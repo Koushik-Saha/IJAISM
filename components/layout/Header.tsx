@@ -8,9 +8,9 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-200">
-      <div className="mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16 md:h-20">
+    <header className="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-200 w-full overflow-x-hidden">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-full">
+        <div className="flex justify-between items-center h-16 md:h-20 w-full">
           {/* Logo */}
           <Link href="/" className="flex items-center flex-shrink-0">
             <div className="flex items-center gap-3 mr-4 lg:mr-8">

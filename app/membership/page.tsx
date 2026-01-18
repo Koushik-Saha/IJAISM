@@ -1,9 +1,22 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { loadStripe } from "@stripe/stripe-js";
+
+// Initialize Stripe
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
 
 export default function MembershipPage() {
+  const router = useRouter();
+  const [loadingTier, setLoadingTier] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
   const plans = [
     {
       name: "Free",
+      tier: "free",
       price: "$0",
       period: "forever",
       description: "Perfect for getting started with IJAISM",
@@ -18,41 +31,117 @@ export default function MembershipPage() {
       recommended: false,
     },
     {
-      name: "Author",
+      name: "Basic",
+      tier: "basic",
       price: "$99",
       period: "per year",
       description: "For active researchers and authors",
       features: [
         "All Free features",
+        "Submit up to 5 papers/year",
         "Priority paper review",
-        "Enhanced author dashboard",
-        "Submission analytics",
-        "Early access to new features",
+        "Basic author dashboard",
+        "Email notifications",
         "Author certification badge",
-        "Unlimited submissions",
       ],
-      cta: "Become an Author",
+      cta: "Get Basic",
+      recommended: false,
+    },
+    {
+      name: "Premium",
+      tier: "premium",
+      price: "$199",
+      period: "per year",
+      description: "For prolific researchers and academics",
+      features: [
+        "All Basic features",
+        "Unlimited submissions",
+        "Enhanced author dashboard",
+        "Submission analytics & insights",
+        "Early access to new features",
+        "Priority email support",
+        "Featured author profile",
+        "Conference discounts (20%)",
+      ],
+      cta: "Get Premium",
       recommended: true,
     },
     {
       name: "Institutional",
-      price: "Custom",
-      period: "contact us",
+      tier: "institutional",
+      price: "$499",
+      period: "per year",
       description: "For universities and research organizations",
       features: [
         "All Author features",
-        "Multiple user accounts",
+        "Multiple user accounts (up to 50)",
         "Institutional branding",
         "Dedicated account manager",
-        "Custom reporting",
+        "Custom reporting & analytics",
         "API access",
-        "Priority support",
+        "Priority 24/7 support",
         "Bulk submission discounts",
       ],
-      cta: "Contact Sales",
+      cta: "Get Institutional",
       recommended: false,
     },
   ];
+
+  // Handle subscription
+  const handleSubscribe = async (tier: string) => {
+    if (tier === "free") {
+      // Redirect to registration for free tier
+      router.push('/register');
+      return;
+    }
+
+    setError(null);
+    setLoadingTier(tier);
+
+    try {
+      // Get token from localStorage
+      const token = localStorage.getItem('token');
+      if (!token) {
+        // Redirect to login if not authenticated
+        router.push(`/login?redirect=/membership&tier=${tier}`);
+        return;
+      }
+
+      // Create checkout session
+      const response = await fetch('/api/payments/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ tier }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create checkout session');
+      }
+
+      // Redirect to Stripe Checkout
+      const stripe = await stripePromise;
+      if (!stripe) {
+        throw new Error('Failed to load Stripe');
+      }
+
+      // Use the URL from the session instead of redirectToCheckout
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL received from server');
+      }
+
+    } catch (error: any) {
+      console.error('Subscription error:', error);
+      setError(error.message || 'Failed to start subscription. Please try again.');
+      setLoadingTier(null);
+    }
+  };
 
   const benefits = [
     {
@@ -101,6 +190,31 @@ export default function MembershipPage() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Error Message */}
+        {error && (
+          <div className="bg-red-50 border-l-4 border-red-500 rounded-lg p-4 mb-8 max-w-4xl mx-auto">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-bold text-red-800">Subscription Error</h3>
+                <p className="text-sm text-red-700 mt-1">{error}</p>
+              </div>
+              <button
+                onClick={() => setError(null)}
+                className="ml-auto text-red-500 hover:text-red-700"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Pricing Plans */}
         <div className="mb-16">
           <div className="text-center mb-12">
@@ -112,7 +226,7 @@ export default function MembershipPage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {plans.map((plan) => (
               <div
                 key={plan.name}
@@ -150,16 +264,27 @@ export default function MembershipPage() {
                       </li>
                     ))}
                   </ul>
-                  <Link
-                    href={plan.name === "Institutional" ? "/contact" : "/register"}
-                    className={`block w-full text-center py-3 px-6 rounded-lg font-bold transition-colors ${
+                  <button
+                    onClick={() => handleSubscribe(plan.tier)}
+                    disabled={loadingTier !== null}
+                    className={`block w-full text-center py-3 px-6 rounded-lg font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                       plan.recommended
                         ? "bg-accent text-white hover:bg-accent-dark"
                         : "bg-primary text-white hover:bg-primary/90"
                     }`}
                   >
-                    {plan.cta}
-                  </Link>
+                    {loadingTier === plan.tier ? (
+                      <span className="flex items-center justify-center">
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Processing...
+                      </span>
+                    ) : (
+                      plan.cta
+                    )}
+                  </button>
                 </div>
               </div>
             ))}

@@ -1,30 +1,55 @@
-# IJAISM Academic Publishing Platform - MVP
+# IJAISM Academic Publishing Platform
 
-A modern academic publishing platform built with Next.js, featuring journal management, article publishing, and peer review workflows.
+**International Journal of Advanced Information Systems and Management**
 
-## Features
+A modern academic publishing platform built with Next.js, featuring innovative 4-reviewer auto-publish system, journal management, and comprehensive peer review workflows.
 
-✅ **Completed (MVP)**
-- Homepage with announcements and journal carousel
-- Journal listing and detail pages (12 journals)
-- Article browsing with filters and search
-- Article detail pages with metrics
-- Responsive design with Tailwind CSS
-- PostgreSQL database schema
-- Prisma ORM integration
+---
 
-🚧 **In Progress**
-- User authentication (register/login)
-- Article submission form
-- User dashboard
+## 📊 Current Status: 42% Complete
 
-📋 **Planned**
-- Peer review system
-- Conference management
-- Dissertation/thesis repository
-- Payment integration (Stripe)
-- Email notifications
-- Admin panel
+**Strong foundation built** - UI complete, core innovation ready, backend needs connection.
+
+📖 **Quick Links:**
+- 🚀 [**QUICK-STATUS.md**](./QUICK-STATUS.md) - What's working, what's not (2-min read)
+- 🗺️ [**IMPLEMENTATION-ROADMAP.md**](./IMPLEMENTATION-ROADMAP.md) - Detailed 3-4 week plan to completion
+- ✅ [**REBRANDING-COMPLETE.md**](./REBRANDING-COMPLETE.md) - Full rebranding summary
+- 🌐 [**DEPLOYMENT.md**](./DEPLOYMENT.md) - Vercel deployment guide
+
+---
+
+## Features Status
+
+### ✅ Completed (Frontend & Architecture)
+- ✅ Homepage with announcements and journal carousel
+- ✅ Journal listing and detail pages (all 12 journals)
+- ✅ Article browsing with filters
+- ✅ Article detail pages with metrics
+- ✅ User authentication UI (register/login)
+- ✅ Article submission form UI
+- ✅ User dashboard
+- ✅ **4-Reviewer Auto-Publish System** (fully coded in `/lib/review-system.ts`)
+- ✅ Responsive design with Tailwind CSS
+- ✅ PWA support (installable app)
+- ✅ PostgreSQL database schema (Prisma ORM)
+- ✅ Professional branding (IJAISM logo, colors)
+
+### 🚧 Needs Backend Integration
+- 🚧 Article submission (form exists, needs API)
+- 🚧 Payment processing (Stripe setup needed)
+- 🚧 Email notifications (DB structure ready, needs SendGrid)
+- 🚧 Reviewer dashboard (logic exists, needs UI)
+- 🚧 Admin panel (not started)
+- 🚧 Database queries (using mock data)
+- 🚧 Search functionality (UI ready, needs backend)
+- 🚧 Profile editing (UI needed)
+
+### 📋 Future Enhancements
+- 📋 Blog publishing system
+- 📋 Conference registration
+- 📋 Dissertation/thesis repository
+- 📋 Book publishing workflow
+- 📋 Advanced analytics
 
 ## Tech Stack
 

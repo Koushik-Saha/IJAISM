@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function SubmitPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState<{
     submissionType: string;
     journal: string;
@@ -22,6 +24,10 @@ export default function SubmitPage() {
     coverLetter: null,
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+
   const journals = [
     "Journal of Information Technology and Management in Business (JITMB)",
     "Journal of Software and Applications Engineering (JSAE)",
@@ -37,11 +43,104 @@ export default function SubmitPage() {
     "Digital Rights, Security, and Data Regulations (DRSDR)",
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const validateForm = () => {
+    const errors: Record<string, string> = {};
+
+    if (!formData.journal) {
+      errors.journal = 'Please select a journal';
+    }
+
+    if (!formData.title.trim()) {
+      errors.title = 'Title is required';
+    }
+
+    if (!formData.abstract.trim()) {
+      errors.abstract = 'Abstract is required';
+    } else {
+      const wordCount = formData.abstract.trim().split(/\s+/).filter(Boolean).length;
+      if (wordCount < 150) {
+        errors.abstract = `Abstract is too short (${wordCount} words). Minimum 150 words required.`;
+      } else if (wordCount > 300) {
+        errors.abstract = `Abstract is too long (${wordCount} words). Maximum 300 words allowed.`;
+      }
+    }
+
+    if (!formData.keywords.trim()) {
+      errors.keywords = 'Keywords are required';
+    } else {
+      const keywordCount = formData.keywords.split(',').filter(k => k.trim()).length;
+      if (keywordCount < 4) {
+        errors.keywords = `At least 4 keywords required (currently ${keywordCount})`;
+      } else if (keywordCount > 7) {
+        errors.keywords = `Maximum 7 keywords allowed (currently ${keywordCount})`;
+      }
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
-    console.log("Form submitted:", formData);
-    alert("Your submission has been received! You will receive a confirmation email shortly.");
+
+    setError(null);
+    setValidationErrors({});
+
+    // Validate form
+    if (!validateForm()) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Get token from localStorage
+      const token = localStorage.getItem('token');
+      if (!token) {
+        router.push('/login?redirect=/submit');
+        return;
+      }
+
+      // Prepare submission data
+      const submissionData = {
+        submissionType: formData.submissionType,
+        journal: formData.journal,
+        title: formData.title,
+        abstract: formData.abstract,
+        keywords: formData.keywords,
+        // TODO: Handle file uploads in future (for now, null)
+        manuscriptUrl: null,
+        coverLetterUrl: null,
+      };
+
+      // Submit to API
+      const response = await fetch('/api/articles/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(submissionData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Submission failed');
+      }
+
+      // Success - show alert and redirect to dashboard
+      alert(`✅ Success! Your article "${data.article.title}" has been submitted to ${data.article.journal.name}.\n\nSubmission ID: ${data.article.id}\n\nYou will be notified when reviewers are assigned.`);
+      router.push('/dashboard');
+
+    } catch (error: any) {
+      console.error('Submission error:', error);
+      setError(error.message || 'Failed to submit article. Please try again.');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -123,6 +222,44 @@ export default function SubmitPage() {
             before submitting.
           </p>
 
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-50 border-l-4 border-red-500 rounded-lg p-4 mb-6">
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-sm font-bold text-red-800">Submission Error</h3>
+                  <p className="text-sm text-red-700 mt-1">{error}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Validation Errors */}
+          {Object.keys(validationErrors).length > 0 && (
+            <div className="bg-yellow-50 border-l-4 border-yellow-500 rounded-lg p-4 mb-6">
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-yellow-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-sm font-bold text-yellow-800">Please fix the following errors:</h3>
+                  <ul className="list-disc list-inside text-sm text-yellow-700 mt-2 space-y-1">
+                    {Object.values(validationErrors).map((error, index) => (
+                      <li key={index}>{error}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Submission Type */}
             <div>
@@ -151,7 +288,9 @@ export default function SubmitPage() {
               </label>
               <select
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent ${
+                  validationErrors.journal ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                }`}
                 value={formData.journal}
                 onChange={(e) => setFormData({ ...formData, journal: e.target.value })}
               >
@@ -162,6 +301,9 @@ export default function SubmitPage() {
                   </option>
                 ))}
               </select>
+              {validationErrors.journal && (
+                <p className="text-red-600 text-sm mt-1">{validationErrors.journal}</p>
+              )}
             </div>
 
             {/* Paper Title */}
@@ -172,11 +314,16 @@ export default function SubmitPage() {
               <input
                 type="text"
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent ${
+                  validationErrors.title ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                }`}
                 placeholder="Enter your paper title"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               />
+              {validationErrors.title && (
+                <p className="text-red-600 text-sm mt-1">{validationErrors.title}</p>
+              )}
             </div>
 
             {/* Abstract */}
@@ -187,14 +334,23 @@ export default function SubmitPage() {
               <textarea
                 required
                 rows={8}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
-                placeholder="Enter your abstract (150-250 words)"
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent ${
+                  validationErrors.abstract ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                }`}
+                placeholder="Enter your abstract (150-300 words)"
                 value={formData.abstract}
                 onChange={(e) => setFormData({ ...formData, abstract: e.target.value })}
               />
-              <p className="text-sm text-gray-600 mt-1">
-                Word count: {formData.abstract.split(/\s+/).filter(Boolean).length}
-              </p>
+              <div className="flex justify-between items-center mt-1">
+                <p className={`text-sm ${
+                  validationErrors.abstract ? 'text-red-600 font-semibold' : 'text-gray-600'
+                }`}>
+                  Word count: {formData.abstract.split(/\s+/).filter(Boolean).length} / 150-300 words
+                </p>
+              </div>
+              {validationErrors.abstract && (
+                <p className="text-red-600 text-sm mt-1">{validationErrors.abstract}</p>
+              )}
             </div>
 
             {/* Keywords */}
@@ -205,14 +361,26 @@ export default function SubmitPage() {
               <input
                 type="text"
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
-                placeholder="Enter 4-6 keywords, separated by commas"
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent ${
+                  validationErrors.keywords ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                }`}
+                placeholder="Enter 4-7 keywords, separated by commas"
                 value={formData.keywords}
                 onChange={(e) => setFormData({ ...formData, keywords: e.target.value })}
               />
-              <p className="text-sm text-gray-600 mt-1">
-                Example: machine learning, neural networks, deep learning, AI
-              </p>
+              <div className="flex justify-between items-center mt-1">
+                <p className="text-sm text-gray-600">
+                  Example: machine learning, neural networks, deep learning, AI
+                </p>
+                <p className={`text-sm ${
+                  validationErrors.keywords ? 'text-red-600 font-semibold' : 'text-gray-600'
+                }`}>
+                  {formData.keywords.split(',').filter(k => k.trim()).length} keywords
+                </p>
+              </div>
+              {validationErrors.keywords && (
+                <p className="text-red-600 text-sm mt-1">{validationErrors.keywords}</p>
+              )}
             </div>
 
             {/* Manuscript Upload */}
@@ -279,13 +447,30 @@ export default function SubmitPage() {
             <div className="flex gap-4">
               <button
                 type="submit"
-                className="flex-1 bg-accent hover:bg-accent-dark text-white px-8 py-4 rounded-lg font-bold text-lg transition-colors"
+                disabled={isSubmitting}
+                className={`flex-1 px-8 py-4 rounded-lg font-bold text-lg transition-colors ${
+                  isSubmitting
+                    ? 'bg-gray-400 cursor-not-allowed text-white'
+                    : 'bg-accent hover:bg-accent-dark text-white'
+                }`}
               >
-                Submit Manuscript
+                {isSubmitting ? (
+                  <span className="flex items-center justify-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Submitting...
+                  </span>
+                ) : (
+                  'Submit Manuscript'
+                )}
               </button>
               <button
                 type="button"
-                className="px-8 py-4 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+                disabled={isSubmitting}
+                className="px-8 py-4 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={() => alert('Draft saving feature coming soon!')}
               >
                 Save Draft
               </button>

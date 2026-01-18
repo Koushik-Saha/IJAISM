@@ -1,0 +1,280 @@
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User Management
+model User {
+  id                String    @id @default(uuid())
+  email             String    @unique
+  passwordHash      String
+  name              String
+  university        String
+  orcid             String?   @unique
+  role              String    @default("author") // author, reviewer, editor, admin
+  affiliation       String?
+  bio               String?
+  profileImageUrl   String?
+  isEmailVerified   Boolean   @default(false)
+  isActive          Boolean   @default(true)
+  lastLoginAt       DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  deletedAt         DateTime?
+
+  articles          Article[]
+  reviews           Review[]
+  conferences       ConferenceRegistration[]
+  dissertations     Dissertation[]
+  membership        Membership?
+  notifications     Notification[]
+
+  @@index([email])
+  @@index([role])
+}
+
+// Memberships
+model Membership {
+  id                  String   @id @default(uuid())
+  userId              String   @unique
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tier                String   // free, basic, premium, institutional
+  status              String   @default("active") // active, expired, cancelled
+  startDate           DateTime
+  endDate             DateTime
+  autoRenew           Boolean  @default(true)
+  stripeSubscriptionId String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+// Journals
+model Journal {
+  id                      String    @id @default(uuid())
+  code                    String    @unique // JITMB, JSAE, etc.
+  fullName                String
+  shortName               String?
+  description             String?
+  aimsAndScope            String?
+  coverImageUrl           String?
+  issn                    String?
+  eIssn                   String?
+  impactFactor            Float?
+  publisher               String?
+  frequency               String?
+  articleProcessingCharge Float?
+  isActive                Boolean   @default(true)
+  displayOrder            Int       @default(0)
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+  deletedAt               DateTime?
+
+  articles                Article[]
+
+  @@index([code])
+  @@index([isActive])
+}
+
+// Articles
+model Article {
+  id              String    @id @default(uuid())
+  journalId       String
+  journal         Journal   @relation(fields: [journalId], references: [id])
+  title           String
+  abstract        String
+  keywords        String[]
+  articleType     String    // research, review, case_study
+  doi             String?   @unique
+  volume          Int?
+  issue           Int?
+  pageStart       Int?
+  pageEnd         Int?
+  publicationDate DateTime?
+  submissionDate  DateTime?
+  acceptanceDate  DateTime?
+  status          String    @default("draft") // draft, submitted, under_review, accepted, published, rejected
+  pdfUrl          String?
+  language        String    @default("en")
+  citationCount   Int       @default(0)
+  viewCount       Int       @default(0)
+  downloadCount   Int       @default(0)
+  isOpenAccess    Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+
+  authorId        String
+  author          User      @relation(fields: [authorId], references: [id])
+  reviews         Review[]
+
+  @@index([journalId])
+  @@index([status])
+  @@index([publicationDate])
+  @@index([authorId])
+}
+
+// Reviews
+model Review {
+  id                String    @id @default(uuid())
+  articleId         String
+  article           Article   @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  reviewerId        String
+  reviewer          User      @relation(fields: [reviewerId], references: [id])
+  reviewerNumber    Int       // 1, 2, 3, or 4 (for 4-reviewer system)
+  round             Int       @default(1)
+  status            String    @default("pending") // pending, in_progress, completed, declined
+  decision          String?   // accept, reject
+  commentsToAuthor  String?
+  commentsToEditor  String?
+  assignedAt        DateTime  @default(now())
+  dueDate           DateTime?
+  submittedAt       DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([articleId])
+  @@index([reviewerId])
+  @@index([status])
+  @@unique([articleId, reviewerNumber])
+}
+
+// Dissertations
+model Dissertation {
+  id             String    @id @default(uuid())
+  title          String
+  abstract       String
+  authorId       String
+  author         User      @relation(fields: [authorId], references: [id])
+  university     String
+  department     String?
+  degreeType     String    // masters, phd
+  supervisorName String?
+  submissionDate DateTime?
+  defenseDate    DateTime?
+  keywords       String[]
+  pdfUrl         String?
+  status         String    @default("pending") // pending, approved, published
+  viewCount      Int       @default(0)
+  downloadCount  Int       @default(0)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  @@index([authorId])
+  @@index([degreeType])
+  @@index([status])
+}
+
+// Conferences
+model Conference {
+  id                  String    @id @default(uuid())
+  title               String
+  description         String?
+  startDate           DateTime
+  endDate             DateTime
+  venue               String?
+  city                String?
+  country             String?
+  websiteUrl          String?
+  registrationUrl     String?
+  submissionDeadline  DateTime?
+  notificationDate    DateTime?
+  conferenceType      String?   // virtual, in_person, hybrid
+  status              String    @default("upcoming") // upcoming, ongoing, completed, cancelled
+  bannerImageUrl      String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  deletedAt           DateTime?
+
+  registrations       ConferenceRegistration[]
+
+  @@index([startDate])
+  @@index([status])
+}
+
+// Conference Registrations
+model ConferenceRegistration {
+  id                String    @id @default(uuid())
+  conferenceId      String
+  conference        Conference @relation(fields: [conferenceId], references: [id], onDelete: Cascade)
+  userId            String
+  user              User      @relation(fields: [userId], references: [id])
+  registrationType  String    // student, academic, industry
+  paymentStatus     String    @default("pending") // pending, completed, failed
+  paymentAmount     Float?
+  stripePaymentId   String?
+  registeredAt      DateTime  @default(now())
+  createdAt         DateTime  @default(now())
+
+  @@index([conferenceId])
+  @@index([userId])
+}
+
+// Blogs
+model Blog {
+  id                String    @id @default(uuid())
+  title             String
+  slug              String    @unique
+  content           String
+  excerpt           String?
+  featuredImageUrl  String?
+  authorId          String
+  status            String    @default("draft") // draft, published
+  publishedAt       DateTime?
+  viewCount         Int       @default(0)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  deletedAt         DateTime?
+
+  @@index([slug])
+  @@index([status])
+  @@index([publishedAt])
+}
+
+// Announcements
+model Announcement {
+  id           String    @id @default(uuid())
+  title        String
+  content      String
+  excerpt      String?
+  thumbnailUrl String?
+  category     String?   // news, update, event
+  priority     Int       @default(0)
+  isFeatured   Boolean   @default(false)
+  publishedAt  DateTime?
+  expiresAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  @@index([category])
+  @@index([isFeatured])
+  @@index([publishedAt])
+}
+
+// Notifications
+model Notification {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String    // submission_update, review_request, message
+  title     String
+  message   String
+  link      String?
+  isRead    Boolean   @default(false)
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+}

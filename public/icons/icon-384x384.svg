@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 384" width="384" height="384">
+  <defs>
+    <linearGradient id="grad384" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a365d;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2d5a8f;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="384" height="384" fill="url(#grad384)" rx="40"/>
+  <text x="192" y="170" font-family="Georgia, serif" font-size="90" font-weight="bold" fill="#ffffff" text-anchor="middle">IJAISM</text>
+  <text x="192" y="220" font-family="Georgia, serif" font-size="24" fill="#e5e7eb" text-anchor="middle">Advanced Information</text>
+  <text x="192" y="250" font-family="Georgia, serif" font-size="24" fill="#e5e7eb" text-anchor="middle">Systems &amp; Management</text>
+  <circle cx="60" cy="60" r="15" fill="#d97706" opacity="0.5"/>
+  <circle cx="324" cy="324" r="15" fill="#d97706" opacity="0.5"/>
+  <line x1="110" y1="285" x2="274" y2="285" stroke="#d97706" stroke-width="3"/>
+</svg>

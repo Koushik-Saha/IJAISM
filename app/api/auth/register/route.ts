@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { hashPassword, isAcademicEmail } from '@/lib/auth';
-import { sendWelcomeEmail } from '@/lib/email/send';
+import { sendWelcomeEmail, sendEmailVerificationEmail } from '@/lib/email/send';
+import crypto from 'crypto';
 
 export async function POST(req: NextRequest) {
   try {
@@ -69,9 +70,29 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // Generate email verification token
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 24); // 24 hours expiration
+
+    // Create email verification token
+    await prisma.emailVerificationToken.create({
+      data: {
+        userId: user.id,
+        token: verificationToken,
+        expiresAt,
+      },
+    });
+
     // Send welcome email (non-blocking)
     sendWelcomeEmail(user.email, user.name).catch(error => {
       console.error('Failed to send welcome email:', error);
+      // Don't fail registration if email fails
+    });
+
+    // Send email verification email (non-blocking)
+    sendEmailVerificationEmail(user.email, user.name, verificationToken).catch(error => {
+      console.error('Failed to send verification email:', error);
       // Don't fail registration if email fails
     });
 
@@ -79,7 +100,7 @@ export async function POST(req: NextRequest) {
       {
         success: true,
         data: { user },
-        message: 'Registration successful',
+        message: 'Registration successful. Please check your email to verify your account.',
       },
       { status: 201 }
     );

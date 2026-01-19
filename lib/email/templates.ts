@@ -492,3 +492,99 @@ export function paymentFailedEmail(
 
   return emailLayout(content, `Action required: Payment failed for ${tierName} membership`);
 }
+
+// 7. Email Verification Email
+export function emailVerificationEmail(
+  userName: string,
+  verificationUrl: string
+): string {
+  const content = `
+    <div class="content">
+      <h2>Verify Your Email Address 📧</h2>
+      <p>Dear ${userName},</p>
+      <p>
+        Thank you for registering with IJAISM! To complete your registration and ensure
+        you receive important updates about your submissions and account, please verify
+        your email address.
+      </p>
+
+      <p>
+        <a href="${verificationUrl}" class="button">Verify Email Address</a>
+      </p>
+
+      <p>
+        Or copy and paste this link into your browser:<br>
+        <a href="${verificationUrl}" style="color: #1e40af; word-break: break-all;">${verificationUrl}</a>
+      </p>
+
+      <div class="info-box">
+        <h3>Why verify your email?</h3>
+        <ul>
+          <li>Receive important notifications about your article submissions</li>
+          <li>Get updates on review status and publication decisions</li>
+          <li>Reset your password if needed</li>
+          <li>Access all platform features</li>
+        </ul>
+      </div>
+
+      <p>
+        <strong>This verification link will expire in 24 hours.</strong>
+        If you didn't create an account with IJAISM, you can safely ignore this email.
+      </p>
+
+      <p>
+        If the button doesn't work, you can also verify by visiting:
+        <a href="${EMAIL_CONFIG.appUrl}/verify-email">${EMAIL_CONFIG.appUrl}/verify-email</a>
+        and entering the verification code from this email.
+      </p>
+
+      <p>Best regards,<br><strong>The IJAISM Team</strong></p>
+    </div>
+  `;
+
+  return emailLayout(content, `Verify your email address to complete registration`);
+}
+
+// 8. Email Verification Confirmation Email
+export function emailVerificationConfirmationEmail(
+  userName: string
+): string {
+  const content = `
+    <div class="content">
+      <h2>Email Verified Successfully! ✅</h2>
+      <p>Dear ${userName},</p>
+      <p>
+        Congratulations! Your email address has been successfully verified.
+        Your IJAISM account is now fully activated.
+      </p>
+
+      <div class="info-box">
+        <h3>What's Next?</h3>
+        <ul>
+          <li>Submit your research articles for peer review</li>
+          <li>Access thousands of published papers</li>
+          <li>Join conferences and academic events</li>
+          <li>Connect with researchers worldwide</li>
+        </ul>
+      </div>
+
+      <p>
+        <a href="${EMAIL_CONFIG.appUrl}/dashboard" class="button">Go to Your Dashboard</a>
+      </p>
+
+      <p>
+        Ready to submit your first article? Visit our
+        <a href="${EMAIL_CONFIG.appUrl}/submit">submission page</a> to get started.
+      </p>
+
+      <p>
+        If you have any questions, our support team is here to help at
+        <a href="mailto:${EMAIL_CONFIG.replyTo}">${EMAIL_CONFIG.replyTo}</a>.
+      </p>
+
+      <p>Best regards,<br><strong>The IJAISM Team</strong></p>
+    </div>
+  `;
+
+  return emailLayout(content, `Your email has been verified successfully!`);
+}

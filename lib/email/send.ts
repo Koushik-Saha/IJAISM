@@ -236,3 +236,32 @@ export async function sendPasswordResetConfirmationEmail(
   );
 }
 
+// 9. Send email verification email
+export async function sendEmailVerificationEmail(
+  userEmail: string,
+  userName: string,
+  verificationToken: string
+): Promise<EmailResult> {
+  const verificationUrl = `${EMAIL_CONFIG.appUrl}/verify-email?token=${verificationToken}`;
+  const html = templates.emailVerificationEmail(userName, verificationUrl);
+  
+  return sendEmail(
+    userEmail,
+    `Verify your email address - ${EMAIL_CONFIG.appName}`,
+    html
+  );
+}
+
+// 10. Send email verification confirmation email
+export async function sendEmailVerificationConfirmationEmail(
+  userEmail: string,
+  userName: string
+): Promise<EmailResult> {
+  const html = templates.emailVerificationConfirmationEmail(userName);
+  
+  return sendEmail(
+    userEmail,
+    `Email verified successfully - ${EMAIL_CONFIG.appName}`,
+    html
+  );
+}

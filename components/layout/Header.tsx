@@ -2,10 +2,84 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+
+interface UserInfo {
+  userId: string;
+  email: string;
+  name?: string;
+  role: string;
+}
 
 export default function Header() {
+  const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [user, setUser] = useState<UserInfo | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Check authentication status on mount and when localStorage changes
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          // Decode JWT token to get user info
+          const base64Url = token.split('.')[1];
+          const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+          const payload = JSON.parse(window.atob(base64));
+
+          // Check if token is expired
+          if (payload.exp && payload.exp * 1000 < Date.now()) {
+            // Token expired, clear it
+            localStorage.removeItem('token');
+            setUser(null);
+          } else {
+            // Token valid, set user info
+            setUser({
+              userId: payload.userId,
+              email: payload.email,
+              name: payload.name || payload.email.split('@')[0],
+              role: payload.role,
+            });
+          }
+        } catch (error) {
+          console.error('Error decoding token:', error);
+          localStorage.removeItem('token');
+          setUser(null);
+        }
+      } else {
+        setUser(null);
+      }
+      setIsLoading(false);
+    };
+
+    checkAuth();
+
+    // Listen for storage events (login/logout in other tabs)
+    window.addEventListener('storage', checkAuth);
+
+    // Listen for custom login event
+    window.addEventListener('userLoggedIn', checkAuth);
+    window.addEventListener('userLoggedOut', checkAuth);
+
+    return () => {
+      window.removeEventListener('storage', checkAuth);
+      window.removeEventListener('userLoggedIn', checkAuth);
+      window.removeEventListener('userLoggedOut', checkAuth);
+    };
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setUser(null);
+    setIsMenuOpen(false);
+
+    // Dispatch logout event
+    window.dispatchEvent(new Event('userLoggedOut'));
+
+    router.push('/');
+  };
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-200 w-full overflow-x-hidden">
@@ -58,12 +132,43 @@ export default function Header() {
             <Link href="/submit" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap">
               Submit Article
             </Link>
-            <Link href="/login" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap">
-              Sign In
-            </Link>
-            <Link href="/register" className="bg-accent text-white px-4 py-2 rounded font-bold hover:bg-accent-dark transition-colors text-sm whitespace-nowrap">
-              JOIN IJAISM
-            </Link>
+
+            {!isLoading && (
+              <>
+                {user ? (
+                  // Logged in: Show user info and logout
+                  <>
+                    <Link href="/dashboard" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap">
+                      Dashboard
+                    </Link>
+                    <div className="flex items-center space-x-2">
+                      <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg">
+                        <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold">
+                          {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                        </div>
+                        <span className="text-sm font-medium text-gray-900">{user.name}</span>
+                      </div>
+                      <button
+                        onClick={handleLogout}
+                        className="text-sm font-medium text-gray-700 hover:text-red-600 transition-colors whitespace-nowrap"
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  // Not logged in: Show sign in and join buttons
+                  <>
+                    <Link href="/login" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap">
+                      Sign In
+                    </Link>
+                    <Link href="/register" className="bg-accent text-white px-4 py-2 rounded font-bold hover:bg-accent-dark transition-colors text-sm whitespace-nowrap">
+                      JOIN IJAISM
+                    </Link>
+                  </>
+                )}
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -154,20 +259,53 @@ export default function Header() {
               >
                 Submit Article
               </Link>
-              <Link
-                href="/login"
-                className="text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50 px-3 py-2 rounded transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Sign In
-              </Link>
-              <Link
-                href="/register"
-                className="bg-accent text-white px-6 py-3 rounded font-bold hover:bg-accent-dark transition-colors text-center text-base"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                JOIN IJAISM
-              </Link>
+
+              {!isLoading && (
+                <>
+                  {user ? (
+                    // Logged in: Show user info and logout
+                    <>
+                      <Link
+                        href="/dashboard"
+                        className="text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50 px-3 py-2 rounded transition-colors"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        Dashboard
+                      </Link>
+                      <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg">
+                        <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold">
+                          {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                        </div>
+                        <span className="text-sm font-medium text-gray-900">{user.name}</span>
+                      </div>
+                      <button
+                        onClick={handleLogout}
+                        className="text-base font-medium text-gray-700 hover:text-red-600 hover:bg-red-50 px-3 py-2 rounded transition-colors text-left"
+                      >
+                        Logout
+                      </button>
+                    </>
+                  ) : (
+                    // Not logged in: Show sign in and join buttons
+                    <>
+                      <Link
+                        href="/login"
+                        className="text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50 px-3 py-2 rounded transition-colors"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        Sign In
+                      </Link>
+                      <Link
+                        href="/register"
+                        className="bg-accent text-white px-6 py-3 rounded font-bold hover:bg-accent-dark transition-colors text-center text-base"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        JOIN IJAISM
+                      </Link>
+                    </>
+                  )}
+                </>
+              )}
             </nav>
           </div>
         )}

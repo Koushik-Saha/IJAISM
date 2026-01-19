@@ -1,8 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+
+interface MembershipStatus {
+  tier: string;
+  tierName: string;
+  submissions: {
+    limit: number;
+    used: number;
+    remaining: number;
+    isUnlimited: boolean;
+    canSubmit: boolean;
+  };
+}
 
 export default function SubmitPage() {
   const router = useRouter();
@@ -27,6 +39,8 @@ export default function SubmitPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [membershipStatus, setMembershipStatus] = useState<MembershipStatus | null>(null);
+  const [loadingMembership, setLoadingMembership] = useState(true);
 
   const journals = [
     "Journal of Information Technology and Management in Business (JITMB)",
@@ -42,6 +56,36 @@ export default function SubmitPage() {
     "Public Management and Social Responsibility Insights (PMSRI)",
     "Digital Rights, Security, and Data Regulations (DRSDR)",
   ];
+
+  // Fetch membership status on mount
+  useEffect(() => {
+    const fetchMembershipStatus = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setLoadingMembership(false);
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/membership/status', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setMembershipStatus(data.status);
+        }
+      } catch (error) {
+        console.error('Failed to fetch membership status:', error);
+      } finally {
+        setLoadingMembership(false);
+      }
+    };
+
+    fetchMembershipStatus();
+  }, []);
 
   const validateForm = () => {
     const errors: Record<string, string> = {};
@@ -127,6 +171,16 @@ export default function SubmitPage() {
       const data = await response.json();
 
       if (!response.ok) {
+        // Check if it's a membership limit error
+        if (response.status === 403 && data.upgradeRequired) {
+          const message = `${data.error}\n\nYou are currently on the ${data.currentTier} tier.\n\nWould you like to upgrade your membership?`;
+          if (confirm(message)) {
+            router.push('/membership');
+            return;
+          }
+          throw new Error(data.error);
+        }
+
         throw new Error(data.error || 'Submission failed');
       }
 
@@ -185,6 +239,76 @@ export default function SubmitPage() {
             </div>
           </div>
         </div>
+
+        {/* Membership Status Banner */}
+        {!loadingMembership && membershipStatus && (
+          <div className={`rounded-lg p-6 mb-8 border-l-4 ${
+            membershipStatus.submissions.canSubmit
+              ? 'bg-green-50 border-green-500'
+              : 'bg-red-50 border-red-500'
+          }`}>
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <h3 className={`text-lg font-bold ${
+                    membershipStatus.submissions.canSubmit ? 'text-green-900' : 'text-red-900'
+                  }`}>
+                    {membershipStatus.tierName} Membership
+                  </h3>
+                  <span className={`px-3 py-1 text-xs font-bold rounded-full ${
+                    membershipStatus.tier === 'free'
+                      ? 'bg-gray-200 text-gray-800'
+                      : membershipStatus.tier === 'basic'
+                      ? 'bg-blue-200 text-blue-800'
+                      : membershipStatus.tier === 'premium'
+                      ? 'bg-purple-200 text-purple-800'
+                      : 'bg-amber-200 text-amber-800'
+                  }`}>
+                    {membershipStatus.tier.toUpperCase()}
+                  </span>
+                </div>
+
+                <div className="space-y-2">
+                  {membershipStatus.submissions.isUnlimited ? (
+                    <p className="text-green-800 font-semibold">
+                      ✓ Unlimited submissions this year
+                    </p>
+                  ) : (
+                    <>
+                      <p className={membershipStatus.submissions.canSubmit ? 'text-green-800' : 'text-red-800'}>
+                        <strong>Submissions this year:</strong> {membershipStatus.submissions.used} / {membershipStatus.submissions.limit}
+                        {membershipStatus.submissions.canSubmit && (
+                          <span className="ml-2">
+                            ({membershipStatus.submissions.remaining} remaining)
+                          </span>
+                        )}
+                      </p>
+
+                      {!membershipStatus.submissions.canSubmit && (
+                        <p className="text-red-800 font-semibold">
+                          {membershipStatus.tier === 'free'
+                            ? '⚠️ Free tier does not include article submissions. Please upgrade to submit.'
+                            : `⚠️ You have reached your annual limit of ${membershipStatus.submissions.limit} submissions.`}
+                        </p>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {!membershipStatus.submissions.canSubmit && (
+                <div className="ml-4">
+                  <Link
+                    href="/membership"
+                    className="inline-block bg-accent text-white px-6 py-2 rounded-lg font-bold hover:bg-accent-dark transition-colors whitespace-nowrap"
+                  >
+                    {membershipStatus.tier === 'free' ? 'Get Membership' : 'Upgrade Plan'}
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Quick Links */}
         <div className="grid md:grid-cols-3 gap-4 mb-8">

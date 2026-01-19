@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
+import { sendArticleSubmissionEmail } from '@/lib/email';
+import { canUserSubmit, getMembershipStatus } from '@/lib/membership';
 
 export async function POST(req: NextRequest) {
   try {
@@ -119,7 +121,28 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 8. Create article in database
+    // 8. Check membership and submission limits
+    const submissionCheck = await canUserSubmit(userId);
+
+    if (!submissionCheck.canSubmit) {
+      const membershipStatus = await getMembershipStatus(userId);
+
+      return NextResponse.json(
+        {
+          error: submissionCheck.reason || 'Submission limit reached',
+          tier: submissionCheck.tier,
+          limit: submissionCheck.limit,
+          used: submissionCheck.used,
+          remaining: submissionCheck.remaining,
+          upgradeRequired: true,
+          currentTier: membershipStatus.tierName,
+          upgradeUrl: '/membership',
+        },
+        { status: 403 }
+      );
+    }
+
+    // 9. Create article in database
     const article = await prisma.article.create({
       data: {
         title: title.trim(),
@@ -154,7 +177,7 @@ export async function POST(req: NextRequest) {
       }
     });
 
-    // 9. Create notification for author
+    // 10. Create notification for author
     await prisma.notification.create({
       data: {
         userId,
@@ -166,7 +189,20 @@ export async function POST(req: NextRequest) {
       }
     });
 
-    // 10. Return success response
+    // 11. Send confirmation email (non-blocking)
+    sendArticleSubmissionEmail(
+      user.email,
+      user.name || user.email.split('@')[0],
+      article.title,
+      journalRecord.fullName,
+      article.id,
+      article.submissionDate || new Date()
+    ).catch(error => {
+      console.error('Failed to send submission confirmation email:', error);
+      // Don't fail the submission if email fails
+    });
+
+    // 12. Return success response
     return NextResponse.json({
       success: true,
       message: 'Article submitted successfully',

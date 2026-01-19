@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { prisma } from '@/lib/prisma';
+import { sendMembershipActivationEmail, sendPaymentFailedEmail } from '@/lib/email';
 
 // Initialize Stripe (lazy initialization to avoid build errors)
 function getStripe() {
@@ -189,7 +190,19 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
 
     console.log(`✅ Membership activated for user ${userId}: ${tier}`);
 
-    // TODO: Send confirmation email (Task 1.3)
+    // Send membership activation email (non-blocking)
+    if (user) {
+      sendMembershipActivationEmail(
+        user.email,
+        user.name || user.email.split('@')[0],
+        tier,
+        endDate,
+        subscriptionId
+      ).catch(error => {
+        console.error('Failed to send membership activation email:', error);
+        // Don't fail the webhook if email fails
+      });
+    }
 
   } catch (error) {
     console.error('Error handling checkout complete:', error);
@@ -331,6 +344,26 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
     });
 
     console.log(`⚠️ Payment failed notification sent to user ${membership.userId}`);
+
+    // Get user details and send payment failed email (non-blocking)
+    const user = await prisma.user.findUnique({
+      where: { id: membership.userId },
+      select: { name: true, email: true },
+    });
+
+    if (user) {
+      const failureReason = (invoice as any).last_payment_error?.message || 'Your payment method was declined';
+
+      sendPaymentFailedEmail(
+        user.email,
+        user.name || user.email.split('@')[0],
+        membership.tier,
+        failureReason
+      ).catch(error => {
+        console.error('Failed to send payment failed email:', error);
+        // Don't fail the webhook if email fails
+      });
+    }
 
   } catch (error) {
     console.error('Error handling payment failure:', error);

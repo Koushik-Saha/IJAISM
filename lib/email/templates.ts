@@ -1,0 +1,494 @@
+import { EMAIL_CONFIG } from './client';
+
+// Base email layout
+function emailLayout(content: string, preheader?: string): string {
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${EMAIL_CONFIG.appName}</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: #f3f4f6;
+      color: #374151;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+    }
+    .header {
+      background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+      padding: 40px 20px;
+      text-align: center;
+    }
+    .header h1 {
+      margin: 0;
+      color: #ffffff;
+      font-size: 28px;
+      font-weight: bold;
+    }
+    .header p {
+      margin: 8px 0 0 0;
+      color: #e0e7ff;
+      font-size: 14px;
+    }
+    .content {
+      padding: 40px 30px;
+      line-height: 1.6;
+    }
+    .content h2 {
+      color: #1e40af;
+      margin-top: 0;
+      font-size: 24px;
+    }
+    .button {
+      display: inline-block;
+      padding: 14px 28px;
+      background-color: #f59e0b;
+      color: #ffffff !important;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: bold;
+      margin: 20px 0;
+    }
+    .info-box {
+      background-color: #f3f4f6;
+      border-left: 4px solid #1e40af;
+      padding: 16px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+    .info-box h3 {
+      margin: 0 0 10px 0;
+      color: #1e40af;
+      font-size: 16px;
+    }
+    .info-row {
+      margin: 8px 0;
+      font-size: 14px;
+    }
+    .info-label {
+      font-weight: 600;
+      color: #4b5563;
+    }
+    .footer {
+      background-color: #f9fafb;
+      padding: 30px;
+      text-align: center;
+      font-size: 12px;
+      color: #6b7280;
+      border-top: 1px solid #e5e7eb;
+    }
+    .footer a {
+      color: #1e40af;
+      text-decoration: none;
+    }
+    .preheader {
+      display: none;
+      max-height: 0;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  ${preheader ? `<div class="preheader">${preheader}</div>` : ''}
+  <div class="container">
+    <div class="header">
+      <h1>IJAISM</h1>
+      <p>International Journal of Advanced Information Systems</p>
+    </div>
+    ${content}
+    <div class="footer">
+      <p>
+        <strong>${EMAIL_CONFIG.appName}</strong><br>
+        Advancing Knowledge and Innovation<br>
+        <a href="${EMAIL_CONFIG.appUrl}">Visit Website</a> •
+        <a href="${EMAIL_CONFIG.appUrl}/contact">Contact Support</a>
+      </p>
+      <p style="margin-top: 20px; color: #9ca3af;">
+        This email was sent to you as a member of IJAISM.<br>
+        If you have any questions, please contact us at ${EMAIL_CONFIG.replyTo}
+      </p>
+    </div>
+  </div>
+</body>
+</html>
+  `.trim();
+}
+
+// 1. Welcome Email (New User Registration)
+export function welcomeEmail(userName: string, userEmail: string): string {
+  const content = `
+    <div class="content">
+      <h2>Welcome to IJAISM! 🎓</h2>
+      <p>Dear ${userName},</p>
+      <p>
+        Thank you for joining the International Journal of Advanced Information Systems and Management (IJAISM).
+        We're thrilled to have you as part of our global community of researchers, academics, and professionals.
+      </p>
+
+      <div class="info-box">
+        <h3>Get Started with IJAISM</h3>
+        <div class="info-row">✓ Submit your research articles for peer review</div>
+        <div class="info-row">✓ Access thousands of published papers</div>
+        <div class="info-row">✓ Join conferences and academic events</div>
+        <div class="info-row">✓ Connect with researchers worldwide</div>
+      </div>
+
+      <p>
+        <a href="${EMAIL_CONFIG.appUrl}/dashboard" class="button">Go to Your Dashboard</a>
+      </p>
+
+      <p>
+        Ready to submit your first article? Visit our
+        <a href="${EMAIL_CONFIG.appUrl}/submit">submission page</a> or check out our
+        <a href="${EMAIL_CONFIG.appUrl}/author-guidelines">author guidelines</a> to get started.
+      </p>
+
+      <p>
+        If you have any questions, our support team is here to help at
+        <a href="mailto:${EMAIL_CONFIG.replyTo}">${EMAIL_CONFIG.replyTo}</a>.
+      </p>
+
+      <p>Best regards,<br><strong>The IJAISM Team</strong></p>
+    </div>
+  `;
+
+  return emailLayout(content, `Welcome to IJAISM, ${userName}!`);
+}
+
+// 2. Article Submission Confirmation
+export function articleSubmissionEmail(
+  userName: string,
+  articleTitle: string,
+  journalName: string,
+  submissionId: string,
+  submissionDate: string
+): string {
+  const content = `
+    <div class="content">
+      <h2>Article Submission Received ✅</h2>
+      <p>Dear ${userName},</p>
+      <p>
+        Thank you for submitting your article to <strong>${journalName}</strong>.
+        We have successfully received your submission and it is now being processed.
+      </p>
+
+      <div class="info-box">
+        <h3>Submission Details</h3>
+        <div class="info-row">
+          <span class="info-label">Article Title:</span> ${articleTitle}
+        </div>
+        <div class="info-row">
+          <span class="info-label">Journal:</span> ${journalName}
+        </div>
+        <div class="info-row">
+          <span class="info-label">Submission ID:</span> ${submissionId}
+        </div>
+        <div class="info-row">
+          <span class="info-label">Submission Date:</span> ${submissionDate}
+        </div>
+      </div>
+
+      <p>
+        <a href="${EMAIL_CONFIG.appUrl}/dashboard/submissions/${submissionId}" class="button">View Submission Status</a>
+      </p>
+
+      <h3>What Happens Next?</h3>
+      <ol>
+        <li><strong>Initial Review</strong> - Our editorial team will review your submission (1-2 business days)</li>
+        <li><strong>Peer Review</strong> - Your article will be assigned to expert reviewers (2-4 weeks)</li>
+        <li><strong>Decision</strong> - You'll receive feedback and a publication decision</li>
+      </ol>
+
+      <p>
+        You can track your submission status anytime in your
+        <a href="${EMAIL_CONFIG.appUrl}/dashboard/submissions">dashboard</a>.
+        We'll send you email updates as your article progresses through the review process.
+      </p>
+
+      <p>Best regards,<br><strong>The IJAISM Editorial Team</strong></p>
+    </div>
+  `;
+
+  return emailLayout(content, `Submission received: ${articleTitle}`);
+}
+
+// 3. Membership Activation Email
+export function membershipActivationEmail(
+  userName: string,
+  tier: string,
+  endDate: string,
+  subscriptionId: string
+): string {
+  const tierBenefits: Record<string, string[]> = {
+    basic: [
+      'Submit up to 5 papers per year',
+      'Priority paper review',
+      'Author certification badge',
+      'Email notifications',
+    ],
+    premium: [
+      'Unlimited paper submissions',
+      'Enhanced author dashboard',
+      'Submission analytics & insights',
+      'Early access to new features',
+      'Priority email support',
+      'Featured author profile',
+      '20% conference discounts',
+    ],
+    institutional: [
+      'All Premium features',
+      'Multiple user accounts (up to 50)',
+      'Institutional branding',
+      'Dedicated account manager',
+      'Custom reporting & analytics',
+      'API access',
+      'Priority 24/7 support',
+    ],
+  };
+
+  const benefits = tierBenefits[tier.toLowerCase()] || [];
+  const tierName = tier.charAt(0).toUpperCase() + tier.slice(1);
+
+  const content = `
+    <div class="content">
+      <h2>Membership Activated! 🎉</h2>
+      <p>Dear ${userName},</p>
+      <p>
+        Congratulations! Your <strong>${tierName} Membership</strong> has been successfully activated.
+        You now have full access to all IJAISM benefits.
+      </p>
+
+      <div class="info-box">
+        <h3>Membership Details</h3>
+        <div class="info-row">
+          <span class="info-label">Plan:</span> ${tierName} Membership
+        </div>
+        <div class="info-row">
+          <span class="info-label">Status:</span> Active
+        </div>
+        <div class="info-row">
+          <span class="info-label">Valid Until:</span> ${endDate}
+        </div>
+        <div class="info-row">
+          <span class="info-label">Subscription ID:</span> ${subscriptionId}
+        </div>
+      </div>
+
+      <h3>Your ${tierName} Benefits</h3>
+      <ul>
+        ${benefits.map(benefit => `<li>${benefit}</li>`).join('')}
+      </ul>
+
+      <p>
+        <a href="${EMAIL_CONFIG.appUrl}/dashboard" class="button">Access Your Dashboard</a>
+      </p>
+
+      <p>
+        Ready to submit your research? Visit your
+        <a href="${EMAIL_CONFIG.appUrl}/submit">submission page</a> to get started.
+      </p>
+
+      <p>
+        To manage your subscription or view billing history, visit your
+        <a href="${EMAIL_CONFIG.appUrl}/dashboard">account settings</a>.
+      </p>
+
+      <p>Best regards,<br><strong>The IJAISM Team</strong></p>
+    </div>
+  `;
+
+  return emailLayout(content, `Your ${tierName} membership is now active!`);
+}
+
+// 4. Payment Receipt Email
+export function paymentReceiptEmail(
+  userName: string,
+  tier: string,
+  amount: number,
+  paymentDate: string,
+  invoiceUrl?: string
+): string {
+  const tierName = tier.charAt(0).toUpperCase() + tier.slice(1);
+  const formattedAmount = `$${(amount / 100).toFixed(2)}`;
+
+  const content = `
+    <div class="content">
+      <h2>Payment Receipt 💳</h2>
+      <p>Dear ${userName},</p>
+      <p>
+        Thank you for your payment. This email confirms that we have successfully processed
+        your subscription payment for IJAISM ${tierName} Membership.
+      </p>
+
+      <div class="info-box">
+        <h3>Payment Details</h3>
+        <div class="info-row">
+          <span class="info-label">Description:</span> ${tierName} Membership - Annual Subscription
+        </div>
+        <div class="info-row">
+          <span class="info-label">Amount Paid:</span> ${formattedAmount} USD
+        </div>
+        <div class="info-row">
+          <span class="info-label">Payment Date:</span> ${paymentDate}
+        </div>
+        <div class="info-row">
+          <span class="info-label">Payment Method:</span> Card
+        </div>
+      </div>
+
+      ${invoiceUrl ? `
+      <p>
+        <a href="${invoiceUrl}" class="button">Download Invoice</a>
+      </p>
+      ` : ''}
+
+      <p>
+        This receipt is for your records. Your membership is now active and will renew automatically
+        in one year unless you choose to cancel.
+      </p>
+
+      <p>
+        If you have any questions about this payment or need assistance, please contact our
+        billing support at <a href="mailto:${EMAIL_CONFIG.replyTo}">${EMAIL_CONFIG.replyTo}</a>.
+      </p>
+
+      <p>Best regards,<br><strong>The IJAISM Team</strong></p>
+    </div>
+  `;
+
+  return emailLayout(content, `Payment receipt for ${tierName} membership`);
+}
+
+// 5. Article Status Update Email
+export function articleStatusUpdateEmail(
+  userName: string,
+  articleTitle: string,
+  oldStatus: string,
+  newStatus: string,
+  submissionId: string,
+  message?: string
+): string {
+  const statusMessages: Record<string, { emoji: string; text: string }> = {
+    'under review': {
+      emoji: '🔍',
+      text: 'Your article is now under peer review. Our expert reviewers are carefully evaluating your work.',
+    },
+    'accepted': {
+      emoji: '✅',
+      text: 'Congratulations! Your article has been accepted for publication.',
+    },
+    'rejected': {
+      emoji: '❌',
+      text: 'After careful review, we regret to inform you that your article was not accepted for publication.',
+    },
+    'revision requested': {
+      emoji: '📝',
+      text: 'The reviewers have requested revisions to your article. Please review their comments and resubmit.',
+    },
+    'published': {
+      emoji: '🎉',
+      text: 'Your article has been published and is now available online!',
+    },
+  };
+
+  const statusInfo = statusMessages[newStatus.toLowerCase()] || {
+    emoji: '📄',
+    text: `Your article status has been updated to: ${newStatus}`
+  };
+
+  const content = `
+    <div class="content">
+      <h2>Article Status Update ${statusInfo.emoji}</h2>
+      <p>Dear ${userName},</p>
+      <p>
+        We have an update regarding your submission: <strong>${articleTitle}</strong>
+      </p>
+
+      <div class="info-box">
+        <h3>Status Change</h3>
+        <div class="info-row">
+          <span class="info-label">Previous Status:</span> ${oldStatus}
+        </div>
+        <div class="info-row">
+          <span class="info-label">New Status:</span> <strong>${newStatus}</strong>
+        </div>
+      </div>
+
+      <p>${statusInfo.text}</p>
+
+      ${message ? `
+      <div class="info-box">
+        <h3>Additional Information</h3>
+        <p>${message}</p>
+      </div>
+      ` : ''}
+
+      <p>
+        <a href="${EMAIL_CONFIG.appUrl}/dashboard/submissions/${submissionId}" class="button">View Submission Details</a>
+      </p>
+
+      <p>Best regards,<br><strong>The IJAISM Editorial Team</strong></p>
+    </div>
+  `;
+
+  return emailLayout(content, `Status update: ${articleTitle}`);
+}
+
+// 6. Payment Failed Email
+export function paymentFailedEmail(
+  userName: string,
+  tier: string,
+  reason?: string
+): string {
+  const tierName = tier.charAt(0).toUpperCase() + tier.slice(1);
+
+  const content = `
+    <div class="content">
+      <h2>Payment Failed ⚠️</h2>
+      <p>Dear ${userName},</p>
+      <p>
+        We were unable to process your recent payment for your <strong>${tierName} Membership</strong> subscription.
+      </p>
+
+      ${reason ? `
+      <div class="info-box">
+        <h3>Reason</h3>
+        <p>${reason}</p>
+      </div>
+      ` : ''}
+
+      <h3>What You Should Do</h3>
+      <ol>
+        <li>Check that your payment method has sufficient funds</li>
+        <li>Verify your card details are up to date</li>
+        <li>Update your payment information in your account settings</li>
+      </ol>
+
+      <p>
+        <a href="${EMAIL_CONFIG.appUrl}/membership" class="button">Update Payment Method</a>
+      </p>
+
+      <p>
+        Your membership will remain active for a short grace period while you update your payment information.
+        Please act quickly to avoid any interruption in service.
+      </p>
+
+      <p>
+        If you need assistance, please contact our support team at
+        <a href="mailto:${EMAIL_CONFIG.replyTo}">${EMAIL_CONFIG.replyTo}</a>.
+      </p>
+
+      <p>Best regards,<br><strong>The IJAISM Team</strong></p>
+    </div>
+  `;
+
+  return emailLayout(content, `Action required: Payment failed for ${tierName} membership`);
+}

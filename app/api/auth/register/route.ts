@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { hashPassword, isAcademicEmail } from '@/lib/auth';
+import { sendWelcomeEmail } from '@/lib/email';
 
 export async function POST(req: NextRequest) {
   try {
@@ -66,6 +67,12 @@ export async function POST(req: NextRequest) {
         role: true,
         createdAt: true,
       },
+    });
+
+    // Send welcome email (non-blocking)
+    sendWelcomeEmail(user.email, user.name).catch(error => {
+      console.error('Failed to send welcome email:', error);
+      // Don't fail registration if email fails
     });
 
     return NextResponse.json(

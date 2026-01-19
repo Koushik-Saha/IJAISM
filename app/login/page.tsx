@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -12,6 +12,33 @@ export default function LoginPage() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Redirect if already logged in
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        // Decode JWT to check if it's valid and not expired
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const payload = JSON.parse(window.atob(base64));
+
+        // Check if token is not expired
+        if (payload.exp && payload.exp * 1000 > Date.now()) {
+          // Token is valid, redirect to dashboard
+          router.push('/dashboard');
+        } else {
+          // Token expired, remove it
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+        }
+      } catch (error) {
+        // Invalid token, remove it
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      }
+    }
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,6 +74,9 @@ export default function LoginPage() {
         // Store token in localStorage
         localStorage.setItem('token', data.data.accessToken);
         localStorage.setItem('user', JSON.stringify(data.data.user));
+
+        // Dispatch login event to update Header
+        window.dispatchEvent(new Event('userLoggedIn'));
 
         // Redirect to dashboard
         router.push('/dashboard');

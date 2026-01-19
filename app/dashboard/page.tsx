@@ -5,10 +5,27 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Card from "@/components/ui/Card";
 
+interface MembershipStatus {
+  tier: string;
+  tierName: string;
+  isActive: boolean;
+  startDate: string | null;
+  endDate: string | null;
+  features: string[];
+  submissions: {
+    limit: number;
+    used: number;
+    remaining: number;
+    isUnlimited: boolean;
+    canSubmit: boolean;
+  };
+}
+
 export default function DashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [membershipStatus, setMembershipStatus] = useState<MembershipStatus | null>(null);
 
   useEffect(() => {
     // Check if user is logged in
@@ -21,13 +38,49 @@ export default function DashboardPage() {
     }
 
     setUser(JSON.parse(userData));
-    setLoading(false);
+
+    // Fetch membership status
+    const fetchMembershipStatus = async () => {
+      try {
+        const response = await fetch('/api/membership/status', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setMembershipStatus(data.status);
+        }
+      } catch (error) {
+        console.error('Failed to fetch membership status:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMembershipStatus();
   }, [router]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     router.push('/');
+  };
+
+  const getTierBadgeColor = (tier: string) => {
+    switch (tier) {
+      case 'free':
+        return 'bg-gray-100 text-gray-800 border-gray-300';
+      case 'basic':
+        return 'bg-blue-100 text-blue-800 border-blue-300';
+      case 'premium':
+        return 'bg-purple-100 text-purple-800 border-purple-300';
+      case 'institutional':
+        return 'bg-amber-100 text-amber-800 border-amber-300';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-300';
+    }
   };
 
   if (loading) {
@@ -95,6 +148,81 @@ export default function DashboardPage() {
                 </Link>
               </div>
             </Card>
+
+            {/* Membership Status */}
+            {membershipStatus && (
+              <Card className="mt-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-bold">Membership</h2>
+                  <span className={`px-3 py-1 text-xs font-bold rounded-full border ${getTierBadgeColor(membershipStatus.tier)}`}>
+                    {membershipStatus.tierName}
+                  </span>
+                </div>
+
+                {/* Submission Limits */}
+                <div className="mb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-semibold text-gray-600">Submissions This Year</span>
+                    {membershipStatus.submissions.isUnlimited ? (
+                      <span className="text-sm font-bold text-green-600">Unlimited</span>
+                    ) : (
+                      <span className="text-sm font-bold text-gray-900">
+                        {membershipStatus.submissions.used} / {membershipStatus.submissions.limit}
+                      </span>
+                    )}
+                  </div>
+
+                  {!membershipStatus.submissions.isUnlimited && (
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div
+                        className={`h-2 rounded-full ${
+                          membershipStatus.submissions.remaining === 0
+                            ? 'bg-red-500'
+                            : membershipStatus.submissions.remaining <= 1
+                            ? 'bg-yellow-500'
+                            : 'bg-green-500'
+                        }`}
+                        style={{
+                          width: `${(membershipStatus.submissions.used / membershipStatus.submissions.limit) * 100}%`,
+                        }}
+                      ></div>
+                    </div>
+                  )}
+
+                  {!membershipStatus.submissions.canSubmit && (
+                    <p className="text-xs text-red-600 mt-2">
+                      {membershipStatus.tier === 'free'
+                        ? 'Upgrade to submit articles'
+                        : 'Annual limit reached. Upgrade for unlimited submissions.'}
+                    </p>
+                  )}
+                </div>
+
+                {/* Expiry Date */}
+                {membershipStatus.isActive && membershipStatus.endDate && (
+                  <div className="mb-4">
+                    <span className="text-sm font-semibold text-gray-600">Valid Until:</span>
+                    <p className="text-sm text-gray-900">
+                      {new Date(membershipStatus.endDate).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })}
+                    </p>
+                  </div>
+                )}
+
+                {/* Upgrade CTA */}
+                {(membershipStatus.tier === 'free' || membershipStatus.tier === 'basic') && (
+                  <Link
+                    href="/membership"
+                    className="block w-full text-center bg-accent text-white px-4 py-2 rounded-lg font-bold hover:bg-accent-dark transition-colors"
+                  >
+                    {membershipStatus.tier === 'free' ? 'Get Membership' : 'Upgrade to Premium'}
+                  </Link>
+                )}
+              </Card>
+            )}
           </div>
 
           {/* Quick Actions */}

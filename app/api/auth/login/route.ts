@@ -91,10 +91,13 @@ export async function POST(req: NextRequest) {
             email: user.email,
             university: user.university,
             role: user.role,
+            isEmailVerified: user.isEmailVerified,
           },
           accessToken,
         },
-        message: 'Login successful',
+        message: user.isEmailVerified
+          ? 'Login successful'
+          : 'Login successful. Please verify your email address to access all features.',
       },
       { status: 200 }
     );

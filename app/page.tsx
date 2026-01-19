@@ -1,75 +1,28 @@
 import Link from "next/link";
 import Card from "@/components/ui/Card";
 
-// Mock data for demo (will be replaced with database queries)
-const mockJournals = [
-  { id: "1", code: "JITMB", fullName: "Journal of Information Technology and Management in Business", coverImageUrl: "" },
-  { id: "2", code: "JSAE", fullName: "Journal of Social and Anthropological Explorations", coverImageUrl: "" },
-  { id: "3", code: "AMLID", fullName: "Accounting, Management, and Leadership in Development", coverImageUrl: "" },
-  { id: "4", code: "OJBEM", fullName: "Business Economics and Management", coverImageUrl: "" },
-  { id: "5", code: "PRAIHI", fullName: "Research and Innovation in Health Informatics", coverImageUrl: "" },
-  { id: "6", code: "JBVADA", fullName: "Business Valuation and Data Analytics", coverImageUrl: "" },
-  { id: "7", code: "JAMSAI", fullName: "Applied Mathematics, Statistics, and AI", coverImageUrl: "" },
-  { id: "8", code: "AESI", fullName: "Environmental Studies and Innovation", coverImageUrl: "" },
-  { id: "9", code: "ILPROM", fullName: "International Leadership and Professional Management", coverImageUrl: "" },
-  { id: "10", code: "TBFLI", fullName: "Business and Financial Leadership Insights", coverImageUrl: "" },
-  { id: "11", code: "PMSRI", fullName: "Public Management and Social Research Insights", coverImageUrl: "" },
-  { id: "12", code: "DRSDR", fullName: "Demographic Research and Social Development Reviews", coverImageUrl: "" },
-];
+async function getHomepageData() {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/homepage`, {
+      cache: 'no-store',
+    });
+    if (!res.ok) {
+      throw new Error('Failed to fetch');
+    }
+    return await res.json();
+  } catch (error) {
+    console.error('Error fetching homepage data:', error);
+    return {
+      announcements: [],
+      journals: [],
+      articles: [],
+      stats: { journals: 12, articles: 0, users: 0 },
+    };
+  }
+}
 
-const mockArticles = [
-  {
-    id: "1",
-    title: "AI-Driven Solutions for Mental Health: Early Detection and Intervention",
-    authors: "Dr. John Smith, Dr. Jane Doe",
-    abstract: "This research explores the application of artificial intelligence in mental health care, focusing on early detection systems and intervention strategies...",
-    journal: "PRAIHI",
-  },
-  {
-    id: "2",
-    title: "Machine Learning Applications in Business Valuation",
-    authors: "Prof. Michael Johnson",
-    abstract: "An in-depth analysis of machine learning algorithms and their effectiveness in predicting business valuations across various industries...",
-    journal: "JBVADA",
-  },
-  {
-    id: "3",
-    title: "Sustainable Environmental Policies: A Global Perspective",
-    authors: "Dr. Sarah Williams, Dr. Robert Chen",
-    abstract: "This paper examines sustainable environmental policies implemented globally and their impact on climate change mitigation...",
-    journal: "AESI",
-  },
-  {
-    id: "4",
-    title: "Leadership in the Digital Age: Challenges and Opportunities",
-    authors: "Prof. David Brown",
-    abstract: "Exploring how digital transformation is reshaping leadership paradigms and organizational management structures...",
-    journal: "ILPROM",
-  },
-];
-
-const mockAnnouncements = [
-  {
-    id: "1",
-    title: "Call for Papers: International Conference on AI and Healthcare 2026",
-    excerpt: "Submit your research on AI applications in healthcare by March 31, 2026.",
-    thumbnailUrl: "",
-  },
-  {
-    id: "2",
-    title: "New Journal Launch: Journal of Digital Transformation",
-    excerpt: "We are excited to announce the launch of our newest journal focusing on digital transformation.",
-    thumbnailUrl: "",
-  },
-  {
-    id: "3",
-    title: "Special Issue: Climate Change and Sustainable Development",
-    excerpt: "Accepting submissions for our special issue on climate change and sustainable development goals.",
-    thumbnailUrl: "",
-  },
-];
-
-export default function HomePage() {
+export default async function HomePage() {
+  const { announcements, journals, articles, stats } = await getHomepageData();
   return (
     <div className="min-h-screen">
       {/* Hero Banner */}
@@ -104,18 +57,28 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold mb-8 text-center">Latest Announcements</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {mockAnnouncements.map((announcement) => (
-              <Card key={announcement.id}>
-                <div className="h-40 bg-gray-200 rounded mb-4 flex items-center justify-center">
-                  <span className="text-gray-400">Image Placeholder</span>
-                </div>
-                <h3 className="text-lg font-bold mb-2">{announcement.title}</h3>
-                <p className="text-gray-600 mb-4">{announcement.excerpt}</p>
-                <Link href={`/announcements/${announcement.id}`} className="text-primary hover:text-primary-dark font-semibold">
-                  Read More →
-                </Link>
-              </Card>
-            ))}
+            {announcements.length > 0 ? (
+              announcements.map((announcement: any) => (
+                <Card key={announcement.id}>
+                  {announcement.thumbnailUrl ? (
+                    <img src={announcement.thumbnailUrl} alt={announcement.title} className="h-40 w-full object-cover rounded mb-4" />
+                  ) : (
+                    <div className="h-40 bg-gray-200 rounded mb-4 flex items-center justify-center">
+                      <span className="text-gray-400">Image Placeholder</span>
+                    </div>
+                  )}
+                  <h3 className="text-lg font-bold mb-2">{announcement.title}</h3>
+                  <p className="text-gray-600 mb-4">{announcement.excerpt || 'No excerpt available.'}</p>
+                  <Link href={`/announcements/${announcement.id}`} className="text-primary hover:text-primary-dark font-semibold">
+                    Read More →
+                  </Link>
+                </Card>
+              ))
+            ) : (
+              <div className="col-span-3 text-center text-gray-500">
+                No announcements available at this time.
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -125,16 +88,26 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold mb-8 text-center">Academic Journals</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {mockJournals.map((journal) => (
-              <Link key={journal.id} href={`/journals/${journal.code.toLowerCase()}`}>
-                <Card className="h-full">
-                  <div className="h-48 bg-gradient-to-br from-primary-light to-primary rounded mb-4 flex items-center justify-center">
-                    <span className="text-white text-3xl font-bold">{journal.code}</span>
-                  </div>
-                  <h3 className="text-sm font-bold text-center">{journal.fullName}</h3>
-                </Card>
-              </Link>
-            ))}
+            {journals.length > 0 ? (
+              journals.map((journal: any) => (
+                <Link key={journal.id} href={`/journals/${journal.code.toLowerCase()}`}>
+                  <Card className="h-full">
+                    {journal.coverImageUrl ? (
+                      <img src={journal.coverImageUrl} alt={journal.code} className="h-48 w-full object-cover rounded mb-4" />
+                    ) : (
+                      <div className="h-48 bg-gradient-to-br from-primary-light to-primary rounded mb-4 flex items-center justify-center">
+                        <span className="text-white text-3xl font-bold">{journal.code}</span>
+                      </div>
+                    )}
+                    <h3 className="text-sm font-bold text-center">{journal.fullName}</h3>
+                  </Card>
+                </Link>
+              ))
+            ) : (
+              <div className="col-span-4 text-center text-gray-500">
+                No journals available at this time.
+              </div>
+            )}
           </div>
           <div className="text-center mt-8">
             <Link href="/journals" className="btn-primary">
@@ -149,21 +122,27 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold mb-8 text-center">Latest Articles</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {mockArticles.map((article) => (
-              <Card key={article.id}>
-                <div className="mb-2">
-                  <span className="text-xs bg-primary text-white px-2 py-1 rounded">
-                    {article.journal}
-                  </span>
-                </div>
-                <h3 className="text-lg font-bold mb-2">{article.title}</h3>
-                <p className="text-sm text-gray-600 mb-2">{article.authors}</p>
-                <p className="text-sm text-gray-700 mb-4 line-clamp-3">{article.abstract}</p>
-                <Link href={`/articles/${article.id}`} className="text-primary hover:text-primary-dark font-semibold">
-                  Read More →
-                </Link>
-              </Card>
-            ))}
+            {articles.length > 0 ? (
+              articles.map((article: any) => (
+                <Card key={article.id}>
+                  <div className="mb-2">
+                    <span className="text-xs bg-primary text-white px-2 py-1 rounded">
+                      {article.journal}
+                    </span>
+                  </div>
+                  <h3 className="text-lg font-bold mb-2">{article.title}</h3>
+                  <p className="text-sm text-gray-600 mb-2">{article.authors}</p>
+                  <p className="text-sm text-gray-700 mb-4 line-clamp-3">{article.abstract || 'No abstract available.'}</p>
+                  <Link href={`/articles/${article.id}`} className="text-primary hover:text-primary-dark font-semibold">
+                    Read More →
+                  </Link>
+                </Card>
+              ))
+            ) : (
+              <div className="col-span-4 text-center text-gray-500">
+                No published articles available at this time.
+              </div>
+            )}
           </div>
           <div className="text-center mt-8">
             <Link href="/articles" className="btn-primary">
@@ -196,15 +175,15 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
             <div>
-              <div className="text-4xl font-bold text-primary mb-2">12</div>
+              <div className="text-4xl font-bold text-primary mb-2">{stats.journals}</div>
               <div className="text-gray-600">Academic Journals</div>
             </div>
             <div>
-              <div className="text-4xl font-bold text-primary mb-2">1000+</div>
+              <div className="text-4xl font-bold text-primary mb-2">{stats.articles}+</div>
               <div className="text-gray-600">Published Articles</div>
             </div>
             <div>
-              <div className="text-4xl font-bold text-primary mb-2">500+</div>
+              <div className="text-4xl font-bold text-primary mb-2">{stats.users}+</div>
               <div className="text-gray-600">Active Researchers</div>
             </div>
             <div>

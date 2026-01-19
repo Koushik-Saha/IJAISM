@@ -253,6 +253,18 @@ export default function DashboardPage() {
                 </Card>
               </Link>
 
+              <Link href="/dashboard/profile">
+                <Card className="hover:border-primary cursor-pointer">
+                  <div className="text-center">
+                    <div className="text-4xl mb-4">👤</div>
+                    <h3 className="text-lg font-bold mb-2">My Profile</h3>
+                    <p className="text-sm text-gray-600">
+                      Manage your profile and settings
+                    </p>
+                  </div>
+                </Card>
+              </Link>
+
               {user.role === 'reviewer' && (
                 <Link href="/dashboard/reviews">
                   <Card className="hover:border-primary cursor-pointer">
@@ -278,6 +290,20 @@ export default function DashboardPage() {
                   </div>
                 </Card>
               </Link>
+
+              {user.role === 'admin' && (
+                <Link href="/admin">
+                  <Card className="hover:border-primary cursor-pointer">
+                    <div className="text-center">
+                      <div className="text-4xl mb-4">⚙️</div>
+                      <h3 className="text-lg font-bold mb-2">Admin Panel</h3>
+                      <p className="text-sm text-gray-600">
+                        Manage platform and users
+                      </p>
+                    </div>
+                  </Card>
+                </Link>
+              )}
             </div>
 
             {/* Info Box */}

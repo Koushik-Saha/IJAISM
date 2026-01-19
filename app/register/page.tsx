@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 const ACADEMIC_EMAIL_DOMAINS = [
   '.edu', '.ac.', '.edu.', 'university', 'college', '.org', '.gov'
@@ -121,14 +122,27 @@ export default function RegisterPage() {
 
       if (response.ok) {
         // Registration successful
-        alert('Registration successful! Please log in.');
+        toast.success('Successfully registered!', {
+          description: 'Your account has been created. Please log in to continue.',
+          duration: 4000,
+        });
         router.push('/login');
       } else {
         // Registration failed
-        setErrors({ submit: data.error?.message || 'Registration failed' });
+        const errorMessage = data.error?.message || 'Registration failed';
+        setErrors({ submit: errorMessage });
+        toast.error('Registration failed', {
+          description: errorMessage,
+          duration: 4000,
+        });
       }
     } catch (error) {
-      setErrors({ submit: 'An error occurred. Please try again.' });
+      const errorMessage = 'An error occurred. Please try again.';
+      setErrors({ submit: errorMessage });
+      toast.error('Registration error', {
+        description: errorMessage,
+        duration: 4000,
+      });
     } finally {
       setIsSubmitting(false);
     }

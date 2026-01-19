@@ -1,82 +1,63 @@
+'use client';
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Card from "@/components/ui/Card";
 
-const mockArticles = [
-  {
-    id: "1",
-    title: "AI-Driven Solutions for Mental Health: Early Detection and Intervention",
-    authors: ["Dr. John Smith", "Dr. Jane Doe"],
-    journal: { code: "PRAIHI", name: "Research and Innovation in Health Informatics" },
-    publicationDate: "2024-01-15",
-    doi: "10.1234/c5k.2024.001",
-    abstract: "This research explores the application of artificial intelligence in mental health care, focusing on early detection systems and intervention strategies. We present a novel framework...",
-    keywords: ["AI", "Mental Health", "Early Detection", "Machine Learning"],
-    citations: 45,
-    downloads: 320,
-  },
-  {
-    id: "2",
-    title: "Machine Learning Applications in Business Valuation",
-    authors: ["Prof. Michael Johnson"],
-    journal: { code: "JBVADA", name: "Business Valuation and Data Analytics" },
-    publicationDate: "2024-01-10",
-    doi: "10.1234/c5k.2024.002",
-    abstract: "An in-depth analysis of machine learning algorithms and their effectiveness in predicting business valuations across various industries. This study compares multiple ML models...",
-    keywords: ["Machine Learning", "Business Valuation", "Predictive Analytics"],
-    citations: 32,
-    downloads: 245,
-  },
-  {
-    id: "3",
-    title: "Sustainable Environmental Policies: A Global Perspective",
-    authors: ["Dr. Sarah Williams", "Dr. Robert Chen"],
-    journal: { code: "AESI", name: "Environmental Studies and Innovation" },
-    publicationDate: "2024-01-05",
-    doi: "10.1234/c5k.2024.003",
-    abstract: "This paper examines sustainable environmental policies implemented globally and their impact on climate change mitigation. We analyze policy effectiveness across 50 countries...",
-    keywords: ["Environment", "Sustainability", "Climate Change", "Policy"],
-    citations: 67,
-    downloads: 421,
-  },
-  {
-    id: "4",
-    title: "Leadership in the Digital Age: Challenges and Opportunities",
-    authors: ["Prof. David Brown"],
-    journal: { code: "ILPROM", name: "International Leadership and Professional Management" },
-    publicationDate: "2023-12-28",
-    doi: "10.1234/c5k.2023.150",
-    abstract: "Exploring how digital transformation is reshaping leadership paradigms and organizational management structures. This research presents insights from 100+ global leaders...",
-    keywords: ["Leadership", "Digital Transformation", "Management", "Innovation"],
-    citations: 28,
-    downloads: 198,
-  },
-  {
-    id: "5",
-    title: "Blockchain Technology in Financial Services: A Comprehensive Review",
-    authors: ["Dr. Lisa Anderson", "Prof. Mark Thompson"],
-    journal: { code: "TBFLI", name: "Business and Financial Leadership Insights" },
-    publicationDate: "2023-12-20",
-    doi: "10.1234/c5k.2023.145",
-    abstract: "This comprehensive review examines the adoption and impact of blockchain technology in financial services, covering banking, insurance, and investment sectors...",
-    keywords: ["Blockchain", "Financial Services", "Technology", "Innovation"],
-    citations: 53,
-    downloads: 387,
-  },
-  {
-    id: "6",
-    title: "Social Media Influence on Consumer Behavior in E-Commerce",
-    authors: ["Dr. Emily Rodriguez"],
-    journal: { code: "OJBEM", name: "Business Economics and Management" },
-    publicationDate: "2023-12-15",
-    doi: "10.1234/c5k.2023.140",
-    abstract: "An empirical study examining how social media platforms influence consumer purchase decisions in online shopping. Data collected from 5,000+ consumers across multiple countries...",
-    keywords: ["Social Media", "Consumer Behavior", "E-Commerce", "Marketing"],
-    citations: 41,
-    downloads: 312,
-  },
-];
+async function getArticles(params: URLSearchParams) {
+  try {
+    const queryString = params.toString();
+    const res = await fetch(`/api/articles/public?${queryString}`, {
+      cache: 'no-store',
+    });
+    if (!res.ok) {
+      throw new Error('Failed to fetch');
+    }
+    return await res.json();
+  } catch (error) {
+    console.error('Error fetching articles:', error);
+    return { articles: [], pagination: { page: 1, limit: 10, total: 0, pages: 0 } };
+  }
+}
 
 export default function ArticlesPage() {
+  const [articles, setArticles] = useState<any[]>([]);
+  const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, pages: 0 });
+  const [filters, setFilters] = useState({ journal: '', year: '', sortBy: 'recent' });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadArticles();
+  }, [filters]);
+
+  const loadArticles = async () => {
+    setLoading(true);
+    const params = new URLSearchParams();
+    if (filters.journal) params.set('journal', filters.journal);
+    if (filters.year) params.set('year', filters.year);
+    params.set('sortBy', filters.sortBy);
+    params.set('page', '1');
+
+    const data = await getArticles(params);
+    setArticles(data.articles || []);
+    setPagination(data.pagination || { page: 1, limit: 10, total: 0, pages: 0 });
+    setLoading(false);
+  };
+
+  const handleFilterChange = (key: string, value: string) => {
+    setFilters({ ...filters, [key]: value });
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-xl text-gray-600">Loading articles...</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -98,50 +79,66 @@ export default function ArticlesPage() {
 
               <div className="mb-6">
                 <label className="block text-sm font-semibold mb-2">Journal</label>
-                <select className="w-full border border-gray-300 rounded px-3 py-2">
-                  <option>All Journals</option>
-                  <option>JITMB</option>
-                  <option>PRAIHI</option>
-                  <option>JBVADA</option>
-                  <option>AESI</option>
+                <select 
+                  className="w-full border border-gray-300 rounded px-3 py-2"
+                  value={filters.journal}
+                  onChange={(e) => handleFilterChange('journal', e.target.value)}
+                >
+                  <option value="">All Journals</option>
+                  <option value="JITMB">JITMB</option>
+                  <option value="JSAE">JSAE</option>
+                  <option value="AMLID">AMLID</option>
+                  <option value="OJBEM">OJBEM</option>
+                  <option value="PRAIHI">PRAIHI</option>
+                  <option value="JBVADA">JBVADA</option>
+                  <option value="JAMSAI">JAMSAI</option>
+                  <option value="AESI">AESI</option>
+                  <option value="ILPROM">ILPROM</option>
+                  <option value="TBFLI">TBFLI</option>
+                  <option value="PMSRI">PMSRI</option>
+                  <option value="DRSDR">DRSDR</option>
                 </select>
               </div>
 
               <div className="mb-6">
                 <label className="block text-sm font-semibold mb-2">Year</label>
-                <select className="w-full border border-gray-300 rounded px-3 py-2">
-                  <option>All Years</option>
-                  <option>2024</option>
-                  <option>2023</option>
-                  <option>2022</option>
+                <select 
+                  className="w-full border border-gray-300 rounded px-3 py-2"
+                  value={filters.year}
+                  onChange={(e) => handleFilterChange('year', e.target.value)}
+                >
+                  <option value="">All Years</option>
+                  <option value="2024">2024</option>
+                  <option value="2023">2023</option>
+                  <option value="2022">2022</option>
+                  <option value="2021">2021</option>
                 </select>
               </div>
 
               <div className="mb-6">
                 <label className="block text-sm font-semibold mb-2">Sort By</label>
-                <select className="w-full border border-gray-300 rounded px-3 py-2">
-                  <option>Most Recent</option>
-                  <option>Most Cited</option>
-                  <option>Most Downloaded</option>
+                <select 
+                  className="w-full border border-gray-300 rounded px-3 py-2"
+                  value={filters.sortBy}
+                  onChange={(e) => handleFilterChange('sortBy', e.target.value)}
+                >
+                  <option value="recent">Most Recent</option>
+                  <option value="cited">Most Cited</option>
+                  <option value="downloaded">Most Downloaded</option>
                 </select>
               </div>
-
-              <button className="w-full btn-primary">Apply Filters</button>
             </Card>
           </div>
 
           {/* Articles List */}
           <div className="lg:col-span-3">
             <div className="flex justify-between items-center mb-6">
-              <p className="text-gray-600">Showing {mockArticles.length} articles</p>
-              <div className="flex gap-2">
-                <button className="px-4 py-2 bg-primary text-white rounded">Grid</button>
-                <button className="px-4 py-2 border border-gray-300 rounded">List</button>
-              </div>
+              <p className="text-gray-600">Showing {pagination.total} articles</p>
             </div>
 
             <div className="space-y-6">
-              {mockArticles.map((article) => (
+              {articles.length > 0 ? (
+                articles.map((article) => (
                 <Card key={article.id}>
                   <div className="flex flex-col sm:flex-row gap-4">
                     <div className="flex-1">
@@ -185,21 +182,48 @@ export default function ArticlesPage() {
                     </div>
                   </div>
                 </Card>
-              ))}
+                ))
+              ) : (
+                <Card>
+                  <div className="text-center py-8 text-gray-500">
+                    No articles found. Try adjusting your filters.
+                  </div>
+                </Card>
+              )}
             </div>
 
             {/* Pagination */}
-            <div className="flex justify-center gap-2 mt-8">
-              <button className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100">
-                Previous
-              </button>
-              <button className="px-4 py-2 bg-primary text-white rounded">1</button>
-              <button className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100">2</button>
-              <button className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100">3</button>
-              <button className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100">
-                Next
-              </button>
-            </div>
+            {pagination.pages > 1 && (
+              <div className="flex justify-center gap-2 mt-8">
+                <button 
+                  className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50"
+                  disabled={pagination.page === 1}
+                >
+                  Previous
+                </button>
+                {Array.from({ length: Math.min(pagination.pages, 5) }, (_, i) => {
+                  const pageNum = i + 1;
+                  return (
+                    <button 
+                      key={pageNum}
+                      className={`px-4 py-2 border rounded ${
+                        pagination.page === pageNum
+                          ? 'bg-primary text-white border-primary'
+                          : 'border-gray-300 hover:bg-gray-100'
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+                <button 
+                  className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50"
+                  disabled={pagination.page === pagination.pages}
+                >
+                  Next
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

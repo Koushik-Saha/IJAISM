@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface UserInfo {
   userId: string;
@@ -17,6 +18,8 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [user, setUser] = useState<UserInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearch, setShowSearch] = useState(false);
 
   // Check authentication status on mount and when localStorage changes
   useEffect(() => {
@@ -72,11 +75,21 @@ export default function Header() {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
     setUser(null);
     setIsMenuOpen(false);
 
     // Dispatch logout event
     window.dispatchEvent(new Event('userLoggedOut'));
+
+    // Show logout toast
+    if (typeof window !== 'undefined') {
+      const { toast } = require('sonner');
+      toast.success('Logged out successfully', {
+        description: 'You have been logged out of your account.',
+        duration: 3000,
+      });
+    }
 
     router.push('/');
   };
@@ -98,6 +111,37 @@ export default function Header() {
               <div className="sm:hidden text-xl font-bold text-primary">IJAISM</div>
             </div>
           </Link>
+
+          {/* Search Bar */}
+          <div className="hidden md:flex items-center flex-1 max-w-md mx-4">
+            <form 
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (searchQuery.trim().length >= 2) {
+                  router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
+                  setShowSearch(false);
+                }
+              }}
+              className="w-full relative"
+            >
+              <input
+                type="text"
+                placeholder="Search articles, journals..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setShowSearch(true)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+              <button
+                type="submit"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-primary"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </button>
+            </form>
+          </div>
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-4 lg:space-x-6 xl:space-x-8">

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -78,13 +79,29 @@ export default function LoginPage() {
         // Dispatch login event to update Header
         window.dispatchEvent(new Event('userLoggedIn'));
 
+        // Show success toast
+        toast.success('Successfully logged in!', {
+          description: `Welcome back, ${data.data.user.name || data.data.user.email}!`,
+          duration: 3000,
+        });
+
         // Redirect to dashboard
         router.push('/dashboard');
       } else {
-        setErrors({ submit: data.error?.message || 'Login failed' });
+        const errorMessage = data.error?.message || 'Login failed';
+        setErrors({ submit: errorMessage });
+        toast.error('Login failed', {
+          description: errorMessage,
+          duration: 4000,
+        });
       }
     } catch (error) {
-      setErrors({ submit: 'An error occurred. Please try again.' });
+      const errorMessage = 'An error occurred. Please try again.';
+      setErrors({ submit: errorMessage });
+      toast.error('Login error', {
+        description: errorMessage,
+        duration: 4000,
+      });
     } finally {
       setIsSubmitting(false);
     }

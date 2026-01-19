@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { toast } from "sonner";
 
 interface MembershipStatus {
   tier: string;
@@ -146,6 +147,52 @@ export default function SubmitPage() {
         return;
       }
 
+      // Upload files if provided
+      let manuscriptUrl = null;
+      let coverLetterUrl = null;
+
+      if (formData.manuscript) {
+        const manuscriptFormData = new FormData();
+        manuscriptFormData.append('file', formData.manuscript);
+        manuscriptFormData.append('fileType', 'manuscript');
+
+        const uploadResponse = await fetch('/api/upload', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+          body: manuscriptFormData,
+        });
+
+        if (uploadResponse.ok) {
+          const uploadData = await uploadResponse.json();
+          manuscriptUrl = uploadData.url;
+        } else {
+          throw new Error('Failed to upload manuscript');
+        }
+      }
+
+      if (formData.coverLetter) {
+        const coverLetterFormData = new FormData();
+        coverLetterFormData.append('file', formData.coverLetter);
+        coverLetterFormData.append('fileType', 'coverLetter');
+
+        const uploadResponse = await fetch('/api/upload', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+          body: coverLetterFormData,
+        });
+
+        if (uploadResponse.ok) {
+          const uploadData = await uploadResponse.json();
+          coverLetterUrl = uploadData.url;
+        } else {
+          throw new Error('Failed to upload cover letter');
+        }
+      }
+
       // Prepare submission data
       const submissionData = {
         submissionType: formData.submissionType,
@@ -153,9 +200,8 @@ export default function SubmitPage() {
         title: formData.title,
         abstract: formData.abstract,
         keywords: formData.keywords,
-        // TODO: Handle file uploads in future (for now, null)
-        manuscriptUrl: null,
-        coverLetterUrl: null,
+        manuscriptUrl,
+        coverLetterUrl,
       };
 
       // Submit to API
@@ -173,24 +219,42 @@ export default function SubmitPage() {
       if (!response.ok) {
         // Check if it's a membership limit error
         if (response.status === 403 && data.upgradeRequired) {
-          const message = `${data.error}\n\nYou are currently on the ${data.currentTier} tier.\n\nWould you like to upgrade your membership?`;
-          if (confirm(message)) {
-            router.push('/membership');
-            return;
-          }
+          toast.error('Membership limit reached', {
+            description: `${data.error}. You are currently on the ${data.currentTier} tier.`,
+            duration: 5000,
+            action: {
+              label: 'Upgrade Now',
+              onClick: () => router.push('/membership'),
+            },
+          });
           throw new Error(data.error);
         }
 
         throw new Error(data.error || 'Submission failed');
       }
 
-      // Success - show alert and redirect to dashboard
-      alert(`✅ Success! Your article "${data.article.title}" has been submitted to ${data.article.journal.name}.\n\nSubmission ID: ${data.article.id}\n\nYou will be notified when reviewers are assigned.`);
-      router.push('/dashboard');
+      // Success - show toast and redirect to dashboard
+      toast.success('Article submitted successfully!', {
+        description: `"${data.article.title}" has been submitted to ${data.article.journal.name}. Submission ID: ${data.article.id}`,
+        duration: 5000,
+      });
+      
+      // Redirect after a short delay to show the toast
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 1500);
 
     } catch (error: any) {
       console.error('Submission error:', error);
-      setError(error.message || 'Failed to submit article. Please try again.');
+      const errorMessage = error.message || 'Failed to submit article. Please try again.';
+      setError(errorMessage);
+      
+      // Show error toast
+      toast.error('Submission failed', {
+        description: errorMessage,
+        duration: 4000,
+      });
+      
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
       setIsSubmitting(false);
@@ -594,7 +658,10 @@ export default function SubmitPage() {
                 type="button"
                 disabled={isSubmitting}
                 className="px-8 py-4 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                onClick={() => alert('Draft saving feature coming soon!')}
+                onClick={() => toast.info('Coming soon', {
+                  description: 'Draft saving feature will be available soon!',
+                  duration: 3000,
+                })}
               >
                 Save Draft
               </button>

@@ -3,6 +3,7 @@ import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import PWARegister from "@/components/PWARegister";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "IJAISM - International Journal of Advanced Information Systems and Management",
@@ -56,6 +57,7 @@ export default function RootLayout({
         </main>
         <Footer />
         <PWARegister />
+        <Toaster position="top-right" richColors closeButton />
       </body>
     </html>
   );

@@ -343,7 +343,7 @@ Future improvements could include:
 
 ### Send Welcome Email
 ```typescript
-import { sendWelcomeEmail } from '@/lib/email';
+import { sendWelcomeEmail } from '@/lib/email/send';
 
 await sendWelcomeEmail(
   'user@university.edu',
@@ -353,7 +353,7 @@ await sendWelcomeEmail(
 
 ### Send Article Submission Email
 ```typescript
-import { sendArticleSubmissionEmail } from '@/lib/email';
+import { sendArticleSubmissionEmail } from '@/lib/email/send';
 
 await sendArticleSubmissionEmail(
   'author@university.edu',
@@ -367,7 +367,7 @@ await sendArticleSubmissionEmail(
 
 ### Send Membership Activation Email
 ```typescript
-import { sendMembershipActivationEmail } from '@/lib/email';
+import { sendMembershipActivationEmail } from '@/lib/email/send';
 
 await sendMembershipActivationEmail(
   'member@university.edu',

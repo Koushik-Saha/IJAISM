@@ -17,5 +17,5 @@ export const EMAIL_CONFIG = {
   from: process.env.EMAIL_FROM || 'IJAISM <noreply@ijaism.org>',
   replyTo: process.env.EMAIL_REPLY_TO || 'support@ijaism.org',
   appName: 'IJAISM',
-  appUrl: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+  appUrl: process.env.NEXT_PUBLIC_APP_URL,
 };

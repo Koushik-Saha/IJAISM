@@ -64,4 +64,13 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+  /* Prevent horizontal scroll */
+  * {
+    max-width: 100%;
+  }
+
+  html, body {
+    overflow-x: hidden !important;
+  }
 }

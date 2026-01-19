@@ -159,7 +159,7 @@ export default function ArticlesPage() {
                         {article.abstract}
                       </p>
                       <div className="flex flex-wrap gap-2 mb-3">
-                        {article.keywords.map((keyword) => (
+                        {article.keywords.map((keyword: string) => (
                           <span key={keyword} className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded">
                             {keyword}
                           </span>

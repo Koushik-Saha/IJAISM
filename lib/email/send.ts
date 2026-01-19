@@ -193,12 +193,46 @@ export async function sendPaymentFailedEmail(
   );
 }
 
-// Export all email functions
-export const emailService = {
-  sendWelcomeEmail,
-  sendArticleSubmissionEmail,
-  sendMembershipActivationEmail,
-  sendPaymentReceiptEmail,
-  sendArticleStatusUpdateEmail,
-  sendPaymentFailedEmail,
-};
+// 7. Send password reset email (forgot password)
+export async function sendPasswordResetEmail(
+    userEmail: string,
+    userName: string,
+    resetUrl: string
+): Promise<EmailResult> {
+  const html =
+      (templates as any).passwordResetEmail?.(userName, resetUrl) ??
+      `
+      <p>Hi ${userName},</p>
+      <p>You requested a password reset for your ${EMAIL_CONFIG.appName} account.</p>
+      <p>Click here to reset your password:</p>
+      <p><a href="${resetUrl}">${resetUrl}</a></p>
+      <p>If you did not request this, you can ignore this email.</p>
+    `;
+
+  return sendEmail(
+      userEmail,
+      `Reset your password - ${EMAIL_CONFIG.appName}`,
+      html
+  );
+}
+
+// 8. Send password reset confirmation email (after reset success)
+export async function sendPasswordResetConfirmationEmail(
+    userEmail: string,
+    userName: string
+): Promise<EmailResult> {
+  const html =
+      (templates as any).passwordResetConfirmationEmail?.(userName) ??
+      `
+      <p>Hi ${userName},</p>
+      <p>Your password was changed successfully.</p>
+      <p>If you did not make this change, please contact support immediately.</p>
+    `;
+
+  return sendEmail(
+      userEmail,
+      `Password updated - ${EMAIL_CONFIG.appName}`,
+      html
+  );
+}
+

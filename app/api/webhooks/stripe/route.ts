@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { prisma } from '@/lib/prisma';
-import { sendMembershipActivationEmail, sendPaymentFailedEmail } from '@/lib/email';
+import { sendMembershipActivationEmail, sendPaymentFailedEmail } from '@/lib/email/send';
 
 // Initialize Stripe (lazy initialization to avoid build errors)
 function getStripe() {

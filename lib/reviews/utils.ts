@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
-import { sendArticleStatusUpdateEmail } from '@/lib/email';
+import {sendArticleStatusUpdateEmail} from "@/lib/email/send";
+
 
 // Review status types
 export type ReviewStatus = 'pending' | 'in_progress' | 'completed' | 'declined';
@@ -220,7 +221,7 @@ export async function checkAndUpdateArticleStatus(articleId: string) {
         where: { id: articleId },
         data: {
           status: newStatus,
-          publishedAt: new Date(),
+          publicationDate: new Date(),
         },
       });
     } else if (rejectedReviews.length >= 2) {

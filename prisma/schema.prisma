@@ -34,9 +34,26 @@ model User {
   dissertations     Dissertation[]
   membership        Membership?
   notifications     Notification[]
+  passwordResetTokens PasswordResetToken[]
 
   @@index([email])
   @@index([role])
+}
+
+// Password Reset Tokens
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([token])
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 // Memberships

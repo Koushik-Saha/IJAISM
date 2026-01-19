@@ -1,17 +1,74 @@
 import Link from "next/link";
 import Card from "@/components/ui/Card";
+import { prisma } from "@/lib/prisma";
+
+export const dynamic = "force-dynamic";
 
 async function getHomepageData() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/homepage`, {
-      cache: 'no-store',
-    });
-    if (!res.ok) {
-      throw new Error('Failed to fetch');
-    }
-    return await res.json();
+    const [announcements, journals, articles] = await Promise.all([
+      prisma.announcement.findMany({
+        where: {
+          publishedAt: { not: null },
+          OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+        },
+        orderBy: { publishedAt: "desc" },
+        take: 6,
+        select: {
+          id: true,
+          title: true,
+          excerpt: true,
+          thumbnailUrl: true,
+        },
+      }),
+
+      prisma.journal.findMany({
+        where: { isActive: true },
+        orderBy: { displayOrder: "asc" },
+        take: 8,
+        select: {
+          id: true,
+          code: true,
+          fullName: true,
+          coverImageUrl: true,
+        },
+      }),
+
+      prisma.article.findMany({
+        where: { status: "published" },
+        orderBy: { publicationDate: "desc" },
+        take: 8,
+        select: {
+          id: true,
+          title: true,
+          abstract: true,
+          journal: { select: { code: true } },
+          author: { select: { name: true } },
+          publicationDate: true,
+        },
+      }),
+    ]);
+
+    const [journalsCount, articlesCount, usersCount] = await Promise.all([
+      prisma.journal.count({ where: { isActive: true } }),
+      prisma.article.count({ where: { status: "published" } }),
+      prisma.user.count({ where: { isActive: true } }),
+    ]);
+
+    return {
+      announcements,
+      journals,
+      articles: articles.map((a) => ({
+        id: a.id,
+        title: a.title,
+        abstract: a.abstract,
+        journal: a.journal.code,
+        authors: a.author.name,
+      })),
+      stats: { journals: journalsCount, articles: articlesCount, users: usersCount },
+    };
   } catch (error) {
-    console.error('Error fetching homepage data:', error);
+    console.error("Error fetching homepage data:", error);
     return {
       announcements: [],
       journals: [],

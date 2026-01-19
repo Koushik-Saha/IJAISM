@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 import { assignReviewers } from '@/lib/review-system';
-import { sendArticleStatusUpdateEmail } from '@/lib/email';
+import {sendArticleStatusUpdateEmail} from "@/lib/email/send";
 
 export async function POST(
   req: NextRequest,

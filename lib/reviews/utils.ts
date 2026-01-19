@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
-import { sendArticleStatusUpdateEmail } from '@/lib/email';
+import {sendArticleStatusUpdateEmail} from "@/lib/email/send";
+
 
 // Review status types
 export type ReviewStatus = 'pending' | 'in_progress' | 'completed' | 'declined';

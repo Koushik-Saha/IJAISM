@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { sendPasswordResetEmail } from '@/lib/email';
+import { sendPasswordResetEmail } from '@/lib/email/send';
 import crypto from 'crypto';
 
 export async function POST(req: NextRequest) {

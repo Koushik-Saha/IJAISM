@@ -5,6 +5,14 @@ import { useRouter } from 'next/navigation';
 import Card from '@/components/ui/Card';
 import { toast } from 'sonner';
 
+interface UserStatistics {
+  totalArticles: number;
+  publishedArticles: number;
+  totalCitations: number;
+  totalViews: number;
+  totalDownloads: number;
+}
+
 interface UserProfile {
   id: string;
   name: string;
@@ -12,6 +20,10 @@ interface UserProfile {
   university: string | null;
   affiliation: string | null;
   role: string;
+  orcid: string | null;
+  bio: string | null;
+  profileImageUrl: string | null;
+  statistics?: UserStatistics;
 }
 
 export default function ProfilePage() {
@@ -27,6 +39,8 @@ export default function ProfilePage() {
     name: '',
     university: '',
     affiliation: '',
+    orcid: '',
+    bio: '',
   });
 
   // Password form state
@@ -69,6 +83,8 @@ export default function ProfilePage() {
         name: data.user.name || '',
         university: data.user.university || '',
         affiliation: data.user.affiliation || '',
+        orcid: data.user.orcid || '',
+        bio: data.user.bio || '',
       });
     } catch (err: any) {
       setError(err.message || 'Failed to load profile');
@@ -96,7 +112,13 @@ export default function ProfilePage() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          name: formData.name,
+          university: formData.university || null,
+          affiliation: formData.affiliation || null,
+          orcid: formData.orcid || null,
+          bio: formData.bio || null,
+        }),
       });
 
       if (!res.ok) {
@@ -230,6 +252,35 @@ export default function ProfilePage() {
           </Card>
         )}
 
+        {/* Statistics Section */}
+        {profile.statistics && (
+          <Card className="mb-6 bg-gradient-to-r from-primary/10 to-blue-50">
+            <h2 className="text-xl font-bold mb-4">Publication Statistics</h2>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-primary">{profile.statistics.totalArticles}</div>
+                <div className="text-sm text-gray-600 mt-1">Total Articles</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-primary">{profile.statistics.publishedArticles}</div>
+                <div className="text-sm text-gray-600 mt-1">Published</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-primary">{profile.statistics.totalCitations}</div>
+                <div className="text-sm text-gray-600 mt-1">Citations</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-primary">{profile.statistics.totalViews.toLocaleString()}</div>
+                <div className="text-sm text-gray-600 mt-1">Views</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-primary">{profile.statistics.totalDownloads.toLocaleString()}</div>
+                <div className="text-sm text-gray-600 mt-1">Downloads</div>
+              </div>
+            </div>
+          </Card>
+        )}
+
         {/* Profile Information */}
         <Card className="mb-6">
           <h2 className="text-xl font-bold mb-4">Profile Information</h2>
@@ -277,6 +328,45 @@ export default function ProfilePage() {
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                   placeholder="Department, school, or organization"
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold mb-2">ORCID</label>
+                <input
+                  type="text"
+                  value={formData.orcid}
+                  onChange={(e) => setFormData({ ...formData, orcid: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="0000-0000-0000-0000"
+                  pattern="[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{4}"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Your ORCID iD (e.g., 0000-0001-2345-6789).{' '}
+                  {profile.orcid && (
+                    <a
+                      href={`https://orcid.org/${profile.orcid}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
+                    >
+                      View ORCID profile
+                    </a>
+                  )}
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold mb-2">Bio</label>
+                <textarea
+                  value={formData.bio}
+                  onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="Brief biography, research interests, and academic background..."
+                  rows={5}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  A brief biography about yourself, your research interests, and academic background.
+                </p>
               </div>
 
               <div>

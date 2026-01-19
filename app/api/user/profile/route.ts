@@ -25,6 +25,9 @@ export async function GET(req: NextRequest) {
         university: true,
         affiliation: true,
         role: true,
+        orcid: true,
+        bio: true,
+        profileImageUrl: true,
         createdAt: true,
       },
     });
@@ -33,9 +36,45 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
+    // Get user statistics
+    const [articleStats, publishedArticles] = await Promise.all([
+      prisma.article.aggregate({
+        where: {
+          authorId: decoded.userId,
+          deletedAt: null,
+        },
+        _sum: {
+          citationCount: true,
+          viewCount: true,
+          downloadCount: true,
+        },
+        _count: {
+          id: true,
+        },
+      }),
+      prisma.article.count({
+        where: {
+          authorId: decoded.userId,
+          status: 'published',
+          deletedAt: null,
+        },
+      }),
+    ]);
+
+    const statistics = {
+      totalArticles: articleStats._count.id,
+      publishedArticles,
+      totalCitations: articleStats._sum.citationCount || 0,
+      totalViews: articleStats._sum.viewCount || 0,
+      totalDownloads: articleStats._sum.downloadCount || 0,
+    };
+
     return NextResponse.json({
       success: true,
-      user,
+      user: {
+        ...user,
+        statistics,
+      },
     });
   } catch (error: any) {
     console.error('Error fetching profile:', error);
@@ -61,7 +100,7 @@ export async function PATCH(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { name, university, affiliation } = body;
+    const { name, university, affiliation, orcid, bio } = body;
 
     const updatedUser = await prisma.user.update({
       where: { id: decoded.userId },
@@ -69,6 +108,8 @@ export async function PATCH(req: NextRequest) {
         ...(name && { name }),
         ...(university !== undefined && { university }),
         ...(affiliation !== undefined && { affiliation }),
+        ...(orcid !== undefined && { orcid }),
+        ...(bio !== undefined && { bio }),
       },
       select: {
         id: true,
@@ -77,12 +118,51 @@ export async function PATCH(req: NextRequest) {
         university: true,
         affiliation: true,
         role: true,
+        orcid: true,
+        bio: true,
+        profileImageUrl: true,
       },
     });
 
+    // Get updated statistics
+    const [articleStats, publishedArticles] = await Promise.all([
+      prisma.article.aggregate({
+        where: {
+          authorId: decoded.userId,
+          deletedAt: null,
+        },
+        _sum: {
+          citationCount: true,
+          viewCount: true,
+          downloadCount: true,
+        },
+        _count: {
+          id: true,
+        },
+      }),
+      prisma.article.count({
+        where: {
+          authorId: decoded.userId,
+          status: 'published',
+          deletedAt: null,
+        },
+      }),
+    ]);
+
+    const statistics = {
+      totalArticles: articleStats._count.id,
+      publishedArticles,
+      totalCitations: articleStats._sum.citationCount || 0,
+      totalViews: articleStats._sum.viewCount || 0,
+      totalDownloads: articleStats._sum.downloadCount || 0,
+    };
+
     return NextResponse.json({
       success: true,
-      user: updatedUser,
+      user: {
+        ...updatedUser,
+        statistics,
+      },
     });
   } catch (error: any) {
     console.error('Error updating profile:', error);

@@ -96,8 +96,8 @@ export default function Header() {
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-200 w-full overflow-x-hidden">
-      <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-full">
-        <div className="flex justify-between items-center h-16 md:h-20 w-full">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+        <div className="flex justify-between items-center h-16 md:h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center flex-shrink-0">
             <div className="flex items-center gap-3 mr-4 lg:mr-8">
@@ -113,8 +113,8 @@ export default function Header() {
           </Link>
 
           {/* Search Bar */}
-          <div className="hidden md:flex items-center flex-1 max-w-md mx-4">
-            <form 
+          <div className="hidden md:flex items-center flex-1 max-w-xs mx-2">
+            <form
               onSubmit={(e) => {
                 e.preventDefault();
                 if (searchQuery.trim().length >= 2) {
@@ -126,17 +126,17 @@ export default function Header() {
             >
               <input
                 type="text"
-                placeholder="Search articles, journals..."
+                placeholder="Search..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => setShowSearch(true)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               />
               <button
                 type="submit"
                 className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-primary"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </button>
@@ -144,37 +144,37 @@ export default function Header() {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-4 lg:space-x-6 xl:space-x-8">
-            <Link href="/" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap">
+          <nav className="hidden lg:flex items-center space-x-2 xl:space-x-3">
+            <Link href="/" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-1">
               Home
             </Link>
-            <Link href="/about" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap">
+            <Link href="/about" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-1">
               About
             </Link>
-            <Link href="/journals" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap">
-              Academic Journals
+            <Link href="/journals" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-1">
+              Journals
             </Link>
-            <Link href="/dissertations" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap">
-              Dissertation/Thesis
+            <Link href="/dissertations" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-1">
+              Dissertations
             </Link>
-            <Link href="/books" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap">
+            <Link href="/books" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-1">
               Books
             </Link>
-            <Link href="/conferences" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap">
+            <Link href="/conferences" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-1">
               Conferences
             </Link>
-            <Link href="/announcements" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap">
+            <Link href="/announcements" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-1">
               Announcements
             </Link>
           </nav>
 
           {/* Desktop User Actions */}
-          <div className="hidden lg:flex items-center space-x-3 lg:space-x-4 xl:space-x-6 flex-shrink-0 ml-4">
-            <Link href="/membership" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap">
+          <div className="hidden lg:flex items-center space-x-2 xl:space-x-3 flex-shrink-0 ml-2">
+            <Link href="/membership" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-1">
               Membership
             </Link>
-            <Link href="/submit" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap">
-              Submit Article
+            <Link href="/submit" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-1">
+              Submit
             </Link>
 
             {!isLoading && (
@@ -182,19 +182,19 @@ export default function Header() {
                 {user ? (
                   // Logged in: Show user info and logout
                   <>
-                    <Link href="/dashboard" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap">
+                    <Link href="/dashboard" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-1">
                       Dashboard
                     </Link>
-                    <div className="flex items-center space-x-2">
-                      <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg">
-                        <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold">
+                    <div className="flex items-center space-x-1">
+                      <div className="flex items-center gap-1.5 px-2 py-1 bg-gray-100 rounded-lg">
+                        <div className="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">
                           {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
                         </div>
-                        <span className="text-sm font-medium text-gray-900">{user.name}</span>
+                        <span className="text-sm font-medium text-gray-900 max-w-[100px] truncate">{user.name}</span>
                       </div>
                       <button
                         onClick={handleLogout}
-                        className="text-sm font-medium text-gray-700 hover:text-red-600 transition-colors whitespace-nowrap"
+                        className="text-sm font-medium text-gray-700 hover:text-red-600 transition-colors whitespace-nowrap px-2"
                       >
                         Logout
                       </button>
@@ -203,10 +203,10 @@ export default function Header() {
                 ) : (
                   // Not logged in: Show sign in and join buttons
                   <>
-                    <Link href="/login" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap">
+                    <Link href="/login" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-2">
                       Sign In
                     </Link>
-                    <Link href="/register" className="bg-accent text-white px-4 py-2 rounded font-bold hover:bg-accent-dark transition-colors text-sm whitespace-nowrap">
+                    <Link href="/register" className="bg-accent text-white px-3 py-1.5 rounded font-bold hover:bg-accent-dark transition-colors text-sm whitespace-nowrap">
                       JOIN IJAISM
                     </Link>
                   </>

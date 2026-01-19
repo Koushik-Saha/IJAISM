@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "prisma generate && next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "seed:c5k": "ts-node scripts/seed-c5k.ts --file",
+    "seed:c5k:dry": "ts-node scripts/seed-c5k.ts --file",
+    "seed:c5k:clear": "ts-node scripts/seed-c5k.ts --clear-first --file"
   },
   "dependencies": {
     "@prisma/client": "^5.19.0",

@@ -220,7 +220,7 @@ export async function checkAndUpdateArticleStatus(articleId: string) {
         where: { id: articleId },
         data: {
           status: newStatus,
-          publishedAt: new Date(),
+          publicationDate: new Date(),
         },
       });
     } else if (rejectedReviews.length >= 2) {

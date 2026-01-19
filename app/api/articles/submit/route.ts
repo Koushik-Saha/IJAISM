@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
-import { sendArticleSubmissionEmail } from '@/lib/email';
+import { sendArticleSubmissionEmail } from '@/lib/email/send';
 import { canUserSubmit, getMembershipStatus } from '@/lib/membership';
 
 export async function POST(req: NextRequest) {

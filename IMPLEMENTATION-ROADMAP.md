@@ -521,7 +521,7 @@ File: `/app/api/articles/submit/route.ts` (MODIFY)
 
 Add after article creation:
 ```typescript
-import { sendEmail, emailTemplates } from '@/lib/email';
+import { sendEmail, emailTemplates } from '@/lib/email/send';
 
 // After creating article
 const author = await prisma.user.findUnique({

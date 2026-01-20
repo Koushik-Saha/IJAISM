@@ -1,4 +1,6 @@
-"use client";
+'use client';
+
+export const dynamic = "force-dynamic";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -186,7 +188,7 @@ export default function AdminDashboard() {
         {/* Quick Actions */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Link
               href="/admin/articles"
               className="border-2 border-gray-200 rounded-lg p-4 hover:border-primary transition-colors"
@@ -207,6 +209,20 @@ export default function AdminDashboard() {
             >
               <h3 className="font-bold text-gray-900 mb-2">📢 Manage Announcements</h3>
               <p className="text-sm text-gray-600">Create and edit announcements</p>
+            </Link>
+            <Link
+              href="/admin/journals"
+              className="border-2 border-gray-200 rounded-lg p-4 hover:border-primary transition-colors"
+            >
+              <h3 className="font-bold text-gray-900 mb-2">📚 Manage Journals</h3>
+              <p className="text-sm text-gray-600">Create and edit journals</p>
+            </Link>
+            <Link
+              href="/admin/blogs"
+              className="border-2 border-gray-200 rounded-lg p-4 hover:border-primary transition-colors"
+            >
+              <h3 className="font-bold text-gray-900 mb-2">📰 Manage Blogs</h3>
+              <p className="text-sm text-gray-600">Create and edit blog posts</p>
             </Link>
           </div>
         </div>
@@ -237,12 +253,11 @@ export default function AdminDashboard() {
                         by {article.author?.name || article.author?.email} • {article.journal?.code}
                       </p>
                     </div>
-                    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
-                      article.status === 'published' ? 'bg-green-100 text-green-800' :
+                    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${article.status === 'published' ? 'bg-green-100 text-green-800' :
                       article.status === 'under_review' ? 'bg-blue-100 text-blue-800' :
-                      article.status === 'submitted' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
+                        article.status === 'submitted' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-gray-100 text-gray-800'
+                      }`}>
                       {article.status.replace('_', ' ')}
                     </span>
                   </div>
@@ -271,11 +286,10 @@ export default function AdminDashboard() {
                       <p className="font-semibold text-gray-900">{user.name || user.email}</p>
                       <p className="text-sm text-gray-600">{user.email}</p>
                     </div>
-                    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
-                      user.role === 'admin' ? 'bg-red-100 text-red-800' :
+                    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${user.role === 'admin' ? 'bg-red-100 text-red-800' :
                       user.role === 'reviewer' ? 'bg-blue-100 text-blue-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
+                        'bg-gray-100 text-gray-800'
+                      }`}>
                       {user.role}
                     </span>
                   </div>

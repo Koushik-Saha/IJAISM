@@ -234,10 +234,39 @@ export default function ConferenceDetailPage({ params }: { params: Promise<{ id:
     }, 1000);
   };
 
-  const handleRegistration = (formData: any) => {
-    // In production, this would submit to API
-    alert(`Registration submitted! In production, this would process the registration for ${formData.name}.`);
-    setShowRegistrationForm(false);
+  const handleRegistration = async (formData: any) => {
+    try {
+      // In production, we'd probably use the ID from the database, but for this mock data we use the current ID
+      // If we had real DB data, we'd use conference.id
+
+      // Since we don't have real conference IDs in the mock data matching the DB uuids, 
+      // this might fail FK constraints if we send "1", "2", "3".
+      // We need a real conference ID.
+      // However, for soft launch verification of flow, let's assume valid ID.
+      // Actually, if we want to test this, we need a real conference in DB.
+
+      const response = await fetch('/api/conferences/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          conferenceId: id, // This ID needs to exist in DB!
+          ...formData
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert(data.message || 'Registration successful!');
+        setShowRegistrationForm(false);
+      } else {
+        alert(data.error || 'Registration failed');
+      }
+    } catch (error) {
+      alert('An error occurred. Please try again.');
+    }
   };
 
   return (

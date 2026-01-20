@@ -195,44 +195,31 @@ export async function sendPaymentFailedEmail(
 
 // 7. Send password reset email (forgot password)
 export async function sendPasswordResetEmail(
-    userEmail: string,
-    userName: string,
-    resetUrl: string
+  userEmail: string,
+  userName: string,
+  resetToken: string
 ): Promise<EmailResult> {
-  const html =
-      (templates as any).passwordResetEmail?.(userName, resetUrl) ??
-      `
-      <p>Hi ${userName},</p>
-      <p>You requested a password reset for your ${EMAIL_CONFIG.appName} account.</p>
-      <p>Click here to reset your password:</p>
-      <p><a href="${resetUrl}">${resetUrl}</a></p>
-      <p>If you did not request this, you can ignore this email.</p>
-    `;
+  const resetUrl = `${EMAIL_CONFIG.appUrl}/reset-password?token=${resetToken}`;
+  const html = templates.passwordResetEmail(userName, resetUrl);
 
   return sendEmail(
-      userEmail,
-      `Reset your password - ${EMAIL_CONFIG.appName}`,
-      html
+    userEmail,
+    `Reset Your Password - ${EMAIL_CONFIG.appName}`,
+    html
   );
 }
 
 // 8. Send password reset confirmation email (after reset success)
 export async function sendPasswordResetConfirmationEmail(
-    userEmail: string,
-    userName: string
+  userEmail: string,
+  userName: string
 ): Promise<EmailResult> {
-  const html =
-      (templates as any).passwordResetConfirmationEmail?.(userName) ??
-      `
-      <p>Hi ${userName},</p>
-      <p>Your password was changed successfully.</p>
-      <p>If you did not make this change, please contact support immediately.</p>
-    `;
+  const html = templates.passwordResetConfirmationEmail(userName);
 
   return sendEmail(
-      userEmail,
-      `Password updated - ${EMAIL_CONFIG.appName}`,
-      html
+    userEmail,
+    `Password Changed Successfully - ${EMAIL_CONFIG.appName}`,
+    html
   );
 }
 
@@ -244,7 +231,7 @@ export async function sendEmailVerificationEmail(
 ): Promise<EmailResult> {
   const verificationUrl = `${EMAIL_CONFIG.appUrl}/verify-email?token=${verificationToken}`;
   const html = templates.emailVerificationEmail(userName, verificationUrl);
-  
+
   return sendEmail(
     userEmail,
     `Verify your email address - ${EMAIL_CONFIG.appName}`,
@@ -258,7 +245,7 @@ export async function sendEmailVerificationConfirmationEmail(
   userName: string
 ): Promise<EmailResult> {
   const html = templates.emailVerificationConfirmationEmail(userName);
-  
+
   return sendEmail(
     userEmail,
     `Email verified successfully - ${EMAIL_CONFIG.appName}`,

@@ -17,6 +17,16 @@ interface MembershipStatus {
   };
 }
 
+interface Journal {
+  id: string;
+  code: string;
+  fullName: string;
+  description: string | null;
+  issn: string | null;
+  impactFactor: number | null;
+  coverImageUrl: string | null;
+}
+
 export default function SubmitPage() {
   const router = useRouter();
   const [formData, setFormData] = useState<{
@@ -42,21 +52,8 @@ export default function SubmitPage() {
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [membershipStatus, setMembershipStatus] = useState<MembershipStatus | null>(null);
   const [loadingMembership, setLoadingMembership] = useState(true);
-
-  const journals = [
-    "Journal of Information Technology and Management in Business (JITMB)",
-    "Journal of Software and Applications Engineering (JSAE)",
-    "Advances in Machine Learning and Intelligent Data (AMLID)",
-    "Open Journal of Business and Economic Management (OJBEM)",
-    "Perspectives on Research in Artificial Intelligence and Healthcare Informatics (PRAIHI)",
-    "Journal of Business Value and Data Analytics (JBVADA)",
-    "Journal of Advances in Management Sciences and Artificial Intelligence (JAMSAI)",
-    "Advances in Engineering and Systems Innovation (AESI)",
-    "International Law, Policy, and Regulatory Management (ILPROM)",
-    "Trends in Blockchain, Fintech, and Legal Innovations (TBFLI)",
-    "Public Management and Social Responsibility Insights (PMSRI)",
-    "Digital Rights, Security, and Data Regulations (DRSDR)",
-  ];
+  const [journals, setJournals] = useState<Journal[]>([]);
+  const [loadingJournals, setLoadingJournals] = useState(true);
 
   // Fetch membership status on mount
   useEffect(() => {
@@ -86,6 +83,27 @@ export default function SubmitPage() {
     };
 
     fetchMembershipStatus();
+  }, []);
+
+  // Fetch journals on mount
+  useEffect(() => {
+    const fetchJournals = async () => {
+      try {
+        const response = await fetch('/api/journals');
+        if (response.ok) {
+          const data = await response.json();
+          setJournals(data.journals || []);
+        } else {
+          console.error('Failed to fetch journals');
+        }
+      } catch (error) {
+        console.error('Error fetching journals:', error);
+      } finally {
+        setLoadingJournals(false);
+      }
+    };
+
+    fetchJournals();
   }, []);
 
   const validateForm = () => {
@@ -476,16 +494,17 @@ export default function SubmitPage() {
               </label>
               <select
                 required
+                disabled={loadingJournals}
                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent ${
                   validationErrors.journal ? 'border-red-500 bg-red-50' : 'border-gray-300'
-                }`}
+                } ${loadingJournals ? 'opacity-50 cursor-not-allowed' : ''}`}
                 value={formData.journal}
                 onChange={(e) => setFormData({ ...formData, journal: e.target.value })}
               >
-                <option value="">-- Choose a journal --</option>
+                <option value="">{loadingJournals ? 'Loading journals...' : '-- Choose a journal --'}</option>
                 {journals.map((journal) => (
-                  <option key={journal} value={journal}>
-                    {journal}
+                  <option key={journal.id} value={journal.code}>
+                    {journal.fullName}
                   </option>
                 ))}
               </select>

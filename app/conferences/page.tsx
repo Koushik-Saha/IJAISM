@@ -1,6 +1,11 @@
+"use client";
+
 import Link from "next/link";
 
 export default function ConferencesPage() {
+  const handleViewProceedings = (conferenceTitle: string) => {
+    alert(`Downloading proceedings for "${conferenceTitle}". In production, this would download the conference proceedings PDF.`);
+  };
   const upcomingConferences = [
     {
       id: 1,
@@ -170,15 +175,24 @@ export default function ConferencesPage() {
                 </div>
 
                 <div className="flex flex-wrap gap-3">
-                  <button className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded font-medium transition-colors">
+                  <Link
+                    href={`/conferences/${conference.id}`}
+                    className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded font-medium transition-colors"
+                  >
                     View Details
-                  </button>
-                  <button className="border border-primary text-primary hover:bg-primary/10 px-6 py-2 rounded font-medium transition-colors">
+                  </Link>
+                  <Link
+                    href={`/conferences/${conference.id}`}
+                    className="border border-primary text-primary hover:bg-primary/10 px-6 py-2 rounded font-medium transition-colors"
+                  >
                     Register Now
-                  </button>
-                  <button className="border border-gray-300 text-gray-700 hover:bg-gray-50 px-6 py-2 rounded font-medium transition-colors">
+                  </Link>
+                  <Link
+                    href={`/conferences/${conference.id}`}
+                    className="border border-gray-300 text-gray-700 hover:bg-gray-50 px-6 py-2 rounded font-medium transition-colors"
+                  >
                     Download Brochure
-                  </button>
+                  </Link>
                 </div>
               </div>
             ))}
@@ -203,7 +217,10 @@ export default function ConferencesPage() {
                   <p><span className="font-semibold">Papers:</span> {conference.papers}</p>
                   <p><span className="font-semibold">Attendees:</span> {conference.attendees}</p>
                 </div>
-                <button className="mt-4 w-full border border-primary text-primary hover:bg-primary/10 px-4 py-2 rounded font-medium transition-colors">
+                <button
+                  onClick={() => handleViewProceedings(conference.title)}
+                  className="mt-4 w-full border border-primary text-primary hover:bg-primary/10 px-4 py-2 rounded font-medium transition-colors"
+                >
                   View Proceedings
                 </button>
               </div>

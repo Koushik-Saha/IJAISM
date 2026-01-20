@@ -217,6 +217,13 @@ export default function AdminDashboard() {
               <h3 className="font-bold text-gray-900 mb-2">📚 Manage Journals</h3>
               <p className="text-sm text-gray-600">Create and edit journals</p>
             </Link>
+            <Link
+              href="/admin/blogs"
+              className="border-2 border-gray-200 rounded-lg p-4 hover:border-primary transition-colors"
+            >
+              <h3 className="font-bold text-gray-900 mb-2">📰 Manage Blogs</h3>
+              <p className="text-sm text-gray-600">Create and edit blog posts</p>
+            </Link>
           </div>
         </div>
 

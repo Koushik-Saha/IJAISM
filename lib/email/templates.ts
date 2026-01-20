@@ -588,3 +588,73 @@ export function emailVerificationConfirmationEmail(
 
   return emailLayout(content, `Your email has been verified successfully!`);
 }
+
+// 9. Password Reset Email
+export function passwordResetEmail(
+  userName: string,
+  resetUrl: string
+): string {
+  const content = `
+    <div class="content">
+      <h2>Reset Your Password 🔒</h2>
+      <p>Dear ${userName},</p>
+      <p>
+        We received a request to reset the password for your IJAISM account.
+        If you made this request, please click the button below to choose a new password.
+      </p>
+
+      <p>
+        <a href="${resetUrl}" class="button">Reset Password</a>
+      </p>
+
+      <p>
+        Or copy and paste this link into your browser:<br>
+        <a href="${resetUrl}" style="color: #1e40af; word-break: break-all;">${resetUrl}</a>
+      </p>
+
+      <div class="info-box">
+        <h3>Security Notice</h3>
+        <ul>
+          <li>This link will expire in 1 hour</li>
+          <li>If you didn't request this reset, you can safely ignore this email</li>
+          <li>Your password will not change unless you click the link above</li>
+        </ul>
+      </div>
+
+      <p>Best regards,<br><strong>The IJAISM Team</strong></p>
+    </div>
+  `;
+
+  return emailLayout(content, `Reset your password for ${EMAIL_CONFIG.appName}`);
+}
+
+// 10. Password Reset Confirmation Email
+export function passwordResetConfirmationEmail(
+  userName: string
+): string {
+  const content = `
+    <div class="content">
+      <h2>Password Changed Successfully ✅</h2>
+      <p>Dear ${userName},</p>
+      <p>
+        Your password has been successfully changed. You can now log in to your IJAISM account with your new password.
+      </p>
+
+      <div class="info-box">
+        <h3>Account Security</h3>
+        <p>
+          If you did not make this change, please contact our support team immediately at
+          <a href="mailto:${EMAIL_CONFIG.replyTo}">${EMAIL_CONFIG.replyTo}</a>
+        </p>
+      </div>
+
+      <p>
+        <a href="${EMAIL_CONFIG.appUrl}/login" class="button">Log In to Your Account</a>
+      </p>
+
+      <p>Best regards,<br><strong>The IJAISM Team</strong></p>
+    </div>
+  `;
+
+  return emailLayout(content, `Your password has been changed successfully`);
+}

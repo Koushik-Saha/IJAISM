@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 import { sendArticleSubmissionEmail } from '@/lib/email/send';
 import { canUserSubmit, getMembershipStatus } from '@/lib/membership';
+import { logger } from '@/lib/logger';
 
 export async function POST(req: NextRequest) {
   try {
@@ -19,6 +20,7 @@ export async function POST(req: NextRequest) {
     const decoded = verifyToken(token);
 
     if (!decoded) {
+      logger.warn('Submission attempt with invalid token');
       return NextResponse.json(
         { error: 'Unauthorized - Invalid token' },
         { status: 401 }
@@ -104,6 +106,7 @@ export async function POST(req: NextRequest) {
         isActive: true,
         university: true,
         affiliation: true,
+        role: true, // Added role for logging context
       }
     });
 
@@ -115,6 +118,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (!user.isActive) {
+      logger.warn('Inactive user attempted submission', { userId, email: user.email });
       return NextResponse.json(
         { error: 'Account is not active. Please contact support.' },
         { status: 403 }
@@ -126,6 +130,13 @@ export async function POST(req: NextRequest) {
 
     if (!submissionCheck.canSubmit) {
       const membershipStatus = await getMembershipStatus(userId);
+
+      logger.info('Submission rejected due to limit', {
+        userId,
+        tier: submissionCheck.tier,
+        limit: submissionCheck.limit,
+        used: submissionCheck.used
+      });
 
       return NextResponse.json(
         {
@@ -177,6 +188,13 @@ export async function POST(req: NextRequest) {
       }
     });
 
+    logger.info('Article submitted successfully', {
+      articleId: article.id,
+      userId,
+      journalCode: journalRecord.code,
+      title: article.title
+    });
+
     // 10. Create notification for author
     await prisma.notification.create({
       data: {
@@ -198,7 +216,11 @@ export async function POST(req: NextRequest) {
       article.id,
       article.submissionDate || new Date()
     ).catch(error => {
-      console.error('Failed to send submission confirmation email:', error);
+      logger.error('Failed to send submission confirmation email', error, {
+        userId,
+        articleId: article.id,
+        email: user.email
+      });
       // Don't fail the submission if email fails
     });
 
@@ -223,7 +245,9 @@ export async function POST(req: NextRequest) {
     }, { status: 201 });
 
   } catch (error: any) {
-    console.error('Article submission error:', error);
+    logger.error('Article submission error', error, {
+      path: '/api/articles/submit'
+    });
 
     // Handle Prisma errors
     if (error.code === 'P2002') {

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { prisma } from '@/lib/prisma';
 import { sendMembershipActivationEmail, sendPaymentFailedEmail } from '@/lib/email/send';
+import { logger } from '@/lib/logger';
 
 // Initialize Stripe (lazy initialization to avoid build errors)
 function getStripe() {
@@ -30,7 +31,7 @@ export async function POST(req: NextRequest) {
     const signature = req.headers.get('stripe-signature');
 
     if (!signature) {
-      console.error('No Stripe signature found');
+      logger.error('No Stripe signature found');
       return NextResponse.json(
         { error: 'No signature provided' },
         { status: 400 }
@@ -49,14 +50,14 @@ export async function POST(req: NextRequest) {
         webhookSecret
       );
     } catch (err: any) {
-      console.error('Webhook signature verification failed:', err.message);
+      logger.error('Webhook signature verification failed', err);
       return NextResponse.json(
         { error: `Webhook Error: ${err.message}` },
         { status: 400 }
       );
     }
 
-    console.log(`✅ Received Stripe event: ${event.type}`);
+    logger.info(`Received Stripe event`, { type: event.type, eventId: event.id });
 
     // 3. Handle different event types
     switch (event.type) {
@@ -68,7 +69,7 @@ export async function POST(req: NextRequest) {
 
       case 'customer.subscription.created': {
         const subscription = event.data.object as Stripe.Subscription;
-        console.log(`Subscription created: ${subscription.id}`);
+        logger.info(`Subscription created`, { subscriptionId: subscription.id });
         break;
       }
 
@@ -86,7 +87,7 @@ export async function POST(req: NextRequest) {
 
       case 'invoice.payment_succeeded': {
         const invoice = event.data.object as Stripe.Invoice;
-        console.log(`Payment succeeded for invoice: ${invoice.id}`);
+        logger.info(`Payment succeeded`, { invoiceId: invoice.id });
         break;
       }
 
@@ -97,14 +98,14 @@ export async function POST(req: NextRequest) {
       }
 
       default:
-        console.log(`Unhandled event type: ${event.type}`);
+        logger.debug(`Unhandled event type`, { type: event.type });
     }
 
     // 4. Return success response
     return NextResponse.json({ received: true }, { status: 200 });
 
   } catch (error: any) {
-    console.error('Webhook error:', error);
+    logger.error('Webhook error', error);
     return NextResponse.json(
       { error: 'Webhook processing failed' },
       { status: 500 }

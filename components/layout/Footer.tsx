@@ -10,8 +10,23 @@ export default function Footer() {
             <h3 className="text-white text-lg font-bold mb-4">ABOUT IJAISM</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/about" className="hover:text-white transition-colors">
+                <Link href="/contact" className="hover:text-white transition-colors">
                   Mission & Vision
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="hover:text-white transition-colors">
+                  Contract
+                </Link>
+              </li>
+              <li>
+                <Link href="/privacy" className="hover:text-white transition-colors">
+                  Privacy & Policy
+                </Link>
+              </li>
+              <li>
+                <Link href="/terms" className="hover:text-white transition-colors">
+                  Terms & Condition
                 </Link>
               </li>
             </ul>

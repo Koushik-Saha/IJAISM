@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { put } from '@vercel/blob';
+import { logger } from '@/lib/logger';
 
 export async function POST(req: NextRequest) {
   try {
@@ -60,7 +61,7 @@ export async function POST(req: NextRequest) {
     const timestamp = Date.now();
     const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
     const fileName = `${fileType}/${timestamp}_${sanitizedName}`;
-    
+
     // Convert file to buffer
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
@@ -71,6 +72,14 @@ export async function POST(req: NextRequest) {
         contentType: file.type,
         access: 'public',
         addRandomSuffix: false,
+      });
+
+      logger.info('File uploaded successfully', {
+        fileType,
+        fileName: file.name,
+        size: file.size,
+        blobUrl: blob.url,
+        userId: decoded.userId
       });
 
       return NextResponse.json({
@@ -84,9 +93,13 @@ export async function POST(req: NextRequest) {
     } catch (blobError: any) {
       // If Vercel Blob is not configured, fall back to placeholder
       if (blobError.message?.includes('BLOB_READ_WRITE_TOKEN') || !process.env.BLOB_READ_WRITE_TOKEN) {
-        console.warn('[UPLOAD] Vercel Blob not configured. Using placeholder URL.');
+        logger.warn('Vercel Blob not configured. Using placeholder URL.', {
+          fileType,
+          userId: decoded.userId
+        });
+
         const placeholderUrl = `/uploads/${fileType}/${timestamp}_${sanitizedName}`;
-        
+
         return NextResponse.json({
           success: true,
           url: placeholderUrl,
@@ -96,11 +109,14 @@ export async function POST(req: NextRequest) {
           warning: 'File storage not configured. Set BLOB_READ_WRITE_TOKEN to enable actual file storage.',
         });
       }
-      
+
       throw blobError;
     }
   } catch (error: any) {
-    console.error('Error uploading file:', error);
+    logger.error('Error uploading file', error, {
+      path: '/api/upload'
+    });
+
     return NextResponse.json(
       {
         error: 'Failed to upload file',

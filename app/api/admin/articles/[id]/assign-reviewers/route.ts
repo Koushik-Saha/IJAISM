@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
-import { assignReviewers } from '@/lib/review-system';
-import {sendArticleStatusUpdateEmail} from "@/lib/email/send";
+import { assignReviewersToArticle } from '@/lib/reviews';
+import { sendArticleStatusUpdateEmail } from "@/lib/email/send";
 
 export async function POST(
   req: NextRequest,
@@ -80,7 +80,7 @@ export async function POST(
     }
 
     // Assign reviewers
-    const reviews = await assignReviewers(id, reviewerIds);
+    const reviews = await assignReviewersToArticle(id, reviewerIds, dueInDays);
 
     // Send email notification to author
     try {

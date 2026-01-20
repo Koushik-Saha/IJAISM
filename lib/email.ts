@@ -78,7 +78,11 @@ export async function sendPasswordResetEmail(
   name: string,
   resetToken: string
 ): Promise<boolean> {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+  if (!appUrl) {
+    console.error('NEXT_PUBLIC_APP_URL is not set in environment variables');
+    return false;
+  }
   const resetUrl = `${appUrl}/reset-password?token=${resetToken}`;
 
   const html = `

@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = "force-dynamic";
+
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Card from "@/components/ui/Card";
@@ -79,7 +81,7 @@ export default function ArticlesPage() {
 
               <div className="mb-6">
                 <label className="block text-sm font-semibold mb-2">Journal</label>
-                <select 
+                <select
                   className="w-full border border-gray-300 rounded px-3 py-2"
                   value={filters.journal}
                   onChange={(e) => handleFilterChange('journal', e.target.value)}
@@ -102,7 +104,7 @@ export default function ArticlesPage() {
 
               <div className="mb-6">
                 <label className="block text-sm font-semibold mb-2">Year</label>
-                <select 
+                <select
                   className="w-full border border-gray-300 rounded px-3 py-2"
                   value={filters.year}
                   onChange={(e) => handleFilterChange('year', e.target.value)}
@@ -117,7 +119,7 @@ export default function ArticlesPage() {
 
               <div className="mb-6">
                 <label className="block text-sm font-semibold mb-2">Sort By</label>
-                <select 
+                <select
                   className="w-full border border-gray-300 rounded px-3 py-2"
                   value={filters.sortBy}
                   onChange={(e) => handleFilterChange('sortBy', e.target.value)}
@@ -139,49 +141,49 @@ export default function ArticlesPage() {
             <div className="space-y-6">
               {articles.length > 0 ? (
                 articles.map((article) => (
-                <Card key={article.id}>
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    <div className="flex-1">
-                      <div className="mb-2">
-                        <span className="text-xs bg-primary text-white px-2 py-1 rounded">
-                          {article.journal.code}
-                        </span>
-                      </div>
-                      <Link href={`/articles/${article.id}`}>
-                        <h2 className="text-xl font-bold text-primary hover:text-primary-dark mb-2">
-                          {article.title}
-                        </h2>
-                      </Link>
-                      <p className="text-sm text-gray-600 mb-2">
-                        {article.authors.join(", ")}
-                      </p>
-                      <p className="text-gray-700 mb-3 line-clamp-2">
-                        {article.abstract}
-                      </p>
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        {article.keywords.map((keyword: string) => (
-                          <span key={keyword} className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded">
-                            {keyword}
+                  <Card key={article.id}>
+                    <div className="flex flex-col sm:flex-row gap-4">
+                      <div className="flex-1">
+                        <div className="mb-2">
+                          <span className="text-xs bg-primary text-white px-2 py-1 rounded">
+                            {article.journal.code}
                           </span>
-                        ))}
+                        </div>
+                        <Link href={`/articles/${article.id}`}>
+                          <h2 className="text-xl font-bold text-primary hover:text-primary-dark mb-2">
+                            {article.title}
+                          </h2>
+                        </Link>
+                        <p className="text-sm text-gray-600 mb-2">
+                          {article.authors.join(", ")}
+                        </p>
+                        <p className="text-gray-700 mb-3 line-clamp-2">
+                          {article.abstract}
+                        </p>
+                        <div className="flex flex-wrap gap-2 mb-3">
+                          {article.keywords.map((keyword: string) => (
+                            <span key={keyword} className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded">
+                              {keyword}
+                            </span>
+                          ))}
+                        </div>
+                        <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+                          <span>Published: {article.publicationDate}</span>
+                          <span>DOI: {article.doi}</span>
+                          <span>Citations: {article.citations}</span>
+                          <span>Downloads: {article.downloads}</span>
+                        </div>
                       </div>
-                      <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-                        <span>Published: {article.publicationDate}</span>
-                        <span>DOI: {article.doi}</span>
-                        <span>Citations: {article.citations}</span>
-                        <span>Downloads: {article.downloads}</span>
+                      <div className="flex sm:flex-col gap-2">
+                        <Link href={`/articles/${article.id}`} className="btn-primary text-sm px-4 py-2 whitespace-nowrap">
+                          Read More
+                        </Link>
+                        <button className="btn-secondary text-sm px-4 py-2 whitespace-nowrap">
+                          Download PDF
+                        </button>
                       </div>
                     </div>
-                    <div className="flex sm:flex-col gap-2">
-                      <Link href={`/articles/${article.id}`} className="btn-primary text-sm px-4 py-2 whitespace-nowrap">
-                        Read More
-                      </Link>
-                      <button className="btn-secondary text-sm px-4 py-2 whitespace-nowrap">
-                        Download PDF
-                      </button>
-                    </div>
-                  </div>
-                </Card>
+                  </Card>
                 ))
               ) : (
                 <Card>
@@ -195,7 +197,7 @@ export default function ArticlesPage() {
             {/* Pagination */}
             {pagination.pages > 1 && (
               <div className="flex justify-center gap-2 mt-8">
-                <button 
+                <button
                   className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50"
                   disabled={pagination.page === 1}
                 >
@@ -204,19 +206,18 @@ export default function ArticlesPage() {
                 {Array.from({ length: Math.min(pagination.pages, 5) }, (_, i) => {
                   const pageNum = i + 1;
                   return (
-                    <button 
+                    <button
                       key={pageNum}
-                      className={`px-4 py-2 border rounded ${
-                        pagination.page === pageNum
-                          ? 'bg-primary text-white border-primary'
-                          : 'border-gray-300 hover:bg-gray-100'
-                      }`}
+                      className={`px-4 py-2 border rounded ${pagination.page === pageNum
+                        ? 'bg-primary text-white border-primary'
+                        : 'border-gray-300 hover:bg-gray-100'
+                        }`}
                     >
                       {pageNum}
                     </button>
                   );
                 })}
-                <button 
+                <button
                   className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50"
                   disabled={pagination.page === pagination.pages}
                 >

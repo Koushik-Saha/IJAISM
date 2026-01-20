@@ -1,4 +1,6 @@
-"use client";
+'use client';
+
+export const dynamic = "force-dynamic";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -175,13 +177,12 @@ export default function DashboardPage() {
                   {!membershipStatus.submissions.isUnlimited && (
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div
-                        className={`h-2 rounded-full ${
-                          membershipStatus.submissions.remaining === 0
-                            ? 'bg-red-500'
-                            : membershipStatus.submissions.remaining <= 1
+                        className={`h-2 rounded-full ${membershipStatus.submissions.remaining === 0
+                          ? 'bg-red-500'
+                          : membershipStatus.submissions.remaining <= 1
                             ? 'bg-yellow-500'
                             : 'bg-green-500'
-                        }`}
+                          }`}
                         style={{
                           width: `${(membershipStatus.submissions.used / membershipStatus.submissions.limit) * 100}%`,
                         }}

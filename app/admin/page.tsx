@@ -1,4 +1,6 @@
-"use client";
+'use client';
+
+export const dynamic = "force-dynamic";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -237,12 +239,11 @@ export default function AdminDashboard() {
                         by {article.author?.name || article.author?.email} • {article.journal?.code}
                       </p>
                     </div>
-                    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
-                      article.status === 'published' ? 'bg-green-100 text-green-800' :
+                    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${article.status === 'published' ? 'bg-green-100 text-green-800' :
                       article.status === 'under_review' ? 'bg-blue-100 text-blue-800' :
-                      article.status === 'submitted' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
+                        article.status === 'submitted' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-gray-100 text-gray-800'
+                      }`}>
                       {article.status.replace('_', ' ')}
                     </span>
                   </div>
@@ -271,11 +272,10 @@ export default function AdminDashboard() {
                       <p className="font-semibold text-gray-900">{user.name || user.email}</p>
                       <p className="text-sm text-gray-600">{user.email}</p>
                     </div>
-                    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
-                      user.role === 'admin' ? 'bg-red-100 text-red-800' :
+                    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${user.role === 'admin' ? 'bg-red-100 text-red-800' :
                       user.role === 'reviewer' ? 'bg-blue-100 text-blue-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
+                        'bg-gray-100 text-gray-800'
+                      }`}>
                       {user.role}
                     </span>
                   </div>

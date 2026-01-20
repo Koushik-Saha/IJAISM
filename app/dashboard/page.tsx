@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Card from "@/components/ui/Card";
+import ReviewerStatsCard from "@/components/dashboard/ReviewerStatsCard";
 
 interface MembershipStatus {
   tier: string;
@@ -23,11 +24,22 @@ interface MembershipStatus {
   };
 }
 
+interface ReviewerStats {
+  pending: number;
+  inProgress: number;
+  completed: number;
+  total: number;
+  overdue: number;
+  dueSoon: number;
+}
+
 export default function DashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [membershipStatus, setMembershipStatus] = useState<MembershipStatus | null>(null);
+  const [reviewerStats, setReviewerStats] = useState<ReviewerStats | null>(null);
+  const [reviewerStatsLoading, setReviewerStatsLoading] = useState(false);
 
   useEffect(() => {
     // Check if user is logged in
@@ -39,7 +51,8 @@ export default function DashboardPage() {
       return;
     }
 
-    setUser(JSON.parse(userData));
+    const parsedUser = JSON.parse(userData);
+    setUser(parsedUser);
 
     // Fetch membership status
     const fetchMembershipStatus = async () => {
@@ -56,12 +69,59 @@ export default function DashboardPage() {
         }
       } catch (error) {
         console.error('Failed to fetch membership status:', error);
-      } finally {
-        setLoading(false);
       }
     };
 
-    fetchMembershipStatus();
+    // Fetch reviewer stats if user is a reviewer
+    const fetchReviewerStats = async () => {
+      if (parsedUser.role !== 'reviewer') return;
+
+      setReviewerStatsLoading(true);
+      try {
+        const response = await fetch('/api/reviews/assigned', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          // Calculate overdue and due soon
+          let overdue = 0;
+          let dueSoon = 0;
+          const now = new Date();
+
+          if (data.assigned) {
+            data.assigned.forEach((review: any) => {
+              if (review.status === 'pending' || review.status === 'in_progress') {
+                if (review.dueDate) {
+                  const dueDate = new Date(review.dueDate);
+                  const diffTime = dueDate.getTime() - now.getTime();
+                  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                  if (diffDays < 0) overdue++;
+                  else if (diffDays <= 3) dueSoon++;
+                }
+              }
+            });
+          }
+
+          setReviewerStats({
+            ...data.stats,
+            overdue,
+            dueSoon
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch reviewer stats:', error);
+      } finally {
+        setReviewerStatsLoading(false);
+      }
+    };
+
+    Promise.all([fetchMembershipStatus(), fetchReviewerStats()]).finally(() => {
+      setLoading(false);
+    });
   }, [router]);
 
   const handleLogout = () => {
@@ -150,6 +210,13 @@ export default function DashboardPage() {
                 </Link>
               </div>
             </Card>
+
+            {/* Reviewer Stats */}
+            {user.role === 'reviewer' && reviewerStats && (
+              <div className="mt-6">
+                <ReviewerStatsCard stats={reviewerStats} isLoading={reviewerStatsLoading} />
+              </div>
+            )}
 
             {/* Membership Status */}
             {membershipStatus && (
@@ -327,7 +394,7 @@ export default function DashboardPage() {
             </Card>
           </div>
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }

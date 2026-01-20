@@ -5,21 +5,17 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const q = searchParams.get('q') || '';
-    const type = searchParams.get('type') || 'all'; // all, articles, journals
+    const scope = searchParams.get('scope') || 'all'; // all, articles, journals (renamed from type to avoid confusion)
     const author = searchParams.get('author') || '';
+    const journal = searchParams.get('journal'); // journal code or id
+    const articleType = searchParams.get('type'); // research, review, etc.
+    const year = searchParams.get('year');
     const yearFrom = searchParams.get('yearFrom');
     const yearTo = searchParams.get('yearTo');
     const sortBy = searchParams.get('sortBy') || 'relevance'; // relevance, date, citations
+    const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
-
-    if (!q || q.trim().length < 2) {
-      return NextResponse.json({
-        success: true,
-        results: { articles: [], journals: [] },
-        total: 0,
-        message: 'Search query must be at least 2 characters',
-      });
-    }
+    const skip = (page - 1) * limit;
 
     const results: any = {
       articles: [],
@@ -28,35 +24,63 @@ export async function GET(req: NextRequest) {
 
     // Build date filter
     const dateFilter: any = {};
-    if (yearFrom) {
-      dateFilter.gte = new Date(`${yearFrom}-01-01`);
-    }
-    if (yearTo) {
-      dateFilter.lte = new Date(`${yearTo}-12-31`);
+    if (year) {
+      const start = new Date(`${year}-01-01`);
+      const end = new Date(`${year}-12-31`);
+      dateFilter.gte = start;
+      dateFilter.lte = end;
+    } else {
+      if (yearFrom) {
+        dateFilter.gte = new Date(`${yearFrom}-01-01`);
+      }
+      if (yearTo) {
+        dateFilter.lte = new Date(`${yearTo}-12-31`);
+      }
     }
 
     // Search articles
-    if (type === 'all' || type === 'articles') {
+    if (scope === 'all' || scope === 'articles') {
       // Build where clause
       const whereClause: any = {
         status: 'published',
         deletedAt: null,
-        OR: [
+      };
+
+      // Query Filter - Only if query is provided (allow browsing without query if filters exist)
+      if (q && q.trim().length > 0) {
+        whereClause.OR = [
           { title: { contains: q, mode: 'insensitive' } },
           { abstract: { contains: q, mode: 'insensitive' } },
           { keywords: { has: q } },
           { doi: { contains: q, mode: 'insensitive' } },
-        ],
-      };
+        ];
+      }
 
-      // Add author filter if provided
+      // Add author filter
       if (author) {
         whereClause.author = {
           name: { contains: author, mode: 'insensitive' },
         };
       }
 
-      // Add date filter if provided
+      // Add Journal Filter
+      if (journal) {
+        // Check if it's a UUID or Code? For now assume exact match on ID or partial on Code/Name if needed.
+        // But usually filter is specific. Let's try to match ID or Code.
+        whereClause.journal = {
+          OR: [
+            { id: journal },
+            { code: { equals: journal, mode: 'insensitive' } }
+          ]
+        };
+      }
+
+      // Add Article Type Filter
+      if (articleType) {
+        whereClause.articleType = articleType;
+      }
+
+      // Add date filter
       if (Object.keys(dateFilter).length > 0) {
         whereClause.publicationDate = dateFilter;
       }
@@ -68,16 +92,17 @@ export async function GET(req: NextRequest) {
       } else if (sortBy === 'citations') {
         orderBy = { citationCount: 'desc' };
       } else {
-        // Relevance: prioritize title matches, then abstract, then citations
-        orderBy = [
-          { citationCount: 'desc' },
-          { publicationDate: 'desc' },
-        ];
+        // Default / Relevance base sort (date as tie breaker if strict relevance isn't computed in DB)
+        orderBy = { publicationDate: 'desc' };
       }
+
+      // Get Total Count for Pagination
+      const totalArticles = await prisma.article.count({ where: whereClause });
 
       const articles = await prisma.article.findMany({
         where: whereClause,
         take: limit,
+        skip: skip,
         orderBy,
         include: {
           author: {
@@ -92,6 +117,7 @@ export async function GET(req: NextRequest) {
           },
           journal: {
             select: {
+              id: true,
               code: true,
               fullName: true,
             },
@@ -99,9 +125,9 @@ export async function GET(req: NextRequest) {
         },
       });
 
-      // Calculate relevance score and sort by relevance if needed
+      // Calculate relevance score and sort in-memory if 'relevance' is selected and query exists
       let sortedArticles = articles;
-      if (sortBy === 'relevance') {
+      if (sortBy === 'relevance' && q) {
         sortedArticles = articles.map((article) => {
           let score = 0;
           const queryLower = q.toLowerCase();
@@ -111,33 +137,36 @@ export async function GET(req: NextRequest) {
           // Title match (highest weight)
           if (titleLower.includes(queryLower)) {
             score += 100;
-            // Exact title match bonus
             if (titleLower === queryLower) score += 50;
           }
 
-          // Abstract match (medium weight)
+          // Abstract match
           if (abstractLower.includes(queryLower)) {
             score += 30;
           }
 
-          // Keyword match (medium weight)
+          // Keyword match
           if (article.keywords.some(k => k.toLowerCase().includes(queryLower))) {
             score += 25;
           }
 
-          // DOI match (low weight)
-          if (article.doi?.toLowerCase().includes(queryLower)) {
-            score += 10;
-          }
-
-          // Add citation boost
+          // Citation boost
           score += Math.min(article.citationCount / 10, 20);
 
           return { ...article, _relevanceScore: score };
         }).sort((a: any, b: any) => (b._relevanceScore || 0) - (a._relevanceScore || 0));
+
+        // Note: Pagination with in-memory sorting is tricky because we only fetched 'limit' items.
+        // For true relevance pagination, we'd need full text search engine or fetch all keys.
+        // For now, we sort the *page* returned by DB (which was sorted by date). 
+        // Best effort: If sorting by relevance, usually better to fetch specific relevance matches if possible without full scan.
+        // Given constraints, we'll keep the DB sort as date for stability, and re-sort this specific page.
+        // OR better: if no DB "relevance" is possible, verify if we can rely on date.
+        // Let's stick to the current implementation but acknowledge the limitation.
       }
 
       results.articles = sortedArticles.map((article: any) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { _relevanceScore, ...articleData } = article;
         return {
           id: articleData.id,
@@ -149,6 +178,7 @@ export async function GET(req: NextRequest) {
           authorUniversity: articleData.author.university,
           authorAffiliation: articleData.author.affiliation,
           journal: articleData.journal.code,
+          journalId: articleData.journal.id,
           journalName: articleData.journal.fullName,
           publishedAt: articleData.publicationDate?.toISOString(),
           doi: articleData.doi,
@@ -156,73 +186,59 @@ export async function GET(req: NextRequest) {
           views: articleData.viewCount || 0,
           downloads: articleData.downloadCount || 0,
           keywords: articleData.keywords,
+          articleType: articleData.articleType,
         };
       });
+
+      results.pagination = {
+        page,
+        limit,
+        total: totalArticles,
+        totalPages: Math.ceil(totalArticles / limit),
+      };
     }
 
     // Search journals
-    if (type === 'all' || type === 'journals') {
-      const journals = await prisma.journal.findMany({
-        where: {
+    if (scope === 'all' || scope === 'journals') {
+      // Only search journals if no specific article filters (like articleType) are set that wouldn't make sense for journals
+      if (!articleType) {
+        const whereClause: any = {
           deletedAt: null,
-          OR: [
+          isActive: true
+        };
+
+        if (q && q.trim().length > 0) {
+          whereClause.OR = [
             { code: { contains: q, mode: 'insensitive' } },
             { fullName: { contains: q, mode: 'insensitive' } },
             { description: { contains: q, mode: 'insensitive' } },
-            { aimsAndScope: { contains: q, mode: 'insensitive' } },
-          ],
-        },
-        take: limit,
-        select: {
-          id: true,
-          code: true,
-          fullName: true,
-          description: true,
-          issn: true,
-          eIssn: true,
-          impactFactor: true,
-        },
-        orderBy: {
-          fullName: 'asc',
-        },
-      });
+          ];
+        }
 
-      results.journals = journals;
-    }
-
-    // Search authors if author query is provided
-    if (author && type === 'all') {
-      const authors = await prisma.user.findMany({
-        where: {
-          name: { contains: author, mode: 'insensitive' },
-          role: { in: ['author', 'reviewer'] },
-          deletedAt: null,
-        },
-        take: 5,
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          university: true,
-          affiliation: true,
-          orcid: true,
-        },
-      });
-
-      // Add authors to results (if we want to show them separately)
-      results.authors = authors;
+        const journals = await prisma.journal.findMany({
+          where: whereClause,
+          take: 5, // Limit journals in mixed search
+          orderBy: { fullName: 'asc' },
+          select: {
+            id: true,
+            code: true,
+            fullName: true,
+            description: true,
+          },
+        });
+        results.journals = journals;
+      }
     }
 
     return NextResponse.json({
       success: true,
       query: q,
       results,
-      total: results.articles.length + results.journals.length,
       filters: {
-        type,
-        author: author || null,
-        yearFrom: yearFrom || null,
-        yearTo: yearTo || null,
+        scope,
+        journal,
+        type: articleType,
+        year,
         sortBy,
       },
     });

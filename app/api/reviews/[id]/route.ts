@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { getReviewById, submitReviewDecision, startReview, ReviewDecision } from '@/lib/reviews';
+import { reviewDecisionSchema } from '@/lib/validations/review';
 import { prisma } from '@/lib/prisma';
 
 // GET single review
@@ -119,24 +120,21 @@ export async function POST(
 
     // 3. Parse request body
     const body = await req.json();
-    const { decision, commentsToAuthor, commentsToEditor } = body;
 
-    // 4. Validate decision
-    const validDecisions: ReviewDecision[] = ['accept', 'reject', 'revision_requested'];
-    if (!decision || !validDecisions.includes(decision)) {
+    // Zod Validation
+    const validation = reviewDecisionSchema.safeParse(body);
+    if (!validation.success) {
+      const firstError = validation.error.issues[0];
       return NextResponse.json(
-        { error: 'Invalid decision. Must be: accept, reject, or revision_requested' },
+        {
+          error: firstError.message,
+          details: validation.error.flatten().fieldErrors
+        },
         { status: 400 }
       );
     }
 
-    // 5. Validate comments
-    if (!commentsToAuthor || commentsToAuthor.trim().length < 50) {
-      return NextResponse.json(
-        { error: 'Comments to author are required (minimum 50 characters)' },
-        { status: 400 }
-      );
-    }
+    const { decision, commentsToAuthor, commentsToEditor } = validation.data;
 
     // 6. Submit review
     const updatedReview = await submitReviewDecision(

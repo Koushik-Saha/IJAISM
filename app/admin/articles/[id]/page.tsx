@@ -82,9 +82,20 @@ export default function AdminArticleDetailPage() {
   };
 
   const handleAssignReviewers = async () => {
-    if (selectedReviewers.length !== 4) {
+    const currentReviewerCount = article?.reviews?.length || 0;
+    const totalAfterAssignment = currentReviewerCount + selectedReviewers.length;
+
+    if (selectedReviewers.length === 0) {
       toast.error('Invalid selection', {
-        description: 'Please select exactly 4 reviewers',
+        description: 'Please select at least 1 reviewer',
+        duration: 3000,
+      });
+      return;
+    }
+
+    if (totalAfterAssignment > 4) {
+      toast.error('Too many reviewers', {
+        description: `You can only assign ${4 - currentReviewerCount} more reviewer(s)`,
         duration: 3000,
       });
       return;
@@ -107,8 +118,9 @@ export default function AdminArticleDetailPage() {
         throw new Error(error.error || 'Failed to assign reviewers');
       }
 
+      const assignedCount = selectedReviewers.length;
       toast.success('Reviewers assigned successfully!', {
-        description: 'The 4 reviewers have been assigned to this article.',
+        description: `${assignedCount} reviewer(s) have been assigned to this article.`,
         duration: 4000,
       });
       fetchArticle(); // Refresh article data
@@ -207,78 +219,135 @@ export default function AdminArticleDetailPage() {
             <div className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-xl font-bold mb-4">Reviewers</h2>
 
-              {hasReviewers ? (
-                <div className="space-y-3">
-                  <p className="text-sm text-gray-600 mb-4">
-                    {article.reviews.length} / 4 reviewers assigned
+              {/* Progress Bar */}
+              <div className="mb-6">
+                <div className="flex justify-between items-center mb-2">
+                  <p className="text-sm text-gray-600">Assignment Progress</p>
+                  <p className="text-sm font-bold text-primary">
+                    {article.reviews.length} / 4
                   </p>
-                  {article.reviews.map((review) => (
-                    <div key={review.id} className="border-b border-gray-200 pb-3">
-                      <p className="font-semibold">Reviewer #{review.reviewerNumber}</p>
-                      <p className="text-sm text-gray-600">{review.reviewer.name}</p>
-                      <p className="text-sm text-gray-600">{review.reviewer.email}</p>
-                      <span className={`mt-2 inline-block px-2 py-1 text-xs rounded ${
-                        review.status === 'completed' ? 'bg-green-100 text-green-800' :
-                        review.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
-                        'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {review.status}
-                      </span>
-                    </div>
-                  ))}
                 </div>
-              ) : (
-                <div>
-                  <p className="text-sm text-gray-600 mb-4">
-                    No reviewers assigned. Select 4 reviewers below:
-                  </p>
-                  <div className="space-y-2 max-h-96 overflow-y-auto">
-                    {reviewers.map((reviewer) => (
-                      <label
-                        key={reviewer.id}
-                        className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedReviewers.includes(reviewer.id)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              if (selectedReviewers.length < 4) {
-                                setSelectedReviewers([...selectedReviewers, reviewer.id]);
-                              } else {
-                                toast.warning('Selection limit', {
-                                  description: 'You can only select 4 reviewers',
-                                  duration: 3000,
-                                });
-                              }
-                            } else {
-                              setSelectedReviewers(selectedReviewers.filter(id => id !== reviewer.id));
-                            }
-                          }}
-                          className="mr-3"
-                        />
-                        <div className="flex-1">
-                          <p className="font-semibold text-sm">{reviewer.name}</p>
-                          <p className="text-xs text-gray-600">{reviewer.email}</p>
-                          <p className="text-xs text-gray-500">
-                            {reviewer._count.reviews} active reviews
-                          </p>
+                <div className="w-full bg-gray-200 rounded-full h-3">
+                  <div
+                    className={`h-3 rounded-full transition-all duration-300 ${
+                      article.reviews.length === 4 ? 'bg-green-500' :
+                      article.reviews.length >= 2 ? 'bg-blue-500' :
+                      'bg-yellow-500'
+                    }`}
+                    style={{ width: `${(article.reviews.length / 4) * 100}%` }}
+                  ></div>
+                </div>
+              </div>
+
+              {/* Assigned Reviewers */}
+              {hasReviewers && (
+                <div className="mb-6">
+                  <h3 className="font-bold text-gray-800 mb-3">Assigned Reviewers</h3>
+                  <div className="space-y-3">
+                    {article.reviews.map((review) => (
+                      <div key={review.id} className="border border-green-200 bg-green-50 rounded-lg p-3">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="font-semibold text-gray-800">Reviewer #{review.reviewerNumber}</p>
+                          <span className="text-green-600 text-sm">✓ Assigned</span>
                         </div>
-                      </label>
+                        <p className="text-sm text-gray-700">{review.reviewer.name}</p>
+                        <p className="text-xs text-gray-600">{review.reviewer.email}</p>
+                        <span className={`mt-2 inline-block px-2 py-1 text-xs rounded ${
+                          review.status === 'completed' ? 'bg-green-100 text-green-800' :
+                          review.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
+                          'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {review.status}
+                        </span>
+                      </div>
                     ))}
                   </div>
-                  <div className="mt-4">
-                    <p className="text-sm text-gray-600 mb-2">
-                      Selected: {selectedReviewers.length} / 4
+                </div>
+              )}
+
+              {/* Empty Slots */}
+              {article.reviews.length < 4 && (
+                <div className="mb-6">
+                  <h3 className="font-bold text-gray-800 mb-3">Available Slots</h3>
+                  <div className="space-y-2">
+                    {[...Array(4 - article.reviews.length)].map((_, index) => (
+                      <div key={index} className="border border-dashed border-gray-300 rounded-lg p-3 text-center text-gray-500 text-sm">
+                        Reviewer #{article.reviews.length + index + 1} - Not Assigned
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Assign More Reviewers */}
+              {article.reviews.length < 4 && (
+                <div>
+                  <h3 className="font-bold text-gray-800 mb-3">
+                    Assign {article.reviews.length === 0 ? 'Reviewers' : 'More Reviewers'}
+                  </h3>
+                  <p className="text-xs text-gray-600 mb-3">
+                    Select up to {4 - article.reviews.length} more reviewer(s)
+                  </p>
+                  <div className="space-y-2 max-h-64 overflow-y-auto mb-4">
+                    {reviewers
+                      .filter(reviewer => !article.reviews.some(r => r.reviewer.email === reviewer.email))
+                      .map((reviewer) => (
+                        <label
+                          key={reviewer.id}
+                          className={`flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 ${
+                            selectedReviewers.includes(reviewer.id) ? 'border-primary bg-primary/5' : ''
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedReviewers.includes(reviewer.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                const maxAllowed = 4 - article.reviews.length;
+                                if (selectedReviewers.length < maxAllowed) {
+                                  setSelectedReviewers([...selectedReviewers, reviewer.id]);
+                                } else {
+                                  toast.warning('Selection limit', {
+                                    description: `You can only select ${maxAllowed} more reviewer(s)`,
+                                    duration: 3000,
+                                  });
+                                }
+                              } else {
+                                setSelectedReviewers(selectedReviewers.filter(id => id !== reviewer.id));
+                              }
+                            }}
+                            className="mr-3"
+                          />
+                          <div className="flex-1">
+                            <p className="font-semibold text-sm">{reviewer.name}</p>
+                            <p className="text-xs text-gray-600">{reviewer.email}</p>
+                            <p className="text-xs text-gray-500">
+                              {reviewer._count.reviews} active reviews
+                            </p>
+                          </div>
+                        </label>
+                      ))}
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm text-gray-600">
+                      Selected: {selectedReviewers.length} / {4 - article.reviews.length}
                     </p>
                     <button
                       onClick={handleAssignReviewers}
-                      disabled={selectedReviewers.length !== 4 || isAssigning}
+                      disabled={selectedReviewers.length === 0 || isAssigning}
                       className="w-full bg-primary text-white py-2 px-4 rounded-lg font-semibold hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {isAssigning ? 'Assigning...' : 'Assign Reviewers'}
+                      {isAssigning ? 'Assigning...' : `Assign ${selectedReviewers.length} Reviewer(s)`}
                     </button>
                   </div>
+                </div>
+              )}
+
+              {/* All Reviewers Assigned */}
+              {article.reviews.length === 4 && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
+                  <p className="text-green-800 font-semibold">✓ All 4 Reviewers Assigned</p>
+                  <p className="text-sm text-green-700 mt-1">This article has the full complement of reviewers.</p>
                 </div>
               )}
             </div>

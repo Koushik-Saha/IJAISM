@@ -116,9 +116,11 @@ export default function DissertationsPage() {
               >
                 <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-4">
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold text-primary mb-2 hover:text-accent transition-colors">
-                      {dissertation.title}
-                    </h3>
+                    <Link href={`/dissertations/${dissertation.id}`}>
+                      <h3 className="text-xl font-bold text-primary mb-2 hover:text-accent transition-colors cursor-pointer">
+                        {dissertation.title}
+                      </h3>
+                    </Link>
                     <div className="flex flex-wrap gap-2 mb-3">
                       <span className="inline-block bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium">
                         {dissertation.field}
@@ -137,12 +139,18 @@ export default function DissertationsPage() {
                   {dissertation.abstract}
                 </p>
                 <div className="flex gap-3">
-                  <button className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded font-medium transition-colors">
+                  <Link
+                    href={`/dissertations/${dissertation.id}`}
+                    className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded font-medium transition-colors"
+                  >
                     View Full Dissertation
-                  </button>
-                  <button className="border border-primary text-primary hover:bg-primary/10 px-6 py-2 rounded font-medium transition-colors">
+                  </Link>
+                  <Link
+                    href={`/dissertations/${dissertation.id}`}
+                    className="border border-primary text-primary hover:bg-primary/10 px-6 py-2 rounded font-medium transition-colors"
+                  >
                     Download PDF
-                  </button>
+                  </Link>
                 </div>
               </div>
             ))}

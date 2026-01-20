@@ -1,6 +1,11 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 
 export default function AnnouncementsPage() {
+  const [selectedCategory, setSelectedCategory] = useState("All");
+
   const announcements = [
     {
       id: 1,
@@ -70,6 +75,11 @@ export default function AnnouncementsPage() {
 
   const categories = ["All", "Journal", "Conference", "Scholarship", "Guidelines", "Editorial", "Platform", "Partnership"];
 
+  // Filter announcements based on selected category
+  const filteredAnnouncements = selectedCategory === "All"
+    ? announcements
+    : announcements.filter(announcement => announcement.category === selectedCategory);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
@@ -91,8 +101,9 @@ export default function AnnouncementsPage() {
             {categories.map((category) => (
               <button
                 key={category}
+                onClick={() => setSelectedCategory(category)}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  category === "All"
+                  category === selectedCategory
                     ? "bg-primary text-white"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
@@ -105,7 +116,12 @@ export default function AnnouncementsPage() {
 
         {/* Announcements List */}
         <div className="space-y-6">
-          {announcements.map((announcement) => (
+          {filteredAnnouncements.length === 0 ? (
+            <div className="bg-white rounded-lg shadow-md p-8 text-center">
+              <p className="text-gray-600 text-lg">No announcements found in this category.</p>
+            </div>
+          ) : (
+            filteredAnnouncements.map((announcement) => (
             <Link
               key={announcement.id}
               href={`/announcements/${announcement.id}`}
@@ -144,7 +160,8 @@ export default function AnnouncementsPage() {
                 </div>
               </div>
             </Link>
-          ))}
+            ))
+          )}
         </div>
 
         {/* Newsletter Subscription */}

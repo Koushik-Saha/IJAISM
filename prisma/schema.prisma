@@ -36,6 +36,7 @@ model User {
   notifications           Notification[]
   passwordResetTokens     PasswordResetToken[]
   emailVerificationTokens EmailVerificationToken[]
+  blogs                   Blog[]
 
   @@index([email])
   @@index([role])
@@ -262,6 +263,7 @@ model Blog {
   excerpt          String?
   featuredImageUrl String?
   authorId         String
+  author           User      @relation(fields: [authorId], references: [id])
   status           String    @default("draft") // draft, published
   publishedAt      DateTime?
   viewCount        Int       @default(0)

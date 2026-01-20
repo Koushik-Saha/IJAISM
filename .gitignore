@@ -39,3 +39,8 @@ next-env.d.ts
 prisma/migrations/
 
 vercel.json
+
+.claude/settings.local.json
+.claude/
+tsconfig.tsbuildinfo
+CLAUDE.md

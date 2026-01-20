@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
+import { articleSubmissionSchema } from '@/lib/validations/article';
 import { sendArticleSubmissionEmail } from '@/lib/email/send';
 import { canUserSubmit, getMembershipStatus } from '@/lib/membership';
 import { logger } from '@/lib/logger';
@@ -31,53 +32,34 @@ export async function POST(req: NextRequest) {
 
     // 2. Parse request body
     const body = await req.json();
+
+    // Zod Validation
+    const validation = articleSubmissionSchema.safeParse(body);
+
+    if (!validation.success) {
+      // Create a nice error message from the first Zod error
+      const firstError = validation.error.issues[0];
+      return NextResponse.json(
+        {
+          error: firstError.message,
+          details: validation.error.flatten().fieldErrors
+        },
+        { status: 400 }
+      );
+    }
+
     const {
       submissionType,
       journal,
       title,
       abstract,
-      keywords,
+      keywords, // This is now an array from the schema transform
       manuscriptUrl,
       coverLetterUrl,
-    } = body;
+    } = validation.data;
 
-    // 3. Validate required fields
-    if (!journal || !title || !abstract || !keywords) {
-      return NextResponse.json(
-        {
-          error: 'Missing required fields',
-          details: {
-            journal: !journal ? 'Journal is required' : null,
-            title: !title ? 'Title is required' : null,
-            abstract: !abstract ? 'Abstract is required' : null,
-            keywords: !keywords ? 'Keywords are required' : null,
-          }
-        },
-        { status: 400 }
-      );
-    }
-
-    // 4. Validate abstract length (150-300 words)
-    const wordCount = abstract.trim().split(/\s+/).filter(Boolean).length;
-    if (wordCount < 150 || wordCount > 300) {
-      return NextResponse.json(
-        {
-          error: `Abstract must be between 150-300 words. Current: ${wordCount} words`,
-        },
-        { status: 400 }
-      );
-    }
-
-    // 5. Validate keywords (4-7 keywords)
-    const keywordArray = keywords.split(',').map((k: string) => k.trim()).filter(Boolean);
-    if (keywordArray.length < 4 || keywordArray.length > 7) {
-      return NextResponse.json(
-        {
-          error: `Keywords must be between 4-7. Current: ${keywordArray.length} keywords`,
-        },
-        { status: 400 }
-      );
-    }
+    // Using filtered keywords directly array from Zod
+    const keywordArray = keywords;
 
     // 6. Find journal by fullName or code
     const journalRecord = await prisma.journal.findFirst({

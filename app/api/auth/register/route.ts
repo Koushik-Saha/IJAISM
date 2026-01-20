@@ -1,24 +1,49 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { hashPassword, isAcademicEmail } from '@/lib/auth';
+import { registerSchema } from '@/lib/validations/auth';
 import { sendWelcomeEmail, sendEmailVerificationEmail } from '@/lib/email/send';
+import rateLimit from '@/lib/rate-limit';
 import crypto from 'crypto';
+
+const limiter = rateLimit({
+  interval: 60 * 60 * 1000, // 1 hour
+  uniqueTokenPerInterval: 500,
+});
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { name, email, university, password } = body;
-
-    // Validation
-    if (!name || !email || !university || !password) {
+    const ip = req.headers.get('x-forwarded-for') || 'anonymous';
+    try {
+      await limiter.check(NextResponse.next(), 5, ip); // 5 registration attempts per hour per IP
+    } catch {
       return NextResponse.json(
         {
           success: false,
-          error: { message: 'All fields are required' },
+          error: { message: 'Too many registration attempts. Please try again later.' },
+        },
+        { status: 429 }
+      );
+    }
+
+    const body = await req.json();
+
+    // Zod Validation
+    const validation = registerSchema.safeParse(body);
+    if (!validation.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            message: 'Validation failed',
+            details: validation.error.flatten().fieldErrors
+          },
         },
         { status: 400 }
       );
     }
+
+    const { name, email, university, password } = validation.data;
 
     // Validate academic email
     if (!isAcademicEmail(email)) {

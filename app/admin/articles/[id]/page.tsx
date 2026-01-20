@@ -81,6 +81,38 @@ export default function AdminArticleDetailPage() {
     }
   };
 
+  const handleAutoAssign = async () => {
+    setIsAssigning(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/admin/articles/${id}/auto-assign-reviewers`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to auto-assign reviewers');
+      }
+
+      toast.success('Auto-assignment successful!', {
+        description: data.message,
+        duration: 4000,
+      });
+      fetchArticle(); // Refresh article data
+    } catch (err: any) {
+      toast.error('Auto-assignment failed', {
+        description: err.message || 'Failed to auto-assign reviewers',
+        duration: 4000,
+      });
+    } finally {
+      setIsAssigning(false);
+    }
+  };
+
   const handleAssignReviewers = async () => {
     const currentReviewerCount = article?.reviews?.length || 0;
     const totalAfterAssignment = currentReviewerCount + selectedReviewers.length;
@@ -186,11 +218,10 @@ export default function AdminArticleDetailPage() {
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Status</p>
-                  <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
-                    article.status === 'published' ? 'bg-green-100 text-green-800' :
+                  <span className={`px-3 py-1 text-xs font-semibold rounded-full ${article.status === 'published' ? 'bg-green-100 text-green-800' :
                     article.status === 'under_review' ? 'bg-blue-100 text-blue-800' :
-                    'bg-yellow-100 text-yellow-800'
-                  }`}>
+                      'bg-yellow-100 text-yellow-800'
+                    }`}>
                     {article.status.replace('_', ' ')}
                   </span>
                 </div>
@@ -229,11 +260,10 @@ export default function AdminArticleDetailPage() {
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-3">
                   <div
-                    className={`h-3 rounded-full transition-all duration-300 ${
-                      article.reviews.length === 4 ? 'bg-green-500' :
+                    className={`h-3 rounded-full transition-all duration-300 ${article.reviews.length === 4 ? 'bg-green-500' :
                       article.reviews.length >= 2 ? 'bg-blue-500' :
-                      'bg-yellow-500'
-                    }`}
+                        'bg-yellow-500'
+                      }`}
                     style={{ width: `${(article.reviews.length / 4) * 100}%` }}
                   ></div>
                 </div>
@@ -252,11 +282,10 @@ export default function AdminArticleDetailPage() {
                         </div>
                         <p className="text-sm text-gray-700">{review.reviewer.name}</p>
                         <p className="text-xs text-gray-600">{review.reviewer.email}</p>
-                        <span className={`mt-2 inline-block px-2 py-1 text-xs rounded ${
-                          review.status === 'completed' ? 'bg-green-100 text-green-800' :
+                        <span className={`mt-2 inline-block px-2 py-1 text-xs rounded ${review.status === 'completed' ? 'bg-green-100 text-green-800' :
                           review.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
-                          'bg-yellow-100 text-yellow-800'
-                        }`}>
+                            'bg-yellow-100 text-yellow-800'
+                          }`}>
                           {review.status}
                         </span>
                       </div>
@@ -294,9 +323,8 @@ export default function AdminArticleDetailPage() {
                       .map((reviewer) => (
                         <label
                           key={reviewer.id}
-                          className={`flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 ${
-                            selectedReviewers.includes(reviewer.id) ? 'border-primary bg-primary/5' : ''
-                          }`}
+                          className={`flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 ${selectedReviewers.includes(reviewer.id) ? 'border-primary bg-primary/5' : ''
+                            }`}
                         >
                           <input
                             type="checkbox"
@@ -338,6 +366,26 @@ export default function AdminArticleDetailPage() {
                       className="w-full bg-primary text-white py-2 px-4 rounded-lg font-semibold hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isAssigning ? 'Assigning...' : `Assign ${selectedReviewers.length} Reviewer(s)`}
+                    </button>
+
+                    <div className="relative flex py-2 items-center">
+                      <div className="flex-grow border-t border-gray-300"></div>
+                      <span className="flex-shrink-0 mx-4 text-gray-400 text-xs">OR</span>
+                      <div className="flex-grow border-t border-gray-300"></div>
+                    </div>
+
+                    <button
+                      onClick={handleAutoAssign}
+                      disabled={isAssigning}
+                      className="w-full bg-purple-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                    >
+                      {isAssigning ? (
+                        'Auto-Assigning...'
+                      ) : (
+                        <>
+                          <span className="mr-2">✨</span> Auto-Assign Best Match
+                        </>
+                      )}
                     </button>
                   </div>
                 </div>

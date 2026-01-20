@@ -1,22 +1,47 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { comparePassword, generateToken } from '@/lib/auth';
+import { loginSchema } from '@/lib/validations/auth';
+import rateLimit from '@/lib/rate-limit';
+
+const limiter = rateLimit({
+  interval: 15 * 60 * 1000, // 15 minutes
+  uniqueTokenPerInterval: 500,
+});
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { email, password } = body;
-
-    // Validation
-    if (!email || !password) {
+    const ip = req.headers.get('x-forwarded-for') || 'anonymous';
+    try {
+      await limiter.check(NextResponse.next(), 5, ip); // 5 requests per 15 minutes
+    } catch {
       return NextResponse.json(
         {
           success: false,
-          error: { message: 'Email and password are required' },
+          error: { message: 'Too many requests. Please try again later.' },
+        },
+        { status: 429 }
+      );
+    }
+
+    const body = await req.json();
+
+    // Zod Validation
+    const validation = loginSchema.safeParse(body);
+    if (!validation.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            message: 'Validation failed',
+            details: validation.error.flatten().fieldErrors
+          },
         },
         { status: 400 }
       );
     }
+
+    const { email, password } = validation.data;
 
     // Find user
     const user = await prisma.user.findUnique({

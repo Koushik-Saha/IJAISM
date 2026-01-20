@@ -374,7 +374,8 @@ export function articleStatusUpdateEmail(
   oldStatus: string,
   newStatus: string,
   submissionId: string,
-  message?: string
+  message?: string,
+  doi?: string
 ): string {
   const statusMessages: Record<string, { emoji: string; text: string }> = {
     'under review': {
@@ -389,7 +390,7 @@ export function articleStatusUpdateEmail(
       emoji: '❌',
       text: 'After careful review, we regret to inform you that your article was not accepted for publication.',
     },
-    'revision requested': {
+    'revision_requested': {
       emoji: '📝',
       text: 'The reviewers have requested revisions to your article. Please review their comments and resubmit.',
     },
@@ -399,7 +400,9 @@ export function articleStatusUpdateEmail(
     },
   };
 
-  const statusInfo = statusMessages[newStatus.toLowerCase()] || {
+  // Handle case variance (e.g. revision_requested vs revision requested)
+  const normalizedStatus = newStatus.toLowerCase().replace('_', ' ');
+  const statusInfo = statusMessages[newStatus.toLowerCase()] || statusMessages[normalizedStatus] || {
     emoji: '📄',
     text: `Your article status has been updated to: ${newStatus}`
   };
@@ -418,8 +421,13 @@ export function articleStatusUpdateEmail(
           <span class="info-label">Previous Status:</span> ${oldStatus}
         </div>
         <div class="info-row">
-          <span class="info-label">New Status:</span> <strong>${newStatus}</strong>
+          <span class="info-label">New Status:</span> <strong>${newStatus.replace('_', ' ')}</strong>
         </div>
+        ${doi ? `
+        <div class="info-row">
+          <span class="info-label">DOI:</span> ${doi}
+        </div>
+        ` : ''}
       </div>
 
       <p>${statusInfo.text}</p>
@@ -431,15 +439,65 @@ export function articleStatusUpdateEmail(
       </div>
       ` : ''}
 
+      ${doi ? `
+      <p>
+        <a href="${EMAIL_CONFIG.appUrl}/articles/${submissionId}" class="button">View Published Article</a>
+      </p>
+      ` : `
       <p>
         <a href="${EMAIL_CONFIG.appUrl}/dashboard/submissions/${submissionId}" class="button">View Submission Details</a>
       </p>
+      `}
 
       <p>Best regards,<br><strong>The IJAISM Editorial Team</strong></p>
     </div>
   `;
 
   return emailLayout(content, `Status update: ${articleTitle}`);
+}
+
+// ... (existing code for paymentFailedEmail, etc.)
+
+// 12. Review Submission Confirmation Email
+export function reviewSubmissionConfirmationEmail(
+  reviewerName: string,
+  articleTitle: string,
+  journalName: string
+): string {
+  const content = `
+    <div class="content">
+      <h2>Review Submitted Successfully ✅</h2>
+      <p>Dear ${reviewerName},</p>
+      <p>
+        Thank you for submitting your review for the article: <strong>${articleTitle}</strong>.
+      </p>
+      
+      <p>
+        We greatly appreciate the time and expertise you have dedicated to evaluating this work. 
+        Your contribution helps maintain the high standards of <strong>${journalName}</strong>.
+      </p>
+
+      <div class="info-box">
+        <h3>What Happens Next?</h3>
+        <p>
+          The editor will review your comments along with those from other reviewers to make a final decision. 
+          You will be notified once a decision has been made on the manuscript.
+        </p>
+      </div>
+
+      <p>
+        You can view your completed reviews in your dashboard at any time.
+      </p>
+
+      <p>
+        <a href="${EMAIL_CONFIG.appUrl}/dashboard/reviews" class="button">Go to Dashboard</a>
+      </p>
+
+      <p>Best regards,<br><strong>The IJAISM Editorial Team</strong></p>
+    </div>
+  `;
+
+  return emailLayout(content, `Review Confirmation: ${articleTitle}`);
 }
 
 // 6. Payment Failed Email
@@ -657,4 +715,61 @@ export function passwordResetConfirmationEmail(
   `;
 
   return emailLayout(content, `Your password has been changed successfully`);
+}
+
+// 11. Reviewer Assignment Email
+export function reviewerAssignmentEmail(
+  reviewerName: string,
+  articleTitle: string,
+  journalName: string,
+  dueDate: string,
+  reviewId: string
+): string {
+  const content = `
+    <div class="content">
+      <h2>New Review Assignment 📝</h2>
+      <p>Dear ${reviewerName},</p>
+      <p>
+        You have been selected to review a new article submission for <strong>${journalName}</strong>.
+        Your expertise would be invaluable in evaluating this work.
+      </p>
+
+      <div class="info-box">
+        <h3>Assignment Details</h3>
+        <div class="info-row">
+          <span class="info-label">Article:</span> ${articleTitle}
+        </div>
+        <div class="info-row">
+          <span class="info-label">Journal:</span> ${journalName}
+        </div>
+        <div class="info-row">
+          <span class="info-label">Due Date:</span> ${dueDate}
+        </div>
+      </div>
+
+      <p>
+        Please log in to your dashboard to view the full manuscript and submit your review.
+      </p>
+
+      <p>
+        <a href="${EMAIL_CONFIG.appUrl}/dashboard/reviews/${reviewId}" class="button">View Assignment</a>
+      </p>
+
+      <h3>Review Guidelines</h3>
+      <ul>
+        <li>Evaluate scientific/academic rigor</li>
+        <li>Check for clarity and structure</li>
+        <li>Provide constructive feedback</li>
+        <li>Maintain confidentiality</li>
+      </ul>
+
+      <p>
+        If you are unable to accept this assignment, please contact the editor immediately.
+      </p>
+
+      <p>Best regards,<br><strong>The IJAISM Editorial Team</strong></p>
+    </div>
+  `;
+
+  return emailLayout(content, `New Review Assignment: ${articleTitle}`);
 }

@@ -2,118 +2,136 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   try {
-    // 1. Verify authentication
+    // Auth Check
     const authHeader = req.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json(
-        { error: 'Unauthorized - No token provided' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-
     const token = authHeader.split(' ')[1];
-    const decoded = verifyToken(token);
+    const payload = verifyToken(token);
+    if (!payload) return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
 
-    if (!decoded) {
-      return NextResponse.json(
-        { error: 'Unauthorized - Invalid token' },
-        { status: 401 }
-      );
-    }
-
-    // 2. Verify user is admin
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-      select: { role: true },
-    });
-
+    const user = await prisma.user.findUnique({ where: { id: payload.userId } });
     if (!user || user.role !== 'admin') {
-      return NextResponse.json(
-        { error: 'Forbidden - Admin access required' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    // 3. Get statistics
-    const [
-      totalUsers,
-      totalArticles,
-      pendingArticles,
-      underReviewArticles,
-      publishedArticles,
-      rejectedArticles,
-      pendingReviews,
-      activeMembers,
-      totalAnnouncements,
-      featuredAnnouncements,
-    ] = await Promise.all([
-      prisma.user.count({ where: { deletedAt: null } }),
-      prisma.article.count({ where: { deletedAt: null } }),
-      prisma.article.count({ where: { status: 'submitted', deletedAt: null } }),
-      prisma.article.count({ where: { status: 'under_review', deletedAt: null } }),
-      prisma.article.count({ where: { status: 'published', deletedAt: null } }),
-      prisma.article.count({ where: { status: 'rejected', deletedAt: null } }),
-      prisma.review.count({ where: { status: 'pending' } }),
-      prisma.membership.count({ where: { status: 'active' } }),
-      prisma.announcement.count({ where: { deletedAt: null } }),
-      prisma.announcement.count({ where: { isFeatured: true, deletedAt: null } }),
-    ]);
+    // --- Statistics Gathering ---
 
-    // 4. Get recent activity
-    const recentArticles = await prisma.article.findMany({
-      where: { deletedAt: null },
-      take: 5,
-      orderBy: { createdAt: 'desc' },
-      include: {
-        author: { select: { name: true, email: true } },
-        journal: { select: { fullName: true, code: true } },
-      },
+    // 1. Articles by Status
+    const articlesByStatusRaw = await prisma.article.groupBy({
+      by: ['status'],
+      _count: { status: true },
     });
+    const articlesByStatus = articlesByStatusRaw.map(item => ({
+      name: item.status.replace('_', ' ').toUpperCase(),
+      value: item._count.status,
+    }));
+
+    // 2. Users by Role
+    const usersByRoleRaw = await prisma.user.groupBy({
+      by: ['role'],
+      _count: { role: true },
+    });
+    const usersByRole = usersByRoleRaw.map(item => ({
+      name: item.role.toUpperCase(),
+      value: item._count.role,
+    }));
+
+    // 3. Memberships by Tier
+    const membershipsByTierRaw = await prisma.membership.groupBy({
+      by: ['tier'],
+      _count: { tier: true },
+    });
+    const revenueByTier = membershipsByTierRaw.map(item => ({
+      name: item.tier.toUpperCase(),
+      value: item._count.tier,
+    }));
+
+    // 4. Monthly Growth (Simplistic - Last 6 months)
+    // Grouping by date in Prisma usually involves raw query or post-processing.
+    // Post-processing for simplicity and DB compatibility.
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
 
     const recentUsers = await prisma.user.findMany({
-      where: { deletedAt: null },
+      where: { createdAt: { gte: sixMonthsAgo } },
+      select: { createdAt: true }
+    });
+    const recentArticles = await prisma.article.findMany({
+      where: { createdAt: { gte: sixMonthsAgo } },
+      select: { createdAt: true }
+    });
+
+    // Bucket by Month
+    const monthlyDataMap = new Map<string, { users: number; articles: number }>();
+
+    // Initialize buckets
+    for (let i = 0; i < 6; i++) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      const key = d.toLocaleString('default', { month: 'short', year: '2-digit' }); // Jan 25
+      monthlyDataMap.set(key, { users: 0, articles: 0 });
+    }
+
+    const processItem = (date: Date, type: 'users' | 'articles') => {
+      const key = date.toLocaleString('default', { month: 'short', year: '2-digit' });
+      if (monthlyDataMap.has(key)) {
+        const entry = monthlyDataMap.get(key)!;
+        entry[type]++;
+      }
+    };
+
+    recentUsers.forEach(u => processItem(u.createdAt, 'users'));
+    recentArticles.forEach(a => processItem(a.createdAt, 'articles'));
+
+    const monthlyGrowth = Array.from(monthlyDataMap.entries())
+      .map(([month, data]) => ({ month, ...data }))
+      .reverse(); // Chronological order
+
+    // Standard Stats (for cards)
+    const totalUsers = await prisma.user.count();
+    const totalArticles = await prisma.article.count();
+    const pendingReviews = await prisma.review.count({ where: { status: 'pending' } });
+    const activeMembers = await prisma.membership.count({ where: { status: 'active' } });
+
+    // Recent items for lists
+    const recentUsersList = await prisma.user.findMany({ take: 5, orderBy: { createdAt: 'desc' } });
+    const recentArticlesList = await prisma.article.findMany({
       take: 5,
       orderBy: { createdAt: 'desc' },
-      select: { id: true, name: true, email: true, role: true, createdAt: true },
+      include: { author: { select: { name: true, email: true } }, journal: { select: { code: true } } }
     });
 
     return NextResponse.json({
-      success: true,
       stats: {
-        users: {
-          total: totalUsers,
-          recent: recentUsers,
-        },
+        users: { total: totalUsers, recent: recentUsersList },
         articles: {
           total: totalArticles,
-          pending: pendingArticles,
-          underReview: underReviewArticles,
-          published: publishedArticles,
-          rejected: rejectedArticles,
-          recent: recentArticles,
+          pending: articlesByStatus.find(s => s.name === 'SUBMITTED')?.value || 0,
+          underReview: articlesByStatus.find(s => s.name === 'UNDER REVIEW')?.value || 0,
+          published: articlesByStatus.find(s => s.name === 'PUBLISHED')?.value || 0,
+          rejected: articlesByStatus.find(s => s.name === 'REJECTED')?.value || 0,
+          recent: recentArticlesList
         },
-        reviews: {
-          pending: pendingReviews,
-        },
-        memberships: {
-          active: activeMembers,
-        },
-        announcements: {
-          total: totalAnnouncements,
-          featured: featuredAnnouncements,
-        },
+        reviews: { pending: pendingReviews },
+        memberships: { active: activeMembers },
+        announcements: { total: 0, featured: 0 }, // Placeholder
       },
+      charts: {
+        articlesByStatus,
+        usersByRole,
+        monthlyGrowth,
+        revenueByTier
+      }
     });
+
   } catch (error: any) {
-    console.error('Error fetching admin stats:', error);
-    return NextResponse.json(
-      {
-        error: 'Failed to fetch statistics',
-        details: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
-      { status: 500 }
-    );
+    console.error('Stats Error', error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

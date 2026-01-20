@@ -29,7 +29,10 @@ interface AdminStats {
     total: number;
     featured: number;
   };
+  charts: any; // Add charts data to interface
 }
+
+import { AnalyticsDashboard } from '@/components/admin/AnalyticsDashboard';
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -66,7 +69,7 @@ export default function AdminDashboard() {
         }
 
         const data = await response.json();
-        setStats(data.stats);
+        setStats({ ...data.stats, charts: data.charts }); // Merge stats and charts
       } catch (err: any) {
         setError(err.message || 'Failed to load dashboard');
       } finally {
@@ -164,6 +167,14 @@ export default function AdminDashboard() {
             </div>
           </div>
         </div>
+
+        {/* Analytics Charts */}
+        {stats.charts && (
+          <div className="mb-8">
+            <h2 className="text-xl font-bold text-gray-900 mb-6">Platform Analytics</h2>
+            <AnalyticsDashboard data={stats.charts} />
+          </div>
+        )}
 
         {/* Article Status Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">

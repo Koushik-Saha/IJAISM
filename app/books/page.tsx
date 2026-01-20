@@ -114,9 +114,11 @@ export default function BooksPage() {
                     <span className="inline-block bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium mb-2">
                       {book.field}
                     </span>
-                    <h3 className="text-xl font-bold text-primary mb-2">
-                      {book.title}
-                    </h3>
+                    <Link href={`/books/${book.id}`}>
+                      <h3 className="text-xl font-bold text-primary mb-2 hover:text-accent transition-colors cursor-pointer">
+                        {book.title}
+                      </h3>
+                    </Link>
                     <p className="text-gray-700 font-medium mb-1">
                       {book.authors.join(", ")}
                     </p>
@@ -133,12 +135,18 @@ export default function BooksPage() {
                 </p>
 
                 <div className="flex gap-3">
-                  <button className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded font-medium transition-colors flex-1">
+                  <Link
+                    href={`/books/${book.id}`}
+                    className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded font-medium transition-colors flex-1 text-center"
+                  >
                     View Details
-                  </button>
-                  <button className="border border-primary text-primary hover:bg-primary/10 px-6 py-2 rounded font-medium transition-colors">
+                  </Link>
+                  <Link
+                    href={`/books/${book.id}`}
+                    className="border border-primary text-primary hover:bg-primary/10 px-6 py-2 rounded font-medium transition-colors text-center"
+                  >
                     Preview
-                  </button>
+                  </Link>
                 </div>
               </div>
             ))}

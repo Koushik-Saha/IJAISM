@@ -67,6 +67,20 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Check if email is verified
+    if (!user.isEmailVerified) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            message: 'Please verify your email address before logging in.',
+            code: 'EMAIL_NOT_VERIFIED',
+          },
+        },
+        { status: 403 }
+      );
+    }
+
     // Update last login
     await prisma.user.update({
       where: { id: user.id },
@@ -95,9 +109,7 @@ export async function POST(req: NextRequest) {
           },
           accessToken,
         },
-        message: user.isEmailVerified
-          ? 'Login successful'
-          : 'Login successful. Please verify your email address to access all features.',
+        message: 'Login successful',
       },
       { status: 200 }
     );

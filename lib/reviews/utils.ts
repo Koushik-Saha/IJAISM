@@ -373,6 +373,11 @@ export async function assignReviewersToArticle(
   const dueDate = new Date();
   dueDate.setDate(dueDate.getDate() + dueInDays);
 
+  // Get current reviewer count for correct numbering
+  const currentReviewCount = await prisma.review.count({
+    where: { articleId }
+  });
+
   // Create review assignments
   const reviews = await Promise.all(
     reviewerIds.map((reviewerId, index) =>
@@ -380,7 +385,7 @@ export async function assignReviewersToArticle(
         data: {
           articleId,
           reviewerId,
-          reviewerNumber: index + 1,
+          reviewerNumber: currentReviewCount + index + 1,
           status: 'pending',
           dueDate,
         },

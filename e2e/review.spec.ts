@@ -2,12 +2,29 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Reviewer Dashboard Flow', () => {
     test.beforeEach(async ({ page }) => {
-        // Login as reviewer
+        page.on('console', msg => console.log('PAGE LOG:', msg.text()));
+        page.on('pageerror', exception => console.log(`PAGE ERROR: "${exception}"`));
+        // Verify console logs working
         await page.goto('/login');
+        await page.evaluate(() => console.log("TESTING CONSOLE LOG"));
         await page.fill('input[name="email"]', 'reviewer1@c5k.com');
         await page.fill('input[name="password"]', 'password123');
         await page.click('button[type="submit"]');
-        await expect(page).toHaveURL('/dashboard');
+
+        // Wait for potential error message or redirect
+        try {
+            await expect(page).toHaveURL('/dashboard', { timeout: 5000 });
+        } catch (e) {
+            // Check for error message
+            const errorElement = page.locator('.text-red-700');
+            if (await errorElement.isVisible()) {
+                const text = await errorElement.textContent();
+                console.log('Login failed with error:', text);
+            } else {
+                console.log('Login failed but no error message visible. Current URL:', page.url());
+            }
+            throw e;
+        }
     });
 
     test('should view assigned reviews', async ({ page }) => {

@@ -1,4 +1,4 @@
-import { getResendClient, EMAIL_CONFIG } from './client';
+import { getResendClient, getNodemailerTransport, EMAIL_CONFIG } from './client';
 import * as templates from './templates';
 
 // Email sending result type
@@ -15,30 +15,53 @@ async function sendEmail(
   html: string
 ): Promise<EmailResult> {
   try {
+    // 1. Try SMTP (Nodemailer)
+    const transporter = getNodemailerTransport();
+    if (transporter) {
+      try {
+        const info = await transporter.sendMail({
+          from: `"${EMAIL_CONFIG.fromName}" <${EMAIL_CONFIG.from}>`,
+          to,
+          subject,
+          html,
+          replyTo: EMAIL_CONFIG.replyTo,
+        });
+
+        console.log(`[EMAIL] Sent (SMTP) successfully to ${to}: ${subject} (ID: ${info.messageId})`);
+        return { success: true, messageId: info.messageId };
+      } catch (smtpError: any) {
+        console.error('[EMAIL] SMTP Send Error:', smtpError);
+        // Fallback to Resend or return error?
+        // Let's return error to avoid confused fallback if SMTP was intended but failed credentials
+        return { success: false, error: smtpError.message };
+      }
+    }
+
+    // 2. Try Resend
     const resend = getResendClient();
 
-    // If Resend is not configured, log warning and return success (dev mode)
-    if (!resend) {
-      console.warn(`[EMAIL] Would send to ${to}: ${subject}`);
-      console.warn('[EMAIL] Set RESEND_API_KEY to enable email sending');
-      return { success: true, messageId: 'dev-mode-no-send' };
+    if (resend) {
+      const result = await resend.emails.send({
+        from: EMAIL_CONFIG.from,
+        to,
+        subject,
+        html,
+        replyTo: EMAIL_CONFIG.replyTo,
+      });
+
+      if (result.error) {
+        console.error('[EMAIL] Failed to send email (Resend):', result.error);
+        return { success: false, error: result.error.message };
+      }
+
+      console.log(`[EMAIL] Sent (Resend) successfully to ${to}: ${subject} (ID: ${result.data?.id})`);
+      return { success: true, messageId: result.data?.id };
     }
 
-    const result = await resend.emails.send({
-      from: EMAIL_CONFIG.from,
-      to,
-      subject,
-      html,
-      replyTo: EMAIL_CONFIG.replyTo,
-    });
-
-    if (result.error) {
-      console.error('[EMAIL] Failed to send email:', result.error);
-      return { success: false, error: result.error.message };
-    }
-
-    console.log(`[EMAIL] Sent successfully to ${to}: ${subject} (ID: ${result.data?.id})`);
-    return { success: true, messageId: result.data?.id };
+    // 3. Dev Mode (No provider)
+    console.warn(`[EMAIL] Would send to ${to}: ${subject}`);
+    console.warn('[EMAIL] No email provider configured (SMTP or Resend). Set SMTP_* or RESEND_API_KEY.');
+    return { success: true, messageId: 'dev-mode-no-send' };
 
   } catch (error: any) {
     console.error('[EMAIL] Error sending email:', error);

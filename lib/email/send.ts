@@ -159,7 +159,8 @@ export async function sendArticleStatusUpdateEmail(
   oldStatus: string,
   newStatus: string,
   submissionId: string,
-  message?: string
+  message?: string,
+  doi?: string
 ): Promise<EmailResult> {
   const html = templates.articleStatusUpdateEmail(
     userName,
@@ -167,12 +168,35 @@ export async function sendArticleStatusUpdateEmail(
     oldStatus,
     newStatus,
     submissionId,
-    message
+    message,
+    doi
   );
 
   return sendEmail(
     userEmail,
     `Article Status Update: ${articleTitle}`,
+    html
+  );
+}
+
+// ... (existing code)
+
+// 12. Send review submission confirmation
+export async function sendReviewSubmissionConfirmationEmail(
+  reviewerEmail: string,
+  reviewerName: string,
+  articleTitle: string,
+  journalName: string
+): Promise<EmailResult> {
+  const html = templates.reviewSubmissionConfirmationEmail(
+    reviewerName,
+    articleTitle,
+    journalName
+  );
+
+  return sendEmail(
+    reviewerEmail,
+    `Review Received: ${articleTitle}`,
     html
   );
 }
@@ -249,6 +273,36 @@ export async function sendEmailVerificationConfirmationEmail(
   return sendEmail(
     userEmail,
     `Email verified successfully - ${EMAIL_CONFIG.appName}`,
+    html
+  );
+}
+
+// 11. Send reviewer assignment email
+export async function sendReviewerAssignmentEmail(
+  reviewerEmail: string,
+  reviewerName: string,
+  articleTitle: string,
+  journalName: string,
+  dueDate: Date,
+  reviewId: string
+): Promise<EmailResult> {
+  const formattedDueDate = dueDate.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+
+  const html = templates.reviewerAssignmentEmail(
+    reviewerName,
+    articleTitle,
+    journalName,
+    formattedDueDate,
+    reviewId
+  );
+
+  return sendEmail(
+    reviewerEmail,
+    `New Review Assignment - ${EMAIL_CONFIG.appName}`,
     html
   );
 }

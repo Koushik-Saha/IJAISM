@@ -1,52 +1,13 @@
 import Link from "next/link";
+import { prisma } from "@/lib/prisma";
 
-export default function BooksPage() {
-  const books = [
-    {
-      id: 1,
-      title: "Advanced Machine Learning: Theory and Practice",
-      authors: ["Dr. Sarah Johnson", "Dr. Michael Chen"],
-      year: 2024,
-      isbn: "978-1-234567-89-0",
-      pages: 456,
-      field: "Information Technology",
-      description: "A comprehensive guide to advanced machine learning techniques, covering deep learning, neural networks, and real-world applications in business and technology.",
-      price: "$89.99",
-    },
-    {
-      id: 2,
-      title: "Digital Transformation Strategies for Modern Business",
-      authors: ["Dr. Emily Rodriguez"],
-      year: 2024,
-      isbn: "978-1-234567-90-6",
-      pages: 328,
-      field: "Business Management",
-      description: "Explore proven strategies for successful digital transformation, including case studies from Fortune 500 companies and emerging startups.",
-      price: "$74.99",
-    },
-    {
-      id: 3,
-      title: "Cybersecurity Fundamentals and Best Practices",
-      authors: ["Dr. James Williams", "Dr. Lisa Anderson"],
-      year: 2023,
-      isbn: "978-1-234567-91-3",
-      pages: 512,
-      field: "Information Technology",
-      description: "Essential cybersecurity knowledge for IT professionals, covering threat detection, incident response, and security architecture design.",
-      price: "$95.99",
-    },
-    {
-      id: 4,
-      title: "Leadership in the Age of AI",
-      authors: ["Dr. Robert Brown"],
-      year: 2023,
-      isbn: "978-1-234567-92-0",
-      pages: 284,
-      field: "Business Management",
-      description: "Navigate the challenges and opportunities of leading organizations in an AI-driven world, with practical frameworks and insights.",
-      price: "$69.99",
-    },
-  ];
+export const dynamic = "force-dynamic";
+
+export default async function BooksPage() {
+  const books = await prisma.book.findMany({
+    orderBy: { createdAt: "desc" },
+    take: 20
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -97,60 +58,75 @@ export default function BooksPage() {
         {/* Books Grid */}
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-primary mb-6">Recent Publications</h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            {books.map((book) => (
-              <div
-                key={book.id}
-                className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 border border-gray-200"
-              >
-                <div className="flex gap-4 mb-4">
-                  {/* Book Cover Placeholder */}
-                  <div className="flex-shrink-0 w-32 h-48 bg-gradient-to-br from-primary to-blue-800 rounded flex items-center justify-center text-white font-bold text-center p-4">
-                    <div className="text-xs leading-tight">{book.title}</div>
-                  </div>
 
-                  {/* Book Details */}
-                  <div className="flex-1">
-                    <span className="inline-block bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium mb-2">
-                      {book.field}
-                    </span>
-                    <Link href={`/books/${book.id}`}>
-                      <h3 className="text-xl font-bold text-primary mb-2 hover:text-accent transition-colors cursor-pointer">
-                        {book.title}
-                      </h3>
-                    </Link>
-                    <p className="text-gray-700 font-medium mb-1">
-                      {book.authors.join(", ")}
-                    </p>
-                    <div className="text-sm text-gray-600 space-y-1">
-                      <p>ISBN: {book.isbn}</p>
-                      <p>{book.pages} pages • {book.year}</p>
-                      <p className="text-lg font-bold text-accent mt-2">{book.price}</p>
+          {books.length > 0 ? (
+            <div className="grid md:grid-cols-2 gap-6">
+              {books.map((book) => (
+                <div
+                  key={book.id}
+                  className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 border border-gray-200"
+                >
+                  <div className="flex gap-4 mb-4">
+                    {/* Book Cover Placeholder or Image */}
+                    {book.coverImageUrl ? (
+                      <img
+                        src={book.coverImageUrl}
+                        alt={book.title}
+                        className="flex-shrink-0 w-32 h-48 object-cover rounded shadow-sm"
+                      />
+                    ) : (
+                      <div className="flex-shrink-0 w-32 h-48 bg-gradient-to-br from-primary to-blue-800 rounded flex items-center justify-center text-white font-bold text-center p-4 shadow-sm">
+                        <div className="text-xs leading-tight">{book.title}</div>
+                      </div>
+                    )}
+
+                    {/* Book Details */}
+                    <div className="flex-1">
+                      <span className="inline-block bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium mb-2">
+                        {book.field}
+                      </span>
+                      <Link href={`/books/${book.id}`}>
+                        <h3 className="text-xl font-bold text-primary mb-2 hover:text-accent transition-colors cursor-pointer">
+                          {book.title}
+                        </h3>
+                      </Link>
+                      <p className="text-gray-700 font-medium mb-1">
+                        {book.authors.join(", ")}
+                      </p>
+                      <div className="text-sm text-gray-600 space-y-1">
+                        <p>ISBN: {book.isbn}</p>
+                        <p>{book.pages} pages • {book.year}</p>
+                        <p className="text-lg font-bold text-accent mt-2">{book.price}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <p className="text-gray-700 leading-relaxed mb-4">
-                  {book.description}
-                </p>
+                  <p className="text-gray-700 leading-relaxed mb-4 line-clamp-3">
+                    {book.description}
+                  </p>
 
-                <div className="flex gap-3">
-                  <Link
-                    href={`/books/${book.id}`}
-                    className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded font-medium transition-colors flex-1 text-center"
-                  >
-                    View Details
-                  </Link>
-                  <Link
-                    href={`/books/${book.id}`}
-                    className="border border-primary text-primary hover:bg-primary/10 px-6 py-2 rounded font-medium transition-colors text-center"
-                  >
-                    Preview
-                  </Link>
+                  <div className="flex gap-3">
+                    <Link
+                      href={`/books/${book.id}`}
+                      className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded font-medium transition-colors flex-1 text-center"
+                    >
+                      View Details
+                    </Link>
+                    <Link
+                      href={`/books/${book.id}`}
+                      className="border border-primary text-primary hover:bg-primary/10 px-6 py-2 rounded font-medium transition-colors text-center"
+                    >
+                      Preview
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-white rounded-lg shadow">
+              <p className="text-gray-500 text-lg">No books available at the moment.</p>
+            </div>
+          )}
         </div>
 
         {/* Categories Section */}

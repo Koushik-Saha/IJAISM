@@ -1,10 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { sendEmailVerificationEmail } from '@/lib/email/send';
+import rateLimit from '@/lib/rate-limit';
 import crypto from 'crypto';
+
+const limiter = rateLimit({
+  interval: 60 * 60 * 1000, // 1 hour
+  uniqueTokenPerInterval: 500,
+});
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = req.headers.get('x-forwarded-for') || 'anonymous';
+    try {
+      await limiter.check(NextResponse.next(), 3, ip); // 3 verification email attempts per hour per IP
+    } catch {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { message: 'Too many verification attempts. Please try again later.' },
+        },
+        { status: 429 }
+      );
+    }
+
     const body = await req.json();
     const { email } = body;
 

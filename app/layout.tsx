@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import CookieConsent from "@/components/CookieConsent";
+import { Analytics } from "@vercel/analytics/react";
 import PWARegister from "@/components/PWARegister";
 import { Toaster } from "sonner";
 
@@ -56,6 +58,8 @@ export default function RootLayout({
           {children}
         </main>
         <Footer />
+        <CookieConsent />
+        <Analytics />
         <PWARegister />
         <Toaster position="top-right" richColors closeButton />
       </body>

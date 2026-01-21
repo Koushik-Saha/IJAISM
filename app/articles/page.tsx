@@ -30,7 +30,7 @@ export default function ArticlesPage() {
 
   useEffect(() => {
     loadArticles();
-  }, [filters]);
+  }, [filters, pagination.page]);
 
   const loadArticles = async () => {
     setLoading(true);
@@ -38,16 +38,29 @@ export default function ArticlesPage() {
     if (filters.journal) params.set('journal', filters.journal);
     if (filters.year) params.set('year', filters.year);
     params.set('sortBy', filters.sortBy);
-    params.set('page', '1');
+    params.set('page', pagination.page.toString()); // Use current page state
 
     const data = await getArticles(params);
     setArticles(data.articles || []);
-    setPagination(data.pagination || { page: 1, limit: 10, total: 0, pages: 0 });
+    setPagination(prev => ({
+      ...prev,
+      ...data.pagination,
+      // Preserve current page if API returns it, otherwise fallback.
+      // But importantly, we update total and pages.
+    }));
     setLoading(false);
   };
 
   const handleFilterChange = (key: string, value: string) => {
     setFilters({ ...filters, [key]: value });
+    setPagination(prev => ({ ...prev, page: 1 })); // Reset to page 1 on filter change
+  };
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= pagination.pages) {
+      setPagination(prev => ({ ...prev, page: newPage }));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   if (loading) {
@@ -200,26 +213,40 @@ export default function ArticlesPage() {
                 <button
                   className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50"
                   disabled={pagination.page === 1}
+                  onClick={() => handlePageChange(pagination.page - 1)}
                 >
                   Previous
                 </button>
-                {Array.from({ length: Math.min(pagination.pages, 5) }, (_, i) => {
-                  const pageNum = i + 1;
-                  return (
+                {(() => {
+                  let startPage = Math.max(1, pagination.page - 2);
+                  let endPage = Math.min(pagination.pages, startPage + 4);
+
+                  if (endPage - startPage < 4) {
+                    startPage = Math.max(1, endPage - 4);
+                  }
+
+                  const pages = [];
+                  for (let p = startPage; p <= endPage; p++) {
+                    pages.push(p);
+                  }
+
+                  return pages.map((pageNum) => (
                     <button
                       key={pageNum}
+                      onClick={() => handlePageChange(pageNum)}
                       className={`px-4 py-2 border rounded ${pagination.page === pageNum
-                        ? 'bg-primary text-white border-primary'
-                        : 'border-gray-300 hover:bg-gray-100'
+                          ? "bg-primary text-white border-primary"
+                          : "border-gray-300 hover:bg-gray-100"
                         }`}
                     >
                       {pageNum}
                     </button>
-                  );
-                })}
+                  ));
+                })()}
                 <button
                   className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50"
                   disabled={pagination.page === pagination.pages}
+                  onClick={() => handlePageChange(pagination.page + 1)}
                 >
                   Next
                 </button>

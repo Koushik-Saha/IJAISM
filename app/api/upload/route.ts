@@ -37,19 +37,24 @@ export async function POST(req: NextRequest) {
     }
 
     // 3. Validate file
-    const maxSize = 20 * 1024 * 1024; // 20MB
+    const maxSize = 10 * 1024 * 1024; // 10MB Limit (Task 27)
     if (file.size > maxSize) {
       return NextResponse.json(
-        { error: 'File size exceeds 20MB limit' },
+        { error: 'File size exceeds 10MB limit' },
         { status: 400 }
       );
     }
 
-    const allowedTypes = [
-      'application/pdf',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    ];
+    const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+
+    // Strict PDF check for manuscripts (Task 27)
+    if (fileType === 'manuscript' && file.type !== 'application/pdf') {
+      return NextResponse.json(
+        { error: 'Manuscripts must be in PDF format' },
+        { status: 400 }
+      );
+    }
+
     if (!allowedTypes.includes(file.type)) {
       return NextResponse.json(
         { error: 'Invalid file type. Only PDF, DOC, and DOCX are allowed' },
@@ -62,17 +67,9 @@ export async function POST(req: NextRequest) {
     const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
     const fileName = `${fileType}/${timestamp}_${sanitizedName}`;
 
-    // Convert file to buffer
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
     try {
-      // Upload to Vercel Blob
-      const blob = await put(fileName, buffer, {
-        contentType: file.type,
-        access: 'public',
-        addRandomSuffix: false,
-      });
+      // Upload to Vercel Blob - File extends Blob so we can pass it directly
+      const blob = await put(fileName, file);
 
       logger.info('File uploaded successfully', {
         fileType,
@@ -88,7 +85,7 @@ export async function POST(req: NextRequest) {
         fileName: file.name,
         size: file.size,
         type: file.type,
-        blobId: blob.pathname,
+        blobId: blob.url,
       });
     } catch (blobError: any) {
       // If Vercel Blob is not configured, fall back to placeholder

@@ -1,0 +1,140 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - link "IJAISM Logo IJAISM Advanced Info Systems" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e6]:
+          - img "IJAISM Logo" [ref=e8]
+          - generic [ref=e9]:
+            - generic [ref=e10]: IJAISM
+            - generic [ref=e11]: Advanced Info Systems
+      - generic [ref=e13]:
+        - textbox "Search..." [ref=e14]
+        - button [active] [ref=e15] [cursor=pointer]:
+          - img [ref=e16]
+      - navigation [ref=e18]:
+        - link "Home" [ref=e19] [cursor=pointer]:
+          - /url: /
+        - link "About" [ref=e20] [cursor=pointer]:
+          - /url: /about
+        - link "Journals" [ref=e21] [cursor=pointer]:
+          - /url: /journals
+        - link "Dissertations" [ref=e22] [cursor=pointer]:
+          - /url: /dissertations
+        - link "Books" [ref=e23] [cursor=pointer]:
+          - /url: /books
+        - link "Conferences" [ref=e24] [cursor=pointer]:
+          - /url: /conferences
+        - link "Announcements" [ref=e25] [cursor=pointer]:
+          - /url: /announcements
+      - generic [ref=e26]:
+        - link "Membership" [ref=e27] [cursor=pointer]:
+          - /url: /membership
+        - link "Submit" [ref=e28] [cursor=pointer]:
+          - /url: /submit
+        - link "Sign In" [ref=e29] [cursor=pointer]:
+          - /url: /login
+        - link "JOIN IJAISM" [ref=e30] [cursor=pointer]:
+          - /url: /register
+  - main [ref=e31]:
+    - generic [ref=e34]:
+      - generic [ref=e35]:
+        - heading "Sign In to IJAISM" [level=2] [ref=e36]
+        - paragraph [ref=e37]: Access your academic account
+      - generic [ref=e38]:
+        - generic [ref=e39]:
+          - generic [ref=e40]: Email Address
+          - textbox "Email Address" [ref=e41]:
+            - /placeholder: your.email@university.edu
+            - text: reviewer1@c5k.com
+        - generic [ref=e42]:
+          - generic [ref=e43]: Password
+          - generic [ref=e44]:
+            - textbox "Password" [ref=e45]:
+              - /placeholder: ••••••••
+              - text: password123
+            - button [ref=e46] [cursor=pointer]:
+              - img [ref=e47]
+        - generic [ref=e50]:
+          - generic [ref=e51]:
+            - checkbox "Remember me" [ref=e52]
+            - generic [ref=e53]: Remember me
+          - link "Forgot password?" [ref=e55] [cursor=pointer]:
+            - /url: /forgot-password
+        - button "Sign In" [ref=e56] [cursor=pointer]
+      - paragraph [ref=e58]:
+        - text: Don't have an account?
+        - link "Create Account" [ref=e59] [cursor=pointer]:
+          - /url: /register
+  - contentinfo [ref=e60]:
+    - generic [ref=e61]:
+      - generic [ref=e62]:
+        - generic [ref=e63]:
+          - heading "ABOUT IJAISM" [level=3] [ref=e64]
+          - list [ref=e65]:
+            - listitem [ref=e66]:
+              - link "Mission & Vision" [ref=e67] [cursor=pointer]:
+                - /url: /contact
+            - listitem [ref=e68]:
+              - link "Contract" [ref=e69] [cursor=pointer]:
+                - /url: /contact
+            - listitem [ref=e70]:
+              - link "Privacy & Policy" [ref=e71] [cursor=pointer]:
+                - /url: /privacy
+            - listitem [ref=e72]:
+              - link "Terms & Condition" [ref=e73] [cursor=pointer]:
+                - /url: /terms
+        - generic [ref=e74]:
+          - heading "LOCATION" [level=3] [ref=e75]
+          - generic [ref=e76]:
+            - text: 761 State Highway 100
+            - text: Port Isabel, TX 78578
+            - text: USA
+        - generic [ref=e77]:
+          - heading "GET INVOLVED" [level=3] [ref=e78]
+          - list [ref=e79]:
+            - listitem [ref=e80]:
+              - link "Conference" [ref=e81] [cursor=pointer]:
+                - /url: /conferences
+            - listitem [ref=e82]:
+              - link "Societies" [ref=e83] [cursor=pointer]:
+                - /url: /societies
+            - listitem [ref=e84]:
+              - link "Technical Career" [ref=e85] [cursor=pointer]:
+                - /url: /careers
+            - listitem [ref=e86]:
+              - link "Scholarship" [ref=e87] [cursor=pointer]:
+                - /url: /scholarship
+        - generic [ref=e88]:
+          - heading "RESOURCES" [level=3] [ref=e89]
+          - list [ref=e90]:
+            - listitem [ref=e91]:
+              - link "Author Guideline" [ref=e92] [cursor=pointer]:
+                - /url: /author-guidelines
+            - listitem [ref=e93]:
+              - link "Paper Format Download" [ref=e94] [cursor=pointer]:
+                - /url: /paper-format
+            - listitem [ref=e95]:
+              - link "Submit Article" [ref=e96] [cursor=pointer]:
+                - /url: /submit
+            - listitem [ref=e97]:
+              - link "Book Publishing" [ref=e98] [cursor=pointer]:
+                - /url: /book-publishing
+            - listitem [ref=e99]:
+              - link "Thesis/Dissertation" [ref=e100] [cursor=pointer]:
+                - /url: /dissertations
+      - paragraph [ref=e102]: © 2026 IJAISM - International Journal of Advanced Information Systems and Management. All rights reserved.
+  - generic [ref=e104]:
+    - paragraph [ref=e106]:
+      - text: We use cookies to enhance your experience. By continuing to visit this site you agree to our use of cookies.
+      - link "Learn more" [ref=e107] [cursor=pointer]:
+        - /url: /privacy
+    - button "Accept All" [ref=e108] [cursor=pointer]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e114] [cursor=pointer]:
+    - img [ref=e115]
+  - alert [ref=e118]
+```

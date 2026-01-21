@@ -16,11 +16,11 @@ export async function POST(req: NextRequest) {
       await limiter.check(NextResponse.next(), 5, ip); // 5 requests per 15 minutes
     } catch {
       return NextResponse.json(
-        {
-          success: false,
-          error: { message: 'Too many requests. Please try again later.' },
-        },
-        { status: 429 }
+          {
+            success: false,
+            error: { message: 'Too many requests. Please try again later.' },
+          },
+          { status: 429 }
       );
     }
 
@@ -30,14 +30,14 @@ export async function POST(req: NextRequest) {
     const validation = loginSchema.safeParse(body);
     if (!validation.success) {
       return NextResponse.json(
-        {
-          success: false,
-          error: {
-            message: 'Validation failed',
-            details: validation.error.flatten().fieldErrors
+          {
+            success: false,
+            error: {
+              message: 'Validation failed',
+              details: validation.error.flatten().fieldErrors
+            },
           },
-        },
-        { status: 400 }
+          { status: 400 }
       );
     }
 
@@ -60,22 +60,22 @@ export async function POST(req: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        {
-          success: false,
-          error: { message: 'Invalid email or password' },
-        },
-        { status: 401 }
+          {
+            success: false,
+            error: { message: 'Invalid email or password' },
+          },
+          { status: 401 }
       );
     }
 
     // Check if account is active
     if (!user.isActive) {
       return NextResponse.json(
-        {
-          success: false,
-          error: { message: 'Your account has been deactivated' },
-        },
-        { status: 403 }
+          {
+            success: false,
+            error: { message: 'Your account has been deactivated' },
+          },
+          { status: 403 }
       );
     }
 
@@ -84,25 +84,25 @@ export async function POST(req: NextRequest) {
 
     if (!isPasswordValid) {
       return NextResponse.json(
-        {
-          success: false,
-          error: { message: 'Invalid email or password' },
-        },
-        { status: 401 }
+          {
+            success: false,
+            error: { message: 'Invalid email or password' },
+          },
+          { status: 401 }
       );
     }
 
     // Check if email is verified
     if (!user.isEmailVerified) {
       return NextResponse.json(
-        {
-          success: false,
-          error: {
-            message: 'Please verify your email address before logging in.',
-            code: 'EMAIL_NOT_VERIFIED',
+          {
+            success: false,
+            error: {
+              message: 'Please verify your email address before logging in.',
+              code: 'EMAIL_NOT_VERIFIED',
+            },
           },
-        },
-        { status: 403 }
+          { status: 403 }
       );
     }
 
@@ -121,31 +121,31 @@ export async function POST(req: NextRequest) {
 
     // Return user data and token
     return NextResponse.json(
-      {
-        success: true,
-        data: {
-          user: {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            university: user.university,
-            role: user.role,
-            isEmailVerified: user.isEmailVerified,
+        {
+          success: true,
+          data: {
+            user: {
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              university: user.university,
+              role: user.role,
+              isEmailVerified: user.isEmailVerified,
+            },
+            accessToken,
           },
-          accessToken,
+          message: 'Login successful',
         },
-        message: 'Login successful',
-      },
-      { status: 200 }
+        { status: 200 }
     );
   } catch (error) {
     console.error('Login error:', error);
     return NextResponse.json(
-      {
-        success: false,
-        error: { message: 'An error occurred during login' },
-      },
-      { status: 500 }
+        {
+          success: false,
+          error: { message: 'An error occurred during login' },
+        },
+        { status: 500 }
     );
   }
 }

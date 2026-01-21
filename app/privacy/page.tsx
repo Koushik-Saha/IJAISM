@@ -1,63 +1,60 @@
-import Link from "next/link";
+import React from 'react';
 
-export default function PrivacyPage() {
+export default function PrivacyPolicy() {
     return (
         <div className="min-h-screen bg-gray-50 py-12">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="bg-white rounded-lg shadow-md p-8 md:p-12">
-                    <h1 className="text-4xl font-bold text-primary mb-8">Privacy Policy</h1>
+                <div className="bg-white rounded-lg shadow-md p-8">
+                    <h1 className="text-3xl font-bold text-gray-900 mb-6">Privacy Policy</h1>
+                    <p className="text-gray-600 mb-4">Last updated: {new Date().toLocaleDateString()}</p>
 
-                    <div className="prose prose-blue max-w-none text-gray-700">
-                        <p className="lead">
-                            Last updated: {new Date().toLocaleDateString()}
+                    <div className="prose prose-blue max-w-none">
+                        <p>
+                            At IJAISM ("we", "us", "our"), we are committed to protecting your personal information and your right to privacy.
+                            This Privacy Policy explains how we collect, use, disclosure, and safeguard your information when you visit our website.
                         </p>
 
                         <h3>1. Information We Collect</h3>
                         <p>
-                            We collect information you provide directly to us, such as when you create an account,
-                            submit a manuscript, or communicate with us. This may include your name, email address,
-                            academic affiliation, and research interests.
+                            We collect personal information that you voluntarily provide to us when you register on the website,
+                            submit articles, or communicate with us. This includes:
                         </p>
+                        <ul>
+                            <li>Name and Contact Data (Email, phone number)</li>
+                            <li>Credentials (Passwords, security information)</li>
+                            <li>Professional Data (Affiliation, University, Orcid ID)</li>
+                        </ul>
 
                         <h3>2. How We Use Your Information</h3>
+                        <p>We use your personal information for these purposes:</p>
+                        <ul>
+                            <li>To facilitate account creation and logon process.</li>
+                            <li>To manage accurate peer review and publication records.</li>
+                            <li>To send administrative information to you.</li>
+                            <li>To protect our sites.</li>
+                        </ul>
+
+                        <h3>3. Sharing Your Information</h3>
                         <p>
-                            We use the information we collect to operate and improve our platform, facilitate the
-                            peer review process, communicate with you, and personalize your experience.
+                            We only share information with your consent, to comply with laws, to provide you with services,
+                            to protect your rights, or to fulfill business obligations.
                         </p>
 
-                        <h3>3. Data Sharing</h3>
+                        <h3>4. Your Privacy Rights (GDPR)</h3>
                         <p>
-                            We do not sell your personal information. We may share your information with trusted
-                            third-party service providers (such as Stripe for payments) who assist us in operating
-                            our platform.
+                            If you are a resident of the European Economic Area (EEA), you have certain data protection rights:
                         </p>
+                        <ul>
+                            <li><strong>Right to Access:</strong> You can request copies of your personal data.</li>
+                            <li><strong>Right to Rectification:</strong> You can request correction of inaccurate data.</li>
+                            <li><strong>Right to Erasure:</strong> You can request that we delete your personal data.</li>
+                            <li><strong>Right to Restrict Processing:</strong> You can request restriction of processing your data.</li>
+                            <li><strong>Right to Data Portability:</strong> You can request transfer of your data.</li>
+                        </ul>
 
-                        <h3>4. Cookies and Tracking</h3>
+                        <h3>5. Contact Us</h3>
                         <p>
-                            We use cookies and similar tracking technologies to track the activity on our service
-                            and hold certain information. You can instruct your browser to refuse all cookies or
-                            to indicate when a cookie is being sent.
-                        </p>
-
-                        <h3>5. Data Security</h3>
-                        <p>
-                            We implement appropriate technical and organizational measures to protect your personal
-                            data against unauthorized access, alteration, disclosure, or destruction.
-                        </p>
-
-                        <h3>6. Your Rights</h3>
-                        <p>
-                            You have the right to access, update, or delete your personal information. You can
-                            manage your account settings directly through your dashboard.
-                        </p>
-
-                        <h3>7. Contact Us</h3>
-                        <p>
-                            If you have any questions about this Privacy Policy, please contact us at{' '}
-                            <Link href="/contact" className="text-primary hover:underline">
-                                privacy@ijaism.org
-                            </Link>
-                            .
+                            If you have questions or comments about this policy, you may email us at support@ijaism.org.
                         </p>
                     </div>
                 </div>

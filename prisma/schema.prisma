@@ -213,19 +213,31 @@ model Dissertation {
 model Conference {
   id                 String    @id @default(uuid())
   title              String
+  acronym            String?
   description        String?
+  fullDescription    String?   // For the detailed about section
   startDate          DateTime
   endDate            DateTime
   venue              String?
   city               String?
   country            String?
+  location           String?   // e.g. "San Francisco, USA" displayed in list
   websiteUrl         String?
   registrationUrl    String?
   submissionDeadline DateTime?
   notificationDate   DateTime?
-  conferenceType     String? // virtual, in_person, hybrid
+  conferenceType     String?   // virtual, in_person, hybrid
   status             String    @default("upcoming") // upcoming, ongoing, completed, cancelled
   bannerImageUrl     String?
+  
+  topics             String[]
+  keynotes           Json?     // [{ name: "...", title: "...", topic: "..." }]
+  schedule           Json?     // [{ day: "...", events: [...] }]
+  registrationFees   Json?     // { earlyBird: {...}, regular: {...} }
+  included           String[]  // Strings of what's included
+  importantDates     Json?     // [{ event: "...", date: "..." }]
+  venueDetails       Json?     // { name: "...", address: "...", hotels: [...] }
+
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
   deletedAt          DateTime?
@@ -286,6 +298,7 @@ model Announcement {
   category     String? // news, update, event
   priority     Int       @default(0)
   isFeatured   Boolean   @default(false)
+  author       String?   @default("IJAISM Admin")
   publishedAt  DateTime?
   expiresAt    DateTime?
   createdAt    DateTime  @default(now())
@@ -313,4 +326,34 @@ model Notification {
   @@index([userId])
   @@index([isRead])
   @@index([createdAt])
+}
+
+// Books
+model Book {
+  id              String    @id @default(uuid())
+  title           String
+  authors         String[]
+  year            Int
+  isbn            String    @unique
+  pages           Int
+  field           String
+  description     String
+  fullDescription String
+  price           String    // Storing as string to handle currency symbols/formatting easily as per mock
+  publisher       String
+  language        String
+  edition         String
+  format          String
+  coverImageUrl   String?
+  
+  tableOfContents Json?     // [{ chapter: 1, title: "...", pages: "..." }]
+  previewPages    Json?     // [{ pageNumber: 1, content: "..." }]
+  reviews         Json?     // [{ author: "...", rating: 5, text: "..." }]
+  relatedTopics   String[]
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([isbn])
+  @@index([field])
 }

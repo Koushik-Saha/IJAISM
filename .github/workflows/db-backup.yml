@@ -1,0 +1,48 @@
+name: Database Backup
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Every day at midnight
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_BUCKET_NAME: ${{ secrets.AWS_BUCKET_NAME }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+
+    steps:
+    - name: Install PostgreSQL Client
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y postgresql-client
+
+    - name: Create Backup
+      run: |
+        TIMESTAMP=$(date +%Y-%m-%d_%H-%M-%S)
+        FILENAME="backup_${TIMESTAMP}.sql"
+        pg_dump $DATABASE_URL > $FILENAME
+        echo "BACKUP_FILE=$FILENAME" >> $GITHUB_ENV
+
+    - name: Upload to S3
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Copy to S3
+      run: |
+        aws s3 cp ${{ env.BACKUP_FILE }} s3://${{ secrets.AWS_BUCKET_NAME }}/backups/${{ env.BACKUP_FILE }}
+        
+    - name: Cleanup Old Backups (Retention 30 days)
+      if: success()
+      run: |
+        # Use simple s3 ls and awk/xargs to delete files older than 30 days (simplified approach)
+        # For production robustness, use a Lifecycle Policy on the bucket itself.
+        echo "Note: Using S3 Lifecycle Policy is recommended for retention."

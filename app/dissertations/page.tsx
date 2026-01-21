@@ -1,62 +1,19 @@
 import Link from "next/link";
+import { prisma } from "@/lib/prisma";
 
-export default function DissertationsPage() {
-  const dissertations = [
-    {
-      id: 1,
-      title: "Machine Learning Applications in Financial Risk Assessment",
-      author: "Dr. Sarah Johnson",
-      university: "Stanford University",
-      year: 2024,
-      field: "Information Technology",
-      abstract: "This dissertation explores the application of machine learning algorithms in predicting and managing financial risks in modern banking systems.",
+export const dynamic = "force-dynamic";
+
+export default async function DissertationsPage() {
+  const dissertations = await prisma.dissertation.findMany({
+    where: { status: "published" },
+    include: {
+      author: {
+        select: { name: true }
+      }
     },
-    {
-      id: 2,
-      title: "Blockchain Technology and Supply Chain Management",
-      author: "Dr. Michael Chen",
-      university: "MIT",
-      year: 2024,
-      field: "Business Management",
-      abstract: "An in-depth analysis of how blockchain technology can revolutionize supply chain transparency and efficiency.",
-    },
-    {
-      id: 3,
-      title: "Artificial Intelligence in Healthcare Decision Making",
-      author: "Dr. Emily Rodriguez",
-      university: "Harvard University",
-      year: 2023,
-      field: "Information Technology",
-      abstract: "Examining the role of AI systems in supporting clinical decision-making processes and patient outcomes.",
-    },
-    {
-      id: 4,
-      title: "Sustainable Business Practices in the Digital Age",
-      author: "Dr. James Williams",
-      university: "Oxford University",
-      year: 2023,
-      field: "Business Management",
-      abstract: "Investigating how digital transformation enables and promotes sustainable business practices globally.",
-    },
-    {
-      id: 5,
-      title: "Cybersecurity Frameworks for IoT Ecosystems",
-      author: "Dr. Lisa Anderson",
-      university: "Carnegie Mellon University",
-      year: 2023,
-      field: "Information Technology",
-      abstract: "Developing comprehensive security frameworks for protecting Internet of Things devices and networks.",
-    },
-    {
-      id: 6,
-      title: "Leadership Strategies in Remote Work Environments",
-      author: "Dr. Robert Brown",
-      university: "Cambridge University",
-      year: 2023,
-      field: "Business Management",
-      abstract: "Analyzing effective leadership approaches in the era of distributed and remote workforces.",
-    },
-  ];
+    orderBy: { createdAt: "desc" },
+    take: 20
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -97,7 +54,7 @@ export default function DissertationsPage() {
               </p>
             </div>
             <Link
-              href="/submit"
+              href="/dashboard/submit-dissertation"
               className="bg-white text-accent hover:bg-gray-100 px-8 py-3 rounded-lg font-bold transition-colors whitespace-nowrap"
             >
               Submit Now
@@ -109,51 +66,67 @@ export default function DissertationsPage() {
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-primary mb-6">Recent Dissertations</h2>
           <div className="grid gap-6">
-            {dissertations.map((dissertation) => (
-              <div
-                key={dissertation.id}
-                className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 border border-gray-200"
-              >
-                <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-4">
-                  <div className="flex-1">
-                    <Link href={`/dissertations/${dissertation.id}`}>
-                      <h3 className="text-xl font-bold text-primary mb-2 hover:text-accent transition-colors cursor-pointer">
-                        {dissertation.title}
-                      </h3>
-                    </Link>
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      <span className="inline-block bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium">
-                        {dissertation.field}
-                      </span>
-                      <span className="inline-block bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
-                        {dissertation.year}
-                      </span>
+            {dissertations.length > 0 ? (
+              dissertations.map((dissertation) => (
+                <div
+                  key={dissertation.id}
+                  className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 border border-gray-200"
+                >
+                  <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-4">
+                    <div className="flex-1">
+                      {/* We don't have a specific dissertation detail page yet, usually it's just a PDF download or a simple view. 
+                           For now, let's link to the same page or a detail page if it existed. 
+                           Assuming /dissertations/[id] exists or should exist. If not, I'll link to # for now.
+                        */}
+                      <Link href={`/dissertations/${dissertation.id}`}>
+                        <h3 className="text-xl font-bold text-primary mb-2 hover:text-accent transition-colors cursor-pointer">
+                          {dissertation.title}
+                        </h3>
+                      </Link>
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        <span className="inline-block bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium">
+                          {dissertation.degreeType === 'phd' ? 'PhD' : 'Masters'}
+                        </span>
+                        {dissertation.defenseDate && (
+                          <span className="inline-block bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
+                            {new Date(dissertation.defenseDate).getFullYear()}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
+                  <div className="mb-4">
+                    <p className="text-gray-800 font-semibold">{dissertation.author.name}</p>
+                    <p className="text-gray-600">{dissertation.university}</p>
+                  </div>
+                  <p className="text-gray-700 leading-relaxed mb-4 line-clamp-3">
+                    {dissertation.abstract}
+                  </p>
+                  <div className="flex gap-3">
+                    <Link
+                      href={`/dissertations/${dissertation.id}`}
+                      className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded font-medium transition-colors"
+                    >
+                      View Full Dissertation
+                    </Link>
+                    {dissertation.pdfUrl && (
+                      <a
+                        href={dissertation.pdfUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="border border-primary text-primary hover:bg-primary/10 px-6 py-2 rounded font-medium transition-colors"
+                      >
+                        Download PDF
+                      </a>
+                    )}
+                  </div>
                 </div>
-                <div className="mb-4">
-                  <p className="text-gray-800 font-semibold">{dissertation.author}</p>
-                  <p className="text-gray-600">{dissertation.university}</p>
-                </div>
-                <p className="text-gray-700 leading-relaxed mb-4">
-                  {dissertation.abstract}
-                </p>
-                <div className="flex gap-3">
-                  <Link
-                    href={`/dissertations/${dissertation.id}`}
-                    className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded font-medium transition-colors"
-                  >
-                    View Full Dissertation
-                  </Link>
-                  <Link
-                    href={`/dissertations/${dissertation.id}`}
-                    className="border border-primary text-primary hover:bg-primary/10 px-6 py-2 rounded font-medium transition-colors"
-                  >
-                    Download PDF
-                  </Link>
-                </div>
+              ))
+            ) : (
+              <div className="text-center py-12 bg-white rounded-lg shadow">
+                <p className="text-gray-500 text-lg">No published dissertations available at the moment.</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
 

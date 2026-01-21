@@ -18,6 +18,7 @@ const config: Config = {
         '^components/(.*)$': '<rootDir>/components/$1',
     },
     moduleDirectories: ['node_modules', '<rootDir>'],
+    testPathIgnorePatterns: ['/node_modules/', '/e2e/'],
 };
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async

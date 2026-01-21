@@ -52,8 +52,11 @@ export default function AdminArticleDetailPage() {
   const fetchArticle = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/admin/articles?id=${id}`, {
-        headers: { 'Authorization': `Bearer ${token}` },
+      const response = await fetch(`/api/admin/articles?id=${id}&t=${Date.now()}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Cache-Control': 'no-cache'
+        },
       });
 
       if (!response.ok) throw new Error('Failed to fetch article');

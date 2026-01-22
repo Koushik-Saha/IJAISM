@@ -1,5 +1,5 @@
 {
-  "name": "c5k-platform",
+  "name": "ijaism-platform",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -7,9 +7,9 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "seed:c5k": "ts-node scripts/seed-c5k.ts --file",
-    "seed:c5k:dry": "ts-node scripts/seed-c5k.ts --file",
-    "seed:c5k:clear": "ts-node scripts/seed-c5k.ts --clear-first --file",
+    "seed:ijaism": "ts-node scripts/seed-c5k.ts --file",
+    "seed:ijaism:dry": "ts-node scripts/seed-c5k.ts --file",
+    "seed:ijaism:clear": "ts-node scripts/seed-c5k.ts --clear-first --file",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",

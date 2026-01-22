@@ -19,7 +19,7 @@ test.describe('Authentication Flow', () => {
 
     test('should allow a seeded user to login', async ({ page }) => {
         await page.goto('/login');
-        await page.fill('input[name="email"]', 'demo.author@c5k.com');
+        await page.fill('input[name="email"]', 'demo.author@ijaism.com');
         await page.fill('input[name="password"]', 'password123');
         await page.click('button[type="submit"]');
 

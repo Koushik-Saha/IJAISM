@@ -1,5 +1,5 @@
 /**
- * Structured Logger for C5K Platform
+ * Structured Logger for IJAISM Platform
  * 
  * Provides consistent JSON-formatted logging for observability.
  * Use this instead of console.log/error/warn.

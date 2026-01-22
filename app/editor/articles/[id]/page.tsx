@@ -16,6 +16,10 @@ interface Article {
     email: string;
     university: string;
   };
+  journalId: string;
+  issueId?: string;
+  volume?: number;
+  issue?: number;
   journal: {
     fullName: string;
     code: string;
@@ -49,12 +53,89 @@ export default function AdminArticleDetailPage() {
   const [decisionComments, setDecisionComments] = useState('');
   const [isSubmittingDecision, setIsSubmittingDecision] = useState(false);
 
+  // Issue Assignment State
+  const [availableIssues, setAvailableIssues] = useState<any[]>([]);
+  const [selectedIssue, setSelectedIssue] = useState<string>('');
+  const [isAssigningIssue, setIsAssigningIssue] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
   useEffect(() => {
     if (id) {
       fetchArticle();
       fetchReviewers();
+      fetchCurrentUser();
     }
   }, [id]);
+
+  const fetchCurrentUser = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/auth/me', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setCurrentUser(data.user);
+      }
+    } catch (e) {
+      console.error("Failed to fetch user", e);
+    }
+  };
+
+  useEffect(() => {
+    if (article?.journalId) {
+      fetchIssues();
+    }
+  }, [article?.journalId]);
+
+  const fetchIssues = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const journalId = article?.journalId;
+      if (!journalId) return;
+
+      const response = await fetch(`/api/editor/journals/${journalId}/issues`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setAvailableIssues(data.issues || []);
+        if (article?.issueId) {
+          setSelectedIssue(article.issueId);
+        }
+      }
+    } catch (e) {
+      console.error("Failed to fetch issues", e);
+    }
+  };
+
+  const handleAssignIssue = async () => {
+    if (!selectedIssue) {
+      toast.error("Please select an issue");
+      return;
+    }
+    setIsAssigningIssue(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/editor/articles/${id}/assign-issue`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ issueId: selectedIssue })
+      });
+
+      if (!response.ok) throw new Error("Failed to assign issue");
+
+      toast.success("Article assigned to issue successfully");
+      fetchArticle();
+    } catch (err) {
+      toast.error("Failed to assign issue");
+    } finally {
+      setIsAssigningIssue(false);
+    }
+  };
 
   const fetchArticle = async () => {
     try {
@@ -355,6 +436,54 @@ export default function AdminArticleDetailPage() {
 
           {/* Sidebar */}
           <div className="lg:col-span-1 space-y-6">
+
+            {/* Assign to Issue Card */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h3 className="font-bold text-gray-800 mb-4 text-lg">Assign to Issue</h3>
+
+              {availableIssues.length > 0 ? (
+                <div className="space-y-3">
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-gray-700">Select Issue</label>
+                    <select
+                      className="w-full border rounded-md p-2 text-sm disabled:bg-gray-100 disabled:text-gray-500"
+                      value={selectedIssue}
+                      onChange={(e) => setSelectedIssue(e.target.value)}
+                      disabled={(article as any).issueId && currentUser?.role !== 'super_admin'}
+                    >
+                      <option value="">-- Unassigned --</option>
+                      {availableIssues.map(issue => (
+                        <option key={issue.id} value={issue.id}>
+                          Vol {issue.volume}, Issue {issue.issue} ({issue.year}) {issue.isSpecial ? '(Special)' : ''}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {(article as any).issueId && currentUser?.role !== 'super_admin' ? (
+                    <div className="text-xs text-orange-600 bg-orange-50 p-2 rounded border border-orange-100 italic flex items-center gap-2">
+                      <span>🔒</span> Assignment locked. Only Super Admin can change this.
+                    </div>
+                  ) : (
+                    <button
+                      onClick={handleAssignIssue}
+                      disabled={isAssigningIssue || !selectedIssue}
+                      className="w-full bg-[#006d77] text-white py-2 rounded-lg font-semibold hover:bg-[#00555d] disabled:opacity-50 text-sm"
+                    >
+                      {isAssigningIssue ? 'Saving...' : 'Save Assignment'}
+                    </button>
+                  )}
+
+                  {(article as any).issueId && (
+                    <p className="text-xs text-green-600 font-medium text-center">
+                      Currently assigned to Vol {(article as any).volume}, Issue {(article as any).issue}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500 italic">No issues created for this journal yet.</p>
+              )}
+            </div>
 
             {/* Assign Reviewers */}
             {article.status === 'resubmitted' ? (

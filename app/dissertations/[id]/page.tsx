@@ -14,7 +14,7 @@ export default async function DissertationDetailPage({ params }: { params: Promi
       author: {
         select: {
           name: true,
-          university: true, // Assuming user model has university relevant to author if needed, or stick to dissertation.university
+          university: true,
         }
       }
     }
@@ -35,7 +35,7 @@ export default async function DissertationDetailPage({ params }: { params: Promi
           <div className="flex items-center text-sm text-gray-600">
             <Link href="/" className="hover:text-primary">Home</Link>
             <span className="mx-2">/</span>
-            <Link href="/dissertations" className="hover:text-primary">Dissertations</Link>
+            <Link href="/dissertations" className="hover:text-primary">Dissertation/Thesis</Link>
             <span className="mx-2">/</span>
             <span className="text-gray-900 truncate">{dissertation.title}</span>
           </div>
@@ -65,12 +65,25 @@ export default async function DissertationDetailPage({ params }: { params: Promi
                 </h1>
               </div>
 
+              {/* Cover Image - Added */}
+              {dissertation.coverImageUrl && (
+                <div className="mb-8 p-4 bg-gray-50 rounded-lg flex justify-center">
+                  <img
+                    src={dissertation.coverImageUrl}
+                    alt={dissertation.title}
+                    className="max-h-[400px] w-auto object-contain rounded shadow-sm"
+                  />
+                </div>
+              )}
+
               {/* Author Info */}
               <div className="mb-6 pb-6 border-b border-gray-200">
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm text-gray-600 mb-1">Author</p>
-                    <p className="text-lg font-bold text-gray-800">{dissertation.author.name}</p>
+                    <p className="text-lg font-bold text-gray-800">
+                      {dissertation.authorName || dissertation.author.name}
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600 mb-1">Supervisor</p>
@@ -118,7 +131,7 @@ export default async function DissertationDetailPage({ params }: { params: Promi
               <div className="bg-blue-50 rounded-lg p-6">
                 <h3 className="font-bold text-gray-800 mb-2">How to Cite</h3>
                 <p className="text-sm text-gray-700 font-mono">
-                  {dissertation.author.name} ({dissertation.defenseDate ? new Date(dissertation.defenseDate).getFullYear() : new Date().getFullYear()}). <em>{dissertation.title}</em>.
+                  {dissertation.authorName || dissertation.author.name} ({dissertation.defenseDate ? new Date(dissertation.defenseDate).getFullYear() : new Date().getFullYear()}). <em>{dissertation.title}</em>.
                   {dissertation.degreeType === 'phd' ? ' Doctoral dissertation' : ' Master\'s thesis'}, {dissertation.university}{dissertation.department ? `, ${dissertation.department}` : ''}.
                 </p>
               </div>

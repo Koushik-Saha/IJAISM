@@ -39,16 +39,30 @@ export default async function ConferencesPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Info Section */}
         <div className="bg-white rounded-lg shadow-md p-8 mb-8">
-          <h2 className="text-3xl font-bold text-primary mb-4">IJAISM Conferences</h2>
+          <h2 className="text-3xl font-bold text-primary mb-4">C5K Conferences</h2>
           <p className="text-lg text-gray-700 mb-4 leading-relaxed">
-            IJAISM organizes world-class academic conferences that bring together researchers,
-            practitioners, and industry leaders from around the globe. Our conferences provide
-            platforms for knowledge exchange, networking, and collaboration across disciplines.
+            Welcome to the C5K Conference Hub! Our conferences bring together thought leaders, researchers,
+            and industry experts to foster the exchange of innovative ideas and cutting-edge research.
+            Join us to gain insights, build professional networks, and advance in your field.
           </p>
-          <p className="text-lg text-gray-700 leading-relaxed">
-            We offer both in-person and virtual participation options to ensure accessibility
-            for the global research community.
-          </p>
+          <div className="grid md:grid-cols-2 gap-8 mt-6">
+            <div>
+              <h3 className="text-xl font-bold text-accent mb-2">Global Networking</h3>
+              <p className="text-gray-600">Engage with professionals from around the world, collaborate with experts, and build long-term partnerships.</p>
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-accent mb-2">Latest Research</h3>
+              <p className="text-gray-600">Discover pioneering research and innovative solutions in diverse disciplines including law, science, and technology.</p>
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-accent mb-2">Expert Panels & Workshops</h3>
+              <p className="text-gray-600">Gain practical knowledge through expert-led discussions and interactive workshops.</p>
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-accent mb-2">Publication Opportunities</h3>
+              <p className="text-gray-600">Selected conference papers will be featured in C5K’s internationally recognized journals.</p>
+            </div>
+          </div>
         </div>
 
         {/* Submit Paper CTA */}

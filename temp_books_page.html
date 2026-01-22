@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!--<img src="https://c5k.com/public/backend/logo/logo.png" alt="logo"> -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" sizes="32x32" type="image/png" href="https://www.c5k.com/public/backend/logo/logo.png">
+
+    <!-- SEO Metadata -->
+    <meta name="author" content="C5K Academic Research">
+    <meta name="keywords"
+        content="academic research, scholarly publishing, C5K, journal, booka, AI research, mental health studies">
+    <meta name="description"
+        content="C5K Academic Research Publishing is a leading global publication dedicated to in-depth quantitative and qualitative analysis, industry insights, and professional resources to help institutions and researchers excel in academic innovation.">
+
+    <!-- Social Media Meta (Open Graph for Facebook & Twitter) -->
+    <meta property="og:title" content="C5K - Leading Academic Research Publication">
+    <meta property="og:description"
+        content="C5K provides scholarly publishing, AI-driven research, and mental health insights to push the boundaries of academic excellence.">
+    <meta property="og:image" content="https://www.c5k.com/public/backend/logo/logo.png">
+    <meta property="og:url" content="https://www.c5k.com">
+
+
+    <!-- Dynamic Laravel Page Title -->
+    <title>C5K - Leading Academic Research Publication </title>
+
+    <!-- Structured Data for SEO (Google Schema Markup) -->
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "C5K Academic Research Publishing",
+            "url": "https://www.c5k.com",
+            "logo": "https://www.c5k.com/logo.png",
+            "description": "C5K - A leading global publication in academic research, offering AI-driven solutions for mental health, scholarly insights, and industry-leading innovations.",
+            "sameAs": [
+
+            ]
+        }
+    </script>
+
+    <!-- Styles & Scripts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
+
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="https://c5k.com/public/frontend/css/custom.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+    <style>
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        p,
+        a,
+        span,
+        i,
+        strong,
+        button,
+        ul,
+        li,
+        ol {
+            font-family: "Inter", sans-serif;
+        }
+        
+        .hight-bg{
+            height: 450px;
+        }
+    </style>
+
+
+</head>
+
+
+<style>
+    * {
+        font-family: 'Georgia', serif;
+    }
+
+    .logo_area a img {
+        height: 60px;
+        margin-left: 20px
+    }
+
+
+    .volume-item img {
+        width: 200px;
+        height: auto;
+        object-fit: cover;
+        border-radius: 4px;
+        margin-right: 1rem;
+    }
+
+    .journal_issue_menu .journal_parent .journal_parent_core {
+        display: inline-block;
+        margin-right: 45px;
+        position: relative;
+        cursor: default;
+        /* cursor: pointer; */
+    }
+</style>
+
+<body>
+
+    <header class="sticky top-0 z-40 shadow-lg shadow-white-500/50">
+
+        <nav class=" bg-gray-900 text-white p-3">
+            <div class="max-w-7xl mx-auto flex justify-between items-center">
+                <!-- Left: Show C5K.com Always, Hide Other Links on Mobile -->
+                <div class="flex space-x-4">
+                    <a href="#" class="flex text-xs items-center hover:text-gray-400">
+                        <span class="mr-1 "></span>C5K.com
+                    </a>
+                    <a href="#" class="hover:text-gray-400 hidden md:inline text-xs">C5K.co</a>
+                    <a href="#" class="hover:text-gray-400 hidden md:inline text-xs">C5K.ec</a>
+                    <a href="#" class="hover:text-gray-400 hidden md:inline text-xs">C5K.nl</a>
+                    <a href="#" class="hover:text-gray-400 hidden md:inline text-xs">More Sites</a>
+                </div>
+
+                <!-- Right: Show JOIN C5K Always, Hide Other Links on Mobile -->
+                <div class="flex space-x-4">
+                    <a href="#" class="hover:text-gray-400 hidden md:inline text-xs">Membership</a>
+                    <a href="/multi-step" class="hover:text-gray-400 hidden md:inline text-xs">Submission</a>
+                    <a href="https://c5k.com/login" class="hover:text-gray-400 hidden md:inline text-xs">Sign In</a>
+                    <a href="https://c5k.com/register" class="hover:text-gray-400 font-bold text-xs">JOIN C5K</a>
+                </div>
+            </div>
+        </nav>
+        <nav class="bg-[#FFFFFF] ">
+            <div class="max-w-7xl mx-auto flex items-center justify-between">
+                <!-- Left: Logo -->
+                <div class="logo_area">
+                    <a href="https://c5k.com">
+                        <img src="https://c5k.com/public/backend/logo/logo.png" alt="logo">
+                    </a>
+                </div>
+
+                <!-- Center: Search Bar -->
+                <div class="flex-grow mx-4 flex justify-center">
+                    <form action="" method="GET" class="w-1/2 relative flex">
+                        <input type="text" name="query" placeholder="Search"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-[#007C92] transition duration-300 placeholder:font-bold">
+
+                        <button type="submit"
+                            class="ml-2 bg-[#007C92] text-white font-bold px-4 py-2 rounded-md hover:bg-[#005f73] transition duration-300">
+                            Search
+                        </button>
+                    </form>
+                </div>
+
+
+
+                <!-- Right: Social Icons -->
+                <div class="flex items-center space-x-4">
+                    <a href="https://web.facebook.com/c5kpub" target="_blank" class="text-[#007C92] text-xl"><i
+                            class="fab fa-facebook"></i></a>
+                    <a href="#" class="text-[#007C92] text-xl"><i class="fab fa-twitter"></i></a>
+                    <!-- Fixed typo -->
+                    <a href="#" class="text-[#007C92] text-xl"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="text-[#007C92] text-xl"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+        </nav>
+
+
+        <nav class="bg-[#007C92] shadow-lg  ">
+            <div class="max-w-7xl mx-auto flex justify-center items-center">
+
+                <div class="hidden  md:flex space-x-12 text-white font-bold p-4 text-lg">
+                    <a href="https://c5k.com" class="hover:text-gray-200 transition">Home</a>
+                    <a href="https://c5k.com/about" class="hover:text-gray-200 transition">About</a>
+                    <a href="https://c5k.com/academic-journal" class="hover:text-gray-200 transition">Academic
+                        Journals</a>
+                    <a href="https://c5k.com/dissertation-thesis"
+                        class="hover:text-gray-200 transition">Dissertation/Thesis</a>
+                    <a href="https://c5k.com/books" class="hover:text-gray-200 transition">Books</a>
+                    <a href="https://c5k.com/conferences" class="hover:text-gray-200 transition">Conferences</a>
+                    <a href="https://c5k.com/home-news" class="hover:text-gray-200 transition">Announcements</a>
+                </div>
+
+                <!-- Right: Social Icons & Mobile Menu Toggle -->
+                <button id="menu-toggle" class="md:hidden text-white focus:outline-none text-2xl">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+            </div>
+
+            <!-- Mobile Menu -->
+            <div id="mobile-menu"
+                class="hidden md:hidden bg-[#007C92] text-white flex flex-col space-y-2 mt-2 p-4 rounded-lg">
+                <a href="https://c5k.com" class="hover:text-gray-200 transition">Home</a>
+                <a href="https://c5k.com/about" class="hover:text-gray-200 transition">About</a>
+                <a href="https://c5k.com/academic-journal" class="hover:text-gray-200 transition">Academic
+                    Journals</a>
+                <a href="https://c5k.com/dissertation-thesis"
+                    class="hover:text-gray-200 transition">Dissertation/Thesis</a>
+                <a href="https://c5k.com/books" class="hover:text-gray-200 transition">Books</a>
+                <a href="https://c5k.com/conferences" class="hover:text-gray-200 transition">Conferences</a>
+                <a href="https://c5k.com/home-news" class="hover:text-gray-200 transition">Announcements</a>
+            </div>
+        </nav>
+    </header>
+
+
+        
+    <section
+        class="w-full hight-bg bg-[url(https://c5k.com/public/backend/books/Screenshot_3.png)] bg-no-repeat bg-cover  sm:bg-[url(https://c5k.com/public/backend/books/Screenshot_3.png)] md:bg-[url(https://c5k.com/public/backend/books/Screenshot_3.png)]">
+    </section>
+
+
+    
+    <section class="bg-[#ebf1f5] py-10">
+        <div class="container mx-auto px-4">
+            <div class="text-center">
+                <h2 class="text-[#486A7E] font-medium text-2xl md:text-3xl mb-5">
+                    Discover Our World-wide Academic Collection
+                </h2>
+                <p class="text-[#444444] font-medium leading-[25px]">
+                    We take pride in presenting a wide range of academic works spanning numerous disciplines. From business
+                    to information technology, sociology to economics, science to engineering, our catalog reflects the
+                    richness and diversity of contemporary university/institute research. Whether you’re a student, academic
+                    researcher, scientific community member, or knowledge enthusiast, you’ll certainly find titles that
+                    pique your curiosity and deepen your understanding.
+                </p>
+            </div>
+        </div>
+    </section>
+
+
+    
+    <section class="py-12">
+        <div class="max-w-7xl mx-auto px-4">
+            <!-- Tabs Section -->
+            <div class="flex flex-col lg:flex-row bg-white shadow rounded-md overflow-hidden">
+                <!-- Left Sidebar -->
+                <div class="w-full lg:w-1/4 border-r bg-[#F3F3F3] flex flex-col justify-between">
+                    <div class="">
+                        <ul class="space-y- text-sm" id="tabMenu">
+                            <li class="px-4 py-3 border-l-4 border-[#006EB4] bg-white font-semibold cursor-pointer active"
+                                data-tab="subjects">Subjects</li>
+                            <li class="px-4 py-3 text-[#006EB4] cursor-pointer font-semibold" data-tab="book-series">Book
+                                series</li>
+                            <li class="px-4 py-3 text-[#006EB4] cursor-pointer font-semibold" data-tab="partner-series">
+                                Partner series</li>
+                            <li class="px-4 py-3 text-[#006EB4] cursor-pointer font-semibold" data-tab="publication-year">
+                                Publication year</li>
+                        </ul>
+                    </div>
+
+                    <div class="py-4">
+                        <button
+                            class="bg-[#fdb714] text-black text-sm w-full py-2 font-medium shadow-sm hover:bg-[#e5a800]">
+                            Browse all books
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right Content -->
+                <div class="w-full lg:w-3/4 p-6">
+
+                    <!-- Subjects -->
+                    <div class="tab_content" data-content="subjects">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-10 gap-y-5 text-sm">
+                            <a href="#" class="underline text-[#0056b3]">All subjects</a>
+                            <a href="#" class="underline text-[#0056b3]">Finance and Accounting</a>
+                            <a href="#" class="underline text-[#0056b3]">Medical | Science</a>
+                            <a href="#" class="underline text-[#0056b3]">Food & Agricultural</a>
+                            <a href="#" class="underline text-[#0056b3]">Multidisciplinary</a>
+                            <a href="#" class="underline text-[#0056b3]">Health Informatics</a>
+                            <a href="#" class="underline text-[#0056b3]">Particle & Nuclear Physics</a>
+                            <a href="#" class="underline text-[#0056b3]">Business information management</a>
+                            <a href="#" class="underline text-[#0056b3]">Sociology and Humanities</a>
+                            <a href="#" class="underline text-[#0056b3]">Chemistry and Nanocomposites</a>
+                            <a href="#" class="underline text-[#0056b3]">Education & Law</a>
+                            <a href="#" class="underline text-[#0056b3]">Sustainability</a>
+                            <a href="#" class="underline text-[#0056b3]">Culture, History & Society</a>
+                            <a href="#" class="underline text-[#0056b3]">Artificial Intelligence</a>
+                            <a href="#" class="underline text-[#0056b3]">Science & Engineering</a>
+                            <a href="#" class="underline text-[#0056b3]">Energy & Environmental</a>
+                            <a href="#" class="underline text-[#0056b3]">Material Engineering & Nanoscience</a>
+                            <a href="#" class="underline text-[#0056b3]">Data Analytics</a>
+                            <a href="#" class="underline text-[#0056b3]">Mathematics & Commutation</a>
+                        </div>
+                    </div>
+
+
+                    <!-- Subjects -->
+                    <div class="tab_content hidden" data-content="book-series">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-10 gap-y-5 text-sm">
+
+                        </div>
+                    </div>
+
+
+                    <!-- Partner Series -->
+                    <div class="tab_content hidden" data-content="partner-series">
+                        <p class="text-gray-600">Partner series content goes here...</p>
+                    </div>
+
+                    <!-- Publication Year -->
+                    <div class="tab_content hidden" data-content="publication-year">
+                        <p class="text-gray-600">Publication year content goes here...</p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+    
+    <section class="py-12 bg-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-[#006EB4] font-medium text-2xl sm:text-3xl mb-10">
+                Latest Books 
+            </h2>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                                            <div class="bg-white rounded-xl shadow-md flex flex-col items-center overflow-hidden transition hover:shadow-lg">
+                            <a href="https://c5k.com/books/18" class="pt-5 block w-full">
+                                <img src="https://c5k.com/public/backend/books/1763017233_691582111cc98.jpg" alt="Book Image"
+                                    class="mx-auto mb-4 bg-[#d3d2d2] p-6 w-[250px]  object-fill" />
+                            </a>
+                            <div class="px-5 pb-6 text-center">
+                                <a href="https://c5k.com/books/18"
+                                    class="text-md text-[#0259b3] leading-snug mb-2 block">
+                                    Artificial Intelligence and Data Analytics for Business Leaders
+                                </a>
+                                <p class="text-[#666666] text-sm mb-2">
+                                    <strong class="opacity-70">Author: </strong>
+                                    Md Samiun, Barna Biswas,  Anup......
+                                </p>
+                                <p class="text-[#666666] text-sm ">
+                                    Published November 2025
+                                </p>
+                            </div>
+                        </div>
+                                            <div class="bg-white rounded-xl shadow-md flex flex-col items-center overflow-hidden transition hover:shadow-lg">
+                            <a href="https://c5k.com/books/17" class="pt-5 block w-full">
+                                <img src="https://c5k.com/public/backend/books/1759158479_68daa0cf83e0c.jpg" alt="Book Image"
+                                    class="mx-auto mb-4 bg-[#d3d2d2] p-6 w-[250px]  object-fill" />
+                            </a>
+                            <div class="px-5 pb-6 text-center">
+                                <a href="https://c5k.com/books/17"
+                                    class="text-md text-[#0259b3] leading-snug mb-2 block">
+                                    Predictive Models in Autism Spectrum Disorder: A Machine Learning Perspective
+                                </a>
+                                <p class="text-[#666666] text-sm mb-2">
+                                    <strong class="opacity-70">Author: </strong>
+                                    none...
+                                </p>
+                                <p class="text-[#666666] text-sm ">
+                                    Published September 2025
+                                </p>
+                            </div>
+                        </div>
+                                            <div class="bg-white rounded-xl shadow-md flex flex-col items-center overflow-hidden transition hover:shadow-lg">
+                            <a href="https://c5k.com/books/14" class="pt-5 block w-full">
+                                <img src="https://c5k.com/public/backend/books/1756917600_68b86f6089992.jpg" alt="Book Image"
+                                    class="mx-auto mb-4 bg-[#d3d2d2] p-6 w-[250px]  object-fill" />
+                            </a>
+                            <div class="px-5 pb-6 text-center">
+                                <a href="https://c5k.com/books/14"
+                                    class="text-md text-[#0259b3] leading-snug mb-2 block">
+                                    AI in Medicine: Transforming Diagnosis, Treatment, and Care
+                                </a>
+                                <p class="text-[#666666] text-sm mb-2">
+                                    <strong class="opacity-70">Author: </strong>
+                                    Md Maruful Islam, Md Nayeem Ha......
+                                </p>
+                                <p class="text-[#666666] text-sm ">
+                                    Published February 2025
+                                </p>
+                            </div>
+                        </div>
+                                            <div class="bg-white rounded-xl shadow-md flex flex-col items-center overflow-hidden transition hover:shadow-lg">
+                            <a href="https://c5k.com/books/13" class="pt-5 block w-full">
+                                <img src="https://c5k.com/public/backend/books/1845856921_6fjfa999c9024.jpg" alt="Book Image"
+                                    class="mx-auto mb-4 bg-[#d3d2d2] p-6 w-[250px]  object-fill" />
+                            </a>
+                            <div class="px-5 pb-6 text-center">
+                                <a href="https://c5k.com/books/13"
+                                    class="text-md text-[#0259b3] leading-snug mb-2 block">
+                                    Neurodiverse Futures: How Technology is Transforming Autism Education and Mental Health Support in America
+                                </a>
+                                <p class="text-[#666666] text-sm mb-2">
+                                    <strong class="opacity-70">Author: </strong>
+                                    Afia Fairooz Tasnim,Rubaiat Ra......
+                                </p>
+                                <p class="text-[#666666] text-sm ">
+                                    Published August 2025
+                                </p>
+                            </div>
+                        </div>
+                                            <div class="bg-white rounded-xl shadow-md flex flex-col items-center overflow-hidden transition hover:shadow-lg">
+                            <a href="https://c5k.com/books/12" class="pt-5 block w-full">
+                                <img src="https://c5k.com/public/backend/books/1745856921_680fa999c9024.jpg" alt="Book Image"
+                                    class="mx-auto mb-4 bg-[#d3d2d2] p-6 w-[250px]  object-fill" />
+                            </a>
+                            <div class="px-5 pb-6 text-center">
+                                <a href="https://c5k.com/books/12"
+                                    class="text-md text-[#0259b3] leading-snug mb-2 block">
+                                    The Rise of AI in Health Care: How Technology is Transforming Health Care
+                                </a>
+                                <p class="text-[#666666] text-sm mb-2">
+                                    <strong class="opacity-70">Author: </strong>
+                                    Hasan Mahmud Sozib,Mesbah Uddi......
+                                </p>
+                                <p class="text-[#666666] text-sm ">
+                                    Published April 2024
+                                </p>
+                            </div>
+                        </div>
+                                            <div class="bg-white rounded-xl shadow-md flex flex-col items-center overflow-hidden transition hover:shadow-lg">
+                            <a href="https://c5k.com/books/11" class="pt-5 block w-full">
+                                <img src="https://c5k.com/public/backend/books/1745856939_680fa9ab699b3.jpg" alt="Book Image"
+                                    class="mx-auto mb-4 bg-[#d3d2d2] p-6 w-[250px]  object-fill" />
+                            </a>
+                            <div class="px-5 pb-6 text-center">
+                                <a href="https://c5k.com/books/11"
+                                    class="text-md text-[#0259b3] leading-snug mb-2 block">
+                                    The Future Revolution of Transforming Business Through Sustainable Innovation
+                                </a>
+                                <p class="text-[#666666] text-sm mb-2">
+                                    <strong class="opacity-70">Author: </strong>
+                                    Istiaque Mahmud,Mesbah Uddin,M......
+                                </p>
+                                <p class="text-[#666666] text-sm ">
+                                    Published April 2024
+                                </p>
+                            </div>
+                        </div>
+                                            <div class="bg-white rounded-xl shadow-md flex flex-col items-center overflow-hidden transition hover:shadow-lg">
+                            <a href="https://c5k.com/books/6" class="pt-5 block w-full">
+                                <img src="https://c5k.com/public/backend/books/6.png" alt="Book Image"
+                                    class="mx-auto mb-4 bg-[#d3d2d2] p-6 w-[250px]  object-fill" />
+                            </a>
+                            <div class="px-5 pb-6 text-center">
+                                <a href="https://c5k.com/books/6"
+                                    class="text-md text-[#0259b3] leading-snug mb-2 block">
+                                    Data-Driven Business StrategiesLeveraging Information Technology for a Competitive Edge
+                                </a>
+                                <p class="text-[#666666] text-sm mb-2">
+                                    <strong class="opacity-70">Author: </strong>
+                                    Mia Md Tofayel Gonee Manik,Rab......
+                                </p>
+                                <p class="text-[#666666] text-sm ">
+                                    Published November 2024
+                                </p>
+                            </div>
+                        </div>
+                                            <div class="bg-white rounded-xl shadow-md flex flex-col items-center overflow-hidden transition hover:shadow-lg">
+                            <a href="https://c5k.com/books/5" class="pt-5 block w-full">
+                                <img src="https://c5k.com/public/backend/books/5.png" alt="Book Image"
+                                    class="mx-auto mb-4 bg-[#d3d2d2] p-6 w-[250px]  object-fill" />
+                            </a>
+                            <div class="px-5 pb-6 text-center">
+                                <a href="https://c5k.com/books/5"
+                                    class="text-md text-[#0259b3] leading-snug mb-2 block">
+                                    The Role of IT in Sustainable Business Practices
+                                </a>
+                                <p class="text-[#666666] text-sm mb-2">
+                                    <strong class="opacity-70">Author: </strong>
+                                    Sadia Sharmin,Al Modabbir Zama......
+                                </p>
+                                <p class="text-[#666666] text-sm ">
+                                    Published November 2024
+                                </p>
+                            </div>
+                        </div>
+                                            <div class="bg-white rounded-xl shadow-md flex flex-col items-center overflow-hidden transition hover:shadow-lg">
+                            <a href="https://c5k.com/books/4" class="pt-5 block w-full">
+                                <img src="https://c5k.com/public/backend/books/4.png" alt="Book Image"
+                                    class="mx-auto mb-4 bg-[#d3d2d2] p-6 w-[250px]  object-fill" />
+                            </a>
+                            <div class="px-5 pb-6 text-center">
+                                <a href="https://c5k.com/books/4"
+                                    class="text-md text-[#0259b3] leading-snug mb-2 block">
+                                    Information Technology for Strategic Business Growth
+                                </a>
+                                <p class="text-[#666666] text-sm mb-2">
+                                    <strong class="opacity-70">Author: </strong>
+                                    Hasan Mahmud Sozib,Mesbah Uddi......
+                                </p>
+                                <p class="text-[#666666] text-sm ">
+                                    Published November 2024
+                                </p>
+                            </div>
+                        </div>
+                                            <div class="bg-white rounded-xl shadow-md flex flex-col items-center overflow-hidden transition hover:shadow-lg">
+                            <a href="https://c5k.com/books/3" class="pt-5 block w-full">
+                                <img src="https://c5k.com/public/backend/books/3.png" alt="Book Image"
+                                    class="mx-auto mb-4 bg-[#d3d2d2] p-6 w-[250px]  object-fill" />
+                            </a>
+                            <div class="px-5 pb-6 text-center">
+                                <a href="https://c5k.com/books/3"
+                                    class="text-md text-[#0259b3] leading-snug mb-2 block">
+                                    Digital Transformation in Modern Business: An Executive Guide
+                                </a>
+                                <p class="text-[#666666] text-sm mb-2">
+                                    <strong class="opacity-70">Author: </strong>
+                                    RAKIBUL HASAN...
+                                </p>
+                                <p class="text-[#666666] text-sm ">
+                                    Published November 2024
+                                </p>
+                            </div>
+                        </div>
+                                   
+            </div>
+        </div>
+    </section>
+
+
+
+    
+    <section class="bg-[#EBF1F5] py-20">
+        <div class="container mx-auto px-4">
+            <!-- Heading and Description -->
+            <div class="mb-16">
+                <h2 class="text-[#006EB4] font-medium text-2xl md:text-3xl border-b-4 border-white pb-3 mb-6">
+                    Stay informed
+                </h2>
+                <p class="text-[#33475B] font-medium leading-[25px]">
+                    Never miss an eBooks update again. Our eBooks-dedicated communications bring together the latest
+                    knowledge from Springer Nature and other community experts to provide valuable insights to those who
+                    work within a research environment. Great for librarians,
+                    research managers, and R&D professionals.
+                </p>
+            </div>
+
+            <!-- Form and Sidebar -->
+            <div class="flex flex-col lg:flex-row gap-10 mt-5">
+                <!-- Form -->
+                <div class="w-full lg:w-3/4">
+                    <!-- Email Field -->
+                    <div class="mb-3">
+                        <label for="email" class="block font-medium text-[#33475B]">
+                            Email <span class="text-[#EB4432]">*</span>
+                        </label>
+                        <input type="email" id="email"
+                            class="mt-2 block w-full h-[50px] px-3 py-2 rounded bg-white border border-[#CBD6E2] focus:outline-none focus:ring-2 focus:ring-[#0088CC]"
+                            placeholder="Please provide your business email address">
+                    </div>
+
+                    <!-- Country & Organisation -->
+                    <div class="flex flex-col md:flex-row gap-5">
+                        <div class="mb-3 w-full md:w-1/2">
+                            <label for="country" class="block font-medium text-[#33475B]">
+                                Country <span class="text-[#EB4432]">*</span>
+                            </label>
+                            <select name="country" id="country"
+                                class="mt-2 block w-full h-[50px] px-3 rounded bg-white border border-[#CBD6E2] focus:outline-none focus:ring-2 focus:ring-[#0088CC]">
+                                <option value="" disabled selected>Please Select</option>
+                                <option value="bangladesh">Bangladesh</option>
+                                <option value="america">America</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3 w-full md:w-1/2">
+                            <label for="organisation" class="block font-medium text-[#33475B]">
+                                Organisation type <span class="text-[#EB4432]">*</span>
+                            </label>
+                            <select name="organisation" id="organisation"
+                                class="mt-2 block w-full h-[50px] px-3 rounded bg-white border border-[#CBD6E2] focus:outline-none focus:ring-2 focus:ring-[#0088CC]">
+                                <option value="" disabled selected>Please Select</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Consent Text -->
+                    <p class="mb-5 text-[#33475B] font-medium leading-[25px] text-sm">
+                        We would like to contact you occasionally via email with marketing information related to Springer
+                        Nature products and services. Another
+                        way of using your email address includes digital advertising through third-party advertising
+                        platforms as detailed in our
+                        <span class="text-[#0000EE] underline cursor-pointer">privacy policy</span>. You
+                        can at any time unsubscribe via the link at the bottom of emails you receive, by contacting
+                        <span class="text-[#0000EE] underline cursor-pointer">customer services</span>, or directly via the
+                        third-party
+                        platform.
+                    </p>
+
+                    <!-- Submit Button -->
+                    <button
+                        class="bg-[#0088CC] text-white px-[30px] py-3 font-medium rounded hover:bg-[#007ab8] transition duration-300">
+                        Submit
+                    </button>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="w-full lg:w-1/4 flex items-start gap-5">
+                    <img src="https://c5k.com/public/backend/books/Screenshot_1.png" alt="" class="w-[60px]">
+                    <div>
+                        <h4 class="text-[#1B778F] leading-[28px] font-medium">
+                            Find out more - Download the eBooks Brochure
+                        </h4>
+                        <p class="text-[#414042] text-sm">(PDF, 2.51 MB)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    
+    <section class="py-20 bg-[#F9FAFB]">
+        <div class="container mx-auto">
+            <h2 class="text-[#006EB4] font-bold text-center text-3xl md:text-3xl mb-16">
+                Our Services
+            </h2>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+                <div
+                    class="bg-white shadow-[0_0_16px_rgba(0,0,0,0.25)] rounded-lg p-8 transition-transform duration-300 hover:-translate-y-5">
+                    <img src="https://c5k.com/public/backend/books/service_1.png" alt=""
+                        class="w-[100px] h-[78px] object-contain mx-auto mb-2">
+                    <h5 class="text-black font-semibold text-[20px] text-center mb-3">
+                        Over the World Book Publishing Service
+                    </h5>
+                    <p class="text-[#414042] text-center">
+                        With easy steps and expert advice, publish your work online. Benefit from high-quality editing and
+                        personalized assistance tailored to your specific needs.
+                    </p>
+                </div>
+
+                <div
+                    class="bg-white shadow-[0_0_16px_rgba(0,0,0,0.25)] rounded-lg p-8 transition-transform duration-300 hover:-translate-y-5">
+                    <img src="https://c5k.com/public/backend/books/service_2.png" alt=""
+                        class="w-[100px] h-[78px] object-contain mx-auto mb-2">
+                    <h5 class="text-black font-semibold text-[20px] text-center mb-3">
+                        Worldwide Marketing Policy
+                    </h5>
+                    <p class="text-[#414042] text-center">
+                        Ensure international recognition for your book with our comprehensive worldwide marketing strategy.
+                        Reach a global audience.
+                    </p>
+                </div>
+
+                <div
+                    class="bg-white shadow-[0_0_16px_rgba(0,0,0,0.25)] rounded-lg p-8 transition-transform duration-300 hover:-translate-y-5">
+                    <img src="https://c5k.com/public/backend/books/service_3.png" alt=""
+                        class="w-[100px] h-[78px] object-contain mx-auto mb-2">
+                    <h5 class="text-black font-semibold text-[20px] text-center mb-3">
+                        Publish with Expert Assistance
+                    </h5>
+                    <p class="text-[#414042] text-center">
+                        Our experts provide complete support throughout the publishing process. Let us help you reach your
+                        goals with ease.
+                    </p>
+                </div>
+
+                <div
+                    class="bg-white shadow-[0_0_16px_rgba(0,0,0,0.25)] rounded-lg p-8 transition-transform duration-300 hover:-translate-y-5">
+                    <img src="https://c5k.com/public/backend/books/service_4.png" alt=""
+                        class="w-[100px] h-[78px] object-contain mx-auto mb-2">
+                    <h5 class="text-black font-semibold text-[20px] text-center mb-3">
+                        Print-on-Demand Service
+                    </h5>
+                    <p class="text-[#414042] text-center">
+                        We use eco-friendly print-on-demand technology to reduce waste and ensure cost-effective production
+                        of your book.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    
+    <section class="py-16 md:py-20 bg-[#EBF1F5]">
+        <div class="container mx-auto px-4">
+            <!-- Heading -->
+            <div class="mb-12 md:mb-20 text-center">
+                <h2 class="text-[#006EB4] font-bold text-2xl sm:text-3xl md:text-4xl mb-4">
+                    Our Book Publishing Procedure is Easy and Quicker
+                </h2>
+                <p class="text-[#4B5563] text-base sm:text-lg md:text-xl font-medium">
+                    There are 4 simple steps to follow
+                </p>
+            </div>
+
+            <!-- Steps Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+                <!-- Step Item -->
+                <div
+                    class="relative bg-white border-2 border-[#CBD6E2] rounded-lg px-6 py-16 sm:py-20 transition-transform duration-300 hover:-translate-y-3">
+                    <h5 class="text-black font-semibold text-lg text-center mb-3">
+                        Submit your book
+                    </h5>
+                    <p class="text-[#414042] text-sm sm:text-base text-center">
+                        Whether you have a complete manuscript or just a draft, we’ll provide constructive feedback—no
+                        obligations
+                    </p>
+                    <span
+                        class="absolute -top-7 -left-7 w-16 h-16 text-center leading-[60px] bg-[#006EB2] text-white rounded-full text-[32px] sm:text-[36px] font-bold">
+                        1
+                    </span>
+                </div>
+
+                <div
+                    class="relative bg-white border-2 border-[#CBD6E2] rounded-lg px-6 py-16 sm:py-20 transition-transform duration-300 hover:-translate-y-3">
+                    <h5 class="text-black font-semibold text-lg text-center mb-3">
+                        In Review and Revision
+                    </h5>
+                    <p class="text-[#414042] text-sm sm:text-base text-center">
+                        We help refine your ideas, ensuring clarity and precision.
+                    </p>
+                    <span
+                        class="absolute -top-7 -left-7 w-16 h-16 text-center leading-[60px] bg-[#006EB2] text-white rounded-full text-[32px] sm:text-[36px] font-bold">
+                        2
+                    </span>
+                </div>
+
+                <div
+                    class="relative bg-white border-2 border-[#CBD6E2] rounded-lg px-6 py-16 sm:py-20 transition-transform duration-300 hover:-translate-y-3">
+                    <h5 class="text-black font-semibold text-lg text-center mb-3">
+                        Proof of book
+                    </h5>
+                    <p class="text-[#414042] text-sm sm:text-base text-center">
+                        We’ll polish your work for impact and professionalism
+                    </p>
+                    <span
+                        class="absolute -top-7 -left-7 w-16 h-16 text-center leading-[60px] bg-[#006EB2] text-white rounded-full text-[32px] sm:text-[36px] font-bold">
+                        3
+                    </span>
+                </div>
+
+                <div
+                    class="relative bg-white border-2 border-[#CBD6E2] rounded-lg px-6 py-16 sm:py-20 transition-transform duration-300 hover:-translate-y-3">
+                    <h5 class="text-black font-semibold text-lg text-center mb-3">
+                        Publish your book
+                    </h5>
+                    <p class="text-[#414042] text-sm sm:text-base text-center">
+                        Reach readers globally and make a lasting impression
+                    </p>
+                    <span
+                        class="absolute -top-7 -left-7 w-16 h-16 text-center leading-[60px] bg-[#006EB2] text-white rounded-full text-[32px] sm:text-[36px] font-bold">
+                        4
+                    </span>
+                </div>
+            </div>
+
+            <!-- Button -->
+            <div class="text-center mt-12 md:mt-16">
+                <button
+                    class="bg-[#FEBE10] px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base font-bold text-black rounded-full hover:brightness-110 transition">
+                    Start Submission
+                </button>
+            </div>
+        </div>
+    </section>
+
+
+    
+    <section class="py-16 md:py-20 ">
+        <div class="container mx-auto px-4">
+            <!-- Heading -->
+            <div class="mb-8 md:mb-16">
+                <h2 class="text-[#102269] font-bold text-2xl sm:text-3xl md:text-4xl mb-3">
+                    PUBLISH YOUR BOOK
+                </h2>
+                <p class="text-[#000000] text-base sm:text-lg md:text-xl font-medium">
+                    It’s easy with C5K Academic Publishing
+                </p>
+            </div>
+
+            <!-- Steps Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                <!-- Step Item -->
+                <div
+                    class="relative bg-white border-2 border-[#CBD6E2] rounded-lg p-8  transition-transform duration-300 hover:-translate-y-3">
+                    <img src="https://c5k.com/public/backend/books/published_01.png" alt=""
+                        class="w-[150px] h-[105px] object-contain mx-auto mb-2">
+                    <h5 class="text-black font-semibold text-lg text-center mb-3">
+                        Submit your book
+                    </h5>
+                    <p class="text-[#414042] text-sm sm:text-base text-center">
+                        Whether you have a complete manuscript or just a draft, we’ll provide constructive feedback—no
+                        obligations
+                    </p>
+
+                    <!-- Button -->
+                    <div class="text-center mt-4 md:mt-8">
+                        <button
+                            class="bg-[#FEBE10] px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base font-medium text-black rounded-full hover:brightness-110 transition">
+                            Get Started
+                        </button>
+                    </div>
+                </div>
+
+                <div
+                    class="relative bg-white border-2 border-[#CBD6E2] rounded-lg p-8  transition-transform duration-300 hover:-translate-y-3">
+                    <img src="https://c5k.com/public/backend/books/published_02.png" alt=""
+                        class="w-[150px] h-[105px] object-contain mx-auto mb-2">
+                    <h5 class="text-black font-semibold text-lg text-center mb-3">
+                        In Review and Revision
+                    </h5>
+                    <p class="text-[#414042] text-sm sm:text-base text-center">
+                        We help refine your ideas, ensuring clarity and precision.
+                    </p>
+
+                    <!-- Button -->
+                    <div class="text-center mt-4 md:mt-8">
+                        <button
+                            class="bg-[#FEBE10] px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base font-medium text-black rounded-full hover:brightness-110 transition">
+                            Get Started
+                        </button>
+                    </div>
+                </div>
+
+                <div
+                    class="relative bg-white border-2 border-[#CBD6E2] rounded-lg p-8  transition-transform duration-300 hover:-translate-y-3">
+                    <img src="https://c5k.com/public/backend/books/published_03.png" alt=""
+                        class="w-[150px] h-[105px] object-contain mx-auto mb-2">
+                    <h5 class="text-black font-semibold text-lg text-center mb-3">
+                        Proof of book
+                    </h5>
+                    <p class="text-[#414042] text-sm sm:text-base text-center">
+                        We’ll polish your work for impact and professionalism
+                    </p>
+
+                    <!-- Button -->
+                    <div class="text-center mt-4 md:mt-8">
+                        <button
+                            class="bg-[#FEBE10] px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base font-medium text-black rounded-full hover:brightness-110 transition">
+                            Get Started
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+
+    
+    <section
+        class="py-24 md:py-32 lg:py-48 bg-[url('https://c5k.com/public/backend/books/map_section.png')] sm:bg-[url(https://c5k.com/public/backend/books/map_section.png)] md:bg-[url(https://c5k.com/public/backend/books/map_section.png)] bg-no-repeat bg-cover bg-center">
+        <div class="container mx-auto px-4">
+            <h2 class="text-black font-bold text-center text-2xl sm:text-3xl md:text-4xl mb-12 lg:mb-20">
+                Our Book Publishing Statistics
+            </h2>
+
+            <!-- Steps Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-10">
+                <div>
+                    <h5 class="text-black font-bold text-center text-3xl sm:text-4xl md:text-4xl mb-1">1000+</h5>
+                    <span class="text-black block text-center text-sm md:text-lg sm:text-base">Authors</span>
+                </div>
+
+                <div>
+                    <h5 class="text-black font-bold text-center text-3xl sm:text-4xl md:text-4xl mb-1">30,000+</h5>
+                    <span class="text-black block text-center text-sm md:text-lg sm:text-base">Social Media Coverage</span>
+                </div>
+
+                <div>
+                    <h5 class="text-black font-bold text-center text-3xl sm:text-4xl md:text-4xl mb-1">778,030</h5>
+                    <span class="text-black block text-center text-sm md:text-lg sm:text-base">Titles in our
+                        catalogue</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    
+    <section class="container mx-auto my-12 px-4 flex flex-col lg:flex-row items-start gap-6">
+        <!-- Image -->
+        <div class="w-full lg:w-1/4 overflow-hidden">
+            <img src="https://c5k.com/public/backend/journal/bookImage.jpg" alt="Dissertation"
+                class="rounded-xl w-full h-auto object-cover">
+        </div>
+        <!-- Content -->
+        <div class="w-full lg:w-1/1">
+            <h2 class="text-2xl font-semibold mb-4">Showcase Your Work with C5KTP</h2>
+            <p class="text-gray-700 mb-4">C5KTP offers publication services for books and dissertations to give your work
+                global exposure and academic value.</p>
+            <p class="text-gray-700 mb-4">Each published author gets a dedicated page with bio, ISBN, and DOI info. Updates
+                are possible post-publication.</p>
+            <ul class="list-disc pl-5 text-gray-700 space-y-1">
+                <li>Global distribution and exhibition</li>
+                <li>Increased visibility and citability</li>
+                <li>Accessible print and e-books</li>
+                <li>Open access for free downloads</li>
+            </ul>
+        </div>
+    </section>
+
+
+    
+    <section class="bg-[#EBF1F5] py-10">
+        <div class="container mx-auto px-4">
+            <div class="mb-10">
+                <h2 class="text-[#486A7E] text-[2.2rem] pb-4 mb-6 border-b-[3px] border-white">
+                    Stay Up To Date
+                </h2>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+                    <!-- 1 -->
+                    <a href="" target="_blank"
+                        class="flex items-center gap-5 bg-white rounded-md rounded-bl-xl p-4">
+                        <div class="bg-[#025E8D] px-5 py-7 mr-2 rounded-bl-xl">
+                            <svg class="w-10 h-10 fill-white" xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 512 512"><!--!Font Awesome Free v6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
+                                <path
+                                    d="M111.8 62.2C170.2 105.9 233 194.7 256 242.4c23-47.6 85.8-136.4 144.2-180.2c42.1-31.6 110.3-56 110.3 21.8c0 15.5-8.9 130.5-14.1 149.2C478.2 298 412 314.6 353.1 304.5c102.9 17.5 129.1 75.5 72.5 133.5c-107.4 110.2-154.3-27.6-166.3-62.9l0 0c-1.7-4.9-2.6-7.8-3.3-7.8s-1.6 3-3.3 7.8l0 0c-12 35.3-59 173.1-166.3 62.9c-56.5-58-30.4-116 72.5-133.5C100 314.6 33.8 298 15.7 233.1C10.4 214.4 1.5 99.4 1.5 83.9c0-77.8 68.2-53.4 110.3-21.8z" />
+                            </svg>
+                        </div>
+                        <p class="text-[20px] text-[#1B778F]">Follow us On Bluesky</p>
+                    </a>
+
+                    <!-- 2 -->
+                    <a href="" target="_blank"
+                        class="flex items-center gap-5 bg-white rounded-md rounded-bl-xl p-4">
+                        <div class="bg-[#025E8D] px-5 py-7 mr-2 rounded-bl-xl">
+                            <svg class="w-10 h-10 fill-white" xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 512 512"><!--!Font Awesome Free v6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
+                                <path
+                                    d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8L200.7 275.5 26.8 48H172.4L272.9 180.9 389.2 48zM364.4 421.8h39.1L151.1 88h-42L364.4 421.8z" />
+                            </svg>
+                        </div>
+                        <p class="text-[20px] text-[#1B778F]">Follow us On Twitter</p>
+                    </a>
+
+                    <!-- 3 -->
+                    <a href="" target="_blank"
+                        class="flex items-center gap-5 bg-white rounded-md rounded-bl-xl p-4">
+                        <div class="bg-[#025E8D] px-5 py-7 mr-2 rounded-bl-xl">
+                            <svg class="w-10 h-10 fill-white" xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 448 512"><!--!Font Awesome Free v6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
+                                <path
+                                    d="M100.28 448H7.4V148.9h92.88zM53.79 108.1C24.09 108.1 0 83.5 0 53.8a53.79 53.79 0 0 1 107.58 0c0 29.7-24.1 54.3-53.79 54.3zM447.9 448h-92.68V302.4c0-34.7-.7-79.2-48.29-79.2-48.29 0-55.69 37.7-55.69 76.7V448h-92.78V148.9h89.08v40.8h1.3c12.4-23.5 42.69-48.3 87.88-48.3 94 0 111.28 61.9 111.28 142.3V448z" />
+                            </svg>
+                        </div>
+                        <p class="text-[20px] text-[#1B778F]">Follow us On Linkedin</p>
+                    </a>
+
+                    <!-- 4 -->
+                    <a href="https://www.facebook.com/c5kpub?_rdc=1&_rdr#" target="_blank"
+                        class="flex items-center gap-5 bg-white rounded-md rounded-bl-xl p-4">
+                        <div class="bg-[#025E8D] px-5 py-7 mr-2 rounded-bl-xl">
+                            <svg class="w-10 h-10 fill-white" xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 320 512"><!--!Font Awesome Free v6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
+                                <path
+                                    d="M80 299.3V512H196V299.3h86.5l18-97.8H196V166.9c0-51.7 20.3-71.5 72.7-71.5c16.3 0 29.4 .4 37 1.2V7.9C291.4 4 256.4 0 236.2 0C129.3 0 80 50.5 80 159.4v42.1H14v97.8H80z" />
+                            </svg>
+                        </div>
+                        <p class="text-[20px] text-[#1B778F]">Follow us On Facebook</p>
+                    </a>
+
+                    <!-- 5 -->
+                    <a href="" target="_blank"
+                        class="flex items-center gap-5 bg-white rounded-md rounded-bl-xl p-4">
+                        <div class="bg-[#025E8D] px-5 py-7 mr-2 rounded-bl-xl">
+                            <svg class="w-10 h-10 fill-white" xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 576 512"><!--!Font Awesome Free v6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
+                                <path
+                                    d="M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438 11.412 132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z" />
+                            </svg>
+                        </div>
+                        <p class="text-[20px] text-[#1B778F]">Follow us On Youtube</p>
+                    </a>
+
+                    <!-- 6 -->
+                    <a href="" target="_blank"
+                        class="flex items-center gap-5 bg-white rounded-md rounded-bl-xl p-4">
+                        <div class="bg-[#025E8D] px-5 py-7 mr-2 rounded-bl-xl">
+                            <svg class="w-10 h-10 fill-white" xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 448 512"><!--!Font Awesome Free v6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
+                                <path
+                                    d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z" />
+                            </svg>
+                        </div>
+                        <p class="text-[20px] text-[#1B778F]">Follow us On Instagram</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-blue-800 text-white py-8 mt-10">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 text-sm px-6">
+            <div>
+                <h2 class="font-bold">ABOUT C5K</h2>
+                <a href="#" class="block mt-2 hover:text-gray-300">Learn more about C5K</a>
+                <a href="https://c5k.com/mission/vission" class="block hover:text-gray-300">Mission & Vision</a>
+            </div>
+            <div>
+                <h2 class="font-bold">LOCATION</h2>
+                <p class="mt-2">761 STATE HIGHWAY 100</p>
+                <p>Port Isabel, TX 78578 USA</p>
+                <a href="#" class="block mt-2 hover:text-gray-300">Contact & Support</a>
+            </div>
+            <div>
+                <h2 class="font-bold">GET INVOLVED</h2>
+                <a href="#" class="block mt-2 hover:text-gray-300">Conference</a>
+                <a href="#" class="block hover:text-gray-300">Societies</a>
+                <a href="#" class="block hover:text-gray-300">Technical career</a>
+                <a href="#" class="block hover:text-gray-300">Scholarship</a>
+            </div>
+            <div>
+                <h2 class="font-bold">RESOURCES</h2>
+                <a href="#" class="block mt-2 hover:text-gray-300">Author guideline</a>
+                <a href="#" class="block hover:text-gray-300">Paper format download</a>
+                <a href="#" class="block hover:text-gray-300">Submit Article</a>
+                <a href="#" class="block hover:text-gray-300">Book publishing</a>
+                <a href="#" class="block hover:text-gray-300">Thesis/Dissertation</a>
+            </div>
+        </div>
+    </footer>
+    <div class="bg-gray-900 text-center text-sm py-4 px-4 text-white">
+        &copy;Copyright 2024 C5K All rights reserved.
+    </div>
+
+    <script>
+        document.getElementById("menu-toggle").addEventListener("click", function() {
+            document.getElementById("mobile-menu").classList.toggle("hidden");
+        });
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabs = document.querySelectorAll('[data-tab]');
+            const contents = document.querySelectorAll('[data-content]');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active state from all tabs
+                    tabs.forEach(t => t.classList.remove('bg-white', 'border-l-4',
+                        'border-[#006EB4]'));
+
+                    // Hide all content
+                    contents.forEach(c => c.classList.add('hidden'));
+                    // Add active state to clicked tab
+                    tab.classList.add('bg-white', 'border-l-4', 'border-[#006EB4]');
+
+                    // Show matching content
+                    const target = tab.getAttribute('data-tab');
+                    document.querySelector(`[data-content="${target}"]`).classList.remove('hidden');
+                });
+            });
+        });
+    </script>
+
+</body>
+
+</html>

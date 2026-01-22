@@ -5,7 +5,7 @@ import JournalSearch from "@/components/journals/JournalSearch";
 
 export const dynamic = "force-dynamic";
 
-async function getJournals(query?: string) {
+async function getJournals(page: number, limit: number, query?: string) {
   const where: any = { isActive: true };
 
   if (query) {
@@ -16,27 +16,42 @@ async function getJournals(query?: string) {
     ];
   }
 
-  return prisma.journal.findMany({
-    where,
-    orderBy: { displayOrder: "asc" },
-    select: {
-      id: true,
-      code: true,
-      fullName: true,
-      description: true,
-      coverImageUrl: true,
-      issn: true,
-      impactFactor: true,
-    },
-  });
+  const skip = (page - 1) * limit;
+
+  const [journals, total] = await Promise.all([
+    prisma.journal.findMany({
+      where,
+      orderBy: { fullName: "asc" }, // Consistent sorting for pagination
+      skip,
+      take: limit,
+      select: {
+        id: true,
+        code: true,
+        fullName: true,
+        description: true,
+        coverImageUrl: true,
+        issn: true,
+        eIssn: true,
+        frequency: true,
+        citeScore: true,
+        impactFactor: true,
+      },
+    }),
+    prisma.journal.count({ where })
+  ]);
+
+  return { journals, total, totalPages: Math.ceil(total / limit) };
 }
 
 export default async function JournalsPage(props: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; page?: string }>;
 }) {
   const searchParams = await props.searchParams;
-  const query = searchParams?.q;
-  const journals = await getJournals(query);
+  const query = searchParams?.q || "";
+  const page = Number(searchParams?.page) || 1;
+  const limit = 10;
+
+  const { journals, total, totalPages } = await getJournals(page, limit, query);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -53,7 +68,7 @@ export default async function JournalsPage(props: {
           <div className="text-center max-w-3xl mx-auto">
             <h1 className="text-4xl font-bold mb-4">Academic Journals</h1>
             <p className="text-xl text-gray-100 mb-8">
-              Browse our collection of 12 prestigious academic journals covering various disciplines
+              Browse our collection of {total} prestigious academic journals covering various disciplines
             </p>
 
             <JournalSearch />
@@ -63,43 +78,95 @@ export default async function JournalsPage(props: {
 
       {/* Journals Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
           {journals.length > 0 ? (
             journals.map((journal) => (
-              <Link key={journal.code} href={`/journals/${journal.code.toLowerCase()}`}>
-                <Card className="h-full">
-                  {journal.coverImageUrl ? (
-                    <img
-                      src={journal.coverImageUrl}
-                      alt={journal.code}
-                      className="h-48 w-full object-cover rounded-lg mb-4"
-                    />
-                  ) : (
-                    <div className="h-48 bg-gradient-to-br from-primary-light to-primary rounded-lg mb-4 flex items-center justify-center">
-                      <span className="text-white text-4xl font-bold">{journal.code}</span>
+              <Link key={journal.id} href={`/journals/${journal.code.toLowerCase()}`} className="block">
+                <Card className="hover:shadow-lg transition-shadow duration-300 overflow-hidden h-full flex flex-col">
+                  <div className="flex flex-col md:flex-row gap-6 h-full">
+                    <div className="md:w-48 flex-shrink-0">
+                      {journal.coverImageUrl ? (
+                        <img
+                          src={journal.coverImageUrl}
+                          alt={journal.code}
+                          className="w-full h-48 md:h-full object-cover rounded-md"
+                        />
+                      ) : (
+                        <div className="w-full h-48 md:h-full min-h-[12rem] bg-gradient-to-br from-primary-light to-primary rounded-md flex items-center justify-center">
+                          <span className="text-white text-4xl font-bold">{journal.code}</span>
+                        </div>
+                      )}
                     </div>
-                  )}
-                  <h2 className="text-xl font-bold mb-2 text-primary">{journal.fullName}</h2>
-                  <p className="text-gray-600 mb-4">
-                    {journal.description || "No description available."}
-                  </p>
-                  <div className="flex items-center justify-between text-sm text-gray-500">
-                    {journal.issn && <span>ISSN: {journal.issn}</span>}
-                    {journal.impactFactor && (
-                      <span className="bg-accent text-white px-2 py-1 rounded">
-                        IF: {journal.impactFactor}
-                      </span>
-                    )}
+                    <div className="flex-1 py-2 flex flex-col">
+                      <h2 className="text-2xl font-bold mb-3 text-blue-600 hover:text-blue-800 transition-colors">
+                        {journal.fullName}
+                      </h2>
+
+                      <div className="flex-1">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 text-sm text-gray-700">
+                          {journal.issn && (
+                            <div className="font-medium">
+                              <span className="font-bold text-gray-900">ISSN:</span> {journal.issn} (print)
+                            </div>
+                          )}
+                          {journal.eIssn && (
+                            <div className="font-medium">
+                              <span className="font-bold text-gray-900">ISSN:</span> {journal.eIssn} (online)
+                            </div>
+                          )}
+                          {journal.frequency && (
+                            <div className="font-medium">
+                              <span className="font-bold text-gray-900">Freq:</span> {journal.frequency}
+                            </div>
+                          )}
+                          {(journal.citeScore !== null && journal.citeScore !== undefined) && (
+                            <div className="font-medium">
+                              <span className="font-bold text-gray-900">Citescore:</span> {journal.citeScore}
+                            </div>
+                          )}
+                          {journal.impactFactor !== null && (
+                            <div className="font-medium">
+                              <span className="font-bold text-gray-900">IF:</span> {journal.impactFactor}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </Card>
               </Link>
             ))
           ) : (
-            <div className="col-span-3 text-center text-gray-500">
-              No journals available at this time.
+            <div className="col-span-2 text-center text-gray-500 py-12">
+              No journals found matching your criteria.
             </div>
           )}
         </div>
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center gap-4 border-t pt-8">
+            <Link
+              href={`/journals?page=${page - 1}${query ? `&q=${query}` : ''}`}
+              className={`px-4 py-2 rounded border ${page <= 1 ? 'pointer-events-none opacity-50 bg-gray-100 text-gray-400' : 'bg-white hover:bg-gray-50 text-blue-600 border-blue-200'}`}
+              aria-disabled={page <= 1}
+            >
+              ← Previous
+            </Link>
+
+            <span className="text-gray-600 font-medium">
+              Page {page} of {totalPages}
+            </span>
+
+            <Link
+              href={`/journals?page=${page + 1}${query ? `&q=${query}` : ''}`}
+              className={`px-4 py-2 rounded border ${page >= totalPages ? 'pointer-events-none opacity-50 bg-gray-100 text-gray-400' : 'bg-white hover:bg-gray-50 text-blue-600 border-blue-200'}`}
+              aria-disabled={page >= totalPages}
+            >
+              Next →
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );

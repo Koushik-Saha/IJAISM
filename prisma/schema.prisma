@@ -105,9 +105,28 @@ model Journal {
   issn                    String?
   eIssn                   String?
   impactFactor            Float?
+  citeScore               Float?
   publisher               String?
   frequency               String?
   articleProcessingCharge Float?
+  themeColor              String?   @default("#006d77") // Default teal color
+  
+  // Journal Insights
+  subjectAreas            String?   @db.Text
+  indexing                String?   @db.Text
+  
+  // Content Pages
+  editorialBoard          Json?     // [{ name: "...", role: "...", affiliation: "...", image: "..." }]
+  editorialBoardDescription String? @db.Text
+  editingService          String?   @db.Text
+  
+  // Timeline Metrics
+  timeToFirstDecision     String?
+  reviewTime              String?
+  revisionTime            String?
+  submissionToAcceptance  String?
+  acceptanceToPublication String?
+
   isActive                Boolean   @default(true)
   displayOrder            Int       @default(0)
   createdAt               DateTime  @default(now())
@@ -115,16 +134,42 @@ model Journal {
   deletedAt               DateTime?
 
   articles Article[]
+  issues   JournalIssue[]
 
   @@index([code])
   @@index([isActive])
 }
 
+model JournalIssue {
+  id          String   @id @default(uuid())
+  journalId   String
+  journal     Journal  @relation(fields: [journalId], references: [id])
+  title       String?  // e.g. "Special Issue on AI"
+  volume      Int
+  issue       Int
+  year        Int
+  coverUrl    String?
+  isSpecial   Boolean  @default(false)
+  isCurrent   Boolean  @default(false)
+  description String?  @db.Text
+  publishedAt DateTime @default(now())
+  
+  articles    Article[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([journalId])
+  @@index([year])
+}
+
 // Articles
 model Article {
-  id              String    @id @default(uuid())
+  id              String        @id @default(uuid())
   journalId       String
-  journal         Journal   @relation(fields: [journalId], references: [id])
+  journal         Journal       @relation(fields: [journalId], references: [id])
+  issueId         String?
+  journalIssue    JournalIssue? @relation(fields: [issueId], references: [id])
   title           String
   abstract        String
   keywords        String[]
@@ -144,6 +189,7 @@ model Article {
   viewCount       Int       @default(0)
   downloadCount   Int       @default(0)
   isOpenAccess    Boolean   @default(true)
+  isBestPaper     Boolean   @default(false)
   
   // New workflow fields
   editorComments    String?
@@ -213,6 +259,7 @@ model Dissertation {
   abstract       String
   authorId       String
   author         User      @relation(fields: [authorId], references: [id])
+  authorName     String?
   university     String
   department     String?
   degreeType     String // masters, phd
@@ -221,6 +268,7 @@ model Dissertation {
   defenseDate    DateTime?
   keywords       String[]
   pdfUrl         String?
+  coverImageUrl  String?
   status         String    @default("pending") // pending, approved, published
   viewCount      Int       @default(0)
   downloadCount  Int       @default(0)

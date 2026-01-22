@@ -5,7 +5,7 @@ test.describe('Article Submission Flow', () => {
     test.beforeEach(async ({ page }) => {
         // Login as author
         await page.goto('/login');
-        await page.fill('input[name="email"]', 'demo.author@c5k.com');
+        await page.fill('input[name="email"]', 'demo.author@ijaism.com');
         await page.fill('input[name="password"]', 'password123');
         await page.click('button[type="submit"]');
         await expect(page).toHaveURL('/dashboard');

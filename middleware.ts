@@ -8,7 +8,9 @@ export function middleware(request: NextRequest) {
     const allowedOrigins = [
         'http://localhost:3000',
         'https://c5k-platform.vercel.app', // Production URL
-        'https://c5k-platform-staging.vercel.app' // Staging URL
+        'https://c5k-platform-staging.vercel.app', // Staging URL
+        'https://ijaism-platform.vercel.app',
+        'https://ijaism-platform-staging.vercel.app'
     ];
 
     const origin = request.headers.get('origin');

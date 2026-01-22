@@ -186,7 +186,7 @@ export default function Header() {
               Journals
             </Link>
             <Link href="/dissertations" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-1">
-              Dissertations
+              Dissertation/Thesis
             </Link>
             <Link href="/books" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-1">
               Books

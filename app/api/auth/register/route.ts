@@ -45,12 +45,12 @@ export async function POST(req: NextRequest) {
 
     const { name, email, university, password } = validation.data;
 
-    // Validate academic email
+    // Validate email format (any valid email now allowed)
     if (!isAcademicEmail(email)) {
       return NextResponse.json(
         {
           success: false,
-          error: { message: 'Please use an academic or work email address' },
+          error: { message: 'Please enter a valid email address' },
         },
         { status: 400 }
       );

@@ -88,22 +88,39 @@ export async function POST(req: NextRequest) {
         blobId: blob.url,
       });
     } catch (blobError: any) {
-      // If Vercel Blob is not configured, fall back to placeholder
+      // If Vercel Blob is not configured, fall back to local storage
       if (blobError.message?.includes('BLOB_READ_WRITE_TOKEN') || !process.env.BLOB_READ_WRITE_TOKEN) {
-        logger.warn('Vercel Blob not configured. Using placeholder URL.', {
+
+        // Local storage logic
+        const fs = require('fs');
+        const path = require('path');
+        const { writeFile, mkdir } = require('fs/promises');
+
+        // Ensure directory exists
+        const uploadDir = path.join(process.cwd(), 'public', 'uploads', fileType);
+        await mkdir(uploadDir, { recursive: true });
+
+        // Write file
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const filePath = path.join(uploadDir, `${timestamp}_${sanitizedName}`);
+        await writeFile(filePath, buffer);
+
+        const fileUrl = `/uploads/${fileType}/${timestamp}_${sanitizedName}`;
+
+        logger.info('File saved locally (Blob not configured)', {
           fileType,
+          fileName,
           userId: decoded.userId
         });
 
-        const placeholderUrl = `/uploads/${fileType}/${timestamp}_${sanitizedName}`;
-
         return NextResponse.json({
           success: true,
-          url: placeholderUrl,
+          url: fileUrl,
           fileName: file.name,
           size: file.size,
           type: file.type,
-          warning: 'File storage not configured. Set BLOB_READ_WRITE_TOKEN to enable actual file storage.',
+          blobId: fileUrl, // Use URL as ID for local files
+          warning: 'Using local storage. Blob storage not configured.',
         });
       }
 

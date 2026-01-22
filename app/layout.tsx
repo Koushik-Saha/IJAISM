@@ -7,6 +7,8 @@ import { Analytics } from "@vercel/analytics/react";
 import PWARegister from "@/components/PWARegister";
 import { Toaster } from "sonner";
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: "IJAISM - International Journal of Advanced Information Systems and Management",
   description: "Dedicated to publishing groundbreaking research in information technology, business management, and related disciplines",

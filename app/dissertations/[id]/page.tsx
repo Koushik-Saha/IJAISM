@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
+import SecureDownloadButton from "@/components/ui/SecureDownloadButton";
 
 export const dynamic = "force-dynamic";
 
@@ -159,14 +160,10 @@ export default async function DissertationDetailPage({ params }: { params: Promi
               {/* Actions */}
               <div className="space-y-3">
                 {hasPdf ? (
-                  <a
-                    href={dissertation.pdfUrl || "#"}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <SecureDownloadButton
+                    pdfUrl={dissertation.pdfUrl || ""}
                     className="w-full text-center block bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg font-bold transition-colors"
-                  >
-                    Download PDF
-                  </a>
+                  />
                 ) : (
                   <button
                     disabled

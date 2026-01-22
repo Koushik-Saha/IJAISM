@@ -96,7 +96,7 @@ export default function CareersPage() {
           <h2 className="text-3xl md:text-4xl font-bold text-primary mb-6">Why Join IJAISM?</h2>
           <p className="text-lg text-gray-700 mb-6 leading-relaxed">
             At IJAISM, we're transforming academic publishing by making research more accessible and
-            the publication process faster and more efficient. Our innovative 4-reviewer system
+            the publication process faster and more efficient. Our innovative review system
             has helped thousands of researchers share their discoveries with the world.
           </p>
           <p className="text-lg text-gray-700 leading-relaxed">

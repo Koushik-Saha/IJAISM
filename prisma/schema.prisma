@@ -17,7 +17,7 @@ model User {
   name            String
   university      String
   orcid           String?   @unique
-  role            String    @default("author") // author, reviewer, editor, admin
+  role            String    @default("author") // author, reviewer, editor, super_admin
   affiliation     String?
   bio             String?
   profileImageUrl String?
@@ -37,6 +37,7 @@ model User {
   passwordResetTokens     PasswordResetToken[]
   emailVerificationTokens EmailVerificationToken[]
   blogs                   Blog[]
+  downloads               DownloadLog[]
 
   @@index([email])
   @@index([role])
@@ -136,13 +137,19 @@ model Article {
   publicationDate DateTime?
   submissionDate  DateTime?
   acceptanceDate  DateTime?
-  status          String    @default("draft") // draft, submitted, under_review, accepted, published, rejected
+  status          String    @default("draft") // draft, submitted, under_review, waiting_for_editor, revision_requested, resubmitted, waiting_for_final_decision, accepted, published, rejected
   pdfUrl          String?
   language        String    @default("en")
   citationCount   Int       @default(0)
   viewCount       Int       @default(0)
   downloadCount   Int       @default(0)
   isOpenAccess    Boolean   @default(true)
+  
+  // New workflow fields
+  editorComments    String?
+  rejectionReason   String?
+  resubmissionCount Int       @default(0)
+
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   deletedAt       DateTime?
@@ -150,11 +157,28 @@ model Article {
   authorId String
   author   User     @relation(fields: [authorId], references: [id])
   reviews  Review[]
+  coAuthors CoAuthor[]
 
   @@index([journalId])
   @@index([status])
   @@index([publicationDate])
   @@index([authorId])
+}
+
+// Co-Authors
+model CoAuthor {
+  id           String   @id @default(uuid())
+  articleId    String
+  article      Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  name         String
+  email        String?
+  university   String?
+  isMain       Boolean  @default(false)
+  order        Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([articleId])
 }
 
 // Reviews
@@ -164,10 +188,10 @@ model Review {
   article          Article   @relation(fields: [articleId], references: [id], onDelete: Cascade)
   reviewerId       String
   reviewer         User      @relation(fields: [reviewerId], references: [id])
-  reviewerNumber   Int // 1, 2, 3, or 4 (for 4-reviewer system)
+  reviewerNumber   Int 
   round            Int       @default(1)
-  status           String    @default("pending") // pending, in_progress, completed, declined
-  decision         String? // accept, reject
+  status           String    @default("invited") // invited, accepted, declined, pending, in_progress, completed
+  decision         String?   // accept, partial_accept, reject
   commentsToAuthor String?
   commentsToEditor String?
   assignedAt       DateTime  @default(now())
@@ -356,4 +380,17 @@ model Book {
 
   @@index([isbn])
   @@index([field])
+}
+
+// Download Tracking
+model DownloadLog {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  resourceId  String
+  resourceType String  // 'article', 'dissertation', etc.
+  downloadedAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([downloadedAt])
 }

@@ -25,7 +25,7 @@ describe('Auth Utilities', () => {
         });
     });
 
-    describe('Academic Email Validation', () => {
+    describe('Email Validation', () => {
         it('should accept .edu emails', () => {
             expect(isAcademicEmail('student@university.edu')).toBe(true);
         });
@@ -34,17 +34,16 @@ describe('Auth Utilities', () => {
             expect(isAcademicEmail('professor@cambridge.ac.uk')).toBe(true);
         });
 
-        it('should accept known academic domains like .org if allowed (check implementation)', () => {
-            // Assuming implementation allows .org or specific lists for now based on standard academic regex
-            // If current impl is simple regex, test constraints:
-            // Adjust these expectations based on the actual Lib
-            expect(isAcademicEmail('researcher@institute.org')).toBe(true);
+        it('should accept generic domains (gmail, yahoo, etc)', () => {
+            expect(isAcademicEmail('user@gmail.com')).toBe(true);
+            expect(isAcademicEmail('user@yahoo.com')).toBe(true);
+            expect(isAcademicEmail('user@hotmail.com')).toBe(true);
         });
 
-        it('should reject generic domains', () => {
-            expect(isAcademicEmail('user@gmail.com')).toBe(false);
-            expect(isAcademicEmail('user@yahoo.com')).toBe(false);
-            expect(isAcademicEmail('user@hotmail.com')).toBe(false);
+        it('should reject invalid email formats', () => {
+            expect(isAcademicEmail('invalid-email')).toBe(false);
+            expect(isAcademicEmail('test@')).toBe(false);
+            expect(isAcademicEmail('@domain.com')).toBe(false);
         });
     });
 

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import SecureDownloadButton from "@/components/ui/SecureDownloadButton";
 
 export const dynamic = "force-dynamic";
 
@@ -111,9 +112,17 @@ export default async function DissertationsPage() {
                     </Link>
                     {dissertation.pdfUrl && (
                       <a
-                        href={dissertation.pdfUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          const token = localStorage.getItem('token');
+                          if (!token) {
+                            window.location.href = `/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`;
+                            return;
+                          }
+                          const path = dissertation.pdfUrl?.replace(/^\/uploads\//, '');
+                          window.open(`/api/files/download/${path}?token=${token}`, '_blank');
+                        }}
                         className="border border-primary text-primary hover:bg-primary/10 px-6 py-2 rounded font-medium transition-colors"
                       >
                         Download PDF

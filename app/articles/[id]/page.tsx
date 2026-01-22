@@ -31,6 +31,15 @@ interface Article {
   revised?: string;
   accepted?: string;
   published?: string;
+  status: string;
+  reviews?: {
+    id: string;
+    reviewer: {
+      name: string;
+    };
+    decision: string;
+    commentsToAuthor?: string;
+  }[];
   views?: number;
   downloads?: number;
   citations?: number;
@@ -110,6 +119,8 @@ export default function ArticleDetailPage() {
           published: rawArticle.publicationDate
             ? new Date(rawArticle.publicationDate).toISOString().split('T')[0]
             : undefined,
+          status: rawArticle.status,
+          reviews: rawArticle.reviews || [],
         };
 
         setArticle(formattedArticle);
@@ -188,6 +199,48 @@ export default function ArticleDetailPage() {
               <p className="text-gray-700 leading-relaxed">{article.abstract}</p>
             </Card>
 
+            {/* Reviewer Feedback - Only visible if Revision Requested */}
+            {article.status === 'revision_requested' && article.reviews && article.reviews.length > 0 && (
+              <Card className="mb-6 bg-orange-50 border-orange-200">
+                <h2 className="text-xl font-bold mb-4 text-orange-900">Reviewer Feedback</h2>
+                <div className="space-y-4">
+                  {article.reviews.map((review) => (
+                    <div key={review.id} className="bg-white p-4 rounded border border-orange-100 shadow-sm">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-semibold text-gray-900">{review.reviewer?.name || "Anonymous Reviewer"}</span>
+                        <span className={`text-xs px-2 py-1 rounded font-medium ${review.decision === 'accept' ? 'bg-green-100 text-green-700' :
+                          review.decision === 'reject' ? 'bg-red-100 text-red-700' :
+                            'bg-yellow-100 text-yellow-700'
+                          }`}>
+                          {review.decision ? review.decision.replace('_', ' ').toUpperCase() : 'PENDING'}
+                        </span>
+                      </div>
+                      {review.commentsToAuthor && (
+                        <div className="text-gray-800 text-sm whitespace-pre-wrap">
+                          {review.commentsToAuthor}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-orange-200">
+                  <p className="text-sm text-orange-800 mb-3">
+                    Please address the feedback above and resubmit your article.
+                  </p>
+                  <Link
+                    href={`/submit?resubmit=${article.id}`}
+                    className="inline-flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white font-medium px-4 py-2 rounded transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Resubmit Article
+                  </Link>
+                </div>
+              </Card>
+            )}
+
             {/* Keywords */}
             <Card className="mb-6">
               <h2 className="text-xl font-bold mb-4">Keywords</h2>
@@ -212,7 +265,21 @@ export default function ArticleDetailPage() {
                       <p className="text-sm text-gray-600">Download to read full content</p>
                     </div>
                   </div>
-                  <a href={article.pdfUrl} target="_blank" rel="noopener noreferrer" className="btn-primary">
+                  <a
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const token = localStorage.getItem('token');
+                      if (!token) {
+                        // Redirect to login
+                        window.location.href = `/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`;
+                        return;
+                      }
+                      const path = article.pdfUrl?.replace(/^\/uploads\//, '');
+                      window.open(`/api/files/download/${path}?token=${token}`, '_blank');
+                    }}
+                    className="btn-primary"
+                  >
                     View PDF
                   </a>
                 </div>
@@ -271,7 +338,20 @@ export default function ArticleDetailPage() {
             {article.pdfUrl && (
               <Card className="mb-6">
                 <h3 className="text-lg font-bold mb-4">Download</h3>
-                <a href={article.pdfUrl} target="_blank" rel="noopener noreferrer" className="w-full btn-primary mb-2 block text-center pt-2 pb-2">Download PDF</a>
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const token = localStorage.getItem('token');
+                    if (!token) {
+                      window.location.href = `/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`;
+                      return;
+                    }
+                    const path = article.pdfUrl?.replace(/^\/uploads\//, '');
+                    window.open(`/api/files/download/${path}?token=${token}`, '_blank');
+                  }}
+                  className="w-full btn-primary mb-2 block text-center pt-2 pb-2"
+                >Download PDF</a>
               </Card>
             )}
 

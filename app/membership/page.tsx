@@ -152,7 +152,7 @@ export default function MembershipPage() {
     {
       icon: "🚀",
       title: "Fast Publication",
-      description: "Our 4-reviewer system ensures rapid publication without compromising quality.",
+      description: "Our rapid review system ensures rapid publication without compromising quality.",
     },
     {
       icon: "🌍",
@@ -230,9 +230,8 @@ export default function MembershipPage() {
             {plans.map((plan) => (
               <div
                 key={plan.name}
-                className={`bg-white rounded-lg shadow-lg overflow-hidden ${
-                  plan.recommended ? "ring-4 ring-accent transform scale-105" : ""
-                }`}
+                className={`bg-white rounded-lg shadow-lg overflow-hidden ${plan.recommended ? "ring-4 ring-accent transform scale-105" : ""
+                  }`}
               >
                 {plan.recommended && (
                   <div className="bg-accent text-white text-center py-2 font-bold text-sm">
@@ -267,11 +266,10 @@ export default function MembershipPage() {
                   <button
                     onClick={() => handleSubscribe(plan.tier)}
                     disabled={loadingTier !== null}
-                    className={`block w-full text-center py-3 px-6 rounded-lg font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                      plan.recommended
-                        ? "bg-accent text-white hover:bg-accent-dark"
-                        : "bg-primary text-white hover:bg-primary/90"
-                    }`}
+                    className={`block w-full text-center py-3 px-6 rounded-lg font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${plan.recommended
+                      ? "bg-accent text-white hover:bg-accent-dark"
+                      : "bg-primary text-white hover:bg-primary/90"
+                      }`}
                   >
                     {loadingTier === plan.tier ? (
                       <span className="flex items-center justify-center">
@@ -322,7 +320,7 @@ export default function MembershipPage() {
             <div className="border-l-4 border-accent pl-6">
               <p className="text-gray-700 italic mb-4">
                 "IJAISM's rapid publication process allowed me to share my research months earlier
-                than traditional journals. The 4-reviewer system ensures quality while maintaining
+                than traditional journals. The rapid review system ensures quality while maintaining
                 speed."
               </p>
               <p className="font-bold text-gray-900">Dr. Sarah Johnson</p>

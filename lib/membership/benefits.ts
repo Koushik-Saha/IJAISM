@@ -7,7 +7,7 @@ export type MembershipTier = 'free' | 'basic' | 'premium' | 'institutional';
 export const TIER_CONFIG = {
   free: {
     name: 'Free',
-    submissionsPerYear: 0, // View only - no submissions
+    submissionsPerYear: 200, // Soft launch: 200/year (was 0)
     priority: 0,
     features: [
       'Access to all published articles',

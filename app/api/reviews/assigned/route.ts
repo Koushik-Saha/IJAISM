@@ -47,8 +47,8 @@ export async function GET(req: NextRequest) {
 
     // 4. Calculate statistics
     const stats = {
-      pending: assignedReviews.filter((r) => r.status === 'pending').length,
-      inProgress: assignedReviews.filter((r) => r.status === 'in_progress').length,
+      pending: assignedReviews.filter((r) => ['pending', 'invited'].includes(r.status)).length,
+      inProgress: assignedReviews.filter((r) => ['in_progress', 'accepted'].includes(r.status)).length,
       completed: completedReviews.length,
       total: assignedReviews.length + completedReviews.length,
     };

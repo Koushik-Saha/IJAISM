@@ -29,8 +29,9 @@ export async function comparePassword(password: string, hash: string): Promise<b
   return bcrypt.compare(password, hash);
 }
 
+// Deprecated: logic changed to allow any valid email
 export function isAcademicEmail(email: string): boolean {
-  const academicDomains = ['.edu', '.ac.', '.edu.', 'university', 'college', '.org', '.gov'];
-  const lowercaseEmail = email.toLowerCase();
-  return academicDomains.some(domain => lowercaseEmail.includes(domain));
+  // Basic email validation regex
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
 }

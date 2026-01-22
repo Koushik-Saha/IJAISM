@@ -17,6 +17,18 @@ const nextConfig: NextConfig = {
         source: '/(.*)',
         headers: [
           {
+            key: 'Cache-Control',
+            value: 'no-store, max-age=0, must-revalidate, proxy-revalidate',
+          },
+          {
+            key: 'Pragma',
+            value: 'no-cache',
+          },
+          {
+            key: 'Expires',
+            value: '0',
+          },
+          {
             key: 'X-Content-Type-Options',
             value: 'nosniff',
           },

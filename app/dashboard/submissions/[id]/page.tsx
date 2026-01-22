@@ -22,6 +22,8 @@ interface Article {
     name: string;
     email: string;
   };
+  editorComments: string | null;
+  rejectionReason: string | null;
 }
 
 export default function SubmissionDetailPage() {
@@ -76,20 +78,21 @@ export default function SubmissionDetailPage() {
   }, [id, router]);
 
   const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
+    switch (status.toLowerCase().replace(' ', '_')) {
       case 'submitted':
         return 'bg-blue-100 text-blue-800';
-      case 'under review':
-      case 'in review':
+      case 'under_review':
+      case 'in_review':
         return 'bg-yellow-100 text-yellow-800';
+      case 'waiting_for_editor':
+        return 'bg-purple-100 text-purple-800';
       case 'accepted':
+      case 'published':
         return 'bg-green-100 text-green-800';
       case 'rejected':
         return 'bg-red-100 text-red-800';
-      case 'revision requested':
+      case 'revision_requested':
         return 'bg-orange-100 text-orange-800';
-      case 'published':
-        return 'bg-purple-100 text-purple-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -171,7 +174,7 @@ export default function SubmissionDetailPage() {
               <p className="text-gray-600">Submission ID: {article.id}</p>
             </div>
             <span className={`px-4 py-2 text-sm font-semibold rounded-full ${getStatusColor(article.status)} whitespace-nowrap`}>
-              {article.status}
+              {article.status.replace('_', ' ')}
             </span>
           </div>
 
@@ -250,7 +253,7 @@ export default function SubmissionDetailPage() {
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-xl font-bold text-primary mb-4">Review Status</h2>
 
-          {article.status.toLowerCase() === 'submitted' && (
+          {article.status.toLowerCase().replace(' ', '_') === 'submitted' && (
             <div className="bg-blue-50 border-l-4 border-blue-500 p-4">
               <div className="flex">
                 <div className="flex-shrink-0">
@@ -267,7 +270,7 @@ export default function SubmissionDetailPage() {
             </div>
           )}
 
-          {article.status.toLowerCase() === 'under review' && (
+          {article.status.toLowerCase().replace(' ', '_') === 'under_review' && (
             <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4">
               <div className="flex">
                 <div className="flex-shrink-0">
@@ -284,7 +287,24 @@ export default function SubmissionDetailPage() {
             </div>
           )}
 
-          {article.status.toLowerCase() === 'accepted' && (
+          {article.status.toLowerCase().replace(' ', '_') === 'waiting_for_editor' && (
+            <div className="bg-purple-50 border-l-4 border-purple-500 p-4">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-purple-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-purple-700">
+                    Review process complete. The editor is now making a final decision on your article.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {(article.status.toLowerCase().replace(' ', '_') === 'accepted' || article.status.toLowerCase().replace(' ', '_') === 'published') && (
             <div className="bg-green-50 border-l-4 border-green-500 p-4">
               <div className="flex">
                 <div className="flex-shrink-0">
@@ -294,14 +314,14 @@ export default function SubmissionDetailPage() {
                 </div>
                 <div className="ml-3">
                   <p className="text-sm text-green-700 font-semibold">
-                    Congratulations! Your article has been accepted for publication.
+                    {article.status === 'published' ? 'Congratulations! Your article has been published.' : 'Congratulations! Your article has been accepted for publication.'}
                   </p>
                 </div>
               </div>
             </div>
           )}
 
-          {article.status.toLowerCase() === 'rejected' && (
+          {article.status.toLowerCase().replace(' ', '_') === 'rejected' && (
             <div className="bg-red-50 border-l-4 border-red-500 p-4">
               <div className="flex">
                 <div className="flex-shrink-0">
@@ -310,15 +330,20 @@ export default function SubmissionDetailPage() {
                   </svg>
                 </div>
                 <div className="ml-3">
-                  <p className="text-sm text-red-700">
-                    Unfortunately, your submission was not accepted. You may revise and resubmit.
+                  <p className="text-sm text-red-700 font-semibold mb-1">
+                    Unfortunately, your submission was not accepted.
                   </p>
+                  {(article.rejectionReason || article.editorComments) && (
+                    <div className="text-sm text-red-700 mt-2 bg-red-100 p-2 rounded">
+                      <strong>Reason:</strong> {article.rejectionReason || article.editorComments}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
           )}
 
-          {article.status.toLowerCase() === 'revision requested' && (
+          {article.status.toLowerCase().replace(' ', '_') === 'revision_requested' && (
             <div className="bg-orange-50 border-l-4 border-orange-500 p-4">
               <div className="flex">
                 <div className="flex-shrink-0">
@@ -327,9 +352,15 @@ export default function SubmissionDetailPage() {
                   </svg>
                 </div>
                 <div className="ml-3">
-                  <p className="text-sm text-orange-700 font-semibold">
-                    Revisions have been requested for your article. Please check the review comments and resubmit.
+                  <p className="text-sm text-orange-700 font-semibold mb-1">
+                    Revisions have been requested for your article.
                   </p>
+                  {article.editorComments && (
+                    <div className="text-sm text-orange-800 mt-2 bg-orange-100 p-3 rounded border border-orange-200">
+                      <strong>Editor Comments:</strong>
+                      <p className="mt-1 whitespace-pre-wrap">{article.editorComments}</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

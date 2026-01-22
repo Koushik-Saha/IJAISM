@@ -2,9 +2,18 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { Menu, MenuButton, MenuItems, MenuItem, Transition } from "@headlessui/react";
+import {
+  ChevronDownIcon,
+  Squares2X2Icon,
+  UserIcon,
+  ClipboardDocumentListIcon,
+  CreditCardIcon,
+  ArrowRightOnRectangleIcon
+} from "@heroicons/react/24/outline";
 
 interface UserInfo {
   userId: string;
@@ -26,6 +35,15 @@ export default function Header() {
   useEffect(() => {
     const checkAuth = () => {
       const token = localStorage.getItem('token');
+      const loginTime = localStorage.getItem('loginTime');
+      const MAX_SESSION_TIME = 2 * 60 * 60 * 1000; // 2 hours
+
+      // Check for session timeout
+      if (loginTime && Date.now() - parseInt(loginTime) > MAX_SESSION_TIME) {
+        handleLogout();
+        return;
+      }
+
       if (token) {
         try {
           // Decode JWT token to get user info
@@ -36,8 +54,7 @@ export default function Header() {
           // Check if token is expired
           if (payload.exp && payload.exp * 1000 < Date.now()) {
             // Token expired, clear it
-            localStorage.removeItem('token');
-            setUser(null);
+            handleLogout();
           } else {
             // Token valid, set user info
             setUser({
@@ -46,11 +63,14 @@ export default function Header() {
               name: payload.name || payload.email.split('@')[0],
               role: payload.role,
             });
+            // Set login time if not present
+            if (!loginTime) {
+              localStorage.setItem('loginTime', Date.now().toString());
+            }
           }
         } catch (error) {
           console.error('Error decoding token:', error);
-          localStorage.removeItem('token');
-          setUser(null);
+          handleLogout();
         }
       } else {
         setUser(null);
@@ -75,10 +95,18 @@ export default function Header() {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    // Clear all storage
+    localStorage.clear();
+    sessionStorage.clear();
+
+    // Clear all cookies
+    document.cookie.split(";").forEach((c) => {
+      document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+    });
+
     setUser(null);
     setIsMenuOpen(false);
+    setIsUserMenuOpen(false);
 
     // Dispatch logout event
     window.dispatchEvent(new Event('userLoggedOut'));
@@ -173,9 +201,7 @@ export default function Header() {
 
           {/* Desktop User Actions */}
           <div className="hidden lg:flex items-center space-x-2 xl:space-x-3 flex-shrink-0 ml-2">
-            <Link href="/membership" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-1">
-              Membership
-            </Link>
+
             <Link href="/submit" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-1">
               Submit
             </Link>
@@ -183,83 +209,119 @@ export default function Header() {
             {!isLoading && (
               <>
                 {user ? (
-                  // Logged in: User Dropdown
-                  <div className="relative ml-2">
-                    <button
-                      onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                      className="flex items-center gap-2 p-1 rounded-full hover:bg-gray-100 transition-colors border border-transparent hover:border-gray-200"
-                    >
+                  // Logged in: User Dropdown (Headless UI)
+                  <Menu as="div" className="relative ml-3">
+                    <MenuButton className="w-[12rem] justify-end flex items-center gap-2 p-1 rounded-full hover:bg-gray-100 transition-colors border border-transparent hover:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
                       <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold shadow-sm">
                         {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
                       </div>
                       <span className="text-sm font-medium text-gray-700 hidden xl:block max-w-[100px] truncate">
                         {user.name}
                       </span>
-                      <svg
-                        className={`w-4 h-4 text-gray-500 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
+                      <ChevronDownIcon className="w-4 h-4 text-gray-500" aria-hidden="true" />
+                    </MenuButton>
+                    <Transition
+                      as={Fragment}
+                      enter="transition ease-out duration-100"
+                      enterFrom="transform opacity-0 scale-95"
+                      enterTo="transform opacity-100 scale-100"
+                      leave="transition ease-in duration-75"
+                      leaveFrom="transform opacity-100 scale-100"
+                      leaveTo="transform opacity-0 scale-95"
+                    >
+                      <MenuItems
+                        className="absolute right-0 mt-2 w-60 bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] p-1 ring-1 ring-black ring-opacity-5 focus:outline-none z-50 origin-top-right border border-gray-100"
                       >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
+                        <div className="px-4 py-3 bg-gray-50 rounded-lg mb-1">
+                          <p className="text-sm font-bold text-gray-900 truncate">{user.name}</p>
+                          <p className="text-xs text-gray-500 font-medium truncate">{user.email}</p>
+                        </div>
 
-                    {/* Dropdown Menu */}
-                    {isUserMenuOpen && (
-                      <>
-                        <div
-                          className="fixed inset-0 z-10"
-                          onClick={() => setIsUserMenuOpen(false)}
-                        ></div>
-                        <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg py-1 ring-1 ring-black ring-opacity-5 focus:outline-none z-20 animate-fade-in-down origin-top-right border border-gray-100">
-                          <div className="px-4 py-3 border-b border-gray-100 bg-gray-50 rounded-t-xl">
-                            <p className="text-sm font-semibold text-gray-900 truncate">{user.name}</p>
-                            <p className="text-xs text-gray-500 truncate">{user.email}</p>
-                          </div>
-
-                          <div className="py-1">
-                            <Link
-                              href="/dashboard"
-                              className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors"
-                              onClick={() => setIsUserMenuOpen(false)}
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-                              Dashboard
-                            </Link>
-                            <Link
-                              href="/dashboard/profile"
-                              className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors"
-                              onClick={() => setIsUserMenuOpen(false)}
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-                              My Profile
-                            </Link>
-                            {user.role === 'reviewer' && (
+                        <div className="space-y-1">
+                          <MenuItem>
+                            {({ active }) => (
                               <Link
-                                href="/dashboard/reviews"
-                                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors"
-                                onClick={() => setIsUserMenuOpen(false)}
+                                href="/dashboard"
+                                className={`${active ? 'bg-primary/5 text-primary' : 'text-gray-700'
+                                  } group flex items-center gap-4 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-200`}
                               >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-                                Review Assignments
+                                <div className={`flex items-center justify-center w-10 h-10 rounded-xl transition-colors ${active ? 'text-primary bg-primary/10' : 'text-gray-400 bg-gray-100/50'
+                                  }`}>
+                                  <Squares2X2Icon className="w-5 h-5" />
+                                </div>
+                                Dashboard
                               </Link>
                             )}
-                          </div>
-
-                          <div className="border-t border-gray-100 py-1">
-                            <button
-                              onClick={handleLogout}
-                              className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-                              Sign Out
-                            </button>
-                          </div>
+                          </MenuItem>
+                          <MenuItem>
+                            {({ active }) => (
+                              <Link
+                                href="/dashboard/profile"
+                                className={`${active ? 'bg-primary/5 text-primary' : 'text-gray-700'
+                                  } group flex items-center gap-4 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-200`}
+                              >
+                                <div className={`flex items-center justify-center w-10 h-10 rounded-xl transition-colors ${active ? 'text-primary bg-primary/10' : 'text-gray-400 bg-gray-100/50'
+                                  }`}>
+                                  <UserIcon className="w-5 h-5" />
+                                </div>
+                                My Profile
+                              </Link>
+                            )}
+                          </MenuItem>
+                          {user.role === 'reviewer' && (
+                            <MenuItem>
+                              {({ active }) => (
+                                <Link
+                                  href="/dashboard/reviews"
+                                  className={`${active ? 'bg-primary/5 text-primary' : 'text-gray-700'
+                                    } group flex items-center gap-4 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-200`}
+                                >
+                                  <div className={`flex items-center justify-center w-10 h-10 rounded-xl transition-colors ${active ? 'text-primary bg-primary/10' : 'text-gray-400 bg-gray-100/50'
+                                    }`}>
+                                    <ClipboardDocumentListIcon className="w-5 h-5" />
+                                  </div>
+                                  Review Assignments
+                                </Link>
+                              )}
+                            </MenuItem>
+                          )}
+                          <MenuItem>
+                            {({ active }) => (
+                              <Link
+                                href="/membership"
+                                className={`${active ? 'bg-primary/5 text-primary' : 'text-gray-700'
+                                  } group flex items-center gap-4 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-200`}
+                              >
+                                <div className={`flex items-center justify-center w-10 h-10 rounded-xl transition-colors ${active ? 'text-primary bg-primary/10' : 'text-gray-400 bg-gray-100/50'
+                                  }`}>
+                                  <CreditCardIcon className="w-5 h-5" />
+                                </div>
+                                Membership
+                              </Link>
+                            )}
+                          </MenuItem>
                         </div>
-                      </>
-                    )}
-                  </div>
+
+                        <div className="mt-2 pt-2 border-t border-gray-100/50">
+                          <MenuItem>
+                            {({ active }) => (
+                              <button
+                                onClick={handleLogout}
+                                className={`${active ? 'bg-red-50 text-red-700' : 'text-red-600'
+                                  } group flex w-full items-center gap-4 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-200`}
+                              >
+                                <div className={`flex items-center justify-center w-10 h-10 rounded-xl transition-colors ${active ? 'text-red-600 bg-red-100' : 'text-red-500 bg-red-50'
+                                  }`}>
+                                  <ArrowRightOnRectangleIcon className="w-5 h-5" />
+                                </div>
+                                Sign Out
+                              </button>
+                            )}
+                          </MenuItem>
+                        </div>
+                      </MenuItems>
+                    </Transition>
+                  </Menu>
                 ) : (
                   // Not logged in: Show sign in and join buttons
                   <>

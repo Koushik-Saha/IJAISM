@@ -69,8 +69,6 @@ export default function RegisterPage() {
       newErrors.email = 'Email is required';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = 'Please enter a valid email address';
-    } else if (!isAcademicEmail(formData.email)) {
-      newErrors.email = 'Please use an academic or work email address (e.g., .edu, .ac.uk, university domain)';
     }
 
     // University validation
@@ -195,7 +193,7 @@ export default function RegisterPage() {
             {/* Email */}
             <div>
               <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
-                Academic/Work Email *
+                Email Address *
               </label>
               <input
                 id="email"
@@ -205,12 +203,9 @@ export default function RegisterPage() {
                 onChange={handleChange}
                 className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary ${errors.email ? 'border-red-500' : 'border-gray-300'
                   }`}
-                placeholder="john.smith@university.edu"
+                placeholder="john.smith@example.com"
               />
               {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
-              <p className="mt-1 text-xs text-gray-500">
-                Use your institutional email (.edu, .ac.uk, university domain)
-              </p>
             </div>
 
             {/* University */}

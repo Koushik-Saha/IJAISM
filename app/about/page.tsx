@@ -25,7 +25,7 @@ export default function AboutPage() {
           </p>
           <p className="text-lg text-gray-700 leading-relaxed">
             We believe in accelerating the dissemination of knowledge through our innovative
-            4-reviewer approval system, ensuring rapid publication while maintaining the highest
+            rapid approval system, ensuring rapid publication while maintaining the highest
             standards of academic rigor.
           </p>
         </div>
@@ -91,7 +91,7 @@ export default function AboutPage() {
                 2
               </div>
               <div className="ml-4">
-                <h3 className="text-xl font-bold text-gray-800 mb-2">4-Reviewer Assessment</h3>
+                <h3 className="text-xl font-bold text-gray-800 mb-2">Expert Assessment</h3>
                 <p className="text-gray-700">
                   Four expert reviewers evaluate the manuscript independently for quality and originality.
                 </p>

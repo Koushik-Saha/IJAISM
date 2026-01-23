@@ -1,13 +1,27 @@
+
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-export default async function BooksPage() {
-  const books = await prisma.book.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 20
-  });
+export default async function BooksPage(props: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const searchParams = await props.searchParams;
+  const page = Number(searchParams?.page) || 1;
+  const limit = 10;
+  const skip = (page - 1) * limit;
+
+  const [books, total] = await Promise.all([
+    prisma.book.findMany({
+      orderBy: { createdAt: "desc" },
+      take: limit,
+      skip: skip,
+    }),
+    prisma.book.count()
+  ]);
+
+  const totalPages = Math.ceil(total / limit);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -72,7 +86,7 @@ export default async function BooksPage() {
                       <img
                         src={book.coverImageUrl}
                         alt={book.title}
-                        className="flex-shrink-0 w-32 h-48 object-cover rounded shadow-sm"
+                        className="flex-shrink-0 w-32 h-auto object-cover rounded shadow-sm border border-gray-100"
                       />
                     ) : (
                       <div className="flex-shrink-0 w-32 h-48 bg-gradient-to-br from-primary to-blue-800 rounded flex items-center justify-center text-white font-bold text-center p-4 shadow-sm">
@@ -129,8 +143,33 @@ export default async function BooksPage() {
           )}
         </div>
 
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center gap-4 border-t pt-8">
+            <Link
+              href={`/books?page=${page - 1}`}
+              className={`px-4 py-2 rounded border ${page <= 1 ? 'pointer-events-none opacity-50 bg-gray-100 text-gray-400' : 'bg-white hover:bg-gray-50 text-blue-600 border-blue-200'}`}
+              aria-disabled={page <= 1}
+            >
+              ← Previous
+            </Link>
+
+            <span className="text-gray-600 font-medium">
+              Page {page} of {totalPages}
+            </span>
+
+            <Link
+              href={`/books?page=${page + 1}`}
+              className={`px-4 py-2 rounded border ${page >= totalPages ? 'pointer-events-none opacity-50 bg-gray-100 text-gray-400' : 'bg-white hover:bg-gray-50 text-blue-600 border-blue-200'}`}
+              aria-disabled={page >= totalPages}
+            >
+              Next →
+            </Link>
+          </div>
+        )}
+
         {/* Categories Section */}
-        <div className="bg-white rounded-lg shadow-md p-8 mb-8">
+        <div className="bg-white rounded-lg shadow-md p-8 mb-8 mt-12">
           <h2 className="text-3xl font-bold text-primary mb-6">Book Categories</h2>
           <div className="grid md:grid-cols-3 gap-6">
             <div className="border-l-4 border-accent pl-4">

@@ -773,3 +773,108 @@ export function reviewerAssignmentEmail(
 
   return emailLayout(content, `New Review Assignment: ${articleTitle}`);
 }
+
+// 13. Review Feedback to Author
+export function reviewFeedbackToAuthor(
+  authorName: string,
+  articleTitle: string,
+  journalName: string,
+  decision: string,
+  comments: string
+): string {
+  const statusColors: Record<string, string> = {
+    accept: '#059669', // Green
+    reject: '#dc2626', // Red
+    revision_requested: '#d97706', // Amber
+  };
+
+  const statusText: Record<string, string> = {
+    accept: 'Accepted',
+    reject: 'Rejected',
+    revision_requested: 'Revision Requested',
+  };
+
+  const decisionColor = statusColors[decision] || '#4b5563';
+  const decisionText = statusText[decision] || decision;
+
+  const content = `
+    <div class="content">
+      <h2>Review Feedback Received</h2>
+      <p>Dear ${authorName},</p>
+      <p>
+        A review has been submitted for your article <strong>${articleTitle}</strong> in <strong>${journalName}</strong>.
+      </p>
+
+      <div class="info-box">
+        <h3>Reviewer Decision</h3>
+        <p style="font-size: 18px; font-weight: bold; color: ${decisionColor}; margin: 10px 0;">
+          ${decisionText}
+        </p>
+      </div>
+
+      <div class="info-box">
+        <h3>Comments from Reviewer</h3>
+        <p style="white-space: pre-wrap;">${comments}</p>
+      </div>
+
+      <p>
+        Please log in to your dashboard to view the full details and take any necessary actions.
+      </p>
+
+      <p>
+        <a href="${EMAIL_CONFIG.appUrl}/dashboard/submissions" class="button">View Submission</a>
+      </p>
+
+      <p>Best regards,<br><strong>The IJAISM Editorial Team</strong></p>
+    </div>
+  `;
+
+  return emailLayout(content, `Review feedback for: ${articleTitle}`);
+}
+
+// 14. Review Feedback to Editor
+export function reviewFeedbackToEditor(
+  editorName: string,
+  reviewerName: string,
+  articleTitle: string,
+  journalName: string,
+  decision: string,
+  commentsToAuthor: string,
+  commentsToEditor: string
+): string {
+  const content = `
+    <div class="content">
+      <h2>New Review Submitted 📝</h2>
+      <p>Dear ${editorName},</p>
+      <p>
+        Reviewer <strong>${reviewerName}</strong> has submitted a review for <strong>${articleTitle}</strong>.
+      </p>
+
+      <div class="info-box">
+        <h3>Review Summary</h3>
+        <div class="info-row">
+          <span class="info-label">Journal:</span> ${journalName}
+        </div>
+        <div class="info-row">
+          <span class="info-label">Decision:</span> <strong>${decision.replace('_', ' ').toUpperCase()}</strong>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <h3>Confidential Comments to Editor</h3>
+        <p style="white-space: pre-wrap;">${commentsToEditor || 'No confidential comments provided.'}</p>
+      </div>
+
+      <div class="info-box">
+        <h3>Comments to Author</h3>
+        <p style="white-space: pre-wrap;">${commentsToAuthor}</p>
+      </div>
+
+      <p>
+        <a href="${EMAIL_CONFIG.appUrl}/editor/articles" class="button">Manage Article</a>
+      </p>
+    </div>
+  `;
+
+  return emailLayout(content, `New Review: ${articleTitle} - ${reviewerName}`);
+}

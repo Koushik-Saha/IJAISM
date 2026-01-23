@@ -4,15 +4,14 @@ import { useEffect } from "react";
 
 export default function PWARegister() {
   useEffect(() => {
+    // Unregister existing service workers to ensure no caching
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker
-        .register("/sw.js")
-        .then((registration) => {
-          console.log("Service Worker registered with scope:", registration.scope);
-        })
-        .catch((error) => {
-          console.error("Service Worker registration failed:", error);
-        });
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        for (let registration of registrations) {
+          registration.unregister();
+          console.log("Service Worker unregistered to disable caching");
+        }
+      });
     }
   }, []);
 

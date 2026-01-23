@@ -7,6 +7,8 @@ import { Analytics } from "@vercel/analytics/react";
 import PWARegister from "@/components/PWARegister";
 import { Toaster } from "sonner";
 
+
+
 export const metadata: Metadata = {
   title: "IJAISM - International Journal of Advanced Information Systems and Management",
   description: "Dedicated to publishing groundbreaking research in information technology, business management, and related disciplines",
@@ -41,7 +43,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="application-name" content="IJAISM" />
         <meta name="apple-mobile-web-app-capable" content="yes" />

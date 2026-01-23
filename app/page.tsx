@@ -96,7 +96,7 @@ export default async function HomePage() {
           </p>
           <p className="text-base mb-8 text-gray-300 max-w-3xl mx-auto">
             Our goal is to minimize the delay in sharing new ideas and discoveries with the world,
-            making high-quality, peer-reviewed journals available online through our fast 4-reviewer approval system.
+            making high-quality, peer-reviewed journals available online through our fast peer review system.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/submit" className="btn-accent">

@@ -329,3 +329,55 @@ export async function sendReviewerAssignmentEmail(
     html
   );
 }
+
+// 13. Send Review Feedback to Author
+export async function sendReviewFeedbackToAuthor(
+  authorEmail: string,
+  authorName: string,
+  articleTitle: string,
+  journalName: string,
+  decision: string,
+  comments: string
+): Promise<EmailResult> {
+  const html = templates.reviewFeedbackToAuthor(
+    authorName,
+    articleTitle,
+    journalName,
+    decision,
+    comments
+  );
+
+  return sendEmail(
+    authorEmail,
+    `Review Feedback: ${articleTitle}`,
+    html
+  );
+}
+
+// 14. Send Review Feedback to Editor
+export async function sendReviewFeedbackToEditor(
+  editorEmail: string,
+  editorName: string,
+  reviewerName: string,
+  articleTitle: string,
+  journalName: string,
+  decision: string,
+  commentsToAuthor: string,
+  commentsToEditor: string
+): Promise<EmailResult> {
+  const html = templates.reviewFeedbackToEditor(
+    editorName,
+    reviewerName,
+    articleTitle,
+    journalName,
+    decision,
+    commentsToAuthor,
+    commentsToEditor
+  );
+
+  return sendEmail(
+    editorEmail,
+    `New Review from ${reviewerName}: ${articleTitle}`,
+    html
+  );
+}

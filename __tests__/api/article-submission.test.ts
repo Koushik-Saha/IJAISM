@@ -26,6 +26,10 @@ jest.mock('@/lib/membership', () => ({
     getMembershipStatus: jest.fn(),
 }));
 
+jest.mock('@/lib/email/send', () => ({
+    sendArticleSubmissionEmail: jest.fn().mockResolvedValue(true),
+}));
+
 jest.mock('@/lib/logger', () => ({
     logger: {
         info: jest.fn(),

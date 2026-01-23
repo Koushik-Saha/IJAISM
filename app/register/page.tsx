@@ -121,16 +121,23 @@ export default function RegisterPage() {
 
       const data = await response.json();
 
-      if (response.ok) {
+      if (data.success) {
         // Registration successful
         toast.success('Successfully registered!', {
-          description: 'Your account has been created. Please log in to continue.',
+          description: data.message || 'Your account has been created. Please log in to continue.',
           duration: 4000,
         });
         router.push('/login');
       } else {
         // Registration failed
-        const errorMessage = data.error?.message || 'Registration failed';
+        const errorMessage = data.error?.message || data.error?.code || 'Registration failed';
+
+        // Handle validation errors if present
+        if (data.error?.code === 'VALIDATION_ERROR' && data.error?.details) {
+          // Mapping Zod errors if fields match
+          // (Optional: set specific field errors if state allowed it, currently only simple errors state)
+        }
+
         setErrors({ submit: errorMessage });
         toast.error('Registration failed', {
           description: errorMessage,

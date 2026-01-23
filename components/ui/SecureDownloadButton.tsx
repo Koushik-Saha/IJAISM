@@ -2,6 +2,7 @@
 "use client";
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 
 interface SecureDownloadButtonProps {
     pdfUrl: string;
@@ -17,15 +18,17 @@ export default function SecureDownloadButton({
     variant = 'button'
 }: SecureDownloadButtonProps) {
 
+    const router = useRouter();
+
     const handleDownload = (e: React.MouseEvent) => {
         e.preventDefault();
-        if (typeof window === 'undefined') return;
 
         const token = localStorage.getItem('token');
 
         if (!token) {
             // Redirect to login with callback
-            window.location.href = `/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`;
+            const callbackUrl = encodeURIComponent(window.location.pathname);
+            router.push(`/login?callbackUrl=${callbackUrl}`);
             return;
         }
 

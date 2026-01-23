@@ -9,14 +9,19 @@ import { Metadata } from "next";
 export const revalidate = 3600; // Revalidate every hour
 
 export async function generateStaticParams() {
-  const articles = await prisma.article.findMany({
-    where: { status: "published" },
-    select: { id: true },
-  });
+  try {
+    const articles = await prisma.article.findMany({
+      where: { status: "published" },
+      select: { id: true },
+    });
 
-  return articles.map((article) => ({
-    id: article.id,
-  }));
+    return articles.map((article) => ({
+      id: article.id,
+    }));
+  } catch (error) {
+    console.warn("Database connection failed during build, skipping static generation for articles:", error);
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {

@@ -2,73 +2,50 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { put } from '@vercel/blob';
 import { logger } from '@/lib/logger';
+import { apiSuccess, apiError } from '@/lib/api-response';
 
 export async function POST(req: NextRequest) {
   try {
-    // 1. Verify authentication
     const authHeader = req.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json(
-        { error: 'Unauthorized - No token provided' },
-        { status: 401 }
-      );
+      return apiError('Unauthorized - No token provided', 401, undefined, 'UNAUTHORIZED');
     }
 
     const token = authHeader.split(' ')[1];
     const decoded = verifyToken(token);
 
     if (!decoded) {
-      return NextResponse.json(
-        { error: 'Unauthorized - Invalid token' },
-        { status: 401 }
-      );
+      return apiError('Unauthorized - Invalid token', 401, undefined, 'INVALID_TOKEN');
     }
 
-    // 2. Get form data
     const formData = await req.formData();
     const file = formData.get('file') as File;
-    const fileType = formData.get('fileType') as string; // 'manuscript' or 'coverLetter'
+    const fileType = formData.get('fileType') as string;
 
     if (!file) {
-      return NextResponse.json(
-        { error: 'No file provided' },
-        { status: 400 }
-      );
+      return apiError('No file provided', 400, undefined, 'NO_FILE');
     }
 
-    // 3. Validate file
-    const maxSize = 10 * 1024 * 1024; // 10MB Limit (Task 27)
+    const maxSize = 10 * 1024 * 1024;
     if (file.size > maxSize) {
-      return NextResponse.json(
-        { error: 'File size exceeds 10MB limit' },
-        { status: 400 }
-      );
+      return apiError('File size exceeds 10MB limit', 400, undefined, 'FILE_TOO_LARGE');
     }
 
     const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
 
-    // Strict PDF check for manuscripts (Task 27)
     if (fileType === 'manuscript' && file.type !== 'application/pdf') {
-      return NextResponse.json(
-        { error: 'Manuscripts must be in PDF format' },
-        { status: 400 }
-      );
+      return apiError('Manuscripts must be in PDF format', 400, undefined, 'INVALID_FILE_TYPE');
     }
 
     if (!allowedTypes.includes(file.type)) {
-      return NextResponse.json(
-        { error: 'Invalid file type. Only PDF, DOC, and DOCX are allowed' },
-        { status: 400 }
-      );
+      return apiError('Invalid file type. Only PDF, DOC, and DOCX are allowed', 400, undefined, 'INVALID_FILE_TYPE');
     }
 
-    // 4. Upload to Vercel Blob
     const timestamp = Date.now();
     const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
     const fileName = `${fileType}/${timestamp}_${sanitizedName}`;
 
     try {
-      // Upload to Vercel Blob - File extends Blob so we can pass it directly
       const blob = await put(fileName, file);
 
       logger.info('File uploaded successfully', {
@@ -79,8 +56,7 @@ export async function POST(req: NextRequest) {
         userId: decoded.userId
       });
 
-      return NextResponse.json({
-        success: true,
+      return apiSuccess({
         url: blob.url,
         fileName: file.name,
         size: file.size,
@@ -88,19 +64,15 @@ export async function POST(req: NextRequest) {
         blobId: blob.url,
       });
     } catch (blobError: any) {
-      // If Vercel Blob is not configured, fall back to local storage
       if (blobError.message?.includes('BLOB_READ_WRITE_TOKEN') || !process.env.BLOB_READ_WRITE_TOKEN) {
 
-        // Local storage logic
         const fs = require('fs');
         const path = require('path');
         const { writeFile, mkdir } = require('fs/promises');
 
-        // Ensure directory exists
         const uploadDir = path.join(process.cwd(), 'public', 'uploads', fileType);
         await mkdir(uploadDir, { recursive: true });
 
-        // Write file
         const buffer = Buffer.from(await file.arrayBuffer());
         const filePath = path.join(uploadDir, `${timestamp}_${sanitizedName}`);
         await writeFile(filePath, buffer);
@@ -113,13 +85,12 @@ export async function POST(req: NextRequest) {
           userId: decoded.userId
         });
 
-        return NextResponse.json({
-          success: true,
+        return apiSuccess({
           url: fileUrl,
           fileName: file.name,
           size: file.size,
           type: file.type,
-          blobId: fileUrl, // Use URL as ID for local files
+          blobId: fileUrl,
           warning: 'Using local storage. Blob storage not configured.',
         });
       }
@@ -131,12 +102,6 @@ export async function POST(req: NextRequest) {
       path: '/api/upload'
     });
 
-    return NextResponse.json(
-      {
-        error: 'Failed to upload file',
-        details: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
-      { status: 500 }
-    );
+    return apiError('Failed to upload file', 500, process.env.NODE_ENV === 'development' ? { message: error.message } : undefined);
   }
 }

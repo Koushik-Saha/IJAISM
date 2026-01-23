@@ -5,16 +5,13 @@ import { articleSubmissionSchema } from '@/lib/validations/article';
 import { sendArticleSubmissionEmail } from '@/lib/email/send';
 import { canUserSubmit, getMembershipStatus } from '@/lib/membership';
 import { logger } from '@/lib/logger';
+import { apiSuccess, apiError } from '@/lib/api-response';
 
 export async function POST(req: NextRequest) {
   try {
-    // 1. Verify user authentication
     const authHeader = req.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json(
-        { error: 'Unauthorized - No token provided' },
-        { status: 401 }
-      );
+      return apiError('Unauthorized - No token provided', 401, undefined, 'UNAUTHORIZED');
     }
 
     const token = authHeader.split(' ')[1];
@@ -22,29 +19,22 @@ export async function POST(req: NextRequest) {
 
     if (!decoded) {
       logger.warn('Submission attempt with invalid token');
-      return NextResponse.json(
-        { error: 'Unauthorized - Invalid token' },
-        { status: 401 }
-      );
+      return apiError('Unauthorized - Invalid token', 401, undefined, 'INVALID_TOKEN');
     }
 
     const userId = decoded.userId;
 
-    // 2. Parse request body
     const body = await req.json();
 
-    // Zod Validation
     const validation = articleSubmissionSchema.safeParse(body);
 
     if (!validation.success) {
-      // Create a nice error message from the first Zod error
       const firstError = validation.error.issues[0];
-      return NextResponse.json(
-        {
-          error: firstError.message,
-          details: validation.error.flatten().fieldErrors
-        },
-        { status: 400 }
+      return apiError(
+        firstError.message,
+        400,
+        validation.error.flatten().fieldErrors,
+        'VALIDATION_ERROR'
       );
     }
 
@@ -53,16 +43,14 @@ export async function POST(req: NextRequest) {
       journal,
       title,
       abstract,
-      keywords, // This is now an array from the schema transform
+      keywords,
       manuscriptUrl,
       coverLetterUrl,
       resubmissionId,
     } = validation.data;
 
-    // Using filtered keywords directly array from Zod
     const keywordArray = keywords;
 
-    // 6. Find journal by fullName or code
     const journalRecord = await prisma.journal.findFirst({
       where: {
         OR: [
@@ -73,13 +61,9 @@ export async function POST(req: NextRequest) {
     });
 
     if (!journalRecord) {
-      return NextResponse.json(
-        { error: `Invalid journal: "${journal}". Please select a valid journal from the list.` },
-        { status: 400 }
-      );
+      return apiError(`Invalid journal: "${journal}". Please select a valid journal from the list.`, 400, undefined, 'INVALID_JOURNAL');
     }
 
-    // 7. Verify user exists and is active
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: {
@@ -89,43 +73,34 @@ export async function POST(req: NextRequest) {
         isActive: true,
         university: true,
         affiliation: true,
-        role: true, // Added role for logging context
+        role: true,
       }
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return apiError('User not found', 404, undefined, 'USER_NOT_FOUND');
     }
 
     if (!user.isActive) {
       logger.warn('Inactive user attempted submission', { userId, email: user.email });
-      return NextResponse.json(
-        { error: 'Account is not active. Please contact support.' },
-        { status: 403 }
-      );
+      return apiError('Account is not active. Please contact support.', 403, undefined, 'ACCOUNT_INACTIVE');
     }
 
     let article: any;
 
-    // HANDLE RESUBMISSION / UPDATE
     if (resubmissionId) {
-      // Check if article exists and belongs to user
       const existingArticle = await prisma.article.findUnique({
         where: { id: resubmissionId },
       });
 
       if (!existingArticle) {
-        return NextResponse.json({ error: 'Article not found' }, { status: 404 });
+        return apiError('Article not found', 404, undefined, 'ARTICLE_NOT_FOUND');
       }
 
       if (existingArticle.authorId !== userId) {
-        return NextResponse.json({ error: 'Unauthorized to edit this article' }, { status: 403 });
+        return apiError('Unauthorized to edit this article', 403, undefined, 'UNAUTHORIZED_ACCESS');
       }
 
-      // Update Article
       article = await prisma.article.update({
         where: { id: resubmissionId },
         data: {
@@ -133,10 +108,10 @@ export async function POST(req: NextRequest) {
           abstract: abstract.trim(),
           keywords: keywordArray,
           articleType: submissionType || 'research',
-          status: 'resubmitted', // Reset status to resubmitted
+          status: 'resubmitted',
           journalId: journalRecord.id,
-          ...(manuscriptUrl && { pdfUrl: manuscriptUrl }), // Only update PDF if new one uploaded
-          submissionDate: new Date(), // Update submission date? Or keep original? Let's update to show "recent" activity.
+          ...(manuscriptUrl && { pdfUrl: manuscriptUrl }),
+          submissionDate: new Date(),
         },
         include: {
           author: { select: { id: true, name: true, email: true } },
@@ -144,7 +119,6 @@ export async function POST(req: NextRequest) {
         }
       });
 
-      // Replace Co-Authors
       if (validation.data.coAuthors) {
         await prisma.coAuthor.deleteMany({ where: { articleId: article.id } });
         if (validation.data.coAuthors.length > 0) {
@@ -164,7 +138,6 @@ export async function POST(req: NextRequest) {
       logger.info('Article resubmitted/updated', { articleId: article.id, userId });
 
     } else {
-      // 8. Check membership and submission limits (ONLY FOR NEW SUBMISSIONS)
       const submissionCheck = await canUserSubmit(userId);
 
       if (!submissionCheck.canSubmit) {
@@ -177,9 +150,10 @@ export async function POST(req: NextRequest) {
           used: submissionCheck.used
         });
 
-        return NextResponse.json(
+        return apiError(
+          submissionCheck.reason || 'Submission limit reached',
+          403,
           {
-            error: submissionCheck.reason || 'Submission limit reached',
             tier: submissionCheck.tier,
             limit: submissionCheck.limit,
             used: submissionCheck.used,
@@ -188,11 +162,10 @@ export async function POST(req: NextRequest) {
             currentTier: membershipStatus.tierName,
             upgradeUrl: '/membership',
           },
-          { status: 403 }
+          'SUBMISSION_LIMIT_REACHED'
         );
       }
 
-      // 9. Create article in database
       article = await prisma.article.create({
         data: {
           title: title.trim(),
@@ -202,9 +175,8 @@ export async function POST(req: NextRequest) {
           status: 'submitted',
           authorId: userId,
           journalId: journalRecord.id,
-          pdfUrl: manuscriptUrl || null, // Store manuscript URL in pdfUrl field
+          pdfUrl: manuscriptUrl || null,
           submissionDate: new Date(),
-          // Metrics are set to 0 by default in schema
         },
         include: {
           author: {
@@ -228,7 +200,6 @@ export async function POST(req: NextRequest) {
         }
       });
 
-      // Create co-authors if provided
       if (validation.data.coAuthors && validation.data.coAuthors.length > 0) {
         await prisma.coAuthor.createMany({
           data: validation.data.coAuthors.map((author: any, index: number) => ({
@@ -250,7 +221,6 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // 10. Create notification for author
     await prisma.notification.create({
       data: {
         userId,
@@ -262,7 +232,6 @@ export async function POST(req: NextRequest) {
       }
     });
 
-    // 11. Send confirmation email (non-blocking)
     sendArticleSubmissionEmail(
       user.email,
       user.name || user.email.split('@')[0],
@@ -276,12 +245,9 @@ export async function POST(req: NextRequest) {
         articleId: article.id,
         email: user.email
       });
-      // Don't fail the submission if email fails
     });
 
-    // 12. Return success response
-    return NextResponse.json({
-      success: true,
+    return apiSuccess({
       message: resubmissionId ? 'Article updated successfully' : 'Article submitted successfully',
       article: {
         id: article.id,
@@ -297,27 +263,17 @@ export async function POST(req: NextRequest) {
           email: article.author.email,
         }
       }
-    }, { status: 201 });
+    }, resubmissionId ? 'Article updated successfully' : 'Article submitted successfully', 201);
 
   } catch (error: any) {
     logger.error('Article submission error', error, {
       path: '/api/articles/submit'
     });
 
-    // Handle Prisma errors
     if (error.code === 'P2002') {
-      return NextResponse.json(
-        { error: 'An article with this title already exists' },
-        { status: 409 }
-      );
+      return apiError('An article with this title already exists', 409, undefined, 'DUPLICATE_TITLE');
     }
 
-    return NextResponse.json(
-      {
-        error: 'Internal server error. Please try again later.',
-        details: process.env.NODE_ENV === 'development' ? error.message : undefined
-      },
-      { status: 500 }
-    );
+    return apiError('Internal server error. Please try again later.', 500, process.env.NODE_ENV === 'development' ? { message: error.message } : undefined);
   }
 }

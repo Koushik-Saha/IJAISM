@@ -1,0 +1,198 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - link "IJAISM Logo IJAISM Advanced Info Systems" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e6]:
+          - img "IJAISM Logo" [ref=e8]
+          - generic [ref=e9]:
+            - generic [ref=e10]: IJAISM
+            - generic [ref=e11]: Advanced Info Systems
+      - generic [ref=e13]:
+        - textbox "Search..." [ref=e14]
+        - button [ref=e15] [cursor=pointer]:
+          - img [ref=e16]
+      - navigation [ref=e18]:
+        - link "Home" [ref=e19] [cursor=pointer]:
+          - /url: /
+        - link "About" [ref=e20] [cursor=pointer]:
+          - /url: /about
+        - link "Journals" [ref=e21] [cursor=pointer]:
+          - /url: /journals
+        - link "Dissertation/Thesis" [ref=e22] [cursor=pointer]:
+          - /url: /dissertations
+        - link "Books" [ref=e23] [cursor=pointer]:
+          - /url: /books
+        - link "Conferences" [ref=e24] [cursor=pointer]:
+          - /url: /conferences
+        - link "Announcements" [ref=e25] [cursor=pointer]:
+          - /url: /announcements
+      - generic [ref=e26]:
+        - link "Submit" [ref=e27] [cursor=pointer]:
+          - /url: /submit
+        - link "Sign In" [ref=e28] [cursor=pointer]:
+          - /url: /login
+        - link "JOIN IJAISM" [ref=e29] [cursor=pointer]:
+          - /url: /register
+  - main [ref=e30]:
+    - generic [ref=e31]:
+      - generic [ref=e33]:
+        - heading "Welcome to IJAISM Academic Publishing Platform" [level=1] [ref=e34]
+        - paragraph [ref=e35]: Dedicated to publishing groundbreaking research and promoting innovative ideas
+        - paragraph [ref=e36]: in the fields of information technology, business management, and related disciplines
+        - paragraph [ref=e37]: Our goal is to minimize the delay in sharing new ideas and discoveries with the world, making high-quality, peer-reviewed journals available online through our fast peer review system.
+        - generic [ref=e38]:
+          - link "Submit Your Research" [ref=e39] [cursor=pointer]:
+            - /url: /submit
+          - link "Browse Journals" [ref=e40] [cursor=pointer]:
+            - /url: /journals
+      - generic [ref=e42]:
+        - heading "Latest Announcements" [level=2] [ref=e43]
+        - generic [ref=e44]:
+          - generic [ref=e45]:
+            - 'img "New Journal Launch: AESI" [ref=e46]'
+            - 'heading "New Journal Launch: AESI" [level=3] [ref=e47]'
+            - paragraph [ref=e48]: Advanced Engineering and Sustainability Innovations (AESI) now accepting submissions.
+            - link "Read More →" [ref=e49] [cursor=pointer]:
+              - /url: /announcements/a146f76d-f4ff-4455-9c04-8b4379a42582
+          - generic [ref=e50]:
+            - img "Call for Papers - All Journals" [ref=e51]
+            - heading "Call for Papers - All Journals" [level=3] [ref=e52]
+            - paragraph [ref=e53]: Submit your research papers across 12+ academic journals. Fast-track review available.
+            - link "Read More →" [ref=e54] [cursor=pointer]:
+              - /url: /announcements/f6857fdc-f157-417d-8383-3f032d28c720
+          - generic [ref=e55]:
+            - img "Fast-Track Review Now Available" [ref=e56]
+            - heading "Fast-Track Review Now Available" [level=3] [ref=e57]
+            - paragraph [ref=e58]: Get your research published faster with our new fast-track review process.
+            - link "Read More →" [ref=e59] [cursor=pointer]:
+              - /url: /announcements/f03cadb1-13d5-4219-ba64-24239222a4f8
+          - generic [ref=e60]:
+            - img "Open Access Publishing Benefits" [ref=e61]
+            - heading "Open Access Publishing Benefits" [level=3] [ref=e62]
+            - paragraph [ref=e63]: Discover the benefits of open access publishing with IJAISM.
+            - link "Read More →" [ref=e64] [cursor=pointer]:
+              - /url: /announcements/8ddeeec3-18fd-4ad0-83d4-162d2b9aea2b
+          - generic [ref=e65]:
+            - 'img "Special Issue: AI in Healthcare" [ref=e66]'
+            - 'heading "Special Issue: AI in Healthcare" [level=3] [ref=e67]'
+            - paragraph [ref=e68]: JAMSAI special issue on AI in Healthcare - Submit by March 31, 2026.
+            - link "Read More →" [ref=e69] [cursor=pointer]:
+              - /url: /announcements/b71f5d8d-9a47-4a07-8450-4016a3a646b0
+          - generic [ref=e70]:
+            - img "Welcome to IJAISM Publishing Platform" [ref=e71]
+            - heading "Welcome to IJAISM Publishing Platform" [level=3] [ref=e72]
+            - paragraph [ref=e73]: IJAISM academic publishing platform is now live! Submit your research today.
+            - link "Read More →" [ref=e74] [cursor=pointer]:
+              - /url: /announcements/04ffead3-c2a4-4948-8b6c-258cc895493d
+      - generic [ref=e76]:
+        - heading "Academic Journals" [level=2] [ref=e77]
+        - link "JITMB Journal of Information Technology" [ref=e79] [cursor=pointer]:
+          - /url: /journals/jitmb
+          - generic [ref=e80]:
+            - img "JITMB" [ref=e81]
+            - heading "Journal of Information Technology" [level=3] [ref=e82]
+        - link "View All Journals" [ref=e84] [cursor=pointer]:
+          - /url: /journals
+      - generic [ref=e86]:
+        - heading "Latest Articles" [level=2] [ref=e87]
+        - generic [ref=e89]:
+          - generic [ref=e90]: JITMB
+          - heading "Published AI Research" [level=3] [ref=e91]
+          - paragraph [ref=e92]: Test Author
+          - paragraph [ref=e93]: This is a published article about AI for E2E testing public views.
+          - link "Read More →" [ref=e94] [cursor=pointer]:
+            - /url: /articles/ae4dbc39-4db3-451c-872f-832e8f525326
+        - link "View All Articles" [ref=e96] [cursor=pointer]:
+          - /url: /articles
+      - generic [ref=e98]:
+        - heading "Subscribe to IJAISM for Updates" [level=2] [ref=e99]
+        - paragraph [ref=e100]: Stay informed about the latest research, publications, and academic events.
+        - generic [ref=e101]:
+          - textbox "Enter your email" [ref=e102]
+          - button "Subscribe" [ref=e103] [cursor=pointer]
+      - generic [ref=e106]:
+        - generic [ref=e107]:
+          - generic [ref=e108]: "1"
+          - generic [ref=e109]: Academic Journals
+        - generic [ref=e110]:
+          - generic [ref=e111]: 1+
+          - generic [ref=e112]: Published Articles
+        - generic [ref=e113]:
+          - generic [ref=e114]: 3+
+          - generic [ref=e115]: Active Researchers
+        - generic [ref=e116]:
+          - generic [ref=e117]: 50+
+          - generic [ref=e118]: Countries
+  - contentinfo [ref=e119]:
+    - generic [ref=e120]:
+      - generic [ref=e121]:
+        - generic [ref=e122]:
+          - heading "ABOUT IJAISM" [level=3] [ref=e123]
+          - list [ref=e124]:
+            - listitem [ref=e125]:
+              - link "Mission & Vision" [ref=e126] [cursor=pointer]:
+                - /url: /contact
+            - listitem [ref=e127]:
+              - link "Contract" [ref=e128] [cursor=pointer]:
+                - /url: /contact
+            - listitem [ref=e129]:
+              - link "Privacy & Policy" [ref=e130] [cursor=pointer]:
+                - /url: /privacy
+            - listitem [ref=e131]:
+              - link "Terms & Condition" [ref=e132] [cursor=pointer]:
+                - /url: /terms
+        - generic [ref=e133]:
+          - heading "LOCATION" [level=3] [ref=e134]
+          - generic [ref=e135]:
+            - text: 761 State Highway 100
+            - text: Port Isabel, TX 78578
+            - text: USA
+        - generic [ref=e136]:
+          - heading "GET INVOLVED" [level=3] [ref=e137]
+          - list [ref=e138]:
+            - listitem [ref=e139]:
+              - link "Conference" [ref=e140] [cursor=pointer]:
+                - /url: /conferences
+            - listitem [ref=e141]:
+              - link "Societies" [ref=e142] [cursor=pointer]:
+                - /url: /societies
+            - listitem [ref=e143]:
+              - link "Technical Career" [ref=e144] [cursor=pointer]:
+                - /url: /careers
+            - listitem [ref=e145]:
+              - link "Scholarship" [ref=e146] [cursor=pointer]:
+                - /url: /scholarship
+        - generic [ref=e147]:
+          - heading "RESOURCES" [level=3] [ref=e148]
+          - list [ref=e149]:
+            - listitem [ref=e150]:
+              - link "Author Guideline" [ref=e151] [cursor=pointer]:
+                - /url: /author-guidelines
+            - listitem [ref=e152]:
+              - link "Paper Format Download" [ref=e153] [cursor=pointer]:
+                - /url: /paper-format
+            - listitem [ref=e154]:
+              - link "Submit Article" [ref=e155] [cursor=pointer]:
+                - /url: /submit
+            - listitem [ref=e156]:
+              - link "Book Publishing" [ref=e157] [cursor=pointer]:
+                - /url: /book-publishing
+            - listitem [ref=e158]:
+              - link "Thesis/Dissertation" [ref=e159] [cursor=pointer]:
+                - /url: /dissertations
+      - paragraph [ref=e161]: © 2026 IJAISM - International Journal of Advanced Information Systems and Management. All rights reserved.
+  - generic [ref=e163]:
+    - paragraph [ref=e165]:
+      - text: We use cookies to enhance your experience. By continuing to visit this site you agree to our use of cookies.
+      - link "Learn more" [ref=e166] [cursor=pointer]:
+        - /url: /privacy
+    - button "Accept All" [ref=e167] [cursor=pointer]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e173] [cursor=pointer]:
+    - img [ref=e174]
+  - alert [ref=e177]
+```

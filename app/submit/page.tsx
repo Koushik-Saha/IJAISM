@@ -76,8 +76,8 @@ function SubmitFormContent() {
           });
           const data = await res.json();
 
-          if (data.success) {
-            const article = data.article;
+          if (data.success) { // Modified to check data.success directly
+            const article = data.data?.article || data.article; // Handle standard wrapper or legacy
             setOriginalArticle(article);
             setIsResubmission(true);
 
@@ -99,6 +99,11 @@ function SubmitFormContent() {
             toast.info("Resubmission Mode", {
               description: "Loaded data from your previous submission. Please upload your revised manuscript."
             });
+          } else {
+            // Handle standardized error
+            const msg = data.error?.message || "Failed to load submission";
+            toast.error(msg);
+            setError(msg);
           }
         } catch (err) {
           console.error("Failed to load resubmission data", err);
@@ -316,6 +321,7 @@ function SubmitFormContent() {
       };
 
       // Submit to API
+      // Submit to API
       const response = await fetch('/api/articles/submit', {
         method: 'POST',
         headers: {
@@ -327,33 +333,56 @@ function SubmitFormContent() {
 
       const data = await response.json();
 
-      if (!response.ok) {
-        // Check if it's a membership limit error
-        if (response.status === 403 && data.upgradeRequired) {
+      if (data.success) {
+        // Success - show toast and redirect to dashboard
+        toast.success(data.message || 'Article submitted successfully!', {
+          description: `"${data.data?.article?.title || data.article?.title}" has been submitted successfully.`,
+          duration: 5000,
+        });
+
+        // Redirect after a short delay to show the toast
+        setTimeout(() => {
+          router.push('/dashboard/submissions');
+        }, 1500);
+
+      } else {
+        // Handle standardized error
+        console.error('Submission failed:', data);
+
+        const errorMsg = data.error?.message || data.error || 'Submission failed';
+
+        // Membership limit check
+        if (data.error?.code === 'SUBMISSION_LIMIT_REACHED' && data.error?.details?.upgradeRequired) {
+          const details = data.error.details;
           toast.error('Membership limit reached', {
-            description: `${data.error}. You are currently on the ${data.currentTier} tier.`,
+            description: `${errorMsg}. You are currently on the ${details.currentTier} tier.`,
             duration: 5000,
             action: {
               label: 'Upgrade Now',
               onClick: () => router.push('/membership'),
             },
           });
-          throw new Error(data.error);
+          setError(errorMsg);
+          throw new Error(errorMsg);
         }
 
-        throw new Error(data.error || 'Submission failed');
+        // Validation errors
+        if (data.error?.details && data.error.code === 'VALIDATION_ERROR') {
+          setValidationErrors(data.error.details);
+          toast.error('Validation Error', {
+            description: errorMsg,
+            duration: 4000
+          });
+        } else {
+          toast.error('Submission Failed', {
+            description: errorMsg,
+            duration: 4000
+          });
+        }
+
+        setError(errorMsg);
+        throw new Error(errorMsg);
       }
-
-      // Success - show toast and redirect to dashboard
-      toast.success('Article submitted successfully!', {
-        description: `"${data.article.title}" has been submitted to ${data.article.journal.name}. Submission ID: ${data.article.id}`,
-        duration: 5000,
-      });
-
-      // Redirect after a short delay to show the toast
-      setTimeout(() => {
-        router.push('/dashboard');
-      }, 1500);
 
     } catch (error: any) {
       console.error('Submission error:', error);

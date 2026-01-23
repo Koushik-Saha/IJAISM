@@ -5,7 +5,18 @@ import JournalInsights from "@/components/journals/JournalInsights";
 import JournalSidebar from "@/components/journals/JournalSidebar";
 import { notFound } from "next/navigation";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600; // Revalidate every hour
+
+export async function generateStaticParams() {
+  const journals = await prisma.journal.findMany({
+    where: { isActive: true },
+    select: { code: true },
+  });
+
+  return journals.map((journal) => ({
+    code: journal.code.toLowerCase(),
+  }));
+}
 
 export default async function JournalDetailPage({ params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;

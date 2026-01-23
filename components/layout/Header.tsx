@@ -235,6 +235,7 @@ export default function Header() {
                         <div className="px-4 py-3 bg-gray-50 rounded-lg mb-1">
                           <p className="text-sm font-bold text-gray-900 truncate">{user.name}</p>
                           <p className="text-xs text-gray-500 font-medium truncate">{user.email}</p>
+
                         </div>
 
                         <div className="space-y-1">

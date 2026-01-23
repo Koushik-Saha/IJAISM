@@ -53,6 +53,7 @@ export default function ReviewerDashboardPage() {
         }
 
         const response = await fetch('/api/reviews/assigned', {
+          cache: 'no-store',
           headers: {
             'Authorization': `Bearer ${token}`,
           },
@@ -242,9 +243,8 @@ export default function ReviewerDashboardPage() {
                             <p className="text-sm text-gray-600">Assigned: <span className="font-medium text-gray-900">{formatDate(review.assignedAt)}</span></p>
                             <p className="text-sm text-gray-600">Due Date: <span className="font-medium text-gray-900">{formatDate(review.dueDate)}</span></p>
                             {daysRemaining !== null && (
-                              <p className={`text-sm font-semibold ${
-                                isOverdue ? 'text-red-600' : isUrgent ? 'text-yellow-600' : 'text-green-600'
-                              }`}>
+                              <p className={`text-sm font-semibold ${isOverdue ? 'text-red-600' : isUrgent ? 'text-yellow-600' : 'text-green-600'
+                                }`}>
                                 {isOverdue
                                   ? `Overdue by ${Math.abs(daysRemaining)} days`
                                   : `${daysRemaining} days remaining`}
@@ -301,17 +301,29 @@ export default function ReviewerDashboardPage() {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {completedReviews.slice(0, 10).map((review) => (
-                    <tr key={review.id} className="hover:bg-gray-50">
+                    <tr key={review.id} className="hover:bg-gray-50 transition-colors group">
                       <td className="px-6 py-4">
-                        <div className="text-sm font-medium text-gray-900">{review.article.title}</div>
-                        <div className="text-sm text-gray-500">{review.article.author.name}</div>
+                        <Link href={`/dashboard/reviews/${review.id}`} className="block">
+                          <div className="text-sm font-medium text-gray-900 group-hover:text-primary">{review.article.title}</div>
+                          <div className="text-sm text-gray-500">{review.article.author.name}</div>
+                        </Link>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-900">{review.article.journal.code}</td>
-                      <td className="px-6 py-4 text-sm text-gray-500">{formatDate(review.assignedAt)}</td>
+                      <td className="px-6 py-4 text-sm text-gray-900">
+                        <Link href={`/dashboard/reviews/${review.id}`} className="block">
+                          {review.article.journal.code}
+                        </Link>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-500">
+                        <Link href={`/dashboard/reviews/${review.id}`} className="block">
+                          {formatDate(review.assignedAt)}
+                        </Link>
+                      </td>
                       <td className="px-6 py-4">
-                        <span className={`px-3 py-1 text-xs font-semibold rounded-full ${getStatusBadge(review.status)}`}>
-                          Completed
-                        </span>
+                        <Link href={`/dashboard/reviews/${review.id}`} className="block">
+                          <span className={`px-3 py-1 text-xs font-semibold rounded-full ${getStatusBadge(review.status)}`}>
+                            Completed
+                          </span>
+                        </Link>
                       </td>
                     </tr>
                   ))}

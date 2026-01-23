@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
+import { toast } from "sonner";
 
 interface Review {
   id: string;
@@ -128,9 +129,24 @@ export default function ReviewSubmissionPage() {
       return;
     }
 
-    if (formData.commentsToAuthor.trim().length < 50) {
-      alert('Comments to author must be at least 50 characters');
-      return;
+    // Validation based on decision
+    if (formData.decision === 'revision_requested') {
+      if (formData.commentsToAuthor.trim().length < 50) {
+        alert('For revision requests, detailed comments to the author are required (min 50 chars).');
+        return;
+      }
+      if (formData.commentsToEditor.trim().length === 0) {
+        alert('For revision requests, please provide a summary/reason to the editor.');
+        return;
+      }
+    } else if (['accept', 'reject'].includes(formData.decision)) {
+      // Comments are optional for Accept/Reject, but if provided, should likely still be reasonable length?
+      // User said "user did not have to comment it is optional".
+      // So we skip the length check if empty, but maybe enforce it if not empty? 
+      // For simplicity and user request compliance: totally optional.
+    } else {
+      // Fallback for strictness? User said "reviser must have to...". 
+      // Let's stick to the prompt: optional for accept/reject.
     }
 
     setIsSubmitting(true);
@@ -153,7 +169,7 @@ export default function ReviewSubmissionPage() {
         throw new Error(data.error || 'Failed to submit review');
       }
 
-      alert('✅ Review submitted successfully!');
+      toast.success('Review submitted successfully!');
       router.push('/dashboard/reviews');
     } catch (err: any) {
       setError(err.message || 'Failed to submit review');
@@ -213,11 +229,10 @@ export default function ReviewSubmissionPage() {
               <h1 className="text-3xl font-bold text-primary mb-2">{review.article.title}</h1>
               <div className="flex items-center gap-3">
                 <span className="text-sm text-gray-600">Review #{review.reviewerNumber}</span>
-                <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
-                  review.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                <span className={`px-3 py-1 text-xs font-semibold rounded-full ${review.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                   review.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
-                  'bg-green-100 text-green-800'
-                }`}>
+                    'bg-green-100 text-green-800'
+                  }`}>
                   {review.status === 'in_progress' ? 'In Progress' : review.status.charAt(0).toUpperCase() + review.status.slice(1)}
                 </span>
               </div>
@@ -375,7 +390,7 @@ export default function ReviewSubmissionPage() {
             {/* Comments to Author */}
             <div>
               <label htmlFor="commentsToAuthor" className="block text-sm font-bold text-gray-700 mb-2">
-                Comments to Author * (Minimum 50 characters)
+                Comments to Author {formData.decision === 'revision_requested' ? '* (Minimum 50 characters)' : '(Optional)'}
               </label>
               <textarea
                 id="commentsToAuthor"
@@ -395,7 +410,7 @@ export default function ReviewSubmissionPage() {
             {/* Comments to Editor (Optional) */}
             <div>
               <label htmlFor="commentsToEditor" className="block text-sm font-bold text-gray-700 mb-2">
-                Confidential Comments to Editor (Optional)
+                Confidential Comments to Editor {formData.decision === 'revision_requested' ? '*' : '(Optional)'}
               </label>
               <textarea
                 id="commentsToEditor"

@@ -12,7 +12,7 @@ export async function getReviewerAssignments(reviewerId: string) {
     where: {
       reviewerId,
       status: {
-        in: ['pending', 'in_progress'],
+        in: ['pending', 'in_progress', 'invited', 'accepted'],
       },
     },
     include: {
@@ -182,10 +182,14 @@ export async function submitReviewDecision(
   if (reviewer?.email) {
     const articleDetails = await prisma.article.findUnique({
       where: { id: review.articleId },
-      include: { journal: true }
+      include: {
+        journal: true,
+        author: { select: { email: true, name: true } }
+      }
     });
 
     if (articleDetails && articleDetails.journal) {
+      // 1. Notify Reviewer (Confirmation)
       await import('@/lib/email/send').then(mod =>
         mod.sendReviewSubmissionConfirmationEmail(
           reviewer.email,
@@ -194,167 +198,59 @@ export async function submitReviewDecision(
           articleDetails.journal.fullName
         )
       ).catch(err => console.error('Failed to send review confirmation email:', err));
+
+      // 2. Notify Author
+      if (articleDetails.author && articleDetails.author.email) {
+        await import('@/lib/email/send').then(mod =>
+          mod.sendReviewFeedbackToAuthor(
+            articleDetails.author.email,
+            articleDetails.author.name || 'Author',
+            articleDetails.title,
+            articleDetails.journal.fullName,
+            decision,
+            commentsToAuthor
+          )
+        ).catch(err => console.error('Failed to send feedback to author:', err));
+      }
+
+      // 3. Notify Editors (Fetch all editors)
+      try {
+        const editors = await prisma.user.findMany({
+          where: { role: { in: ['editor', 'admin', 'super_admin'] } },
+          select: { email: true, name: true }
+        });
+
+        await Promise.all(editors.map(editor =>
+          import('@/lib/email/send').then(mod =>
+            mod.sendReviewFeedbackToEditor(
+              editor.email,
+              editor.name || 'Editor',
+              reviewer.name || 'Reviewer',
+              articleDetails.title,
+              articleDetails.journal.fullName,
+              decision,
+              commentsToAuthor,
+              commentsToEditor || ''
+            )
+          )
+        ));
+      } catch (err) {
+        console.error('Failed to notify editors:', err);
+      }
     }
   }
 
   return updatedReview;
 }
 
-// Check all reviews for an article and update article status
-export async function checkAndUpdateArticleStatus(articleId: string) {
-  // Get all reviews for this article
-  const reviews = await prisma.review.findMany({
-    where: { articleId },
-  });
-
-  const totalReviews = reviews.length;
-  const completedReviews = reviews.filter((r) => r.status === 'completed');
-  const acceptedReviews = completedReviews.filter((r) => r.decision === 'accept');
-  const rejectedReviews = completedReviews.filter((r) => r.decision === 'reject');
-  const revisionRequests = completedReviews.filter((r) => r.decision === 'revision_requested');
-
-  // Get article with author info
-  const article = await prisma.article.findUnique({
-    where: { id: articleId },
-    include: {
-      author: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
-      },
-    },
-  });
-
-  if (!article) return;
-
-  let newStatus = article.status;
-  let statusMessage = '';
-
-  // Decision logic for 4-reviewer system
-  if (totalReviews === 4 && completedReviews.length === 4) {
-    // All 4 reviews completed
-    if (acceptedReviews.length === 4) {
-      // All 4 accepted - AUTO PUBLISH!
-      newStatus = 'published';
-      statusMessage = 'Congratulations! All reviewers accepted your article. It has been automatically published.';
-
-      // Calculate Metadata
-      const now = new Date();
-      const currentYear = now.getFullYear();
-      const volume = currentYear - 2023; // Base year 2023 = Vol 0 (or 1 depending on preference, let's say 2024=Vol1) -> 2024-2023 = 1.
-      // Actually normally Volume 1 starts at inception. If inception 2024, then 2024=Vol 1.
-      // Let's assume inception 2024.
-      const vol = Math.max(1, currentYear - 2023);
-      const issue = now.getMonth() + 1; // Month 1-12
-
-      // Generate DOI
-      const doi = `10.5555/ijaism.${currentYear}.${vol}.${issue}.${articleId.substring(0, 8)}`;
-
-      // Update publication date and metadata
-      await prisma.article.update({
-        where: { id: articleId },
-        data: {
-          status: newStatus,
-          publicationDate: now,
-          acceptanceDate: now,
-          doi,
-          volume: vol,
-          issue: issue,
-        },
-      });
-    } else if (rejectedReviews.length >= 2) {
-      // 2 or more rejected - reject article
-      newStatus = 'rejected';
-      statusMessage = 'Your article has been rejected after peer review. You may revise and resubmit to a different journal.';
-
-      await prisma.article.update({
-        where: { id: articleId },
-        data: { status: newStatus },
-      });
-    } else if (revisionRequests.length > 0) {
-      // At least one revision requested
-      newStatus = 'revision_requested';
-      statusMessage = 'Reviewers have requested revisions to your article. Please review their comments and resubmit.';
-
-      await prisma.article.update({
-        where: { id: articleId },
-        data: { status: newStatus },
-      });
-    } else if (acceptedReviews.length >= 2 && rejectedReviews.length === 0) {
-      // Mixed reviews but more accepts than rejects - request revision
-      newStatus = 'revision_requested';
-      statusMessage = 'Your article shows promise but requires minor revisions based on reviewer feedback.';
-
-      await prisma.article.update({
-        where: { id: articleId },
-        data: { status: newStatus },
-      });
-    }
-  } else if (completedReviews.length > 0 && completedReviews.length < 4) {
-    // Partial reviews completed - update to "under review"
-    if (article.status === 'submitted') {
-      newStatus = 'under review';
-      statusMessage = `Your article is under review. ${completedReviews.length} of 4 reviewers have completed their assessment.`;
-
-      await prisma.article.update({
-        where: { id: articleId },
-        data: { status: newStatus },
-      });
-    }
-  }
-
-  // Send email notification if status changed
-  if (newStatus !== article.status && statusMessage) {
-    // Check if we have a generated DOI from the logic above. 
-    // Usually 'doi' variable is local to the 'published' block.
-    // We should fetch the *updated* article to be sure, or pass the variable if available.
-    // For simplicity, let's fetch the fresh article data if the status is 'published' to get the DOI.
-
-    let doi = undefined;
-    if (newStatus === 'published') {
-      const updatedArticle = await prisma.article.findUnique({
-        where: { id: articleId },
-        select: { doi: true }
-      });
-      if (updatedArticle?.doi) {
-        doi = updatedArticle.doi;
-      }
-    }
-
-    await sendArticleStatusUpdateEmail(
-      article.author.email,
-      article.author.name || article.author.email.split('@')[0],
-      article.title,
-      article.status,
-      newStatus,
-      articleId,
-      statusMessage,
-      doi
-    ).catch((error) => {
-      console.error('Failed to send status update email:', error);
-    });
-  }
-
-  return {
-    newStatus,
-    totalReviews,
-    completedReviews: completedReviews.length,
-    accepted: acceptedReviews.length,
-    rejected: rejectedReviews.length,
-    revisionRequested: revisionRequests.length,
-  };
-}
-
-// Assign reviewers to an article (admin function)
+// Assign reviewers to an article (editor function)
 export async function assignReviewersToArticle(
   articleId: string,
   reviewerIds: string[],
   dueInDays: number = 21 // Default 3 weeks
 ) {
-  if (reviewerIds.length !== 4) {
-    throw new Error('Must assign exactly 4 reviewers');
+  if (reviewerIds.length === 0) {
+    throw new Error('At least one reviewer must be assigned');
   }
 
   // Check if reviewers are valid
@@ -365,7 +261,7 @@ export async function assignReviewersToArticle(
     },
   });
 
-  if (reviewers.length !== 4) {
+  if (reviewers.length !== reviewerIds.length) {
     throw new Error('All assigned users must have reviewer role');
   }
 
@@ -386,7 +282,7 @@ export async function assignReviewersToArticle(
           articleId,
           reviewerId,
           reviewerNumber: currentReviewCount + index + 1,
-          status: 'pending',
+          status: 'invited', // Changed from pending to invited
           dueDate,
         },
       })
@@ -396,7 +292,7 @@ export async function assignReviewersToArticle(
   // Update article status to "under review"
   await prisma.article.update({
     where: { id: articleId },
-    data: { status: 'under review' },
+    data: { status: 'under_review' }, // Ensure snake_case matches enum
   });
 
   // Send notification emails to reviewers
@@ -429,7 +325,39 @@ export async function assignReviewersToArticle(
   return reviews;
 }
 
-// Get article review status (for admin)
+// Check all reviews for an article and update article status
+export async function checkAndUpdateArticleStatus(articleId: string) {
+  // Get all reviews for this article
+  const reviews = await prisma.review.findMany({
+    where: { articleId },
+  });
+
+  const totalReviews = reviews.length;
+  // Count active reviews (excluding declined)
+  const activeReviews = reviews.filter(r => r.status !== 'declined');
+  const completedReviews = reviews.filter((r) => r.status === 'completed');
+
+  // Get article
+  const article = await prisma.article.findUnique({
+    where: { id: articleId },
+  });
+
+  if (!article) return;
+
+  // If all active reviews are completed, move to waiting_for_editor
+  if (activeReviews.length > 0 && completedReviews.length === activeReviews.length) {
+    if (article.status !== 'waiting_for_editor' && article.status !== 'published' && article.status !== 'rejected') {
+      await prisma.article.update({
+        where: { id: articleId },
+        data: { status: 'waiting_for_editor' }
+      });
+
+      // Notify editor? (Optional, could add Notification creation here)
+    }
+  }
+}
+
+// Get article review status (for editor)
 export async function getArticleReviewStatus(articleId: string) {
   const reviews = await prisma.review.findMany({
     where: { articleId },
@@ -448,8 +376,7 @@ export async function getArticleReviewStatus(articleId: string) {
   });
 
   const completed = reviews.filter((r) => r.status === 'completed').length;
-  const pending = reviews.filter((r) => r.status === 'pending').length;
-  const inProgress = reviews.filter((r) => r.status === 'in_progress').length;
+  const pending = reviews.filter((r) => ['pending', 'invited', 'accepted', 'in_progress'].includes(r.status)).length;
 
   return {
     reviews,
@@ -457,8 +384,7 @@ export async function getArticleReviewStatus(articleId: string) {
       total: reviews.length,
       completed,
       pending,
-      inProgress,
-      allComplete: completed === 4,
+      allComplete: completed === reviews.length && reviews.length > 0,
     },
   };
 }
@@ -469,11 +395,25 @@ export async function startReview(reviewId: string, reviewerId: string) {
     where: {
       id: reviewId,
       reviewerId,
-      status: 'pending',
+      status: 'pending', // Allow starting from pending
     },
   });
 
   if (!review) {
+    // Check if it's invited or accepted
+    const reviewCheck = await prisma.review.findFirst({
+      where: {
+        id: reviewId,
+        reviewerId,
+      },
+    });
+    if (reviewCheck && ['invited', 'accepted'].includes(reviewCheck.status)) {
+      return await prisma.review.update({
+        where: { id: reviewId },
+        data: { status: 'in_progress' },
+      });
+    }
+
     throw new Error('Review not found or already started');
   }
 
@@ -484,7 +424,7 @@ export async function startReview(reviewId: string, reviewerId: string) {
 }
 
 // Auto-assign reviewers based on keywords and workload
-export async function autoAssignReviewers(articleId: string) {
+export async function autoAssignReviewers(articleId: string, count: number = 3) {
   // 1. Fetch article details
   const article = await prisma.article.findUnique({
     where: { id: articleId },
@@ -503,11 +443,6 @@ export async function autoAssignReviewers(articleId: string) {
     throw new Error('Article not found');
   }
 
-  // Check if already fully assigned
-  if (article.reviews.length >= 4) {
-    throw new Error('Article already has 4 reviewers assigned');
-  }
-
   // 2. Fetch all potential reviewers
   const allReviewers = await prisma.user.findMany({
     where: {
@@ -518,7 +453,7 @@ export async function autoAssignReviewers(articleId: string) {
     include: {
       reviews: {
         where: {
-          status: { in: ['pending', 'in_progress'] },
+          status: { in: ['pending', 'in_progress', 'invited', 'accepted'] },
         },
       },
     },
@@ -535,7 +470,7 @@ export async function autoAssignReviewers(articleId: string) {
       return false;
     }
 
-    // Workload Check: Max 5 active reviews
+    // Workload Check: Max 5 active reviews (configurable?)
     if (reviewer.reviews.length >= 5) {
       return false;
     }
@@ -565,7 +500,6 @@ export async function autoAssignReviewers(articleId: string) {
     });
 
     // Bonus for lower workload (balance load)
-    // Max 5 reviews. 0 reviews = +2.5 score, 4 reviews = +0.5 score
     const workloadScore = (5 - reviewer.reviews.length) * 0.5;
 
     return {
@@ -578,9 +512,8 @@ export async function autoAssignReviewers(articleId: string) {
   // Sort by score (descending)
   scoredReviewers.sort((a, b) => b.score - a.score);
 
-  // Select top N needed (target 4 total)
-  const needed = 4 - article.reviews.length;
-  const selectedReviewers = scoredReviewers.slice(0, needed);
+  // Select top N needed
+  const selectedReviewers = scoredReviewers.slice(0, count);
 
   if (selectedReviewers.length === 0) {
     throw new Error('Could not find suitable reviewers');

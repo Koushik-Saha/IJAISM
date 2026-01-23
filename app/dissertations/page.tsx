@@ -1,26 +1,41 @@
+
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import SecureDownloadButton from "@/components/ui/SecureDownloadButton";
 
 export const dynamic = "force-dynamic";
 
-export default async function DissertationsPage() {
-  const dissertations = await prisma.dissertation.findMany({
-    where: { status: "published" },
-    include: {
-      author: {
-        select: { name: true }
-      }
-    },
-    orderBy: { createdAt: "desc" },
-    take: 20
-  });
+export default async function DissertationsPage(props: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const searchParams = await props.searchParams;
+  const page = Number(searchParams?.page) || 1;
+  const limit = 10;
+  const skip = (page - 1) * limit;
+
+  const [dissertations, total] = await Promise.all([
+    prisma.dissertation.findMany({
+      where: { status: "published" },
+      include: {
+        author: {
+          select: { name: true }
+        }
+      },
+      orderBy: { createdAt: "desc" },
+      take: limit,
+      skip: skip,
+    }),
+    prisma.dissertation.count({ where: { status: "published" } })
+  ]);
+
+  const totalPages = Math.ceil(total / limit);
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-primary to-blue-800 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Dissertations</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">Dissertation/Thesis</h1>
           <p className="text-xl md:text-2xl text-gray-100 max-w-3xl">
             Explore groundbreaking doctoral research from leading universities worldwide
           </p>
@@ -72,53 +87,65 @@ export default async function DissertationsPage() {
                   key={dissertation.id}
                   className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 border border-gray-200"
                 >
-                  <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-4">
+                  <div className="flex flex-col md:flex-row gap-6">
+                    {/* Added Image Display */}
+                    {dissertation.coverImageUrl && (
+                      <div className="flex-shrink-0 w-full md:w-32 lg:w-40">
+                        <img
+                          src={dissertation.coverImageUrl}
+                          alt={dissertation.title}
+                          className="w-full h-auto object-cover rounded shadow-sm border border-gray-100"
+                        />
+                      </div>
+                    )}
+
                     <div className="flex-1">
-                      {/* We don't have a specific dissertation detail page yet, usually it's just a PDF download or a simple view. 
-                           For now, let's link to the same page or a detail page if it existed. 
-                           Assuming /dissertations/[id] exists or should exist. If not, I'll link to # for now.
-                        */}
-                      <Link href={`/dissertations/${dissertation.id}`}>
-                        <h3 className="text-xl font-bold text-primary mb-2 hover:text-accent transition-colors cursor-pointer">
-                          {dissertation.title}
-                        </h3>
-                      </Link>
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        <span className="inline-block bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium">
-                          {dissertation.degreeType === 'phd' ? 'PhD' : 'Masters'}
-                        </span>
-                        {dissertation.defenseDate && (
-                          <span className="inline-block bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
-                            {new Date(dissertation.defenseDate).getFullYear()}
-                          </span>
+                      <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-4">
+                        <div className="flex-1">
+                          <Link href={`/dissertations/${dissertation.id}`}>
+                            <h3 className="text-xl font-bold text-primary mb-2 hover:text-accent transition-colors cursor-pointer">
+                              {dissertation.title}
+                            </h3>
+                          </Link>
+                          <div className="flex flex-wrap gap-2 mb-3">
+                            <span className="inline-block bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium">
+                              {dissertation.degreeType === 'phd' ? 'PhD' : 'Masters'}
+                            </span>
+                            {dissertation.defenseDate && (
+                              <span className="inline-block bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
+                                {new Date(dissertation.defenseDate).getFullYear()}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="mb-4">
+                        <p className="text-gray-800 font-semibold">
+                          {/* Use authorName if available (from scrape), else relation name */}
+                          {dissertation.authorName || dissertation.author.name}
+                        </p>
+                        <p className="text-gray-600">{dissertation.university}</p>
+                      </div>
+                      <p className="text-gray-700 leading-relaxed mb-4 line-clamp-3">
+                        {dissertation.abstract}
+                      </p>
+                      <div className="flex gap-3 mt-auto">
+                        <Link
+                          href={`/dissertations/${dissertation.id}`}
+                          className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded font-medium transition-colors"
+                        >
+                          View Full Dissertation
+                        </Link>
+                        {dissertation.pdfUrl && (
+                          <SecureDownloadButton
+                            pdfUrl={dissertation.pdfUrl}
+                            label="Download PDF"
+                            variant="link"
+                            className="border border-primary text-primary hover:bg-primary/10 px-6 py-2 rounded font-medium transition-colors inline-block text-center cursor-pointer"
+                          />
                         )}
                       </div>
                     </div>
-                  </div>
-                  <div className="mb-4">
-                    <p className="text-gray-800 font-semibold">{dissertation.author.name}</p>
-                    <p className="text-gray-600">{dissertation.university}</p>
-                  </div>
-                  <p className="text-gray-700 leading-relaxed mb-4 line-clamp-3">
-                    {dissertation.abstract}
-                  </p>
-                  <div className="flex gap-3">
-                    <Link
-                      href={`/dissertations/${dissertation.id}`}
-                      className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded font-medium transition-colors"
-                    >
-                      View Full Dissertation
-                    </Link>
-                    {dissertation.pdfUrl && (
-                      <a
-                        href={dissertation.pdfUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="border border-primary text-primary hover:bg-primary/10 px-6 py-2 rounded font-medium transition-colors"
-                      >
-                        Download PDF
-                      </a>
-                    )}
                   </div>
                 </div>
               ))
@@ -130,36 +157,31 @@ export default async function DissertationsPage() {
           </div>
         </div>
 
-        {/* Guidelines Section */}
-        <div className="bg-white rounded-lg shadow-md p-8">
-          <h2 className="text-3xl font-bold text-primary mb-6">Submission Guidelines</h2>
-          <div className="space-y-4">
-            <div className="border-l-4 border-accent pl-4">
-              <h3 className="text-lg font-bold text-gray-800 mb-2">Format Requirements</h3>
-              <p className="text-gray-700">
-                Dissertations must be submitted in PDF format with complete citations and references.
-              </p>
-            </div>
-            <div className="border-l-4 border-accent pl-4">
-              <h3 className="text-lg font-bold text-gray-800 mb-2">Copyright</h3>
-              <p className="text-gray-700">
-                Authors retain copyright while granting IJAISM permission for online distribution.
-              </p>
-            </div>
-            <div className="border-l-4 border-accent pl-4">
-              <h3 className="text-lg font-bold text-gray-800 mb-2">Review Process</h3>
-              <p className="text-gray-700">
-                All dissertations are reviewed for academic quality and adherence to standards.
-              </p>
-            </div>
-            <div className="border-l-4 border-accent pl-4">
-              <h3 className="text-lg font-bold text-gray-800 mb-2">Access</h3>
-              <p className="text-gray-700">
-                Published dissertations are freely accessible to the global research community.
-              </p>
-            </div>
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center gap-4 border-t pt-8">
+            <Link
+              href={`/dissertations?page=${page - 1}`}
+              className={`px-4 py-2 rounded border ${page <= 1 ? 'pointer-events-none opacity-50 bg-gray-100 text-gray-400' : 'bg-white hover:bg-gray-50 text-blue-600 border-blue-200'}`}
+              aria-disabled={page <= 1}
+            >
+              ← Previous
+            </Link>
+
+            <span className="text-gray-600 font-medium">
+              Page {page} of {totalPages}
+            </span>
+
+            <Link
+              href={`/dissertations?page=${page + 1}`}
+              className={`px-4 py-2 rounded border ${page >= totalPages ? 'pointer-events-none opacity-50 bg-gray-100 text-gray-400' : 'bg-white hover:bg-gray-50 text-blue-600 border-blue-200'}`}
+              aria-disabled={page >= totalPages}
+            >
+              Next →
+            </Link>
           </div>
-        </div>
+        )}
+
       </div>
     </div>
   );

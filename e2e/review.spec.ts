@@ -7,7 +7,7 @@ test.describe('Reviewer Dashboard Flow', () => {
         // Verify console logs working
         await page.goto('/login');
         await page.evaluate(() => console.log("TESTING CONSOLE LOG"));
-        await page.fill('input[name="email"]', 'reviewer1@c5k.com');
+        await page.fill('input[name="email"]', 'reviewer1@ijaism.com');
         await page.fill('input[name="password"]', 'password123');
         await page.click('button[type="submit"]');
 

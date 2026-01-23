@@ -78,11 +78,16 @@ export default function MySubmissionsPage() {
       published: { label: 'Published', className: 'bg-green-500' },
       rejected: { label: 'Rejected', className: 'bg-red-500' },
       revision_requested: { label: 'Revision Requested', className: 'bg-orange-500' },
+      waiting_for_editor: { label: 'Waiting For Editor', className: 'bg-purple-500' },
+      accepted: { label: 'Accepted', className: 'bg-green-500' },
     };
 
-    const config = statusConfig[status] || { label: status, className: 'bg-gray-500' };
+    const config = statusConfig[status] || {
+      label: status.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+      className: 'bg-gray-500'
+    };
     return (
-      <span className={`text-white text-xs px-2 py-1 rounded ${config.className}`}>
+      <span className={`text-white text-sm px-2 py-1 rounded whitespace-nowrap ${config.className}`}>
         {config.label}
       </span>
     );
@@ -181,13 +186,13 @@ export default function MySubmissionsPage() {
                         </div>
                       )}
                       <div>
-                        <span className="text-gray-500">Review Progress:</span>
+                        <span className="text-gray-500">Reviews Completed:</span>
                         <div className="font-semibold">
-                          {article.reviewProgress.completed} / {article.reviewProgress.required}
+                          {article.reviewProgress.completed}
                         </div>
                       </div>
                       <div>
-                        <span className="text-gray-500">Total Reviews:</span>
+                        <span className="text-gray-500">Total Assigned:</span>
                         <div className="font-semibold">
                           {article.reviewProgress.total}
                         </div>
@@ -200,36 +205,56 @@ export default function MySubmissionsPage() {
                         <div className="flex justify-between text-sm text-gray-600 mb-1">
                           <span>Review Progress</span>
                           <span>
-                            {article.reviewProgress.completed} of {article.reviewProgress.required} completed
+                            {article.reviewProgress.completed} completed
                           </span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
                           <div
                             className="bg-primary h-2 rounded-full transition-all"
                             style={{
-                              width: `${(article.reviewProgress.completed / article.reviewProgress.required) * 100}%`,
+                              width: `${(article.reviewProgress.completed / (article.reviewProgress.required || 4)) * 100}%`,
                             }}
                           />
                         </div>
                       </div>
                     )}
 
-                    {/* Reviewers List */}
-                    {article.reviews.length > 0 && (
-                      <div className="mt-4">
-                        <h3 className="text-sm font-semibold mb-2">Reviewers:</h3>
-                        <div className="flex flex-wrap gap-2">
+                    {/* Reviewers List - Only visible if Revision Requested */}
+                    {article.status === 'revision_requested' && article.reviews.length > 0 && (
+                      <div className="mt-4 bg-orange-50 border border-orange-100 rounded-lg p-4">
+                        <h3 className="text-sm font-bold text-orange-900 mb-3">Reviewer Feedback:</h3>
+                        <div className="space-y-3">
                           {article.reviews.map((review) => (
                             <div
                               key={review.id}
-                              className="text-xs bg-gray-100 px-2 py-1 rounded"
+                              className="bg-white p-3 rounded border border-orange-100 shadow-sm"
                             >
-                              {review.reviewerName} -{' '}
-                              <span className={review.status === 'completed' ? 'text-green-600' : 'text-yellow-600'}>
-                                {review.status === 'completed' ? review.decision || 'Completed' : 'Pending'}
-                              </span>
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="font-semibold text-sm text-gray-900">{review.reviewerName}</span>
+                                <span className={`text-xs px-2 py-1 rounded font-medium ${review.decision === 'accept' ? 'bg-green-100 text-green-700' :
+                                    review.decision === 'reject' ? 'bg-red-100 text-red-700' :
+                                      'bg-yellow-100 text-yellow-700'
+                                  }`}>
+                                  {review.decision ? review.decision.replace('_', ' ').toUpperCase() : 'PENDING'}
+                                </span>
+                              </div>
+                              {/* Note: Comments would be displayed here if available in the API response */}
                             </div>
                           ))}
+                        </div>
+                        <div className="mt-4 pt-3 border-t border-orange-200">
+                          <p className="text-sm text-orange-800 mb-2">
+                            Please address the feedback above and resubmit your article.
+                          </p>
+                          <Link
+                            href={`/submit?resubmit=${article.id}`}
+                            className="inline-flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium px-4 py-2 rounded transition-colors"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            Resubmit Article
+                          </Link>
                         </div>
                       </div>
                     )}
@@ -238,7 +263,7 @@ export default function MySubmissionsPage() {
                   <div className="flex flex-col gap-2">
                     <Link
                       href={`/articles/${article.id}`}
-                      className="btn-primary text-sm px-4 py-2 whitespace-nowrap"
+                      className="btn-primary text-sm px-4 py-2 whitespace-nowrap text-center"
                     >
                       View Details
                     </Link>

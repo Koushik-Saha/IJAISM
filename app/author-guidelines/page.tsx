@@ -34,7 +34,7 @@ export default function AuthorGuidelinesPage() {
           <p className="text-lg text-gray-700 mb-4 leading-relaxed">
             Thank you for considering IJAISM for publishing your research. We are committed to
             maintaining the highest standards of academic publishing while ensuring a fast and
-            efficient review process through our innovative 4-reviewer system.
+            efficient review process through our innovative peer review system.
           </p>
           <p className="text-lg text-gray-700 leading-relaxed">
             Please read these guidelines carefully before submitting your manuscript. Adherence
@@ -156,10 +156,10 @@ export default function AuthorGuidelinesPage() {
 
         {/* Review Process */}
         <div id="review-process" className="bg-white rounded-lg shadow-md p-8 md:p-10 mb-8">
-          <h2 className="text-3xl font-bold text-primary mb-6">4-Reviewer System</h2>
+          <h2 className="text-3xl font-bold text-primary mb-6">Peer Review System</h2>
 
           <p className="text-lg text-gray-700 mb-6 leading-relaxed">
-            IJAISM uses an innovative 4-reviewer peer review system to ensure rigorous evaluation
+            IJAISM uses an innovative peer review system to ensure rigorous evaluation
             while maintaining rapid publication timelines.
           </p>
 
@@ -172,7 +172,7 @@ export default function AuthorGuidelinesPage() {
               <div>
                 <h4 className="font-bold text-gray-900 mb-1">Reviewer Assignment (1 week)</h4>
                 <p className="text-gray-700">
-                  Four expert reviewers are assigned to evaluate your manuscript independently.
+                  Expert reviewers are assigned to evaluate your manuscript independently.
                 </p>
               </div>
             </div>
@@ -194,7 +194,7 @@ export default function AuthorGuidelinesPage() {
               <div>
                 <h4 className="font-bold text-gray-900 mb-1">Decision</h4>
                 <p className="text-gray-700">
-                  <strong className="text-accent">If all 4 reviewers accept:</strong> Your paper is automatically published!
+                  <strong className="text-accent">If reviewers accept:</strong> Your paper is automatically published!
                   <br />
                   <strong>If any reviewer rejects:</strong> Revisions required or rejection.
                 </p>
@@ -217,7 +217,7 @@ export default function AuthorGuidelinesPage() {
             <p className="text-gray-700">
               <strong>✅ Average time to decision:</strong> 6-8 weeks from submission
               <br />
-              <strong>✅ Automatic publication:</strong> When all 4 reviewers accept
+              <strong>✅ Automatic publication:</strong> When reviewers accept
             </p>
           </div>
         </div>

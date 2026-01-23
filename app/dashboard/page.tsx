@@ -359,8 +359,8 @@ export default function DashboardPage() {
                 </Card>
               </Link>
 
-              {user.role === 'admin' && (
-                <Link href="/admin">
+              {['editor', 'super_admin'].includes(user.role) && (
+                <Link href="/editor">
                   <Card className="hover:border-primary cursor-pointer">
                     <div className="text-center">
                       <div className="text-4xl mb-4">⚙️</div>
@@ -377,16 +377,16 @@ export default function DashboardPage() {
             {/* Info Box */}
             <Card className="mt-8 bg-blue-50 border-blue-200">
               <h3 className="text-lg font-bold mb-3 text-blue-900">
-                🚀 Fast 4-Reviewer Publication System
+                🚀 Rapid Peer Review System
               </h3>
               <p className="text-blue-800 mb-2">
                 At IJAISM, we minimize the delay in sharing your research! Here's how it works:
               </p>
               <ol className="list-decimal list-inside space-y-1 text-blue-800">
                 <li>Submit your article through our platform</li>
-                <li>Your paper is assigned to 4 expert reviewers</li>
+                <li>Your paper is assigned to expert reviewers</li>
                 <li>Each reviewer provides accept/reject decision</li>
-                <li><strong>If all 4 reviewers accept, your paper is automatically published!</strong></li>
+                <li><strong>If reviewers accept, your paper is automatically published!</strong></li>
               </ol>
               <p className="text-blue-800 mt-3 font-semibold">
                 No delays. No waiting. Just fast, quality peer review.

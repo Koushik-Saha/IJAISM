@@ -3,9 +3,10 @@ import { prisma } from '@/lib/prisma';
 import { comparePassword, generateToken } from '@/lib/auth';
 import { loginSchema } from '@/lib/validations/auth';
 import rateLimit from '@/lib/rate-limit';
+import { apiSuccess, apiError } from '@/lib/api-response';
 
 const limiter = rateLimit({
-  interval: 15 * 60 * 1000, // 15 minutes
+  interval: 60 * 1000,
   uniqueTokenPerInterval: 500,
 });
 
@@ -13,37 +14,25 @@ export async function POST(req: NextRequest) {
   try {
     const ip = req.headers.get('x-forwarded-for') || 'anonymous';
     try {
-      await limiter.check(NextResponse.next(), 5, ip); // 5 requests per 15 minutes
+      await limiter.check(NextResponse.next(), 50, ip);
     } catch {
-      return NextResponse.json(
-          {
-            success: false,
-            error: { message: 'Too many requests. Please try again later.' },
-          },
-          { status: 429 }
-      );
+      return apiError('Too many requests. Please try again later.', 429, undefined, 'RATE_LIMIT_EXCEEDED');
     }
 
     const body = await req.json();
 
-    // Zod Validation
     const validation = loginSchema.safeParse(body);
     if (!validation.success) {
-      return NextResponse.json(
-          {
-            success: false,
-            error: {
-              message: 'Validation failed',
-              details: validation.error.flatten().fieldErrors
-            },
-          },
-          { status: 400 }
+      return apiError(
+        'Validation failed',
+        400,
+        validation.error.flatten().fieldErrors,
+        'VALIDATION_ERROR'
       );
     }
 
     const { email, password } = validation.data;
 
-    // Find user
     const user = await prisma.user.findUnique({
       where: { email },
       select: {
@@ -59,93 +48,55 @@ export async function POST(req: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json(
-          {
-            success: false,
-            error: { message: 'Invalid email or password' },
-          },
-          { status: 401 }
-      );
+      return apiError('Invalid email or password', 401, undefined, 'INVALID_CREDENTIALS');
     }
 
-    // Check if account is active
     if (!user.isActive) {
-      return NextResponse.json(
-          {
-            success: false,
-            error: { message: 'Your account has been deactivated' },
-          },
-          { status: 403 }
-      );
+      return apiError('Your account has been deactivated', 403, undefined, 'ACCOUNT_DEACTIVATED');
     }
 
-    // Verify password
     const isPasswordValid = await comparePassword(password, user.passwordHash);
 
     if (!isPasswordValid) {
-      return NextResponse.json(
-          {
-            success: false,
-            error: { message: 'Invalid email or password' },
-          },
-          { status: 401 }
-      );
+      return apiError('Invalid email or password', 401, undefined, 'INVALID_CREDENTIALS');
     }
 
-    // Check if email is verified
     if (!user.isEmailVerified) {
-      return NextResponse.json(
-          {
-            success: false,
-            error: {
-              message: 'Please verify your email address before logging in.',
-              code: 'EMAIL_NOT_VERIFIED',
-            },
-          },
-          { status: 403 }
+      return apiError(
+        'Please verify your email address before logging in.',
+        403,
+        undefined,
+        'EMAIL_NOT_VERIFIED'
       );
     }
 
-    // Update last login
     await prisma.user.update({
       where: { id: user.id },
       data: { lastLoginAt: new Date() },
     });
 
-    // Generate token
     const accessToken = generateToken({
       userId: user.id,
       email: user.email,
       role: user.role,
     });
 
-    // Return user data and token
-    return NextResponse.json(
-        {
-          success: true,
-          data: {
-            user: {
-              id: user.id,
-              name: user.name,
-              email: user.email,
-              university: user.university,
-              role: user.role,
-              isEmailVerified: user.isEmailVerified,
-            },
-            accessToken,
-          },
-          message: 'Login successful',
+    return apiSuccess(
+      {
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          university: user.university,
+          role: user.role,
+          isEmailVerified: user.isEmailVerified,
         },
-        { status: 200 }
+        accessToken,
+      },
+      'Login successful'
     );
   } catch (error) {
     console.error('Login error:', error);
-    return NextResponse.json(
-        {
-          success: false,
-          error: { message: 'An error occurred during login' },
-        },
-        { status: 500 }
-    );
+    return apiError('An error occurred during login', 500);
   }
 }

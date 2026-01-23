@@ -14,6 +14,7 @@ import {
   CreditCardIcon,
   ArrowRightOnRectangleIcon
 } from "@heroicons/react/24/outline";
+import AuthModal from "@/components/ui/AuthModal";
 
 interface UserInfo {
   userId: string;
@@ -30,6 +31,15 @@ export default function Header() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
+  const handleSubmitClick = (e: React.MouseEvent) => {
+    if (!user) {
+      e.preventDefault();
+      setIsAuthModalOpen(true);
+      if (isMenuOpen) setIsMenuOpen(false);
+    }
+  };
 
   // Check authentication status on mount and when localStorage changes
   useEffect(() => {
@@ -202,7 +212,11 @@ export default function Header() {
           {/* Desktop User Actions */}
           <div className="hidden lg:flex items-center space-x-2 xl:space-x-3 flex-shrink-0 ml-2">
 
-            <Link href="/submit" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-1">
+            <Link
+              href="/submit"
+              onClick={handleSubmitClick}
+              className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-1"
+            >
               Submit
             </Link>
 
@@ -422,7 +436,7 @@ export default function Header() {
               <Link
                 href="/submit"
                 className="text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50 px-3 py-2 rounded transition-colors"
-                onClick={() => setIsMenuOpen(false)}
+                onClick={handleSubmitClick}
               >
                 Submit Article
               </Link>
@@ -477,6 +491,13 @@ export default function Header() {
           </div>
         )}
       </div>
-    </header>
+
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        title="Start Your Submission"
+        description="To maintain the quality and integrity of our peer-review process, we require all authors to log in before submitting an article. This ensures you can track your submission status and communicate effectively with our editors."
+      />
+    </header >
   );
 }

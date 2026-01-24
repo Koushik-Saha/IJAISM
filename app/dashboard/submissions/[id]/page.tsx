@@ -173,8 +173,8 @@ export default function SubmissionDetailPage() {
               <h1 className="text-3xl font-bold text-primary mb-2">{article.title}</h1>
               <p className="text-gray-600">Submission ID: {article.id}</p>
             </div>
-            <span className={`px-4 py-2 text-sm font-semibold rounded-full ${getStatusColor(article.status)} whitespace-nowrap`}>
-              {article.status.replace('_', ' ')}
+            <span className={`px-4 py-2 text-sm font-semibold rounded-full ${getStatusColor(article.status)} whitespace-nowrap capitalize`}>
+              {article.status.replace(/_/g, ' ')}
             </span>
           </div>
 

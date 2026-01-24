@@ -25,10 +25,13 @@ export default function AdminArticlesPage() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 10;
 
   useEffect(() => {
     fetchArticles();
-  }, [statusFilter]);
+  }, [statusFilter, page]);
 
   const fetchArticles = async () => {
     try {
@@ -38,9 +41,10 @@ export default function AdminArticlesPage() {
         return;
       }
 
-      const url = statusFilter === 'all'
-        ? '/api/editor/articles'
-        : `/api/editor/articles?status=${statusFilter}`;
+      let url = `/api/editor/articles?page=${page}&limit=${limit}`;
+      if (statusFilter !== 'all') {
+        url += `&status=${statusFilter}`;
+      }
 
       const response = await fetch(url, {
         headers: { 'Authorization': `Bearer ${token}` },
@@ -56,10 +60,19 @@ export default function AdminArticlesPage() {
 
       const data = await response.json();
       setArticles(data.articles || []);
+      if (data.pagination) {
+        setTotalPages(data.pagination.pages);
+      }
     } catch (err: any) {
       console.error('Error:', err);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setPage(newPage);
     }
   };
 
@@ -83,6 +96,17 @@ export default function AdminArticlesPage() {
     return badges[status] || 'bg-gray-100 text-gray-800';
   };
 
+  const statuses = [
+    { value: 'all', label: 'All' },
+    { value: 'submitted', label: 'Pending' },
+    { value: 'under_review', label: 'Under Review' },
+    { value: 'waiting_for_editor', label: 'Waiting for Editor' },
+    { value: 'revision_requested', label: 'Revision Requested' },
+    { value: 'accepted', label: 'Accepted' },
+    { value: 'published', label: 'Published' },
+    { value: 'rejected', label: 'Rejected' },
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white border-b">
@@ -102,31 +126,22 @@ export default function AdminArticlesPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Filter */}
         <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-          <div className="flex gap-4">
-            <button
-              onClick={() => setStatusFilter('all')}
-              className={`px-4 py-2 rounded ${statusFilter === 'all' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700'}`}
-            >
-              All
-            </button>
-            <button
-              onClick={() => setStatusFilter('submitted')}
-              className={`px-4 py-2 rounded ${statusFilter === 'submitted' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700'}`}
-            >
-              Pending
-            </button>
-            <button
-              onClick={() => setStatusFilter('under_review')}
-              className={`px-4 py-2 rounded ${statusFilter === 'under_review' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700'}`}
-            >
-              Under Review
-            </button>
-            <button
-              onClick={() => setStatusFilter('published')}
-              className={`px-4 py-2 rounded ${statusFilter === 'published' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700'}`}
-            >
-              Published
-            </button>
+          <div className="flex flex-wrap gap-2">
+            {statuses.map((status) => (
+              <button
+                key={status.value}
+                onClick={() => {
+                  setStatusFilter(status.value);
+                  setPage(1); // Reset to page 1 on filter change
+                }}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${statusFilter === status.value
+                  ? 'bg-primary text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+              >
+                {status.label}
+              </button>
+            ))}
           </div>
         </div>
 
@@ -137,7 +152,7 @@ export default function AdminArticlesPage() {
           </div>
         ) : articles.length === 0 ? (
           <div className="bg-white rounded-lg shadow-md p-12 text-center">
-            <p className="text-gray-500">No articles found</p>
+            <p className="text-gray-500">No articles found matching this filter.</p>
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
@@ -185,6 +200,31 @@ export default function AdminArticlesPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {/* Pagination Controls */}
+        {articles.length > 0 && (
+          <div className="flex items-center justify-between mt-6 bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+            <div className="text-sm text-gray-600">
+              Page <span className="font-semibold">{page}</span> of <span className="font-semibold">{totalPages}</span>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => handlePageChange(page - 1)}
+                disabled={page === 1}
+                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Previous
+              </button>
+              <button
+                onClick={() => handlePageChange(page + 1)}
+                disabled={page === totalPages}
+                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Next
+              </button>
+            </div>
           </div>
         )}
       </div>

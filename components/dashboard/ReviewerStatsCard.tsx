@@ -40,7 +40,7 @@ export default function ReviewerStatsCard({ stats, isLoading }: ReviewerStatsPro
                 </Link>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 mt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
                 <div className="bg-purple-50 p-3 rounded-lg text-center">
                     <p className="text-2xl font-bold text-purple-700">{stats.pending}</p>
                     <p className="text-xs text-purple-800 font-medium uppercase tracking-wide">Pending</p>

@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
+import AuthProtectedLink from "@/components/ui/AuthProtectedLink";
 
 export default function JournalNav({ journalCode }: { journalCode: string }) {
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -54,13 +55,13 @@ export default function JournalNav({ journalCode }: { journalCode: string }) {
     return (
         <div className="bg-[#c05621] text-white shadow-md relative z-20" ref={navRef}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex items-center h-12">
+                <div className="flex flex-wrap items-center justify-center lg:justify-start min-h-[3rem] py-1 gap-y-1">
                     {navItems.map((item) => (
                         <div key={item.name} className="relative group">
                             <button
                                 onClick={() => toggleDropdown(item.name)}
                                 onMouseEnter={() => setActiveDropdown(item.name)}
-                                className="flex items-center px-6 py-3 font-semibold hover:bg-[#a3461a] transition-colors focus:outline-none"
+                                className="flex items-center px-4 md:px-6 py-2 font-semibold hover:bg-[#a3461a] transition-colors focus:outline-none whitespace-nowrap"
                             >
                                 {item.name}
                                 <ChevronDownIcon className="w-4 h-4 ml-2" />
@@ -68,7 +69,7 @@ export default function JournalNav({ journalCode }: { journalCode: string }) {
 
                             {activeDropdown === item.name && (
                                 <div
-                                    className="absolute left-0 top-full w-56 bg-[#0e7490] shadow-lg rounded-b-md overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200"
+                                    className="absolute left-0 top-full w-56 bg-[#0e7490] shadow-lg rounded-b-md overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 z-50"
                                     onMouseLeave={() => setActiveDropdown(null)}
                                 >
                                     {item.items.map((subItem) => (
@@ -86,16 +87,16 @@ export default function JournalNav({ journalCode }: { journalCode: string }) {
                         </div>
                     ))}
 
-                    <Link
+                    <AuthProtectedLink
                         href="/submit"
-                        className="flex items-center px-6 py-3 font-semibold hover:bg-[#a3461a] transition-colors"
+                        className="flex items-center px-4 md:px-6 py-2 font-semibold hover:bg-[#a3461a] transition-colors whitespace-nowrap"
                     >
                         Submit Your Article
-                    </Link>
+                    </AuthProtectedLink>
 
                     <Link
                         href="/author-guidelines"
-                        className="flex items-center px-6 py-3 font-semibold hover:bg-[#a3461a] transition-colors"
+                        className="flex items-center px-4 md:px-6 py-2 font-semibold hover:bg-[#a3461a] transition-colors whitespace-nowrap"
                     >
                         Guide for Authors
                     </Link>

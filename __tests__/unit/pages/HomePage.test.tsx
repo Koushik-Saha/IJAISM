@@ -18,6 +18,16 @@ jest.mock('@/lib/prisma', () => ({
 // Mock Child Components to simplify test
 jest.mock('@/components/ui/Card', () => ({ children, className }: any) => <div data-testid="card" className={className}>{children}</div>);
 
+// Mock useRouter
+jest.mock('next/navigation', () => ({
+    useRouter: () => ({
+        push: jest.fn(),
+        refresh: jest.fn(),
+        back: jest.fn(),
+        forward: jest.fn(),
+    }),
+}));
+
 describe('HomePage', () => {
     beforeEach(() => {
         jest.clearAllMocks();

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Card from "@/components/ui/Card";
+import AuthProtectedLink from "@/components/ui/AuthProtectedLink";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -99,9 +100,9 @@ export default async function HomePage() {
             making high-quality, peer-reviewed journals available online through our fast peer review system.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/submit" className="btn-accent">
+            <AuthProtectedLink href="/submit" className="btn-accent">
               Submit Your Research
-            </Link>
+            </AuthProtectedLink>
             <Link href="/journals" className="btn-secondary bg-white text-primary hover:bg-gray-100">
               Browse Journals
             </Link>

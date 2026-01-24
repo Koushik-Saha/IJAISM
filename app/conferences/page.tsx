@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import AuthProtectedLink from "@/components/ui/AuthProtectedLink";
 
 export const dynamic = "force-dynamic";
 
@@ -74,12 +75,12 @@ export default async function ConferencesPage() {
                 Present your work at our upcoming conferences and engage with peers
               </p>
             </div>
-            <Link
+            <AuthProtectedLink
               href="/submit"
               className="bg-white text-accent hover:bg-gray-100 px-8 py-3 rounded-lg font-bold transition-colors whitespace-nowrap"
             >
               Submit Paper
-            </Link>
+            </AuthProtectedLink>
           </div>
         </div>
 

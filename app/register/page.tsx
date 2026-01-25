@@ -25,6 +25,7 @@ export default function RegisterPage() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [demoVerificationLink, setDemoVerificationLink] = useState<string | null>(null);
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -124,10 +125,21 @@ export default function RegisterPage() {
       if (data.success) {
         // Registration successful
         toast.success('Successfully registered!', {
-          description: data.message || 'Your account has been created. Please log in to continue.',
+          description: data.message || 'Your account has been created.',
           duration: 4000,
         });
-        router.push('/login');
+
+        // DEMO MODE: If verification token is returned, show it to the user
+        // This allows verification without email delivery (for investors/demo)
+        if (data.data?.verificationToken) {
+          setErrors({
+            demo: `DEMO MODE: Email might not arrive. Verify directly: /verify-email?token=${data.data.verificationToken}`
+          });
+          // We also set a specific state to show a nice button
+          setDemoVerificationLink(`/verify-email?token=${data.data.verificationToken}`);
+        } else {
+          router.push('/login');
+        }
       } else {
         // Registration failed
         const errorMessage = data.error?.message || data.error?.code || 'Registration failed';
@@ -324,6 +336,22 @@ export default function RegisterPage() {
               {isSubmitting ? 'Creating Account...' : 'Create Account'}
             </button>
           </form>
+
+          {/* Demo Mode Verification Link */}
+          {demoVerificationLink && (
+            <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+              <h3 className="text-sm font-bold text-yellow-800 mb-2">⚠️ Demo / Investor Mode</h3>
+              <p className="text-xs text-yellow-700 mb-3">
+                Since email delivery requires domain verification (which is pending), use this link to verify the account immediately:
+              </p>
+              <Link
+                href={demoVerificationLink}
+                className="block w-full text-center py-2 px-4 bg-yellow-600 hover:bg-yellow-700 text-white rounded-md text-sm font-medium transition"
+              >
+                Verify Account Now
+              </Link>
+            </div>
+          )}
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">

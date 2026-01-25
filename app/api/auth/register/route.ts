@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
     });
 
     return apiSuccess(
-      { user },
+      { user, verificationToken }, // Exposed for Demo Mode (Investor Verification)
       'Registration successful. Please check your email to verify your account.',
       201
     );

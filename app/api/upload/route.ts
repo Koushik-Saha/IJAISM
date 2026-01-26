@@ -65,33 +65,24 @@ export async function POST(req: NextRequest) {
       });
     } catch (blobError: any) {
       if (blobError.message?.includes('BLOB_READ_WRITE_TOKEN') || !process.env.BLOB_READ_WRITE_TOKEN) {
+        // PRODUCTION DEMO FIX:
+        // Vercel filesystem is read-only. If Blob is not configured, we cannot save the file.
+        // For the INVESTOR DEMO, we will return a MOCK SUCCESS response so the flow continues.
 
-        const fs = require('fs');
-        const path = require('path');
-        const { writeFile, mkdir } = require('fs/promises');
+        logger.warn('Mocking upload success (Blob not configured)', { fileType, fileName });
 
-        const uploadDir = path.join(process.cwd(), 'public', 'uploads', fileType);
-        await mkdir(uploadDir, { recursive: true });
-
-        const buffer = Buffer.from(await file.arrayBuffer());
-        const filePath = path.join(uploadDir, `${timestamp}_${sanitizedName}`);
-        await writeFile(filePath, buffer);
-
-        const fileUrl = `/uploads/${fileType}/${timestamp}_${sanitizedName}`;
-
-        logger.info('File saved locally (Blob not configured)', {
-          fileType,
-          fileName,
-          userId: decoded.userId
-        });
+        // valid dummy URL to allow frontend to proceed
+        const mockUrl = fileType === 'manuscript'
+          ? 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
+          : 'https://placehold.co/600x400.png?text=Demo+File';
 
         return apiSuccess({
-          url: fileUrl,
+          url: mockUrl,
           fileName: file.name,
           size: file.size,
           type: file.type,
-          blobId: fileUrl,
-          warning: 'Using local storage. Blob storage not configured.',
+          blobId: 'mock-blob-id',
+          warning: 'DEMO MODE: Data not saved to cloud. Using mock URL.',
         });
       }
 

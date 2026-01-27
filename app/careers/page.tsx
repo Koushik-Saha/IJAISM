@@ -82,7 +82,7 @@ export default function CareersPage() {
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-primary to-blue-800 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Careers at IJAISM</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">Careers at C5K</h1>
           <p className="text-xl md:text-2xl text-gray-100 max-w-3xl">
             Join our mission to accelerate the dissemination of knowledge worldwide
           </p>
@@ -91,11 +91,11 @@ export default function CareersPage() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Why Join IJAISM */}
+        {/* Why Join C5K */}
         <div className="bg-white rounded-lg shadow-md p-8 md:p-12 mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-primary mb-6">Why Join IJAISM?</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-primary mb-6">Why Join C5K?</h2>
           <p className="text-lg text-gray-700 mb-6 leading-relaxed">
-            At IJAISM, we're transforming academic publishing by making research more accessible and
+            At C5K, we're transforming academic publishing by making research more accessible and
             the publication process faster and more efficient. Our innovative review system
             has helped thousands of researchers share their discoveries with the world.
           </p>
@@ -209,7 +209,7 @@ export default function CareersPage() {
             Diversity, Equity & Inclusion
           </h2>
           <p className="text-lg text-gray-700 mb-4 leading-relaxed">
-            IJAISM is committed to creating an inclusive environment where everyone feels welcome,
+            C5K is committed to creating an inclusive environment where everyone feels welcome,
             valued, and empowered to do their best work. We believe that diversity of perspectives,
             backgrounds, and experiences makes us stronger and better able to serve the global
             research community.
@@ -294,7 +294,7 @@ export default function CareersPage() {
               href="/about"
               className="bg-white hover:bg-gray-100 text-primary px-8 py-4 rounded-lg font-bold text-lg transition-colors"
             >
-              Learn More About IJAISM
+              Learn More About C5K
             </Link>
           </div>
         </div>

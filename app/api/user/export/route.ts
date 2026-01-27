@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
             status: 200,
             headers: {
                 'Content-Type': 'application/json',
-                'Content-Disposition': `attachment; filename="ijaism-data-export-${userId}.json"`
+                'Content-Disposition': `attachment; filename="c5k-data-export-${userId}.json"`
             }
         });
 

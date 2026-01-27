@@ -10,13 +10,13 @@ import { Toaster } from "sonner";
 
 
 export const metadata: Metadata = {
-  title: "IJAISM - International Journal of Advanced Information Systems and Management",
+  title: "C5K - International Journal of Advanced Information Systems and Management",
   description: "Dedicated to publishing groundbreaking research in information technology, business management, and related disciplines",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "IJAISM",
+    title: "C5K",
   },
   icons: {
     icon: [
@@ -45,10 +45,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <meta name="application-name" content="IJAISM" />
+        <meta name="application-name" content="C5K" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="IJAISM" />
+        <meta name="apple-mobile-web-app-title" content="C5K" />
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
         <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.svg" />

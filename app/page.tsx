@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 async function getHomepageData() {
   try {
-    const [announcements, journals, articles] = await Promise.all([
+    const [announcements, journals, articles, mostViewedArticles] = await Promise.all([
       prisma.announcement.findMany({
         where: {
           publishedAt: { not: null },
@@ -48,6 +48,20 @@ async function getHomepageData() {
           publicationDate: true,
         },
       }),
+
+      prisma.article.findMany({
+        where: { status: "published" },
+        orderBy: { viewCount: "desc" },
+        take: 6,
+        select: {
+          id: true,
+          title: true,
+          abstract: true,
+          journal: { select: { code: true } },
+          author: { select: { name: true } },
+          viewCount: true,
+        },
+      }),
     ]);
 
     const [journalsCount, articlesCount, usersCount] = await Promise.all([
@@ -66,7 +80,9 @@ async function getHomepageData() {
         journal: a.journal.code,
         authors: a.author.name,
       })),
+      mostViewedArticles,
       stats: { journals: journalsCount, articles: articlesCount, users: usersCount },
+
     };
   } catch (error) {
     console.error("Error fetching homepage data:", error);
@@ -80,14 +96,14 @@ async function getHomepageData() {
 }
 
 export default async function HomePage() {
-  const { announcements, journals, articles, stats } = await getHomepageData();
+  const { announcements, journals, articles, mostViewedArticles, stats } = await getHomepageData();
   return (
     <div className="min-h-screen">
       {/* Hero Banner */}
       <section className="bg-gradient-to-r from-primary to-primary-light text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-6">
-            Welcome to IJAISM Academic Publishing Platform
+            Welcome to C5K Academic Publishing Platform
           </h1>
           <p className="text-xl md:text-2xl mb-4 text-gray-100">
             Dedicated to publishing groundbreaking research and promoting innovative ideas
@@ -210,10 +226,47 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* Most Viewed Articles */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold mb-8 text-center">Most Viewed Articles</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {mostViewedArticles && mostViewedArticles.length > 0 ? (
+              mostViewedArticles.map((article: any) => (
+                <Card key={article.id}>
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded font-semibold">
+                      {article.journal.code}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      👁️ {article.viewCount} views
+                    </span>
+                  </div>
+                  <h3 className="text-lg font-bold mb-2 line-clamp-2">
+                    <Link href={`/articles/${article.id}`} className="hover:text-primary">
+                      {article.title}
+                    </Link>
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-2">By {article.author.name}</p>
+                  <p className="text-sm text-gray-700 mb-4 line-clamp-2">{article.abstract || 'No abstract available.'}</p>
+                  <Link href={`/articles/${article.id}`} className="text-primary hover:text-primary-dark font-semibold">
+                    Read More →
+                  </Link>
+                </Card>
+              ))
+            ) : (
+              <div className="col-span-3 text-center text-gray-500">
+                No articles to display.
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
       {/* Newsletter Subscription */}
       <section className="py-16 bg-primary text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold mb-4">Subscribe to IJAISM for Updates</h2>
+          <h2 className="text-3xl font-bold mb-4">Subscribe to C5K for Updates</h2>
           <p className="text-lg mb-8">Stay informed about the latest research, publications, and academic events.</p>
           <form className="flex flex-col sm:flex-row gap-4 justify-center">
             <input

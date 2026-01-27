@@ -37,6 +37,7 @@ import { AnalyticsDashboard } from '@/components/editor/AnalyticsDashboard';
 export default function AdminDashboard() {
   const router = useRouter();
   const [stats, setStats] = useState<AdminStats | null>(null);
+  const [currentUser, setCurrentUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -68,6 +69,12 @@ export default function AdminDashboard() {
           router.push('/login?redirect=/editor');
           return;
         }
+
+        // Fetch User Info for RBAC
+        fetch('/api/auth/me', { headers: { Authorization: `Bearer ${token}` } })
+          .then(res => res.json())
+          .then(data => setCurrentUser(data.user || null))
+          .catch(err => console.error(err));
 
         const response = await fetch('/api/editor/stats', {
           headers: {
@@ -235,26 +242,54 @@ export default function AdminDashboard() {
               <p className="text-sm text-gray-600">User roles and permissions</p>
             </Link>
             <Link
-              href="/editor/announcements"
-              className="border-2 border-gray-200 rounded-lg p-4 hover:border-primary transition-colors"
-            >
-              <h3 className="font-bold text-gray-900 mb-2">📢 Manage Announcements</h3>
-              <p className="text-sm text-gray-600">Create and edit announcements</p>
-            </Link>
-            <Link
               href="/editor/journals"
               className="border-2 border-gray-200 rounded-lg p-4 hover:border-primary transition-colors"
             >
               <h3 className="font-bold text-gray-900 mb-2">📚 Manage Journals</h3>
               <p className="text-sm text-gray-600">Create and edit journals</p>
             </Link>
-            <Link
-              href="/editor/blogs"
-              className="border-2 border-gray-200 rounded-lg p-4 hover:border-primary transition-colors"
-            >
-              <h3 className="font-bold text-gray-900 mb-2">📰 Manage Blogs</h3>
-              <p className="text-sm text-gray-600">Create and edit blog posts</p>
-            </Link>
+
+            {/* Super Admin / Mother Admin Only Actions */}
+            {currentUser && ['super_admin', 'mother_admin'].includes(currentUser.role) && (
+              <>
+                <Link
+                  href="/editor/announcements"
+                  className="border-2 border-gray-200 rounded-lg p-4 hover:border-primary transition-colors"
+                >
+                  <h3 className="font-bold text-gray-900 mb-2">📢 Manage Announcements</h3>
+                  <p className="text-sm text-gray-600">Create and edit announcements</p>
+                </Link>
+                <Link
+                  href="/editor/blogs"
+                  className="border-2 border-gray-200 rounded-lg p-4 hover:border-primary transition-colors"
+                >
+                  <h3 className="font-bold text-gray-900 mb-2">📰 Manage Blogs</h3>
+                  <p className="text-sm text-gray-600">Create and edit blog posts</p>
+                </Link>
+                {/* Add placeholders for other Super Admin features if they exist or will exist */}
+                <Link
+                  href="/editor/dissertations"
+                  className="border-2 border-gray-200 rounded-lg p-4 hover:border-primary transition-colors"
+                >
+                  <h3 className="font-bold text-gray-900 mb-2">🎓 Dissertations</h3>
+                  <p className="text-sm text-gray-600">Manage dissertations</p>
+                </Link>
+                <Link
+                  href="/editor/books"
+                  className="border-2 border-gray-200 rounded-lg p-4 hover:border-primary transition-colors"
+                >
+                  <h3 className="font-bold text-gray-900 mb-2">📖 Books</h3>
+                  <p className="text-sm text-gray-600">Manage books</p>
+                </Link>
+                <Link
+                  href="/editor/conferences"
+                  className="border-2 border-gray-200 rounded-lg p-4 hover:border-primary transition-colors"
+                >
+                  <h3 className="font-bold text-gray-900 mb-2">🗓️ Conferences</h3>
+                  <p className="text-sm text-gray-600">Manage conferences</p>
+                </Link>
+              </>
+            )}
           </div>
         </div>
 
@@ -313,7 +348,7 @@ export default function AdminDashboard() {
                       <p className="font-semibold text-gray-900">{user.name || user.email}</p>
                       <p className="text-sm text-gray-600">{user.email}</p>
                     </div>
-                    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${['editor', 'super_admin'].includes(user.role) ? 'bg-red-100 text-red-800' :
+                    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${['editor', 'super_admin', 'mother_admin'].includes(user.role) ? 'bg-red-100 text-red-800' :
                       user.role === 'reviewer' ? 'bg-blue-100 text-blue-800' :
                         'bg-gray-100 text-gray-800'
                       }`}>

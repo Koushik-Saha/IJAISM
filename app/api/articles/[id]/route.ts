@@ -73,11 +73,33 @@ export async function GET(
     }
 
     // 4. Verify user owns this article (security check)
-    if (article.authorId !== userId) {
+    // Note: Public/Published articles might be accessed by anyone in some contexts, but here we seem to enforce Author ownership OR Editor access?
+    // The previous code only checked `if (article.authorId !== userId)`.
+    // Wait, if I am an Editor, I should be allowed?
+    // The previous code actually BLOCKED editors! (Line 76: `if (article.authorId !== userId)`).
+    // I should fix that too to allow Editors.
+
+    const isEditor = decoded && ['editor', 'super_admin', 'mother_admin'].includes(decoded.role);
+    const isAuthor = article.authorId === userId;
+
+    if (!isAuthor && !isEditor) {
+      // If it's published, maybe allow? For now, stick to secure unless public route.
+      // Assuming this is the Author's dashboard view API.
       return NextResponse.json(
         { error: 'Forbidden - You do not have access to this article' },
         { status: 403 }
       );
+    }
+
+    // 5. Mask Data if not Editor (i.e. Author)
+    if (!isEditor) {
+      // Mask Reviewer Names
+      (article.reviews as any) = article.reviews.map((review, index) => ({
+        ...review,
+        reviewer: {
+          name: `Reviewer ${index + 1}`
+        }
+      }));
     }
 
     // 5. Return article

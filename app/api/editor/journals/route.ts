@@ -23,12 +23,18 @@ export async function GET(req: NextRequest) {
             select: { role: true },
         });
 
-        if (!user || !['admin', 'editor', 'super_admin'].includes(user.role)) {
+        if (!user || !['admin', 'editor', 'super_admin', 'mother_admin'].includes(user.role)) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
         // 2. Fetch all journals
+        const where: any = {};
+        if (user.role === 'editor') {
+            where.editorId = decoded.userId;
+        }
+
         const journals = await prisma.journal.findMany({
+            where,
             orderBy: { displayOrder: 'asc' },
             include: {
                 _count: {
@@ -68,7 +74,7 @@ export async function POST(req: NextRequest) {
             select: { role: true },
         });
 
-        if (!user || !['admin', 'editor', 'super_admin'].includes(user.role)) {
+        if (!user || !['admin', 'editor', 'super_admin', 'mother_admin'].includes(user.role)) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 

@@ -84,17 +84,39 @@ export default function ArticleActions({
                 </div>
             </Card>
 
-            {/* Download */}
+            {/* Download/View Options */}
             {pdfUrl && (
                 <Card className="mb-6">
-                    <h3 className="text-lg font-bold mb-4">Download</h3>
-                    <a
-                        href="#"
-                        onClick={handleDownload}
-                        className="w-full btn-primary mb-2 block text-center pt-2 pb-2"
-                    >
-                        Download PDF
-                    </a>
+                    <h3 className="text-lg font-bold mb-4">Access Full Text</h3>
+                    <div className="flex flex-col gap-2">
+                        <button
+                            onClick={() => {
+                                const token = localStorage.getItem('token');
+                                if (!token) {
+                                    window.location.href = `/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`;
+                                    return;
+                                }
+                                window.open(`/api/articles/${articleId}/pdf?token=${token}`, '_blank');
+                            }}
+                            className="w-full btn-primary text-center pt-2 pb-2"
+                        >
+                            View PDF
+                        </button>
+
+                        <button
+                            onClick={() => {
+                                const token = localStorage.getItem('token');
+                                if (!token) {
+                                    window.location.href = `/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`;
+                                    return;
+                                }
+                                window.location.href = `/api/articles/${articleId}/pdf?token=${token}&download=true`;
+                            }}
+                            className="w-full btn-secondary text-center pt-2 pb-2"
+                        >
+                            Download PDF
+                        </button>
+                    </div>
                 </Card>
             )}
 

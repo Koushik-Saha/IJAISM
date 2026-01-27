@@ -50,7 +50,14 @@ describe('Review API /api/reviews/[id]', () => {
             const { getReviewById } = require('@/lib/reviews');
 
             (prisma.user.findUnique as jest.Mock).mockResolvedValue({ role: 'reviewer' });
-            (getReviewById as jest.Mock).mockResolvedValue({ id: '1', status: 'pending' });
+            (getReviewById as jest.Mock).mockResolvedValue({
+                id: '1',
+                status: 'pending',
+                article: {
+                    id: 'a1',
+                    coAuthors: []
+                }
+            });
 
             const req = new NextRequest('http://localhost:3000/api/reviews/1', {
                 headers: { Authorization: 'Bearer token' }

@@ -14,7 +14,7 @@ export default function TermsPage() {
 
                         <h3>1. Introduction</h3>
                         <p>
-                            Welcome to IJAISM. By accessing or using our platform, you agree to be bound by these
+                            Welcome to C5K. By accessing or using our platform, you agree to be bound by these
                             Terms of Service and all applicable laws and regulations.
                         </p>
 
@@ -35,8 +35,8 @@ export default function TermsPage() {
 
                         <h3>4. Intellectual Property</h3>
                         <p>
-                            Authors retain the copyright to their work published on IJAISM. By submitting content,
-                            you grant IJAISM a non-exclusive license to publish, archive, and distribute your work.
+                            Authors retain the copyright to their work published on C5K. By submitting content,
+                            you grant C5K a non-exclusive license to publish, archive, and distribute your work.
                         </p>
 
                         <h3>5. Peer Review Process</h3>
@@ -55,7 +55,7 @@ export default function TermsPage() {
                         <p>
                             If you have any questions about these Terms, please contact us at{' '}
                             <Link href="/contact" className="text-primary hover:underline">
-                                support@ijaism.org
+                                support@c5k.org
                             </Link>
                             .
                         </p>

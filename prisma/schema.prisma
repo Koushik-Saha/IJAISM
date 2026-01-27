@@ -1,5 +1,3 @@
-// This is your Prisma schema file
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,201 +7,193 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// User Management
 model User {
-  id              String    @id @default(uuid())
-  email           String    @unique
-  passwordHash    String
-  name            String
-  university      String
-  orcid           String?   @unique
-  role            String    @default("author") // author, reviewer, editor, super_admin
-  affiliation     String?
-  bio             String?
-  profileImageUrl String?
-  isEmailVerified Boolean   @default(false)
-  isActive        Boolean   @default(true)
-  lastLoginAt     DateTime?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  deletedAt       DateTime?
-
+  id                      String                   @id @default(uuid())
+  email                   String                   @unique
+  passwordHash            String
+  name                    String
+  university              String
+  orcid                   String?                  @unique
+  role                    String                   @default("author")
+  affiliation             String?
+  bio                     String?
+  profileImageUrl         String?
+  isEmailVerified         Boolean                  @default(false)
+  isActive                Boolean                  @default(true)
+  lastLoginAt             DateTime?
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  deletedAt               DateTime?
+  managedById             String?
   articles                Article[]
-  reviews                 Review[]
+  blogs                   Blog[]
   conferences             ConferenceRegistration[]
   dissertations           Dissertation[]
+  downloads               DownloadLog[]
+  emailVerificationTokens EmailVerificationToken[]
+  managedJournals         Journal[]                @relation("JournalEditor")
   membership              Membership?
   notifications           Notification[]
   passwordResetTokens     PasswordResetToken[]
-  emailVerificationTokens EmailVerificationToken[]
-  blogs                   Blog[]
-  downloads               DownloadLog[]
+  reviews                 Review[]
+  managedBy               User?                    @relation("UserHierarchy", fields: [managedById], references: [id])
+  subordinates            User[]                   @relation("UserHierarchy")
 
   @@index([email])
   @@index([role])
+  @@index([managedById])
 }
 
-// Password Reset Tokens
 model PasswordResetToken {
   id        String    @id @default(uuid())
   userId    String
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   token     String    @unique
   expiresAt DateTime
   used      Boolean   @default(false)
   usedAt    DateTime?
   createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([token])
   @@index([userId])
   @@index([expiresAt])
 }
 
-// Email Verification Tokens
 model EmailVerificationToken {
   id        String    @id @default(uuid())
   userId    String
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   token     String    @unique
   expiresAt DateTime
   used      Boolean   @default(false)
   usedAt    DateTime?
   createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([token])
   @@index([userId])
   @@index([expiresAt])
 }
 
-// Memberships
 model Membership {
   id                   String   @id @default(uuid())
   userId               String   @unique
-  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tier                 String // free, basic, premium, institutional
-  status               String   @default("active") // active, expired, cancelled
+  tier                 String
+  status               String   @default("active")
   startDate            DateTime
   endDate              DateTime
   autoRenew            Boolean  @default(true)
   stripeSubscriptionId String?
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([status])
 }
 
-// Journals
 model Journal {
-  id                      String    @id @default(uuid())
-  code                    String    @unique // JITMB, JSAE, etc.
-  fullName                String
-  shortName               String?
-  description             String?
-  aimsAndScope            String?
-  coverImageUrl           String?
-  issn                    String?
-  eIssn                   String?
-  impactFactor            Float?
-  citeScore               Float?
-  publisher               String?
-  frequency               String?
-  articleProcessingCharge Float?
-  themeColor              String?   @default("#006d77") // Default teal color
-  
-  // Journal Insights
-  subjectAreas            String?   @db.Text
-  indexing                String?   @db.Text
-  
-  // Content Pages
-  editorialBoard          Json?     // [{ name: "...", role: "...", affiliation: "...", image: "..." }]
-  editorialBoardDescription String? @db.Text
-  editingService          String?   @db.Text
-  
-  // Timeline Metrics
-  timeToFirstDecision     String?
-  reviewTime              String?
-  revisionTime            String?
-  submissionToAcceptance  String?
-  acceptanceToPublication String?
-
-  isActive                Boolean   @default(true)
-  displayOrder            Int       @default(0)
-  createdAt               DateTime  @default(now())
-  updatedAt               DateTime  @updatedAt
-  deletedAt               DateTime?
-
-  articles Article[]
-  issues   JournalIssue[]
+  id                        String         @id @default(uuid())
+  code                      String         @unique
+  fullName                  String
+  shortName                 String?
+  description               String?
+  aimsAndScope              String?
+  coverImageUrl             String?
+  issn                      String?
+  eIssn                     String?
+  impactFactor              Float?
+  publisher                 String?
+  frequency                 String?
+  articleProcessingCharge   Float?
+  isActive                  Boolean        @default(true)
+  displayOrder              Int            @default(0)
+  createdAt                 DateTime       @default(now())
+  updatedAt                 DateTime       @updatedAt
+  deletedAt                 DateTime?
+  citeScore                 Float?
+  themeColor                String?        @default("#006d77")
+  acceptanceToPublication   String?
+  indexing                  String?
+  reviewTime                String?
+  revisionTime              String?
+  subjectAreas              String?
+  submissionToAcceptance    String?
+  timeToFirstDecision       String?
+  editingService            String?
+  editorialBoard            Json?
+  editorialBoardDescription String?
+  editorId                  String?
+  articles                  Article[]
+  editor                    User?          @relation("JournalEditor", fields: [editorId], references: [id])
+  issues                    JournalIssue[]
 
   @@index([code])
   @@index([isActive])
+  @@index([editorId])
 }
 
 model JournalIssue {
-  id          String   @id @default(uuid())
+  id          String    @id @default(uuid())
   journalId   String
-  journal     Journal  @relation(fields: [journalId], references: [id])
-  title       String?  // e.g. "Special Issue on AI"
+  title       String?
   volume      Int
   issue       Int
   year        Int
   coverUrl    String?
-  isSpecial   Boolean  @default(false)
-  isCurrent   Boolean  @default(false)
-  description String?  @db.Text
-  publishedAt DateTime @default(now())
-  
+  isSpecial   Boolean   @default(false)
+  isCurrent   Boolean   @default(false)
+  description String?
+  publishedAt DateTime  @default(now())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   articles    Article[]
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  journal     Journal   @relation(fields: [journalId], references: [id])
 
   @@index([journalId])
   @@index([year])
 }
 
-// Articles
 model Article {
-  id              String        @id @default(uuid())
-  journalId       String
-  journal         Journal       @relation(fields: [journalId], references: [id])
-  issueId         String?
-  journalIssue    JournalIssue? @relation(fields: [issueId], references: [id])
-  title           String
-  abstract        String
-  keywords        String[]
-  articleType     String // research, review, case_study
-  doi             String?   @unique
-  volume          Int?
-  issue           Int?
-  pageStart       Int?
-  pageEnd         Int?
-  publicationDate DateTime?
-  submissionDate  DateTime?
-  acceptanceDate  DateTime?
-  status          String    @default("draft") // draft, submitted, under_review, waiting_for_editor, revision_requested, resubmitted, waiting_for_final_decision, accepted, published, rejected
-  pdfUrl          String?
-  language        String    @default("en")
-  citationCount   Int       @default(0)
-  viewCount       Int       @default(0)
-  downloadCount   Int       @default(0)
-  isOpenAccess    Boolean   @default(true)
-  isBestPaper     Boolean   @default(false)
-  
-  // New workflow fields
+  id                String        @id @default(uuid())
+  journalId         String
+  title             String
+  abstract          String
+  keywords          String[]
+  articleType       String
+  doi               String?       @unique
+  volume            Int?
+  issue             Int?
+  pageStart         Int?
+  pageEnd           Int?
+  publicationDate   DateTime?
+  submissionDate    DateTime?
+  acceptanceDate    DateTime?
+  status            String        @default("draft")
+  pdfUrl            String?
+  language          String        @default("en")
+  citationCount     Int           @default(0)
+  viewCount         Int           @default(0)
+  downloadCount     Int           @default(0)
+  isOpenAccess      Boolean       @default(true)
+
+  createdAt         DateTime      @default(now())
+  reviewerInvitations ReviewerInvitation[]
+  updatedAt         DateTime      @updatedAt
+  isApcPaid         Boolean       @default(false)
+  apcAmount         Float?
+  stripePaymentId   String?       // For Payment Tracking
+  deletedAt         DateTime?
+  authorId          String
   editorComments    String?
   rejectionReason   String?
-  resubmissionCount Int       @default(0)
-
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  deletedAt       DateTime?
-
-  authorId String
-  author   User     @relation(fields: [authorId], references: [id])
-  reviews  Review[]
-  coAuthors CoAuthor[]
+  resubmissionCount Int           @default(0)
+  issueId           String?
+  isBestPaper       Boolean       @default(false)
+  author            User          @relation(fields: [authorId], references: [id])
+  journalIssue      JournalIssue? @relation(fields: [issueId], references: [id])
+  journal           Journal       @relation(fields: [journalId], references: [id])
+  coAuthors         CoAuthor[]
+  reviews           Review[]
 
   @@index([journalId])
   @@index([status])
@@ -211,33 +201,29 @@ model Article {
   @@index([authorId])
 }
 
-// Co-Authors
 model CoAuthor {
-  id           String   @id @default(uuid())
-  articleId    String
-  article      Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
-  name         String
-  email        String?
-  university   String?
-  isMain       Boolean  @default(false)
-  order        Int      @default(0)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id         String   @id @default(uuid())
+  articleId  String
+  name       String
+  email      String?
+  university String?
+  isMain     Boolean  @default(false)
+  order      Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  article    Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
 
   @@index([articleId])
 }
 
-// Reviews
 model Review {
   id               String    @id @default(uuid())
   articleId        String
-  article          Article   @relation(fields: [articleId], references: [id], onDelete: Cascade)
   reviewerId       String
-  reviewer         User      @relation(fields: [reviewerId], references: [id])
-  reviewerNumber   Int 
+  reviewerNumber   Int
   round            Int       @default(1)
-  status           String    @default("invited") // invited, accepted, declined, pending, in_progress, completed
-  decision         String?   // accept, partial_accept, reject
+  status           String    @default("invited")
+  decision         String?
   commentsToAuthor String?
   commentsToEditor String?
   assignedAt       DateTime  @default(now())
@@ -245,6 +231,8 @@ model Review {
   submittedAt      DateTime?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
+  article          Article   @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  reviewer         User      @relation(fields: [reviewerId], references: [id])
 
   @@unique([articleId, reviewerNumber])
   @@index([articleId])
@@ -252,93 +240,86 @@ model Review {
   @@index([status])
 }
 
-// Dissertations
 model Dissertation {
   id             String    @id @default(uuid())
   title          String
   abstract       String
   authorId       String
-  author         User      @relation(fields: [authorId], references: [id])
-  authorName     String?
   university     String
   department     String?
-  degreeType     String // masters, phd
+  degreeType     String
   supervisorName String?
   submissionDate DateTime?
   defenseDate    DateTime?
   keywords       String[]
   pdfUrl         String?
-  coverImageUrl  String?
-  status         String    @default("pending") // pending, approved, published
+  status         String    @default("pending")
   viewCount      Int       @default(0)
   downloadCount  Int       @default(0)
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
   deletedAt      DateTime?
+  coverImageUrl  String?
+  authorName     String?
+  author         User      @relation(fields: [authorId], references: [id])
 
   @@index([authorId])
   @@index([degreeType])
   @@index([status])
 }
 
-// Conferences
 model Conference {
-  id                 String    @id @default(uuid())
+  id                 String                   @id @default(uuid())
   title              String
-  acronym            String?
   description        String?
-  fullDescription    String?   // For the detailed about section
   startDate          DateTime
   endDate            DateTime
   venue              String?
   city               String?
   country            String?
-  location           String?   // e.g. "San Francisco, USA" displayed in list
   websiteUrl         String?
   registrationUrl    String?
   submissionDeadline DateTime?
   notificationDate   DateTime?
-  conferenceType     String?   // virtual, in_person, hybrid
-  status             String    @default("upcoming") // upcoming, ongoing, completed, cancelled
+  conferenceType     String?
+  status             String                   @default("upcoming")
   bannerImageUrl     String?
-  
-  topics             String[]
-  keynotes           Json?     // [{ name: "...", title: "...", topic: "..." }]
-  schedule           Json?     // [{ day: "...", events: [...] }]
-  registrationFees   Json?     // { earlyBird: {...}, regular: {...} }
-  included           String[]  // Strings of what's included
-  importantDates     Json?     // [{ event: "...", date: "..." }]
-  venueDetails       Json?     // { name: "...", address: "...", hotels: [...] }
-
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
   deletedAt          DateTime?
-
-  registrations ConferenceRegistration[]
+  acronym            String?
+  fullDescription    String?
+  importantDates     Json?
+  included           String[]
+  keynotes           Json?
+  location           String?
+  registrationFees   Json?
+  schedule           Json?
+  topics             String[]
+  venueDetails       Json?
+  registrations      ConferenceRegistration[]
 
   @@index([startDate])
   @@index([status])
 }
 
-// Conference Registrations
 model ConferenceRegistration {
   id               String     @id @default(uuid())
   conferenceId     String
-  conference       Conference @relation(fields: [conferenceId], references: [id], onDelete: Cascade)
   userId           String
-  user             User       @relation(fields: [userId], references: [id])
-  registrationType String // student, academic, industry
-  paymentStatus    String     @default("pending") // pending, completed, failed
+  registrationType String
+  paymentStatus    String     @default("pending")
   paymentAmount    Float?
   stripePaymentId  String?
   registeredAt     DateTime   @default(now())
   createdAt        DateTime   @default(now())
+  conference       Conference @relation(fields: [conferenceId], references: [id], onDelete: Cascade)
+  user             User       @relation(fields: [userId], references: [id])
 
   @@index([conferenceId])
   @@index([userId])
 }
 
-// Blogs
 model Blog {
   id               String    @id @default(uuid())
   title            String
@@ -347,98 +328,107 @@ model Blog {
   excerpt          String?
   featuredImageUrl String?
   authorId         String
-  author           User      @relation(fields: [authorId], references: [id])
-  status           String    @default("draft") // draft, published
+  status           String    @default("draft")
   publishedAt      DateTime?
   viewCount        Int       @default(0)
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
   deletedAt        DateTime?
+  author           User      @relation(fields: [authorId], references: [id])
 
   @@index([slug])
   @@index([status])
   @@index([publishedAt])
 }
 
-// Announcements
 model Announcement {
   id           String    @id @default(uuid())
   title        String
   content      String
   excerpt      String?
   thumbnailUrl String?
-  category     String? // news, update, event
+  category     String?
   priority     Int       @default(0)
   isFeatured   Boolean   @default(false)
-  author       String?   @default("IJAISM Admin")
   publishedAt  DateTime?
   expiresAt    DateTime?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   deletedAt    DateTime?
+  author       String?   @default("IJAISM Admin")
 
   @@index([category])
   @@index([isFeatured])
   @@index([publishedAt])
 }
 
-// Notifications
 model Notification {
   id        String    @id @default(uuid())
   userId    String
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type      String // submission_update, review_request, message
+  type      String
   title     String
   message   String
   link      String?
   isRead    Boolean   @default(false)
   readAt    DateTime?
   createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([isRead])
   @@index([createdAt])
 }
 
-// Books
 model Book {
-  id              String    @id @default(uuid())
+  id              String   @id @default(uuid())
   title           String
   authors         String[]
   year            Int
-  isbn            String    @unique
+  isbn            String   @unique
   pages           Int
   field           String
   description     String
   fullDescription String
-  price           String    // Storing as string to handle currency symbols/formatting easily as per mock
+  price           String
   publisher       String
   language        String
   edition         String
   format          String
   coverImageUrl   String?
-  
-  tableOfContents Json?     // [{ chapter: 1, title: "...", pages: "..." }]
-  previewPages    Json?     // [{ pageNumber: 1, content: "..." }]
-  reviews         Json?     // [{ author: "...", rating: 5, text: "..." }]
+  tableOfContents Json?
+  previewPages    Json?
+  reviews         Json?
   relatedTopics   String[]
-
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   @@index([isbn])
   @@index([field])
 }
 
-// Download Tracking
 model DownloadLog {
-  id          String   @id @default(uuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  resourceId  String
-  resourceType String  // 'article', 'dissertation', etc.
+  id           String   @id @default(uuid())
+  userId       String
+  resourceId   String
+  resourceType String
   downloadedAt DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([downloadedAt])
+}
+
+model ReviewerInvitation {
+  id        String   @id @default(uuid())
+  email     String
+  name      String
+  articleId String
+  token     String   @unique
+  status    String   @default("pending") // pending, accepted, expired
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@index([email])
+  @@index([token])
 }

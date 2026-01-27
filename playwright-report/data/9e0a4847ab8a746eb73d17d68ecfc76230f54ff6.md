@@ -1,0 +1,112 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - link "C5K Logo C5K" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e6]:
+          - img "C5K Logo" [ref=e8]
+          - generic [ref=e9]: C5K
+      - button "Toggle menu" [ref=e10] [cursor=pointer]:
+        - img [ref=e11]
+  - main [ref=e13]:
+    - generic [ref=e16]:
+      - generic [ref=e17]:
+        - heading "Sign In to C5K" [level=2] [ref=e18]
+        - paragraph [ref=e19]: Access your academic account
+      - generic [ref=e20]:
+        - generic [ref=e21]:
+          - generic [ref=e22]: Email Address
+          - textbox "Email Address" [ref=e23]:
+            - /placeholder: your.email@university.edu
+            - text: mother_1769543421795@c5k.org
+        - generic [ref=e24]:
+          - generic [ref=e25]: Password
+          - generic [ref=e26]:
+            - textbox "Password" [active] [ref=e27]:
+              - /placeholder: ••••••••
+              - text: Password123!
+            - button [ref=e28] [cursor=pointer]:
+              - img [ref=e29]
+        - generic [ref=e32]:
+          - generic [ref=e33]:
+            - checkbox "Remember me" [ref=e34]
+            - generic [ref=e35]: Remember me
+          - link "Forgot password?" [ref=e37] [cursor=pointer]:
+            - /url: /forgot-password
+        - button "Sign In" [ref=e38] [cursor=pointer]
+      - paragraph [ref=e40]:
+        - text: Don't have an account?
+        - link "Create Account" [ref=e41] [cursor=pointer]:
+          - /url: /register
+  - contentinfo [ref=e42]:
+    - generic [ref=e43]:
+      - generic [ref=e44]:
+        - generic [ref=e45]:
+          - heading "ABOUT C5K" [level=3] [ref=e46]
+          - list [ref=e47]:
+            - listitem [ref=e48]:
+              - link "Mission & Vision" [ref=e49] [cursor=pointer]:
+                - /url: /contact
+            - listitem [ref=e50]:
+              - link "Contract" [ref=e51] [cursor=pointer]:
+                - /url: /contact
+            - listitem [ref=e52]:
+              - link "Privacy & Policy" [ref=e53] [cursor=pointer]:
+                - /url: /privacy
+            - listitem [ref=e54]:
+              - link "Terms & Condition" [ref=e55] [cursor=pointer]:
+                - /url: /terms
+        - generic [ref=e56]:
+          - heading "LOCATION" [level=3] [ref=e57]
+          - generic [ref=e58]:
+            - text: 761 State Highway 100
+            - text: Port Isabel, TX 78578
+            - text: USA
+        - generic [ref=e59]:
+          - heading "GET INVOLVED" [level=3] [ref=e60]
+          - list [ref=e61]:
+            - listitem [ref=e62]:
+              - link "Conference" [ref=e63] [cursor=pointer]:
+                - /url: /conferences
+            - listitem [ref=e64]:
+              - link "Societies" [ref=e65] [cursor=pointer]:
+                - /url: /societies
+            - listitem [ref=e66]:
+              - link "Technical Career" [ref=e67] [cursor=pointer]:
+                - /url: /careers
+            - listitem [ref=e68]:
+              - link "Scholarship" [ref=e69] [cursor=pointer]:
+                - /url: /scholarship
+        - generic [ref=e70]:
+          - heading "RESOURCES" [level=3] [ref=e71]
+          - list [ref=e72]:
+            - listitem [ref=e73]:
+              - link "Author Guideline" [ref=e74] [cursor=pointer]:
+                - /url: /author-guidelines
+            - listitem [ref=e75]:
+              - link "Paper Format Download" [ref=e76] [cursor=pointer]:
+                - /url: /paper-format
+            - listitem [ref=e77]:
+              - link "Submit Article" [ref=e78] [cursor=pointer]:
+                - /url: /submit
+            - listitem [ref=e79]:
+              - link "Book Publishing" [ref=e80] [cursor=pointer]:
+                - /url: /book-publishing
+            - listitem [ref=e81]:
+              - link "Thesis/Dissertation" [ref=e82] [cursor=pointer]:
+                - /url: /dissertations
+      - paragraph [ref=e84]: © 2026 C5K - International Journal of Advanced Information Systems and Management. All rights reserved.
+  - generic [ref=e86]:
+    - paragraph [ref=e88]:
+      - text: We use cookies to enhance your experience. By continuing to visit this site you agree to our use of cookies.
+      - link "Learn more" [ref=e89] [cursor=pointer]:
+        - /url: /privacy
+    - button "Accept All" [ref=e90] [cursor=pointer]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e96] [cursor=pointer]:
+    - img [ref=e97]
+  - alert [ref=e100]
+```

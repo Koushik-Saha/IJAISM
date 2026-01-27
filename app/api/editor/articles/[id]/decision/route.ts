@@ -35,7 +35,7 @@ export async function POST(
         const { decision, comments } = body;
 
         // Validate decision
-        if (!['publish', 'reject', 'revise'].includes(decision)) {
+        if (!['publish', 'reject', 'revise', 'accept'].includes(decision)) {
             return NextResponse.json({ error: 'Invalid decision' }, { status: 400 });
         }
 
@@ -58,20 +58,40 @@ export async function POST(
 
         const now = new Date();
 
-        if (decision === 'publish') {
+        if (decision === 'accept') {
+            // New "Accept" stage (Pre-Publish)
+            newStatus = 'accepted';
+            statusMessage = `Your article has been accepted for publication in ${article.journal.fullName}. Please log in to your dashboard to complete the APC payment.`;
+
+            updateData = {
+                status: 'accepted',
+                acceptanceDate: now,
+                editorComments: comments
+            };
+
+        } else if (decision === 'publish') {
+            // Check APC Payment
+            const isMotherAdmin = user.role === 'mother_admin';
+            if (!article.isApcPaid && !isMotherAdmin) {
+                return NextResponse.json({
+                    error: 'Cannot publish. APC Fee has not been paid by the author.',
+                    code: 'APC_NOT_PAID'
+                }, { status: 403 });
+            }
+
             newStatus = 'published';
-            statusMessage = `Congratulations! Your article has been accepted for publication in ${article.journal.fullName}.`;
+            statusMessage = `Congratulations! Your article has been officially published in ${article.journal.fullName}.`;
 
             // Generate DOI logic
             const currentYear = now.getFullYear();
             const vol = Math.max(1, currentYear - 2023);
             const issue = now.getMonth() + 1;
-            doi = `10.5555/ijaism.${currentYear}.${vol}.${issue}.${id.substring(0, 8)}`; // Simplified logic
+            doi = `10.5555/c5k.${currentYear}.${vol}.${issue}.${id.substring(0, 8)}`; // Simplified logic
 
             updateData = {
                 status: 'published',
                 publicationDate: now,
-                acceptanceDate: now,
+                // acceptanceDate: now, // Already set during accept usually, but safe to update? Maybe keep original if exists.
                 doi,
                 volume: vol,
                 issue: issue,

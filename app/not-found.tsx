@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: 'Page Not Found - IJAISM',
+    title: 'Page Not Found - C5K',
     description: 'The requested page could not be found.',
 };
 

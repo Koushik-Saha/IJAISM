@@ -56,7 +56,29 @@ export async function GET(
       );
     }
 
-    // 4. Return review
+    // 4. Return review (Mask if Reviewer)
+    if (user.role === 'reviewer') {
+      const maskedReview = {
+        ...review,
+        article: {
+          ...review.article,
+          author: {
+            name: 'Author 01',
+            email: 'hidden@example.com',
+            university: 'Affiliation Hidden',
+            affiliation: 'Affiliation Hidden'
+          },
+          // Mask Co-Authors if they were included
+          coAuthors: (review.article as any).coAuthors?.map((_: any, i: number) => ({
+            name: `Co-Author ${i + 1}`,
+            email: 'hidden@example.com',
+            university: 'Affiliation Hidden'
+          })) || []
+        }
+      };
+      return NextResponse.json({ success: true, review: maskedReview }, { status: 200 });
+    }
+
     return NextResponse.json(
       {
         success: true,

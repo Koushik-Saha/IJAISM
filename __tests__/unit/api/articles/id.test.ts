@@ -72,7 +72,7 @@ describe('GET /api/articles/[id]', () => {
 
     it('returns 200 and article if authorized', async () => {
         (verifyToken as jest.Mock).mockReturnValue(mockUser);
-        const article = { id: '123', authorId: 'user-1', title: 'My Article' };
+        const article = { id: '123', authorId: 'user-1', title: 'My Article', reviews: [] };
 
         const { prisma } = require('@/lib/prisma');
         (prisma.article.findUnique as jest.Mock).mockResolvedValue(article);

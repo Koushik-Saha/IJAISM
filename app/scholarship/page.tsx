@@ -3,7 +3,7 @@ import Link from "next/link";
 export default function ScholarshipPage() {
   const scholarships = [
     {
-      name: "IJAISM Doctoral Research Scholarship",
+      name: "C5K Doctoral Research Scholarship",
       amount: "$25,000",
       duration: "1 year",
       eligibility: "PhD students in IT or Business Management",
@@ -24,7 +24,7 @@ export default function ScholarshipPage() {
       name: "Conference Travel Grant",
       amount: "$2,500",
       duration: "One-time",
-      eligibility: "Graduate students presenting at IJAISM conferences",
+      eligibility: "Graduate students presenting at C5K conferences",
       deadline: "Rolling basis",
       awards: "50 grants per year",
       status: "Open",
@@ -47,9 +47,9 @@ export default function ScholarshipPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Info Section */}
         <div className="bg-white rounded-lg shadow-md p-8 mb-8">
-          <h2 className="text-3xl font-bold text-primary mb-4">IJAISM Scholarship Program</h2>
+          <h2 className="text-3xl font-bold text-primary mb-4">C5K Scholarship Program</h2>
           <p className="text-lg text-gray-700 mb-4 leading-relaxed">
-            IJAISM is committed to advancing academic research by providing financial support to
+            C5K is committed to advancing academic research by providing financial support to
             talented researchers worldwide. Our scholarship program aims to remove financial
             barriers and enable researchers to focus on groundbreaking work in information
             technology, business management, and related disciplines.
@@ -331,7 +331,7 @@ export default function ScholarshipPage() {
           <div className="grid md:grid-cols-2 gap-8">
             <div className="border-l-4 border-accent pl-6">
               <p className="text-gray-700 italic mb-4">
-                "The IJAISM scholarship enabled me to focus entirely on my doctoral research in AI
+                "The C5K scholarship enabled me to focus entirely on my doctoral research in AI
                 ethics. I successfully defended my thesis and now lead a research lab at a top
                 university."
               </p>
@@ -353,7 +353,7 @@ export default function ScholarshipPage() {
         <div className="bg-gradient-to-r from-primary to-blue-800 text-white rounded-lg shadow-md p-8 md:p-12 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Apply?</h2>
           <p className="text-xl text-gray-100 mb-8 max-w-2xl mx-auto">
-            Take the first step towards advancing your research with IJAISM support
+            Take the first step towards advancing your research with C5K support
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link

@@ -19,7 +19,7 @@ export default function MembershipPage() {
       tier: "free",
       price: "$0",
       period: "forever",
-      description: "Perfect for getting started with IJAISM",
+      description: "Perfect for getting started with C5K",
       features: [
         "Access to all published articles",
         "Browse journals and conferences",
@@ -181,7 +181,7 @@ export default function MembershipPage() {
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-primary to-blue-800 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Join IJAISM Community</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">Join C5K Community</h1>
           <p className="text-xl md:text-2xl text-gray-100 max-w-3xl mx-auto">
             Become part of a global network advancing knowledge and innovation
           </p>
@@ -319,7 +319,7 @@ export default function MembershipPage() {
           <div className="grid md:grid-cols-2 gap-8">
             <div className="border-l-4 border-accent pl-6">
               <p className="text-gray-700 italic mb-4">
-                "IJAISM's rapid publication process allowed me to share my research months earlier
+                "C5K's rapid publication process allowed me to share my research months earlier
                 than traditional journals. The rapid review system ensures quality while maintaining
                 speed."
               </p>
@@ -384,7 +384,7 @@ export default function MembershipPage() {
         <div className="bg-gradient-to-r from-primary to-blue-800 text-white rounded-lg shadow-lg p-8 md:p-12 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Get Started?</h2>
           <p className="text-xl text-gray-100 mb-8 max-w-2xl mx-auto">
-            Join thousands of researchers advancing knowledge through IJAISM
+            Join thousands of researchers advancing knowledge through C5K
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link

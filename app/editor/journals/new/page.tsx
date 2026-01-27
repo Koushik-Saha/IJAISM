@@ -73,7 +73,7 @@ export default function NewJournalPage() {
                             <input
                                 type="text"
                                 required
-                                placeholder="e.g. IJAISM"
+                                placeholder="e.g. C5K"
                                 className="input-field"
                                 value={formData.code}
                                 onChange={(e) => setFormData({ ...formData, code: e.target.value })}

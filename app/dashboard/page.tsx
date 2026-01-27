@@ -359,7 +359,7 @@ export default function DashboardPage() {
                 </Card>
               </Link>
 
-              {['editor', 'super_admin'].includes(user.role) && (
+              {['admin', 'editor', 'super_admin', 'mother_admin'].includes(user.role) && (
                 <Link href="/editor">
                   <Card className="hover:border-primary cursor-pointer">
                     <div className="text-center">
@@ -380,7 +380,7 @@ export default function DashboardPage() {
                 🚀 Rapid Peer Review System
               </h3>
               <p className="text-blue-800 mb-2">
-                At IJAISM, we minimize the delay in sharing your research! Here's how it works:
+                At C5K, we minimize the delay in sharing your research! Here's how it works:
               </p>
               <ol className="list-decimal list-inside space-y-1 text-blue-800">
                 <li>Submit your article through our platform</li>

@@ -62,7 +62,7 @@ export default function ContactPage() {
                                 </div>
                                 <div className="ml-4">
                                     <h3 className="font-bold text-gray-900">Email</h3>
-                                    <p className="text-gray-600">support@ijaism.org</p>
+                                    <p className="text-gray-600">support@c5k.org</p>
                                 </div>
                             </div>
 

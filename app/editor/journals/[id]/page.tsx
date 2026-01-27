@@ -103,9 +103,14 @@ export default function EditJournalPage() {
                 <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                     <div className="flex justify-between items-center">
                         <h1 className="text-3xl font-bold text-primary">Edit Journal</h1>
-                        <Link href="/editor/journals" className="btn-secondary">
-                            Cancel
-                        </Link>
+                        <div className="flex gap-3">
+                            <Link href={`/editor/journals/${id}/issues`} className="btn-primary bg-indigo-600 hover:bg-indigo-700">
+                                📚 Manage Issues
+                            </Link>
+                            <Link href="/editor/journals" className="btn-secondary">
+                                Cancel
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </div>

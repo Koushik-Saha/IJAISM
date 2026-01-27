@@ -45,10 +45,10 @@ export default function BookPublishingPage() {
         {/* Introduction */}
         <div className="bg-white rounded-lg shadow-md p-8 md:p-12 mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-primary mb-6">
-            Publish Your Book with IJAISM
+            Publish Your Book with C5K
           </h2>
           <p className="text-lg text-gray-700 mb-4 leading-relaxed">
-            IJAISM Press publishes high-quality academic books that advance knowledge in information
+            C5K Press publishes high-quality academic books that advance knowledge in information
             technology, business management, and related disciplines. Our rigorous peer review
             process ensures scholarly excellence, while our global distribution network maximizes
             your book's reach and impact.
@@ -177,9 +177,9 @@ export default function BookPublishingPage() {
           </div>
         </div>
 
-        {/* Why Publish with IJAISM */}
+        {/* Why Publish with C5K */}
         <div className="bg-white rounded-lg shadow-md p-8 md:p-12 mb-12">
-          <h2 className="text-3xl font-bold text-primary mb-8">Why Publish with IJAISM?</h2>
+          <h2 className="text-3xl font-bold text-primary mb-8">Why Publish with C5K?</h2>
           <div className="grid md:grid-cols-2 gap-8">
             <div className="flex items-start">
               <div className="flex-shrink-0 w-12 h-12 bg-accent text-white rounded-full flex items-center justify-center font-bold text-2xl mr-4">

@@ -99,7 +99,7 @@ export default async function AnnouncementDetailPage({ params }: { params: Promi
             </h1>
 
             <div className="flex items-center text-gray-600">
-              <span className="font-medium">Posted by {ann.author || "IJAISM Admin"}</span>
+              <span className="font-medium">Posted by {ann.author || "C5K Admin"}</span>
             </div>
           </div>
 

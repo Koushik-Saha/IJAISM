@@ -303,17 +303,22 @@ export default function ReviewSubmissionPage() {
                 </svg>
                 <div className="ml-4">
                   <p className="text-sm font-bold text-gray-900">Full Manuscript PDF</p>
-                  <p className="text-xs text-gray-600">Click to download or view</p>
+                  <p className="text-xs text-gray-600">View Only (Download Disabled)</p>
                 </div>
               </div>
-              <a
-                href={review.article.pdfUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                onClick={() => {
+                  const token = localStorage.getItem('token');
+                  if (token) {
+                    window.open(`/api/articles/${review.article.id}/pdf?token=${token}`, '_blank');
+                  } else {
+                    toast.error("Authentication required");
+                  }
+                }}
                 className="bg-primary text-white px-6 py-2 rounded-lg font-semibold hover:bg-primary/90 transition-colors"
               >
                 View PDF
-              </a>
+              </button>
             </div>
           </div>
         )}
@@ -325,10 +330,22 @@ export default function ReviewSubmissionPage() {
           </h2>
 
           {isCompleted && (
-            <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-6">
-              <p className="text-sm text-green-700 font-semibold">
-                ✓ Review completed and submitted
-              </p>
+            <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-6 flex justify-between items-center">
+              <div>
+                <p className="text-sm text-green-700 font-semibold">
+                  ✓ Review completed and submitted
+                </p>
+                <p className="text-xs text-green-600 mt-1">Thank you for your contribution.</p>
+              </div>
+              <button
+                onClick={() => {
+                  const token = localStorage.getItem('token');
+                  window.open(`/api/reviews/${review.id}/certificate?token=${token}`, '_blank');
+                }}
+                className="bg-green-600 text-white px-4 py-2 rounded text-sm font-bold hover:bg-green-700 transition flex items-center gap-2"
+              >
+                <span>📜</span> Download Certificate
+              </button>
             </div>
           )}
 

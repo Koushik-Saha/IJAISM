@@ -49,7 +49,7 @@ export default function AdminArticleDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isAssigning, setIsAssigning] = useState(false);
   const [showDecisionModal, setShowDecisionModal] = useState(false);
-  const [decisionType, setDecisionType] = useState<'publish' | 'reject' | 'revise' | null>(null);
+  const [decisionType, setDecisionType] = useState<'publish' | 'reject' | 'revise' | 'accept' | null>(null);
   const [decisionComments, setDecisionComments] = useState('');
   const [isSubmittingDecision, setIsSubmittingDecision] = useState(false);
 
@@ -258,7 +258,10 @@ export default function AdminArticleDetailPage() {
     }
   };
 
-  const openDecisionModal = (type: 'publish' | 'reject' | 'revise') => {
+  /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
+  // @ts-ignore
+  const openDecisionModal = (type: 'publish' | 'reject' | 'revise' | 'accept') => {
+    // @ts-ignore
     setDecisionType(type);
     setDecisionComments('');
     setShowDecisionModal(true);
@@ -577,28 +580,125 @@ export default function AdminArticleDetailPage() {
               </div>
 
             )}
+
+            {/* Invite New Reviewer */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h3 className="font-bold text-gray-800 mb-4 text-lg">Invite New Reviewer</h3>
+              <div className="space-y-3">
+                <p className="text-sm text-gray-600">Invite someone via email. If they don't have an account, they'll be asked to register.</p>
+                <input
+                  type="text"
+                  placeholder="Name"
+                  className="w-full border rounded p-2 text-sm"
+                  id="invite-name"
+                />
+                <input
+                  type="email"
+                  placeholder="Email Address"
+                  className="w-full border rounded p-2 text-sm"
+                  id="invite-email"
+                />
+                <button
+                  onClick={async () => {
+                    const nameEl = document.getElementById('invite-name') as HTMLInputElement;
+                    const emailEl = document.getElementById('invite-email') as HTMLInputElement;
+                    const name = nameEl.value;
+                    const email = emailEl.value;
+
+                    if (!name || !email) {
+                      toast.error("Please enter both name and email");
+                      return;
+                    }
+
+                    try {
+                      const token = localStorage.getItem('token');
+                      toast.info("Sending invitation...");
+                      const res = await fetch(`/api/editor/articles/${id}/invite`, {
+                        method: 'POST',
+                        headers: {
+                          'Authorization': `Bearer ${token}`,
+                          'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ name, email })
+                      });
+
+                      const data = await res.json();
+                      if (!res.ok) throw new Error(data.error);
+
+                      toast.success(data.message);
+                      nameEl.value = '';
+                      emailEl.value = '';
+                      fetchReviewers(); // Refresh list in case they auto-assigned
+                    } catch (err: any) {
+                      toast.error(err.message);
+                    }
+                  }}
+                  className="w-full bg-indigo-600 text-white py-2 rounded font-semibold hover:bg-indigo-700 text-sm"
+                >
+                  Send Invitation
+                </button>
+              </div>
+            </div>
             {/* Editor Decision */}
             <div className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-xl font-bold mb-4">Make Decision</h2>
               <div className="space-y-3">
-                <button
-                  className="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-bold hover:bg-green-700 transition"
-                  onClick={() => openDecisionModal('publish')}
-                >
-                  ✅ Accept & Publish
-                </button>
-                <button
-                  className="w-full bg-yellow-500 text-white py-3 px-4 rounded-lg font-bold hover:bg-yellow-600 transition"
-                  onClick={() => openDecisionModal('revise')}
-                >
-                  📝 Request Revision
-                </button>
-                <button
-                  className="w-full bg-red-600 text-white py-3 px-4 rounded-lg font-bold hover:bg-red-700 transition"
-                  onClick={() => openDecisionModal('reject')}
-                >
-                  ❌ Reject Article
-                </button>
+
+                {/* Accept Button (Only if not already accepted/published) */}
+                {article.status !== 'accepted' && article.status !== 'published' && (
+                  <button
+                    className="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-bold hover:bg-green-700 transition"
+                    onClick={() => openDecisionModal('accept')}
+                  >
+                    ✅ Accept Article
+                  </button>
+                )}
+
+                {/* Publish Button (Only if Accepted) */}
+                {article.status === 'accepted' && (
+                  <div className="space-y-2">
+                    {!(article as any).isApcPaid && currentUser?.role !== 'mother_admin' ? (
+                      <div className="bg-yellow-50 p-3 rounded border border-yellow-200 text-sm text-yellow-800 mb-2">
+                        ⚠️ Authors must pay APC fee before you can publish.
+                        <br />
+                        <span className="font-semibold">Payment Status: Pending</span>
+                      </div>
+                    ) : (
+                      (article as any).isApcPaid && (
+                        <div className="bg-green-50 p-2 rounded text-green-700 text-sm mb-2 font-bold">
+                          ✓ APC Fee Paid
+                        </div>
+                      )
+                    )}
+
+                    <button
+                      className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-bold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={() => openDecisionModal('publish')}
+                      disabled={!(article as any).isApcPaid && currentUser?.role !== 'mother_admin'}
+                    >
+                      📢 Publish Article
+                      {currentUser?.role === 'mother_admin' && !(article as any).isApcPaid && " (Admin Bypass)"}
+                    </button>
+                  </div>
+                )}
+
+
+                {article.status !== 'published' && article.status !== 'rejected' && (
+                  <>
+                    <button
+                      className="w-full bg-yellow-500 text-white py-3 px-4 rounded-lg font-bold hover:bg-yellow-600 transition"
+                      onClick={() => openDecisionModal('revise')}
+                    >
+                      📝 Request Revision
+                    </button>
+                    <button
+                      className="w-full bg-red-600 text-white py-3 px-4 rounded-lg font-bold hover:bg-red-700 transition"
+                      onClick={() => openDecisionModal('reject')}
+                    >
+                      ❌ Reject Article
+                    </button>
+                  </>
+                )}
               </div>
             </div>
 
@@ -611,14 +711,16 @@ export default function AdminArticleDetailPage() {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-lg max-w-md w-full p-6">
               <h3 className="text-xl font-bold mb-4 capitalize">
-                {decisionType === 'publish' ? 'Accept & Publish' :
-                  decisionType === 'revise' ? 'Request Revision' : 'Reject Article'}
+                {decisionType === 'publish' ? 'Confirm Publication' :
+                  decisionType === 'accept' ? 'Accept Article' :
+                    decisionType === 'revise' ? 'Request Revision' : 'Reject Article'}
               </h3>
 
               <p className="text-gray-600 mb-4">
-                {decisionType === 'publish' ? 'Are you sure you want to publish this article? This action cannot be undone.' :
-                  decisionType === 'revise' ? 'Please provide instructions for the author regarding required revisions.' :
-                    'Please provide a reason for rejection.'}
+                {decisionType === 'publish' ? 'Are you sure you want to PUBLISH this article? This is final.' :
+                  decisionType === 'accept' ? 'Are you sure you want to ACCEPT this article? The author will be notified to pay the APC fee.' :
+                    decisionType === 'revise' ? 'Please provide instructions for the author regarding required revisions.' :
+                      'Please provide a reason for rejection.'}
               </p>
 
               {(decisionType === 'revise' || decisionType === 'reject') && (

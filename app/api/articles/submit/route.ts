@@ -101,6 +101,18 @@ export async function POST(req: NextRequest) {
         return apiError('Unauthorized to edit this article', 403, undefined, 'UNAUTHORIZED_ACCESS');
       }
 
+      // Restrict Editing: Only allow editing if Draft or Revision Requested
+      const allowedStatuses = ['draft', 'revision_requested', 'resubmitted'];
+      if (!allowedStatuses.includes(existingArticle.status)) {
+        logger.warn('Attempt to edit submitted article blocked', { articleId: existingArticle.id, status: existingArticle.status });
+        return apiError(
+          'You cannot edit this article after submission. You can only update it during the revision period.',
+          403,
+          undefined,
+          'EDIT_LOCKED'
+        );
+      }
+
       article = await prisma.article.update({
         where: { id: resubmissionId },
         data: {

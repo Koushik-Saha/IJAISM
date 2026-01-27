@@ -76,15 +76,15 @@ export default function SocietiesPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Info Section */}
         <div className="bg-white rounded-lg shadow-md p-8 mb-12">
-          <h2 className="text-3xl font-bold text-primary mb-4">IJAISM Academic Societies</h2>
+          <h2 className="text-3xl font-bold text-primary mb-4">C5K Academic Societies</h2>
           <p className="text-lg text-gray-700 mb-4 leading-relaxed">
-            IJAISM hosts and supports several prestigious academic societies that bring together
+            C5K hosts and supports several prestigious academic societies that bring together
             researchers, practitioners, and industry leaders from around the world. Our societies
             provide platforms for collaboration, knowledge exchange, and professional development
             in specialized research areas.
           </p>
           <p className="text-lg text-gray-700 leading-relaxed">
-            As a member of a IJAISM society, you gain access to exclusive resources, networking
+            As a member of a C5K society, you gain access to exclusive resources, networking
             opportunities, and the chance to shape the future of your field through active
             participation in research initiatives and standards development.
           </p>

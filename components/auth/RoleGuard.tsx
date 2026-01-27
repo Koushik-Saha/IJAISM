@@ -29,7 +29,15 @@ export default function RoleGuard({ children, allowedRoles }: RoleGuardProps) {
             const user = JSON.parse(userStr);
 
             // 2. Check role
-            if (allowedRoles.includes(user.role)) {
+            // Hierarchy: mother_admin > super_admin > others
+            const userRole = user.role;
+            let isAllowed = allowedRoles.includes(userRole);
+
+            // Inherit permissions
+            if (userRole === 'mother_admin') isAllowed = true; // Mother Admin can access everything
+            if (userRole === 'super_admin' && allowedRoles.includes('editor')) isAllowed = true; // Super Admin can access Editor pages
+
+            if (isAllowed) {
                 setAuthorized(true);
             } else {
                 toast.error("You do not have permission to access this page");

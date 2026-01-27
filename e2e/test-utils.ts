@@ -19,3 +19,26 @@ export async function uploadFile(page: Page, selector: string, fileName: string)
         buffer: Buffer.from('dummy pdf content')
     });
 }
+
+import { prisma } from '../lib/prisma';
+import { hashPassword } from '../lib/auth';
+
+export async function createTestUser(email: string, role: string, name: string) {
+    const passwordHash = await hashPassword('Password123!');
+    return await prisma.user.create({
+        data: {
+            email,
+            name,
+            passwordHash,
+            role,
+            university: 'Test University',
+            isActive: true,
+            isEmailVerified: true
+        }
+    });
+}
+
+export async function getAuthToken(email: string) {
+    // Helper if needed for API tests, but for UI tests we use loginAs
+    return 'mock-token';
+}

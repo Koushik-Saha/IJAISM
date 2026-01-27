@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
     if (!payload) return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
 
     const user = await prisma.user.findUnique({ where: { id: payload.userId } });
-    if (!user || !['admin', 'editor', 'super_admin'].includes(user.role)) {
+    if (!user || !['admin', 'editor', 'super_admin', 'mother_admin'].includes(user.role)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 

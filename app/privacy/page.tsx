@@ -10,7 +10,7 @@ export default function PrivacyPolicy() {
 
                     <div className="prose prose-blue max-w-none">
                         <p>
-                            At IJAISM ("we", "us", "our"), we are committed to protecting your personal information and your right to privacy.
+                            At C5K ("we", "us", "our"), we are committed to protecting your personal information and your right to privacy.
                             This Privacy Policy explains how we collect, use, disclosure, and safeguard your information when you visit our website.
                         </p>
 
@@ -54,7 +54,7 @@ export default function PrivacyPolicy() {
 
                         <h3>5. Contact Us</h3>
                         <p>
-                            If you have questions or comments about this policy, you may email us at support@ijaism.org.
+                            If you have questions or comments about this policy, you may email us at support@c5k.org.
                         </p>
                     </div>
                 </div>

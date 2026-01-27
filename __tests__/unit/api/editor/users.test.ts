@@ -21,6 +21,15 @@ jest.mock('@/lib/prisma', () => ({
 
 jest.mock('@/lib/auth', () => ({
     verifyToken: jest.fn(),
+    ROLES: {
+        MOTHER_ADMIN: 'mother_admin',
+        SUPER_ADMIN: 'super_admin',
+        EDITOR: 'editor',
+        SUB_EDITOR: 'sub_editor',
+        REVIEWER: 'reviewer',
+        AUTHOR: 'author',
+    },
+    hashPassword: jest.fn(),
 }));
 
 describe('Admin Users API', () => {
@@ -30,7 +39,7 @@ describe('Admin Users API', () => {
 
     const mockAdminUser = {
         id: 'admin-1',
-        role: 'admin',
+        role: 'super_admin',
     };
 
     const createRequest = (method: string, urlStr: string, body: any = null, token: string = 'valid-token') => {

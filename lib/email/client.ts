@@ -4,9 +4,9 @@ import nodemailer from 'nodemailer';
 // Email configuration
 export const EMAIL_CONFIG = {
   from: process.env.SMTP_FROM_EMAIL || process.env.EMAIL_FROM || 'noreply@example.com',
-  fromName: process.env.SMTP_FROM_NAME || 'IJAISM Platform',
+  fromName: process.env.SMTP_FROM_NAME || 'C5K Platform',
   replyTo: process.env.EMAIL_REPLY_TO || process.env.SMTP_FROM_EMAIL,
-  appName: process.env.NEXT_PUBLIC_APP_NAME || 'IJAISM',
+  appName: process.env.NEXT_PUBLIC_APP_NAME || 'C5K',
   appUrl: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
   smtp: {
     host: process.env.SMTP_HOST,

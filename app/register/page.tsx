@@ -186,7 +186,7 @@ export default function RegisterPage() {
       <div className="max-w-md w-full">
         <div className="bg-white rounded-lg shadow-md p-8">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-primary">Join IJAISM</h2>
+            <h2 className="text-3xl font-bold text-primary">Join C5K</h2>
             <p className="mt-2 text-gray-600">Create your academic account</p>
           </div>
 

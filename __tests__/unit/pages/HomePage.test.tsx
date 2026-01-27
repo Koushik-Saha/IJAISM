@@ -60,7 +60,7 @@ describe('HomePage', () => {
         render(jsx);
 
         // Assertions
-        expect(screen.getByText('Welcome to IJAISM Academic Publishing Platform')).toBeInTheDocument();
+        expect(screen.getByText('Welcome to C5K Academic Publishing Platform')).toBeInTheDocument();
 
         // Check Data Rendering
         expect(screen.getAllByText('Start of Semantic Web')[0]).toBeInTheDocument();

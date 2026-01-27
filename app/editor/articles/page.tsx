@@ -205,24 +205,61 @@ export default function AdminArticlesPage() {
 
         {/* Pagination Controls */}
         {articles.length > 0 && (
-          <div className="flex items-center justify-between mt-6 bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-            <div className="text-sm text-gray-600">
-              Page <span className="font-semibold">{page}</span> of <span className="font-semibold">{totalPages}</span>
-            </div>
-            <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row justify-between items-center mt-6 gap-4">
+            <p className="text-sm text-gray-600">
+              Showing page {page} of {totalPages}
+            </p>
+
+            <div className="flex gap-1 items-center">
               <button
-                onClick={() => handlePageChange(page - 1)}
+                onClick={() => setPage(1)}
                 disabled={page === 1}
-                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-3 py-1 border rounded disabled:opacity-50 hover:bg-gray-50 bg-white"
+                title="First Page"
               >
-                Previous
+                «
               </button>
               <button
-                onClick={() => handlePageChange(page + 1)}
-                disabled={page === totalPages}
-                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="px-3 py-1 border rounded disabled:opacity-50 hover:bg-gray-50 bg-white"
               >
-                Next
+                ‹
+              </button>
+
+              {/* Numbered Pages Logic: Show limited window around current page */}
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                // Logic to center the window
+                let start = Math.max(1, page - 2);
+                if (start + 4 > totalPages) start = Math.max(1, totalPages - 4);
+                const pNum = start + i;
+                if (pNum > totalPages) return null;
+
+                return (
+                  <button
+                    key={pNum}
+                    onClick={() => setPage(pNum)}
+                    className={`px-3 py-1 border rounded min-w-[32px] ${page === pNum ? 'bg-primary text-white border-primary' : 'bg-white hover:bg-gray-50'}`}
+                  >
+                    {pNum}
+                  </button>
+                );
+              })}
+
+              <button
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="px-3 py-1 border rounded disabled:opacity-50 hover:bg-gray-50 bg-white"
+              >
+                ›
+              </button>
+              <button
+                onClick={() => setPage(totalPages)}
+                disabled={page === totalPages}
+                className="px-3 py-1 border rounded disabled:opacity-50 hover:bg-gray-50 bg-white"
+                title="Last Page"
+              >
+                »
               </button>
             </div>
           </div>

@@ -48,7 +48,7 @@ export default async function DissertationsPage(props: {
         <div className="bg-white rounded-lg shadow-md p-8 mb-8">
           <h2 className="text-3xl font-bold text-primary mb-4">About Our Dissertation Collection</h2>
           <p className="text-lg text-gray-700 mb-4 leading-relaxed">
-            IJAISM proudly hosts a curated collection of exceptional doctoral dissertations from
+            C5K proudly hosts a curated collection of exceptional doctoral dissertations from
             leading academic institutions worldwide. Our platform provides researchers with access
             to cutting-edge doctoral research in information technology, business management, and
             related disciplines.

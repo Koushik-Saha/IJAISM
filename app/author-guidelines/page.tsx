@@ -8,7 +8,7 @@ export default function AuthorGuidelinesPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Author Guidelines</h1>
           <p className="text-xl md:text-2xl text-gray-100 max-w-3xl">
-            Everything you need to know to submit and publish with IJAISM
+            Everything you need to know to submit and publish with C5K
           </p>
         </div>
       </div>
@@ -32,7 +32,7 @@ export default function AuthorGuidelinesPage() {
         <div className="bg-white rounded-lg shadow-md p-8 md:p-10 mb-8">
           <h2 className="text-3xl font-bold text-primary mb-4">Welcome Authors</h2>
           <p className="text-lg text-gray-700 mb-4 leading-relaxed">
-            Thank you for considering IJAISM for publishing your research. We are committed to
+            Thank you for considering C5K for publishing your research. We are committed to
             maintaining the highest standards of academic publishing while ensuring a fast and
             efficient review process through our innovative peer review system.
           </p>
@@ -159,7 +159,7 @@ export default function AuthorGuidelinesPage() {
           <h2 className="text-3xl font-bold text-primary mb-6">Peer Review System</h2>
 
           <p className="text-lg text-gray-700 mb-6 leading-relaxed">
-            IJAISM uses an innovative peer review system to ensure rigorous evaluation
+            C5K uses an innovative peer review system to ensure rigorous evaluation
             while maintaining rapid publication timelines.
           </p>
 
@@ -245,13 +245,13 @@ export default function AuthorGuidelinesPage() {
 
           <h3 className="text-xl font-bold text-gray-900 mb-3">Article Processing Charges (APC)</h3>
           <p className="text-gray-700 mb-4">
-            IJAISM operates on an open access model. Publication fees vary by journal:
+            C5K operates on an open access model. Publication fees vary by journal:
           </p>
           <ul className="list-disc ml-6 mb-6 space-y-2 text-gray-700">
             <li>Standard articles: $500-$800 USD</li>
             <li>Review articles: $800-$1,200 USD</li>
             <li>Waivers available for authors from developing countries</li>
-            <li>Discounts for IJAISM members (20% off)</li>
+            <li>Discounts for C5K members (20% off)</li>
           </ul>
         </div>
 
@@ -300,7 +300,7 @@ export default function AuthorGuidelinesPage() {
 
           <h3 className="text-xl font-bold text-gray-900 mb-3">Open Access</h3>
           <p className="text-gray-700 mb-4">
-            IJAISM publishes all articles under the Creative Commons Attribution (CC BY) license,
+            C5K publishes all articles under the Creative Commons Attribution (CC BY) license,
             allowing readers to:
           </p>
           <ul className="list-disc ml-6 mb-6 space-y-2 text-gray-700">
@@ -315,7 +315,7 @@ export default function AuthorGuidelinesPage() {
           <h3 className="text-xl font-bold text-gray-900 mb-3">Author Rights</h3>
           <ul className="list-disc ml-6 mb-6 space-y-2 text-gray-700">
             <li>Authors retain copyright of their work</li>
-            <li>Authors grant IJAISM a license to publish and distribute</li>
+            <li>Authors grant C5K a license to publish and distribute</li>
             <li>Authors can reuse their work in future publications</li>
             <li>Authors can share their work on institutional repositories</li>
           </ul>

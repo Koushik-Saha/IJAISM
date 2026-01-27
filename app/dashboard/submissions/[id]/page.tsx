@@ -312,10 +312,50 @@ export default function SubmissionDetailPage() {
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
                 </div>
-                <div className="ml-3">
+                <div className="ml-3 flex-1">
                   <p className="text-sm text-green-700 font-semibold">
                     {article.status === 'published' ? 'Congratulations! Your article has been published.' : 'Congratulations! Your article has been accepted for publication.'}
                   </p>
+
+                  {article.status === 'accepted' && !(article as any).isApcPaid && (
+                    <div className="mt-4 border-t border-green-200 pt-3">
+                      <p className="text-sm text-green-800 mb-2">
+                        To complete the publication process, please settle the Article Processing Charge (APC).
+                      </p>
+                      <button
+                        onClick={async () => {
+                          try {
+                            const token = localStorage.getItem('token');
+                            const res = await fetch('/api/payments/create-apc-session', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                              body: JSON.stringify({ articleId: article.id })
+                            });
+                            const data = await res.json();
+                            if (data.url) {
+                              window.location.href = data.url;
+                            } else {
+                              alert('Failed to start payment: ' + (data.error || 'Unknown error'));
+                            }
+                          } catch (e) {
+                            console.error(e);
+                            alert('Payment initialization failed');
+                          }
+                        }}
+                        className="bg-green-600 text-white px-4 py-2 rounded text-sm font-bold hover:bg-green-700 transition"
+                      >
+                        Pay APC Fee
+                      </button>
+                    </div>
+                  )}
+
+                  {(article as any).isApcPaid && (
+                    <div className="mt-4 border-t border-green-200 pt-3">
+                      <p className="text-sm text-green-800 font-bold">
+                        ✓ APC Fee Paid. Pending final publication by the Editor.
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

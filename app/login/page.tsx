@@ -126,7 +126,7 @@ export default function LoginPage() {
       <div className="max-w-md w-full">
         <div className="bg-white rounded-lg shadow-md p-8">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-primary">Sign In to IJAISM</h2>
+            <h2 className="text-3xl font-bold text-primary">Sign In to C5K</h2>
             <p className="mt-2 text-gray-600">Access your academic account</p>
           </div>
 

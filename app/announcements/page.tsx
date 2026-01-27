@@ -27,7 +27,7 @@ export default async function AnnouncementsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Announcements</h1>
           <p className="text-xl md:text-2xl text-gray-100 max-w-3xl">
-            Stay updated with the latest news and updates from IJAISM
+            Stay updated with the latest news and updates from C5K
           </p>
         </div>
       </div>

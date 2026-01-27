@@ -270,7 +270,7 @@ export default async function ConferencesPage() {
             <div className="border-l-4 border-accent pl-4">
               <h3 className="text-lg font-bold text-gray-800 mb-2">Paper Format</h3>
               <p className="text-gray-700">
-                Submissions must follow the IJAISM paper format (6-12 pages, IEEE style). See our{" "}
+                Submissions must follow the C5K paper format (6-12 pages, IEEE style). See our{" "}
                 <Link href="/paper-format" className="text-accent hover:underline font-semibold">
                   paper format guidelines
                 </Link>.

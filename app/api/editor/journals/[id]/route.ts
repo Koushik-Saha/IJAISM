@@ -28,7 +28,7 @@ export async function PUT(
             select: { role: true },
         });
 
-        if (!user || !['admin', 'editor', 'super_admin'].includes(user.role)) {
+        if (!user || !['admin', 'editor', 'super_admin', 'mother_admin'].includes(user.role)) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
@@ -42,10 +42,49 @@ export async function PUT(
             issn,
             impactFactor,
             isActive,
-            displayOrder
+            displayOrder,
+            editorId // NEW: Support assigning an editor
         } = body;
 
-        // 3. Update journal
+        // 3. Update journal logic handled below based on editorId checks
+
+        // If assigning an editor, ensure they are removed from other journals (Enforce 1 Editor -> 1 Journal Max)
+        if (editorId) {
+            await prisma.$transaction([
+                // 1. Remove this editor from any other journal
+                prisma.journal.updateMany({
+                    where: {
+                        editorId: editorId,
+                        id: { not: id }
+                    },
+                    data: { editorId: null }
+                }),
+                // 2. Update the target journal
+                prisma.journal.update({
+                    where: { id },
+                    data: { editorId }
+                })
+            ]);
+
+            // Re-fetch to return fresh data
+            const journal = await prisma.journal.findUnique({ where: { id } });
+            return NextResponse.json({
+                success: true,
+                message: 'Journal updated successfully (Editor reassigned)',
+                journal,
+            });
+        }
+
+        // Standard update without editor change or clearing editor logic
+        if (editorId === null || editorId === "") { // Explicit removal
+            const journal = await prisma.journal.update({
+                where: { id },
+                data: { editorId: null }
+            });
+            return NextResponse.json({ success: true, message: 'Editor removed', journal });
+        }
+
+        // If editorId is undefined (not passed), just update other fields
         const journal = await prisma.journal.update({
             where: { id },
             data: {
@@ -100,7 +139,7 @@ export async function GET(
             select: { role: true },
         });
 
-        if (!user || !['admin', 'editor', 'super_admin'].includes(user.role)) {
+        if (!user || !['admin', 'editor', 'super_admin', 'mother_admin'].includes(user.role)) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 

@@ -80,6 +80,7 @@ export default function MySubmissionsPage() {
       revision_requested: { label: 'Revision Requested', className: 'bg-orange-500' },
       waiting_for_editor: { label: 'Waiting For Editor', className: 'bg-purple-500' },
       accepted: { label: 'Accepted', className: 'bg-green-500' },
+      withdrawn: { label: 'Withdrawn', className: 'bg-gray-400' },
     };
 
     const config = statusConfig[status] || {
@@ -91,6 +92,31 @@ export default function MySubmissionsPage() {
         {config.label}
       </span>
     );
+  };
+
+  const handleWithdraw = async (articleId: string) => {
+    if (!confirm('Are you sure you want to withdraw this article?')) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`/api/articles/${articleId}/withdraw`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to withdraw');
+      }
+
+      // Refresh list
+      fetchSubmissions();
+      alert('Article withdrawn successfully.');
+    } catch (err: any) {
+      alert(err.message);
+    }
   };
 
   const formatDate = (dateString?: string) => {
@@ -232,8 +258,8 @@ export default function MySubmissionsPage() {
                               <div className="flex items-center justify-between mb-2">
                                 <span className="font-semibold text-sm text-gray-900">{review.reviewerName}</span>
                                 <span className={`text-xs px-2 py-1 rounded font-medium ${review.decision === 'accept' ? 'bg-green-100 text-green-700' :
-                                    review.decision === 'reject' ? 'bg-red-100 text-red-700' :
-                                      'bg-yellow-100 text-yellow-700'
+                                  review.decision === 'reject' ? 'bg-red-100 text-red-700' :
+                                    'bg-yellow-100 text-yellow-700'
                                   }`}>
                                   {review.decision ? review.decision.replace('_', ' ').toUpperCase() : 'PENDING'}
                                 </span>
@@ -270,6 +296,16 @@ export default function MySubmissionsPage() {
                     {article.status === 'published' && (
                       <button className="btn-secondary text-sm px-4 py-2 whitespace-nowrap">
                         Download PDF
+                      </button>
+                    )}
+
+                    {/* Withdraw Button */}
+                    {article.status !== 'withdrawn' && article.status !== 'published' && article.reviewProgress.total === 0 && (
+                      <button
+                        onClick={() => handleWithdraw(article.id)}
+                        className="px-4 py-2 border border-red-200 text-red-600 hover:bg-red-50 rounded-lg text-sm font-medium transition-colors whitespace-nowrap"
+                      >
+                        Withdraw Article
                       </button>
                     )}
                   </div>

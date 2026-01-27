@@ -100,7 +100,7 @@ function emailLayout(content: string, preheader?: string): string {
   ${preheader ? `<div class="preheader">${preheader}</div>` : ''}
   <div class="container">
     <div class="header">
-      <h1>IJAISM</h1>
+      <h1>C5K</h1>
       <p>International Journal of Advanced Information Systems</p>
     </div>
     ${content}
@@ -112,7 +112,7 @@ function emailLayout(content: string, preheader?: string): string {
         <a href="${EMAIL_CONFIG.appUrl}/contact">Contact Support</a>
       </p>
       <p style="margin-top: 20px; color: #9ca3af;">
-        This email was sent to you as a member of IJAISM.<br>
+        This email was sent to you as a member of C5K.<br>
         If you have any questions, please contact us at ${EMAIL_CONFIG.replyTo}
       </p>
     </div>
@@ -126,15 +126,15 @@ function emailLayout(content: string, preheader?: string): string {
 export function welcomeEmail(userName: string, userEmail: string): string {
   const content = `
     <div class="content">
-      <h2>Welcome to IJAISM! 🎓</h2>
+      <h2>Welcome to C5K! 🎓</h2>
       <p>Dear ${userName},</p>
       <p>
-        Thank you for joining the International Journal of Advanced Information Systems and Management (IJAISM).
+        Thank you for joining the International Journal of Advanced Information Systems and Management (C5K).
         We're thrilled to have you as part of our global community of researchers, academics, and professionals.
       </p>
 
       <div class="info-box">
-        <h3>Get Started with IJAISM</h3>
+        <h3>Get Started with C5K</h3>
         <div class="info-row">✓ Submit your research articles for peer review</div>
         <div class="info-row">✓ Access thousands of published papers</div>
         <div class="info-row">✓ Join conferences and academic events</div>
@@ -156,11 +156,11 @@ export function welcomeEmail(userName: string, userEmail: string): string {
         <a href="mailto:${EMAIL_CONFIG.replyTo}">${EMAIL_CONFIG.replyTo}</a>.
       </p>
 
-      <p>Best regards,<br><strong>The IJAISM Team</strong></p>
+      <p>Best regards,<br><strong>The C5K Team</strong></p>
     </div>
   `;
 
-  return emailLayout(content, `Welcome to IJAISM, ${userName}!`);
+  return emailLayout(content, `Welcome to C5K, ${userName}!`);
 }
 
 // 2. Article Submission Confirmation
@@ -213,7 +213,7 @@ export function articleSubmissionEmail(
         We'll send you email updates as your article progresses through the review process.
       </p>
 
-      <p>Best regards,<br><strong>The IJAISM Editorial Team</strong></p>
+      <p>Best regards,<br><strong>The C5K Editorial Team</strong></p>
     </div>
   `;
 
@@ -263,7 +263,7 @@ export function membershipActivationEmail(
       <p>Dear ${userName},</p>
       <p>
         Congratulations! Your <strong>${tierName} Membership</strong> has been successfully activated.
-        You now have full access to all IJAISM benefits.
+        You now have full access to all C5K benefits.
       </p>
 
       <div class="info-box">
@@ -301,7 +301,7 @@ export function membershipActivationEmail(
         <a href="${EMAIL_CONFIG.appUrl}/dashboard">account settings</a>.
       </p>
 
-      <p>Best regards,<br><strong>The IJAISM Team</strong></p>
+      <p>Best regards,<br><strong>The C5K Team</strong></p>
     </div>
   `;
 
@@ -325,7 +325,7 @@ export function paymentReceiptEmail(
       <p>Dear ${userName},</p>
       <p>
         Thank you for your payment. This email confirms that we have successfully processed
-        your subscription payment for IJAISM ${tierName} Membership.
+        your subscription payment for C5K ${tierName} Membership.
       </p>
 
       <div class="info-box">
@@ -360,7 +360,7 @@ export function paymentReceiptEmail(
         billing support at <a href="mailto:${EMAIL_CONFIG.replyTo}">${EMAIL_CONFIG.replyTo}</a>.
       </p>
 
-      <p>Best regards,<br><strong>The IJAISM Team</strong></p>
+      <p>Best regards,<br><strong>The C5K Team</strong></p>
     </div>
   `;
 
@@ -449,7 +449,7 @@ export function articleStatusUpdateEmail(
       </p>
       `}
 
-      <p>Best regards,<br><strong>The IJAISM Editorial Team</strong></p>
+      <p>Best regards,<br><strong>The C5K Editorial Team</strong></p>
     </div>
   `;
 
@@ -493,7 +493,7 @@ export function reviewSubmissionConfirmationEmail(
         <a href="${EMAIL_CONFIG.appUrl}/dashboard/reviews" class="button">Go to Dashboard</a>
       </p>
 
-      <p>Best regards,<br><strong>The IJAISM Editorial Team</strong></p>
+      <p>Best regards,<br><strong>The C5K Editorial Team</strong></p>
     </div>
   `;
 
@@ -544,7 +544,7 @@ export function paymentFailedEmail(
         <a href="mailto:${EMAIL_CONFIG.replyTo}">${EMAIL_CONFIG.replyTo}</a>.
       </p>
 
-      <p>Best regards,<br><strong>The IJAISM Team</strong></p>
+      <p>Best regards,<br><strong>The C5K Team</strong></p>
     </div>
   `;
 
@@ -561,7 +561,7 @@ export function emailVerificationEmail(
       <h2>Verify Your Email Address 📧</h2>
       <p>Dear ${userName},</p>
       <p>
-        Thank you for registering with IJAISM! To complete your registration and ensure
+        Thank you for registering with C5K! To complete your registration and ensure
         you receive important updates about your submissions and account, please verify
         your email address.
       </p>
@@ -587,7 +587,7 @@ export function emailVerificationEmail(
 
       <p>
         <strong>This verification link will expire in 24 hours.</strong>
-        If you didn't create an account with IJAISM, you can safely ignore this email.
+        If you didn't create an account with C5K, you can safely ignore this email.
       </p>
 
       <p>
@@ -596,7 +596,7 @@ export function emailVerificationEmail(
         and entering the verification code from this email.
       </p>
 
-      <p>Best regards,<br><strong>The IJAISM Team</strong></p>
+      <p>Best regards,<br><strong>The C5K Team</strong></p>
     </div>
   `;
 
@@ -613,7 +613,7 @@ export function emailVerificationConfirmationEmail(
       <p>Dear ${userName},</p>
       <p>
         Congratulations! Your email address has been successfully verified.
-        Your IJAISM account is now fully activated.
+        Your C5K account is now fully activated.
       </p>
 
       <div class="info-box">
@@ -640,7 +640,7 @@ export function emailVerificationConfirmationEmail(
         <a href="mailto:${EMAIL_CONFIG.replyTo}">${EMAIL_CONFIG.replyTo}</a>.
       </p>
 
-      <p>Best regards,<br><strong>The IJAISM Team</strong></p>
+      <p>Best regards,<br><strong>The C5K Team</strong></p>
     </div>
   `;
 
@@ -657,7 +657,7 @@ export function passwordResetEmail(
       <h2>Reset Your Password 🔒</h2>
       <p>Dear ${userName},</p>
       <p>
-        We received a request to reset the password for your IJAISM account.
+        We received a request to reset the password for your C5K account.
         If you made this request, please click the button below to choose a new password.
       </p>
 
@@ -679,7 +679,7 @@ export function passwordResetEmail(
         </ul>
       </div>
 
-      <p>Best regards,<br><strong>The IJAISM Team</strong></p>
+      <p>Best regards,<br><strong>The C5K Team</strong></p>
     </div>
   `;
 
@@ -695,7 +695,7 @@ export function passwordResetConfirmationEmail(
       <h2>Password Changed Successfully ✅</h2>
       <p>Dear ${userName},</p>
       <p>
-        Your password has been successfully changed. You can now log in to your IJAISM account with your new password.
+        Your password has been successfully changed. You can now log in to your C5K account with your new password.
       </p>
 
       <div class="info-box">
@@ -710,7 +710,7 @@ export function passwordResetConfirmationEmail(
         <a href="${EMAIL_CONFIG.appUrl}/login" class="button">Log In to Your Account</a>
       </p>
 
-      <p>Best regards,<br><strong>The IJAISM Team</strong></p>
+      <p>Best regards,<br><strong>The C5K Team</strong></p>
     </div>
   `;
 
@@ -767,7 +767,7 @@ export function reviewerAssignmentEmail(
         If you are unable to accept this assignment, please contact the editor immediately.
       </p>
 
-      <p>Best regards,<br><strong>The IJAISM Editorial Team</strong></p>
+      <p>Best regards,<br><strong>The C5K Editorial Team</strong></p>
     </div>
   `;
 
@@ -825,7 +825,7 @@ export function reviewFeedbackToAuthor(
         <a href="${EMAIL_CONFIG.appUrl}/dashboard/submissions" class="button">View Submission</a>
       </p>
 
-      <p>Best regards,<br><strong>The IJAISM Editorial Team</strong></p>
+      <p>Best regards,<br><strong>The C5K Editorial Team</strong></p>
     </div>
   `;
 
@@ -877,4 +877,54 @@ export function reviewFeedbackToEditor(
   `;
 
   return emailLayout(content, `New Review: ${articleTitle} - ${reviewerName}`);
+}
+
+// 15. Reviewer Invitation Email
+export function reviewerInvitationEmail(
+  reviewerName: string,
+  articleTitle: string,
+  journalName: string,
+  inviteLink: string
+): string {
+  const content = `
+    <div class="content">
+      <h2>Invitation to Review 📝</h2>
+      <p>Dear ${reviewerName},</p>
+      <p>
+        You have been invited to review a manuscript submitted to <strong>${journalName}</strong>. 
+        We believe your expertise would be valuable in evaluating this work.
+      </p>
+
+      <div class="info-box">
+        <h3>Manuscript Details</h3>
+        <div class="info-row">
+          <span class="info-label">Title:</span> ${articleTitle}
+        </div>
+        <div class="info-row">
+          <span class="info-label">Journal:</span> ${journalName}
+        </div>
+      </div>
+
+      <p>
+        Please click the button below to accept this invitation and create your reviewer account (or log in).
+      </p>
+
+      <p>
+        <a href="${inviteLink}" class="button">Accept Invitation</a>
+      </p>
+
+      <p>
+        Or copy and paste this link:<br>
+        <a href="${inviteLink}" style="color: #1e40af; word-break: break-all;">${inviteLink}</a>
+      </p>
+
+      <p>
+        If you are unable to review at this time, you can ignore this email.
+      </p>
+
+      <p>Best regards,<br><strong>The C5K Editorial Team</strong></p>
+    </div>
+  `;
+
+  return emailLayout(content, `Invitation to review for ${journalName}`);
 }

@@ -89,6 +89,51 @@ export async function POST(req: NextRequest) {
       console.error('Failed to send verification email:', error);
     });
 
+    // Process Pending Reviewer Invitations
+    try {
+      const invitations = await prisma.reviewerInvitation.findMany({
+        where: { email: user.email, status: 'pending' }
+      });
+
+      for (const inv of invitations) {
+        // Check if review already exists (double check)
+        const exists = await prisma.review.findFirst({
+          where: { articleId: inv.articleId, reviewerId: user.id }
+        });
+
+        if (!exists) {
+          // Assign Reviewer
+          const nextReviewerNumber = await prisma.review.count({ where: { articleId: inv.articleId } }) + 1;
+          await prisma.review.create({
+            data: {
+              articleId: inv.articleId,
+              reviewerId: user.id,
+              reviewerNumber: nextReviewerNumber,
+              status: 'invited', // They need to accept it in dashboard, or auto-accept? "invited" is safe.
+              dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
+            }
+          });
+
+          // Update Invitation Status
+          await prisma.reviewerInvitation.update({
+            where: { id: inv.id },
+            data: { status: 'accepted' }
+          });
+
+          // Upgrade Role if needed
+          if (user.role !== 'reviewer' && user.role !== 'editor' && user.role !== 'super_admin') {
+            await prisma.user.update({
+              where: { id: user.id },
+              data: { role: 'reviewer' }
+            });
+          }
+        }
+      }
+    } catch (invError) {
+      console.error("Error processing reviewer invitations:", invError);
+      // Do not fail registration
+    }
+
     return apiSuccess(
       { user, verificationToken }, // Exposed for Demo Mode (Investor Verification)
       'Registration successful. Please check your email to verify your account.',

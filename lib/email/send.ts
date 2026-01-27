@@ -9,7 +9,7 @@ interface EmailResult {
 }
 
 // Base email sending function
-async function sendEmail(
+export async function sendEmail(
   to: string,
   subject: string,
   html: string
@@ -378,6 +378,36 @@ export async function sendReviewFeedbackToEditor(
   return sendEmail(
     editorEmail,
     `New Review from ${reviewerName}: ${articleTitle}`,
+    html
+  );
+}
+
+// 15. Send Reviewer Invitation Email
+export async function sendReviewerInvitationEmail(
+  email: string,
+  name: string,
+  articleTitle: string,
+  journalName: string,
+  tokenOrType: string
+): Promise<EmailResult> {
+  let inviteLink;
+
+  if (tokenOrType === 'EXISTING_USER_LOGIN') {
+    inviteLink = `${EMAIL_CONFIG.appUrl}/login?redirect=/dashboard/reviews`;
+  } else {
+    inviteLink = `${EMAIL_CONFIG.appUrl}/register?invitation=${tokenOrType}`;
+  }
+
+  const html = templates.reviewerInvitationEmail(
+    name,
+    articleTitle,
+    journalName,
+    inviteLink
+  );
+
+  return sendEmail(
+    email,
+    `Invitation to Review: ${articleTitle}`,
     html
   );
 }

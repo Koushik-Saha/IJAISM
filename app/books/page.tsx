@@ -39,9 +39,9 @@ export default async function BooksPage(props: {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Info Section */}
         <div className="bg-white rounded-lg shadow-md p-8 mb-8">
-          <h2 className="text-3xl font-bold text-primary mb-4">IJAISM Academic Books</h2>
+          <h2 className="text-3xl font-bold text-primary mb-4">C5K Academic Books</h2>
           <p className="text-lg text-gray-700 mb-4 leading-relaxed">
-            IJAISM publishes high-quality academic books that provide comprehensive coverage of
+            C5K publishes high-quality academic books that provide comprehensive coverage of
             cutting-edge topics in information technology, business management, and related fields.
             Our books are authored by leading experts and undergo rigorous peer review.
           </p>
@@ -55,7 +55,7 @@ export default async function BooksPage(props: {
         <div className="bg-gradient-to-r from-accent to-orange-600 text-white rounded-lg shadow-md p-6 mb-8">
           <div className="flex flex-col md:flex-row items-center justify-between">
             <div className="mb-4 md:mb-0">
-              <h3 className="text-2xl font-bold mb-2">Publish Your Book with IJAISM</h3>
+              <h3 className="text-2xl font-bold mb-2">Publish Your Book with C5K</h3>
               <p className="text-gray-100">
                 Join our prestigious list of authors and reach a global audience
               </p>
@@ -204,7 +204,7 @@ export default async function BooksPage(props: {
 
         {/* Benefits Section */}
         <div className="bg-white rounded-lg shadow-md p-8">
-          <h2 className="text-3xl font-bold text-primary mb-6">Why Choose IJAISM Books?</h2>
+          <h2 className="text-3xl font-bold text-primary mb-6">Why Choose C5K Books?</h2>
           <div className="grid md:grid-cols-2 gap-6">
             <div className="flex items-start">
               <div className="flex-shrink-0 w-12 h-12 bg-accent text-white rounded-full flex items-center justify-center font-bold text-lg mr-4">

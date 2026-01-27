@@ -20,6 +20,7 @@ export default function AdminAnnouncementsPage() {
   const router = useRouter();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [page, setPage] = useState(1);
   const [isEditing, setIsEditing] = useState(false);
   const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
   const [formData, setFormData] = useState({
@@ -91,7 +92,7 @@ export default function AdminAnnouncementsPage() {
       }
 
       toast.success(editingAnnouncement ? 'Announcement updated!' : 'Announcement created!', {
-        description: editingAnnouncement 
+        description: editingAnnouncement
           ? 'The announcement has been updated successfully.'
           : 'The announcement has been created successfully.',
         duration: 3000,
@@ -279,7 +280,7 @@ export default function AdminAnnouncementsPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {announcements.map((announcement) => (
+            {announcements.slice((page - 1) * 10, page * 10).map((announcement) => (
               <div key={announcement.id} className="bg-white rounded-lg shadow-md p-6">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
@@ -320,6 +321,34 @@ export default function AdminAnnouncementsPage() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Pagination Controls */}
+        {announcements.length > 0 && (
+          <div className="flex flex-col sm:flex-row justify-between items-center mt-6 gap-4">
+            <p className="text-sm text-gray-600">
+              Showing page {page} of {Math.ceil(announcements.length / 10)}
+            </p>
+
+            <div className="flex gap-1 items-center">
+              <button onClick={() => setPage(1)} disabled={page === 1} className="px-3 py-1 border rounded disabled:opacity-50 hover:bg-gray-50 bg-white">«</button>
+              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="px-3 py-1 border rounded disabled:opacity-50 hover:bg-gray-50 bg-white">‹</button>
+
+              {Array.from({ length: Math.min(5, Math.ceil(announcements.length / 10)) }, (_, i) => {
+                const totalPages = Math.ceil(announcements.length / 10);
+                let start = Math.max(1, page - 2);
+                if (start + 4 > totalPages) start = Math.max(1, totalPages - 4);
+                const pNum = start + i;
+                if (pNum > totalPages) return null;
+                return (
+                  <button key={pNum} onClick={() => setPage(pNum)} className={`px-3 py-1 border rounded min-w-[32px] ${page === pNum ? 'bg-primary text-white border-primary' : 'bg-white hover:bg-gray-50'}`}>{pNum}</button>
+                );
+              })}
+
+              <button onClick={() => setPage(p => Math.min(Math.ceil(announcements.length / 10), p + 1))} disabled={page === Math.ceil(announcements.length / 10)} className="px-3 py-1 border rounded disabled:opacity-50 hover:bg-gray-50 bg-white">›</button>
+              <button onClick={() => setPage(Math.ceil(announcements.length / 10))} disabled={page === Math.ceil(announcements.length / 10)} className="px-3 py-1 border rounded disabled:opacity-50 hover:bg-gray-50 bg-white">»</button>
+            </div>
           </div>
         )}
       </div>

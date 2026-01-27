@@ -63,7 +63,14 @@ export async function POST(req: NextRequest) {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
-        await handleCheckoutComplete(session);
+
+        // Handle APC Payment
+        if (session.metadata?.type === 'apc_payment') {
+          await handleApcPaymentSuccess(session);
+        } else {
+          // Handle Membership Payment (Default)
+          await handleCheckoutComplete(session);
+        }
         break;
       }
 
@@ -183,7 +190,7 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
         userId,
         type: 'membership',
         title: 'Membership Activated!',
-        message: `Congratulations! Your ${tier.charAt(0).toUpperCase() + tier.slice(1)} membership has been successfully activated. You now have full access to all IJAISM benefits.`,
+        message: `Congratulations! Your ${tier.charAt(0).toUpperCase() + tier.slice(1)} membership has been successfully activated. You now have full access to all C5K benefits.`,
         link: '/dashboard',
         isRead: false,
       },
@@ -368,6 +375,52 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
 
   } catch (error) {
     console.error('Error handling payment failure:', error);
+    throw error;
+  }
+}
+
+async function handleApcPaymentSuccess(session: Stripe.Checkout.Session) {
+  try {
+    const articleId = session.metadata?.articleId;
+    const userId = session.metadata?.userId;
+
+    if (!articleId) {
+      logger.error('Missing articleId in APC payment metadata', { sessionId: session.id });
+      return;
+    }
+
+    const amount = session.amount_total ? session.amount_total / 100 : 0;
+
+    await prisma.article.update({
+      where: { id: articleId },
+      data: {
+        isApcPaid: true,
+        apcAmount: amount,
+        stripePaymentId: session.id
+      }
+    });
+
+    logger.info('APC Payment Successful', { articleId, amount });
+
+    // Notify Author
+    if (userId) {
+      await prisma.notification.create({
+        data: {
+          userId,
+          type: 'payment',
+          title: 'APC Payment Received',
+          message: 'Your Article Processing Charge has been received. Your article is now ready for publication.',
+          link: `/dashboard/submissions/${articleId}`,
+          isRead: false
+        }
+      });
+    }
+
+    // Notify Editors (Find Editor of the journal)
+    // Optimization: For now just log, real world would notify specific editors.
+
+  } catch (error) {
+    logger.error('Error handling APC success', error);
     throw error;
   }
 }

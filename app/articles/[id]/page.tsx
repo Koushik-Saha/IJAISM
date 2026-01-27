@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
   return {
     title: article.title,
-    description: article.abstract?.substring(0, 160) || "Read this academic article on IJAISM.",
+    description: article.abstract?.substring(0, 160) || "Read this academic article on C5K.",
   };
 }
 
@@ -199,26 +199,84 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
               </Card>
             )}
 
-            {/* Timeline */}
-            <Card>
-              <h2 className="text-xl font-bold mb-4">Article Timeline</h2>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="font-semibold">Received:</span>
-                  <span>{new Date(article.createdAt).toLocaleDateString()}</span>
-                </div>
-                {/* Schema checks required for accepted date */}
-                {(article as any).acceptanceDate && (
-                  <div className="flex justify-between">
-                    <span className="font-semibold">Accepted:</span>
-                    <span>{new Date((article as any).acceptanceDate).toLocaleDateString()}</span>
+            {/* Status Timeline */}
+            <Card className="mb-6">
+              <h2 className="text-xl font-bold mb-4">Submission Status</h2>
+              <div className="relative">
+                {/* Connector Line */}
+                <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200" style={{ height: 'calc(100% - 20px)' }}></div>
+
+                {/* Steps */}
+                <div className="space-y-6">
+                  {/* Step 1: Submission */}
+                  <div className="relative flex items-start pl-10">
+                    <div className={`absolute left-2 w-4 h-4 rounded-full border-2 border-white 
+                            ${new Date(article.createdAt) <= new Date() ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                    <div>
+                      <h3 className="font-bold text-gray-900">Submitted</h3>
+                      <p className="text-xs text-gray-500">{new Date(article.createdAt).toLocaleDateString()}</p>
+                      <p className="text-sm text-gray-600">Manuscript received by editorial office.</p>
+                    </div>
                   </div>
-                )}
-                <div className="flex justify-between">
-                  <span className="font-semibold">Published:</span>
-                  <span>{article.status === 'published' ? publicationDate : "Pending"}</span>
+
+                  {/* Step 2: Under Review */}
+                  <div className="relative flex items-start pl-10">
+                    <div className={`absolute left-2 w-4 h-4 rounded-full border-2 border-white 
+                            ${['under_review', 'revision_requested', 'resubmitted', 'waiting_for_final_decision', 'accepted', 'published', 'rejected'].includes(article.status) ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                    <div>
+                      <h3 className="font-bold text-gray-900">Under Review</h3>
+                      {article.status === 'under_review' && <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded ml-2">Current Stage</span>}
+                      <p className="text-sm text-gray-600">
+                        {['under_review', 'revision_requested', 'resubmitted'].includes(article.status)
+                          ? "Reviewers are assessing the manuscript."
+                          : "Review process initiated."}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Step 3: Decision */}
+                  <div className="relative flex items-start pl-10">
+                    <div className={`absolute left-2 w-4 h-4 rounded-full border-2 border-white 
+                            ${['accepted', 'published', 'rejected'].includes(article.status) ? (article.status === 'rejected' ? 'bg-red-500' : 'bg-green-500') :
+                        (article.status === 'revision_requested' ? 'bg-orange-500' : 'bg-gray-300')}`}></div>
+                    <div>
+                      <h3 className="font-bold text-gray-900">Editorial Decision</h3>
+                      {article.status === 'revision_requested' && <span className="text-xs bg-orange-100 text-orange-800 px-2 py-0.5 rounded ml-2 text-wrap">Revision Requested</span>}
+                      {article.status === 'rejected' && <span className="text-xs bg-red-100 text-red-800 px-2 py-0.5 rounded ml-2">Rejected</span>}
+                      {article.status === 'accepted' && <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded ml-2">Accepted</span>}
+                      <p className="text-sm text-gray-600">
+                        {article.status === 'revision_requested' ? "Revisions required based on feedback." :
+                          article.status === 'rejected' ? "Manuscript was not accepted." :
+                            article.status === 'accepted' ? "Manuscript accepted for publication." :
+                              "Pending final decision."}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Step 4: Publication */}
+                  <div className="relative flex items-start pl-10">
+                    <div className={`absolute left-2 w-4 h-4 rounded-full border-2 border-white 
+                            ${article.status === 'published' ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                    <div>
+                      <h3 className="font-bold text-gray-900">Published</h3>
+                      {article.status === 'published' && <p className="text-xs text-gray-500">{publicationDate}</p>}
+                      <p className="text-sm text-gray-600">
+                        {article.status === 'published'
+                          ? "Available online."
+                          : "Final production and release."}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
+
+              {/* Withdrawn State Special Handler */}
+              {article.status === 'withdrawn' && (
+                <div className="mt-6 p-4 bg-gray-100 rounded border border-gray-300">
+                  <h3 className="font-bold text-gray-700">Article Withdrawn</h3>
+                  <p className="text-sm text-gray-600">This article was withdrawn by the author.</p>
+                </div>
+              )}
             </Card>
           </div>
 

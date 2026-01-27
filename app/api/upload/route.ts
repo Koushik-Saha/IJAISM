@@ -65,9 +65,10 @@ export async function POST(req: NextRequest) {
       });
     } catch (blobError: any) {
       if (blobError.message?.includes('BLOB_READ_WRITE_TOKEN') || !process.env.BLOB_READ_WRITE_TOKEN) {
-        // PRODUCTION DEMO FIX:
-        // Vercel filesystem is read-only. If Blob is not configured, we cannot save the file.
-        // For the INVESTOR DEMO, we will return a MOCK SUCCESS response so the flow continues.
+        // PRODUCTION SAFETY:
+        if (process.env.NODE_ENV === 'production' && !process.env.ENABLE_MOCK_UPLOAD_IN_PROD) {
+          throw new Error('Vercel Blob Token not configured. Upload failed.');
+        }
 
         logger.warn('Mocking upload success (Blob not configured)', { fileType, fileName });
 

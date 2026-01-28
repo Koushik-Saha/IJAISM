@@ -2,12 +2,13 @@ import Link from "next/link";
 import Card from "@/components/ui/Card";
 import AuthProtectedLink from "@/components/ui/AuthProtectedLink";
 import { prisma } from "@/lib/prisma";
+import HeroCarousel from "@/components/marketing/HeroCarousel";
 
 export const dynamic = "force-dynamic";
 
 async function getHomepageData() {
   try {
-    const [announcements, journals, articles, mostViewedArticles] = await Promise.all([
+    const [announcements, journals, articles, mostViewedArticles, heroSlides] = await Promise.all([
       prisma.announcement.findMany({
         where: {
           publishedAt: { not: null },
@@ -62,6 +63,11 @@ async function getHomepageData() {
           viewCount: true,
         },
       }),
+
+      prisma.heroSlide.findMany({
+        where: { isActive: true },
+        orderBy: { displayOrder: "asc" },
+      }),
     ]);
 
     const [journalsCount, articlesCount, usersCount] = await Promise.all([
@@ -81,6 +87,7 @@ async function getHomepageData() {
         authors: a.author.name,
       })),
       mostViewedArticles,
+      heroSlides,
       stats: { journals: journalsCount, articles: articlesCount, users: usersCount },
 
     };
@@ -90,41 +97,18 @@ async function getHomepageData() {
       announcements: [],
       journals: [],
       articles: [],
+      heroSlides: [],
       stats: { journals: 12, articles: 0, users: 0 },
     };
   }
 }
 
 export default async function HomePage() {
-  const { announcements, journals, articles, mostViewedArticles, stats } = await getHomepageData();
+  const { announcements, journals, articles, mostViewedArticles, heroSlides, stats } = await getHomepageData();
   return (
     <div className="min-h-screen">
-      {/* Hero Banner */}
-      <section className="bg-gradient-to-r from-primary to-primary-light text-white py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">
-            Welcome to C5K Academic Publishing Platform
-          </h1>
-          <p className="text-xl md:text-2xl mb-4 text-gray-100">
-            Dedicated to publishing groundbreaking research and promoting innovative ideas
-          </p>
-          <p className="text-lg mb-8 text-gray-200">
-            in the fields of information technology, business management, and related disciplines
-          </p>
-          <p className="text-base mb-8 text-gray-300 max-w-3xl mx-auto">
-            Our goal is to minimize the delay in sharing new ideas and discoveries with the world,
-            making high-quality, peer-reviewed journals available online through our fast peer review system.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <AuthProtectedLink href="/submit" className="btn-accent">
-              Submit Your Research
-            </AuthProtectedLink>
-            <Link href="/journals" className="btn-secondary bg-white text-primary hover:bg-gray-100">
-              Browse Journals
-            </Link>
-          </div>
-        </div>
-      </section>
+      {/* Hero Carousel */}
+      <HeroCarousel slides={heroSlides} />
 
       {/* Latest Announcements */}
       <section className="py-16 bg-gray-50">

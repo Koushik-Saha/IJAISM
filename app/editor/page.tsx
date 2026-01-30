@@ -32,7 +32,7 @@ interface AdminStats {
   charts: any; // Add charts data to interface
 }
 
-import { AnalyticsDashboard } from '@/components/editor/AnalyticsDashboard';
+import { SimpleAnalytics } from '@/components/editor/SimpleAnalytics';
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -195,11 +195,10 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Analytics Charts */}
-        {stats.charts && (
+        {/* Analytics - Super Admin Only */}
+        {stats.charts && currentUser && ['super_admin', 'mother_admin'].includes(currentUser.role) && (
           <div className="mb-8">
-            <h2 className="text-xl font-bold text-gray-900 mb-6">Platform Analytics</h2>
-            <AnalyticsDashboard data={stats.charts} />
+            <SimpleAnalytics data={stats.charts} />
           </div>
         )}
 
@@ -247,6 +246,13 @@ export default function AdminDashboard() {
             >
               <h3 className="font-bold text-gray-900 mb-2">📚 Manage Journals</h3>
               <p className="text-sm text-gray-600">Create and edit journals</p>
+            </Link>
+            <Link
+              href="/editor/issues"
+              className="border-2 border-gray-200 rounded-lg p-4 hover:border-primary transition-colors"
+            >
+              <h3 className="font-bold text-gray-900 mb-2">🔢 Manage Issues</h3>
+              <p className="text-sm text-gray-600">Volumes and issues</p>
             </Link>
 
             {/* Super Admin / Mother Admin Only Actions */}
@@ -361,6 +367,6 @@ export default function AdminDashboard() {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 }

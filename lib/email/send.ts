@@ -411,3 +411,34 @@ export async function sendReviewerInvitationEmail(
     html
   );
 }
+// 16. Send Co-Author Notification
+export async function sendCoAuthorNotification(
+  coAuthorEmail: string,
+  coAuthorName: string,
+  primaryAuthorName: string,
+  articleTitle: string,
+  journalName: string,
+  submissionId: string,
+  submissionDate: Date
+): Promise<EmailResult> {
+  const formattedDate = submissionDate.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+
+  const html = templates.coAuthorNotificationEmail(
+    coAuthorName,
+    primaryAuthorName,
+    articleTitle,
+    journalName,
+    submissionId,
+    formattedDate
+  );
+
+  return sendEmail(
+    coAuthorEmail,
+    `You are listed as a Co-Author: ${articleTitle}`,
+    html
+  );
+}

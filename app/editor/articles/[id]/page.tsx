@@ -36,6 +36,8 @@ interface Article {
     commentsToAuthor?: string;
     commentsToEditor?: string;
   }>;
+  isApcPaid?: boolean;
+  apcAmount?: number;
 }
 
 export default function AdminArticleDetailPage() {
@@ -57,6 +59,15 @@ export default function AdminArticleDetailPage() {
   const [availableIssues, setAvailableIssues] = useState<any[]>([]);
   const [selectedIssue, setSelectedIssue] = useState<string>('');
   const [isAssigningIssue, setIsAssigningIssue] = useState(false);
+  const [showCreateIssueModal, setShowCreateIssueModal] = useState(false);
+  const [createIssueLoading, setCreateIssueLoading] = useState(false);
+  const [newIssueData, setNewIssueData] = useState({
+    volume: '',
+    issue: '',
+    year: new Date().getFullYear(),
+    title: '',
+    isSpecial: false
+  });
   const [currentUser, setCurrentUser] = useState<any>(null);
 
   useEffect(() => {
@@ -67,7 +78,47 @@ export default function AdminArticleDetailPage() {
     }
   }, [id]);
 
+  const handleCreateIssue = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!article?.journalId) return;
+
+    setCreateIssueLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/editor/issues', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ...newIssueData,
+          journalId: article.journalId,
+          volume: parseInt(newIssueData.volume),
+          issue: parseInt(newIssueData.issue),
+          year: parseInt(newIssueData.year as any)
+        })
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Failed to create issue");
+
+      toast.success("Issue created successfully");
+      setShowCreateIssueModal(false);
+      fetchIssues(); // Refresh the list
+      // Auto-select
+      if (data.issue?.id) {
+        setSelectedIssue(data.issue.id);
+      }
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setCreateIssueLoading(false);
+    }
+  };
+
   const fetchCurrentUser = async () => {
+
     try {
       const token = localStorage.getItem('token');
       const response = await fetch('/api/auth/me', {
@@ -309,6 +360,15 @@ export default function AdminArticleDetailPage() {
     }
   };
 
+  const formatStatus = (status: string) => {
+    return status
+      .replace(/_/g, ' ')
+      .toLowerCase()
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -365,8 +425,39 @@ export default function AdminArticleDetailPage() {
                       article.status === 'resubmitted' ? 'bg-purple-100 text-purple-800' :
                         'bg-yellow-100 text-yellow-800'
                     }`}>
-                    {article.status.replace('_', ' ')}
+                    {formatStatus(article.status)}
                   </span>
+                </div>
+
+                <div className="pt-2">
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => window.open(`/articles/${article.id}/full-text`, '_blank')}
+                      className="text-sm bg-purple-50 text-purple-700 px-3 py-1 rounded border border-purple-200 hover:bg-purple-100 font-medium flex items-center gap-1"
+                    >
+                      🌐 View As HTML
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        const token = localStorage.getItem('token');
+                        window.open(`/api/articles/${article.id}/pdf?token=${token}`, '_blank');
+                      }}
+                      className="text-sm bg-blue-50 text-blue-700 px-3 py-1 rounded border border-blue-200 hover:bg-blue-100 font-medium flex items-center gap-1"
+                    >
+                      📄 View Manuscript (PDF)
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        const token = localStorage.getItem('token');
+                        window.open(`/api/articles/${article.id}/pdf?token=${token}&download=true`, '_blank');
+                      }}
+                      className="text-sm bg-gray-50 text-gray-700 px-3 py-1 rounded border border-gray-200 hover:bg-gray-100 font-medium flex items-center gap-1"
+                    >
+                      ⬇️ Download
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -401,7 +492,7 @@ export default function AdminArticleDetailPage() {
                             review.status === 'declined' ? 'bg-red-200 text-red-800' :
                               'bg-yellow-200 text-yellow-800'
                             }`}>
-                            {review.status === 'completed' ? (review.decision ? review.decision.replace('_', ' ').toUpperCase() : 'COMPLETED') : review.status.toUpperCase()}
+                            {review.status === 'completed' ? (review.decision ? formatStatus(review.decision) : 'Completed') : formatStatus(review.status)}
                           </span>
                         </div>
                       </div>
@@ -482,9 +573,25 @@ export default function AdminArticleDetailPage() {
                       Currently assigned to Vol {(article as any).volume}, Issue {(article as any).issue}
                     </p>
                   )}
+                  <div className="pt-2 border-t border-gray-100">
+                    <button
+                      onClick={() => setShowCreateIssueModal(true)}
+                      className="text-xs font-semibold text-primary hover:underline flex items-center gap-1 w-full justify-center"
+                    >
+                      + Or Create New Issue
+                    </button>
+                  </div>
                 </div>
               ) : (
-                <p className="text-sm text-gray-500 italic">No issues created for this journal yet.</p>
+                <div className="text-center">
+                  <p className="text-sm text-gray-500 italic mb-2">No issues created yet.</p>
+                  <button
+                    onClick={() => setShowCreateIssueModal(true)}
+                    className="text-xs font-semibold text-primary hover:underline"
+                  >
+                    + Create First Issue
+                  </button>
+                </div>
               )}
             </div>
 
@@ -657,7 +764,7 @@ export default function AdminArticleDetailPage() {
                 {/* Publish Button (Only if Accepted) */}
                 {article.status === 'accepted' && (
                   <div className="space-y-2">
-                    {!(article as any).isApcPaid && currentUser?.role !== 'mother_admin' ? (
+                    {!article.isApcPaid && currentUser?.role !== 'mother_admin' ? (
                       <div className="bg-yellow-50 p-3 rounded border border-yellow-200 text-sm text-yellow-800 mb-2">
                         ⚠️ Authors must pay APC fee before you can publish.
                         <br />
@@ -674,10 +781,10 @@ export default function AdminArticleDetailPage() {
                     <button
                       className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-bold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
                       onClick={() => openDecisionModal('publish')}
-                      disabled={!(article as any).isApcPaid && currentUser?.role !== 'mother_admin'}
+                      disabled={!article.isApcPaid && currentUser?.role !== 'mother_admin'}
                     >
                       📢 Publish Article
-                      {currentUser?.role === 'mother_admin' && !(article as any).isApcPaid && " (Admin Bypass)"}
+                      {currentUser?.role === 'mother_admin' && !article.isApcPaid && " (Admin Bypass)"}
                     </button>
                   </div>
                 )}
@@ -768,6 +875,92 @@ export default function AdminArticleDetailPage() {
                   {isSubmittingDecision ? 'Submitting...' : 'Confirm Decision'}
                 </button>
               </div>
+            </div>
+          </div>
+        )
+      }
+
+      {
+        showCreateIssueModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg max-w-md w-full p-6">
+              <h2 className="text-xl font-bold mb-4">Create New Issue</h2>
+              <form onSubmit={handleCreateIssue} className="space-y-4">
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Volume</label>
+                    <input
+                      type="number"
+                      min="1"
+                      required
+                      className="w-full border rounded p-2"
+                      value={newIssueData.volume}
+                      onChange={(e) => setNewIssueData({ ...newIssueData, volume: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Issue</label>
+                    <input
+                      type="number"
+                      min="1"
+                      required
+                      className="w-full border rounded p-2"
+                      value={newIssueData.issue}
+                      onChange={(e) => setNewIssueData({ ...newIssueData, issue: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Year</label>
+                    <input
+                      type="number"
+                      min="2000"
+                      required
+                      className="w-full border rounded p-2"
+                      value={newIssueData.year}
+                      onChange={(e) => setNewIssueData({ ...newIssueData, year: parseInt(e.target.value) || 0 })}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Title (Optional)</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Special Issue on AI"
+                    className="w-full border rounded p-2"
+                    value={newIssueData.title}
+                    onChange={(e) => setNewIssueData({ ...newIssueData, title: e.target.value })}
+                  />
+                </div>
+
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="modalIsSpecial"
+                    className="h-4 w-4 text-primary rounded"
+                    checked={newIssueData.isSpecial}
+                    onChange={(e) => setNewIssueData({ ...newIssueData, isSpecial: e.target.checked })}
+                  />
+                  <label htmlFor="modalIsSpecial" className="ml-2 text-sm text-gray-700">This is a Special Issue</label>
+                </div>
+
+                <div className="flex justify-end gap-3 mt-6">
+                  <button
+                    type="button"
+                    onClick={() => setShowCreateIssueModal(false)}
+                    className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={createIssueLoading}
+                    className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90 disabled:opacity-50"
+                  >
+                    {createIssueLoading ? 'Creating...' : 'Create & Select'}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )

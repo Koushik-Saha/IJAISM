@@ -13,6 +13,7 @@ interface Article {
     name: string;
   };
   status: string;
+  isApcPaid: boolean;
   createdAt: string;
   submittedAt?: string;
   publishedAt?: string;
@@ -297,6 +298,40 @@ export default function MySubmissionsPage() {
                       <button className="btn-secondary text-sm px-4 py-2 whitespace-nowrap">
                         Download PDF
                       </button>
+                    )}
+
+                    {/* Pay APC Button for Accepted Articles */}
+                    {article.status === 'accepted' && !article.isApcPaid && (
+                      <button
+                        onClick={async () => {
+                          try {
+                            const token = localStorage.getItem('token');
+                            const res = await fetch('/api/payments/create-apc-session', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                              body: JSON.stringify({ articleId: article.id })
+                            });
+                            const data = await res.json();
+                            if (data.url) {
+                              window.location.href = data.url;
+                            } else {
+                              alert('Failed to start payment: ' + (data.error || 'Unknown error'));
+                            }
+                          } catch (e) {
+                            console.error(e);
+                            alert('Payment initialization failed');
+                          }
+                        }}
+                        className="px-4 py-2 bg-green-600 text-white hover:bg-green-700 rounded-lg text-sm font-medium transition-colors whitespace-nowrap shadow-sm"
+                      >
+                        Card: Pay APC Fee
+                      </button>
+                    )}
+
+                    {article.status === 'accepted' && article.isApcPaid && (
+                      <span className="px-4 py-2 bg-green-50 text-green-700 border border-green-200 rounded-lg text-sm font-bold whitespace-nowrap cursor-default">
+                        ✓ APC Paid
+                      </span>
                     )}
 
                     {/* Withdraw Button */}

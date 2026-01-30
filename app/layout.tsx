@@ -54,7 +54,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.svg" />
         <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192x192.svg" />
       </head>
-      <body className="min-h-screen flex flex-col overflow-x-hidden max-w-full">
+      <body className="min-h-screen flex flex-col overflow-x-hidden max-w-full" suppressHydrationWarning>
         <Header />
         <main className="flex-grow w-full overflow-x-hidden">
           {children}

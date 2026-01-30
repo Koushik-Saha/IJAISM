@@ -151,7 +151,15 @@ export default function AdminJournalsPage() {
         },
         {
             header: "Stats",
-            accessor: (j: any) => `${j._count?.articles || 0} articles`,
+            accessor: (j: any) => (
+                <Link
+                    href={`/editor/articles?journalId=${j.id}`}
+                    className="text-primary hover:underline"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    {j._count?.articles || 0} articles
+                </Link>
+            ),
             className: "text-gray-500 w-32"
         },
         // NEW: Editor Assignment Column (Admin Only)

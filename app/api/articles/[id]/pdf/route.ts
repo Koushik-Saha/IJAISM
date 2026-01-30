@@ -86,33 +86,60 @@ export async function GET(
         }
 
         // Serve File
-        // Handle local file path (e.g., /uploads/dummy.pdf)
-        let filePath = article.pdfUrl;
-        if (filePath.startsWith('/')) {
-            // Remove leading slash for local fs path relative to process.cwd()
-            // Assuming public folder structure
-            if (filePath.startsWith('/uploads')) {
-                filePath = path.join(process.cwd(), 'public', filePath);
-            } else {
-                filePath = path.join(process.cwd(), filePath);
+        // Handle Remote URL (Vercel Blob / S3) vs Local File
+        const isRemote = article.pdfUrl.startsWith('http');
+
+        if (isRemote) {
+            // Fetch remote file
+            const fileResponse = await fetch(article.pdfUrl);
+            if (!fileResponse.ok) {
+                console.error("Remote PDF Fetch Error:", fileResponse.statusText);
+                return NextResponse.json({ error: "Failed to fetch PDF from storage" }, { status: 502 });
             }
+
+            const contentType = fileResponse.headers.get('content-type') || 'application/pdf';
+            const fileName = path.basename(new URL(article.pdfUrl).pathname) || 'document.pdf';
+
+            // Force Inline for reviewers, respect param for others (unless forced)
+            const disposition = (forceInline || downloadParam !== 'true') ? 'inline' : `attachment; filename="${fileName}"`;
+
+            // Stream response
+            const headers = new Headers();
+            headers.set('Content-Type', contentType);
+            headers.set('Content-Disposition', disposition);
+            headers.set('Cache-Control', 'public, max-age=3600');
+
+            return new NextResponse(fileResponse.body, { headers });
+
+        } else {
+            // Handle local file path (Development / Local Storage)
+            let filePath = article.pdfUrl;
+            if (filePath.startsWith('/')) {
+                // Remove leading slash for local fs path relative to process.cwd()
+                // Assuming public folder structure
+                if (filePath.startsWith('/uploads')) {
+                    filePath = path.join(process.cwd(), 'public', filePath);
+                } else {
+                    filePath = path.join(process.cwd(), filePath);
+                }
+            }
+
+            if (!fs.existsSync(filePath)) {
+                return NextResponse.json({ error: "File not found on server" }, { status: 404 });
+            }
+
+            const fileBuffer = fs.readFileSync(filePath);
+            const contentType = mime.getType(filePath) || 'application/pdf';
+            const fileName = path.basename(filePath);
+
+            const disposition = (forceInline || downloadParam !== 'true') ? 'inline' : `attachment; filename="${fileName}"`;
+
+            const response = new NextResponse(fileBuffer);
+            response.headers.set('Content-Type', contentType);
+            response.headers.set('Content-Disposition', disposition);
+
+            return response;
         }
-
-        if (!fs.existsSync(filePath)) {
-            return NextResponse.json({ error: "File not found on server" }, { status: 404 });
-        }
-
-        const fileBuffer = fs.readFileSync(filePath);
-        const contentType = mime.getType(filePath) || 'application/pdf';
-        const fileName = path.basename(filePath);
-
-        const disposition = (forceInline || downloadParam !== 'true') ? 'inline' : `attachment; filename="${fileName}"`;
-
-        const response = new NextResponse(fileBuffer);
-        response.headers.set('Content-Type', contentType);
-        response.headers.set('Content-Disposition', disposition);
-
-        return response;
 
     } catch (error: any) {
         console.error("PDF Serve Error:", error);

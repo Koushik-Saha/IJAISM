@@ -129,6 +129,13 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
             {(article as any).doi && <span>DOI: {(article as any).doi}</span>}
             {(article as any).volume && <span>Volume {(article as any).volume}</span>}
             {(article as any).issue && <span>Issue {(article as any).issue}</span>}
+            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize 
+              ${article.status === 'published' ? 'bg-green-100 text-green-800' :
+                article.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                  article.status === 'accepted' ? 'bg-blue-100 text-blue-800' :
+                    'bg-yellow-100 text-yellow-800'}`}>
+              Status: {article.status.replace(/_/g, ' ')}
+            </span>
           </div>
         </div>
       </div>

@@ -1,131 +1,111 @@
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { verifyToken } from "@/lib/auth";
+import { apiSuccess, apiError } from "@/lib/api-response";
+import { z } from "zod";
 
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { verifyToken } from '@/lib/auth';
-
-const checkAdminRole = async (req: NextRequest) => {
-    const authHeader = req.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
-    const token = authHeader.split(' ')[1];
-    const decoded = verifyToken(token);
-    if (!decoded) return null;
-
-    const user = await prisma.user.findUnique({
-        where: { id: decoded.userId },
-        select: { id: true, role: true },
-    });
-
-    if (!user || !['super_admin', 'mother_admin'].includes(user.role)) return null;
-    return user;
-};
+const createBookSchema = z.object({
+    title: z.string().min(1, "Title is required"),
+    authors: z.array(z.string()).min(1, "At least one author is required"),
+    year: z.number().int().min(1000).max(new Date().getFullYear() + 5),
+    isbn: z.string().min(1),
+    pages: z.number().int().positive(),
+    field: z.string().min(1),
+    description: z.string().min(1),
+    fullDescription: z.string().min(1),
+    price: z.string().min(1),
+    publisher: z.string().min(1),
+    language: z.string().default("English"),
+    edition: z.string().default("1st"),
+    format: z.string().default("Paperback"),
+    coverImageUrl: z.string().url().optional().or(z.literal("")),
+});
 
 export async function GET(req: NextRequest) {
-    const admin = await checkAdminRole(req);
-    if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-
-    const searchParams = req.nextUrl.searchParams;
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
-    const skip = (page - 1) * limit;
-
-    const [books, total] = await prisma.$transaction([
-        prisma.book.findMany({
-            skip,
-            take: limit,
-            orderBy: { createdAt: 'desc' },
-        }),
-        prisma.book.count()
-    ]);
-
-    return NextResponse.json({
-        books,
-        pagination: {
-            page,
-            limit,
-            total,
-            pages: Math.ceil(total / limit)
+    try {
+        const authHeader = req.headers.get("authorization");
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+            return apiError("Unauthorized", 401);
         }
-    });
+        const token = authHeader.split(" ")[1];
+        const auth = verifyToken(token);
+
+        if (!auth || !["super_admin", "mother_admin"].includes(auth.role)) {
+            return apiError("Forbidden: Insufficient permissions", 403);
+        }
+
+        const { searchParams } = new URL(req.url);
+        const page = parseInt(searchParams.get("page") || "1");
+        const limit = parseInt(searchParams.get("limit") || "10");
+        const search = searchParams.get("search") || "";
+        const skip = (page - 1) * limit;
+
+        const where: any = {};
+
+        if (search) {
+            where.OR = [
+                { title: { contains: search, mode: "insensitive" } },
+                { isbn: { contains: search, mode: "insensitive" } },
+                { publisher: { contains: search, mode: "insensitive" } },
+            ];
+        }
+
+        const [books, total] = await Promise.all([
+            prisma.book.findMany({
+                where,
+                skip,
+                take: limit,
+                orderBy: { createdAt: "desc" },
+            }),
+            prisma.book.count({ where }),
+        ]);
+
+        return apiSuccess({
+            books,
+            pagination: {
+                page,
+                limit,
+                total,
+                pages: Math.ceil(total / limit),
+            },
+        });
+    } catch (error: any) {
+        return apiError(error.message, 500);
+    }
 }
 
 export async function POST(req: NextRequest) {
-    const admin = await checkAdminRole(req);
-    if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-
     try {
+        const authHeader = req.headers.get("authorization");
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+            return apiError("Unauthorized", 401);
+        }
+        const token = authHeader.split(" ")[1];
+        const auth = verifyToken(token);
+
+        if (!auth || !["super_admin", "mother_admin"].includes(auth.role)) {
+            return apiError("Forbidden: Insufficient permissions", 403);
+        }
+
         const body = await req.json();
+        const validated = createBookSchema.parse(body);
+
         const book = await prisma.book.create({
             data: {
-                title: body.title,
-                authors: Array.isArray(body.authors) ? body.authors : [body.authors], // Ensure array
-                year: parseInt(body.year),
-                isbn: body.isbn,
-                pages: parseInt(body.pages),
-                field: body.field,
-                description: body.description,
-                fullDescription: body.fullDescription || body.description,
-                price: body.price,
-                publisher: body.publisher,
-                language: body.language,
-                edition: body.edition,
-                format: body.format,
-                coverImageUrl: body.coverImageUrl,
-                relatedTopics: body.relatedTopics || [],
-            }
+                ...validated,
+                coverImageUrl: validated.coverImageUrl || null,
+            },
         });
-        return NextResponse.json({ success: true, book });
-    } catch (e: any) {
-        console.error(e);
-        return NextResponse.json({ error: e.message }, { status: 500 });
-    }
-}
 
-export async function PATCH(req: NextRequest) {
-    const admin = await checkAdminRole(req);
-    if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-
-    try {
-        const body = await req.json();
-        if (!body.id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
-
-        const book = await prisma.book.update({
-            where: { id: body.id },
-            data: {
-                title: body.title,
-                authors: body.authors,
-                year: body.year ? parseInt(body.year) : undefined,
-                isbn: body.isbn,
-                pages: body.pages ? parseInt(body.pages) : undefined,
-                field: body.field,
-                description: body.description,
-                fullDescription: body.fullDescription,
-                price: body.price,
-                publisher: body.publisher,
-                language: body.language,
-                edition: body.edition,
-                format: body.format,
-                coverImageUrl: body.coverImageUrl,
-                relatedTopics: body.relatedTopics,
-            }
-        });
-        return NextResponse.json({ success: true, book });
-    } catch (e: any) {
-        return NextResponse.json({ error: e.message }, { status: 500 });
-    }
-}
-
-export async function DELETE(req: NextRequest) {
-    const admin = await checkAdminRole(req);
-    if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-
-    const searchParams = req.nextUrl.searchParams;
-    const id = searchParams.get('id');
-    if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
-
-    try {
-        await prisma.book.delete({ where: { id } });
-        return NextResponse.json({ success: true });
-    } catch (e: any) {
-        return NextResponse.json({ error: e.message }, { status: 500 });
+        return apiSuccess({ book }, "Book created successfully", 201);
+    } catch (error: any) {
+        if (error instanceof z.ZodError) {
+            return apiError("Validation Error", 400, error.errors);
+        }
+        // Handle Unique Constraint (ISBN)
+        if (error.code === 'P2002') {
+            return apiError("ISBN already exists", 409);
+        }
+        return apiError(error.message, 500);
     }
 }

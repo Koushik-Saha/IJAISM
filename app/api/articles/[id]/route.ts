@@ -93,13 +93,18 @@ export async function GET(
 
     // 5. Mask Data if not Editor (i.e. Author)
     if (!isEditor) {
-      // Mask Reviewer Names
-      (article.reviews as any) = article.reviews.map((review, index) => ({
-        ...review,
-        reviewer: {
-          name: `Reviewer ${index + 1}`
-        }
-      }));
+      // Mask Reviewer Data & HIDE Confidential Comments
+      (article.reviews as any) = article.reviews.map((review, index) => {
+        // Create a compliant object removing confidential fields
+        const { commentsToEditor, ...safeReview } = review as any;
+
+        return {
+          ...safeReview, // This excludes commentsToEditor
+          reviewer: {
+            name: `Reviewer ${index + 1}`
+          }
+        };
+      });
     }
 
     // 5. Return article

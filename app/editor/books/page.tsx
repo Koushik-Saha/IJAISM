@@ -32,7 +32,8 @@ export default function BooksPage() {
         language: 'English',
         edition: '1st',
         format: 'Hardcover',
-        price: '0.00'
+        price: '0.00',
+        authors: ''
     });
 
     useEffect(() => { checkAuth(); }, []);
@@ -67,8 +68,12 @@ export default function BooksPage() {
             const token = localStorage.getItem('token');
             const url = '/api/editor/books';
             const method = selectedItem ? 'PATCH' : 'POST';
-            const body = selectedItem ? { ...formData, id: selectedItem.id } :
-                { ...formData, authors: ["Pending Author"] }; // Default author array requirement
+
+            // Process authors from string to array
+            const authorList = formData.authors.split(',').map(a => a.trim()).filter(a => a);
+
+            const body = selectedItem ? { ...formData, authors: authorList, id: selectedItem.id } :
+                { ...formData, authors: authorList, fullDescription: formData.description }; // Reuse description for fullDescription
 
             const res = await fetch(url, {
                 method,
@@ -107,7 +112,8 @@ export default function BooksPage() {
             language: item.language,
             edition: item.edition,
             format: item.format,
-            price: item.price
+            price: item.price,
+            authors: item.authors ? item.authors.join(', ') : ''
         });
         setIsModalOpen(true);
     };
@@ -125,7 +131,8 @@ export default function BooksPage() {
             language: 'English',
             edition: '1st',
             format: 'Hardcover',
-            price: '0.00'
+            price: '0.00',
+            authors: ''
         });
         setIsModalOpen(true);
     };
@@ -198,6 +205,11 @@ export default function BooksPage() {
 
                                 <div><label className="block text-sm font-bold mb-1">Pages</label><input type="number" required className="w-full border rounded p-2" value={formData.pages} onChange={e => setFormData({ ...formData, pages: parseInt(e.target.value) })} /></div>
                                 <div><label className="block text-sm font-bold mb-1">Edition</label><input required className="w-full border rounded p-2" value={formData.edition} onChange={e => setFormData({ ...formData, edition: e.target.value })} /></div>
+
+                                <div className="col-span-2">
+                                    <label className="block text-sm font-bold mb-1">Authors (comma separated)</label>
+                                    <input required className="w-full border rounded p-2" value={formData.authors} onChange={e => setFormData({ ...formData, authors: e.target.value })} placeholder="Author 1, Author 2" />
+                                </div>
                             </div>
                             <div>
                                 <label className="block text-sm font-bold mb-1">Description</label>

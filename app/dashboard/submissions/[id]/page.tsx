@@ -24,6 +24,8 @@ interface Article {
   };
   editorComments: string | null;
   rejectionReason: string | null;
+  isApcPaid?: boolean;
+  apcAmount?: number;
 }
 
 export default function SubmissionDetailPage() {
@@ -317,7 +319,7 @@ export default function SubmissionDetailPage() {
                     {article.status === 'published' ? 'Congratulations! Your article has been published.' : 'Congratulations! Your article has been accepted for publication.'}
                   </p>
 
-                  {article.status === 'accepted' && !(article as any).isApcPaid && (
+                  {article.status === 'accepted' && !article.isApcPaid && (
                     <div className="mt-4 border-t border-green-200 pt-3">
                       <p className="text-sm text-green-800 mb-2">
                         To complete the publication process, please settle the Article Processing Charge (APC).
@@ -349,7 +351,7 @@ export default function SubmissionDetailPage() {
                     </div>
                   )}
 
-                  {(article as any).isApcPaid && (
+                  {article.isApcPaid && (
                     <div className="mt-4 border-t border-green-200 pt-3">
                       <p className="text-sm text-green-800 font-bold">
                         ✓ APC Fee Paid. Pending final publication by the Editor.
@@ -406,7 +408,40 @@ export default function SubmissionDetailPage() {
             </div>
           )}
 
-          {/* Placeholder for future reviewer/review data */}
+          {/* Anonymized Reviews (For Author) */}
+          {(article as any).reviews && (article as any).reviews.length > 0 && (
+            <div className="mt-6">
+              <h3 className="text-lg font-bold text-gray-800 mb-4">Peer Review Feedback</h3>
+              <div className="space-y-4">
+                {(article as any).reviews.map((review: any, index: number) => (
+                  review.status === 'completed' && (
+                    <div key={index} className="bg-white border rounded-lg p-4 shadow-sm">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-bold text-gray-700">{review.reviewer?.name || `Reviewer ${index + 1}`}</span>
+                        <span className={`text-xs px-2 py-1 rounded font-semibold capitalize ${review.decision === 'accept' ? 'bg-green-100 text-green-800' :
+                            review.decision === 'reject' ? 'bg-red-100 text-red-800' :
+                              review.decision === 'revision_requested' ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-gray-100 text-gray-600'
+                          }`}>
+                          {review.decision?.replace(/_/g, ' ') || 'Completed'}
+                        </span>
+                      </div>
+
+                      {review.commentsToAuthor ? (
+                        <div className="text-sm text-gray-700 whitespace-pre-wrap bg-gray-50 p-3 rounded">
+                          {review.commentsToAuthor}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-500 italic">No comments provided.</p>
+                      )}
+                    </div>
+                  )
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Review Timeline */}
           <div className="mt-6">
             <h3 className="text-sm font-bold text-gray-700 mb-2">Review Timeline</h3>
             <div className="border-l-2 border-gray-300 pl-4 space-y-4">

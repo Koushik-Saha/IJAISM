@@ -1,8 +1,9 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 import { articleSubmissionSchema } from '@/lib/validations/article';
-import { sendArticleSubmissionEmail } from '@/lib/email/send';
+import { sendArticleSubmissionEmail, sendCoAuthorNotification } from '@/lib/email/send';
 import { canUserSubmit, getMembershipStatus } from '@/lib/membership';
 import { logger } from '@/lib/logger';
 import { apiSuccess, apiError } from '@/lib/api-response';
@@ -103,10 +104,12 @@ export async function POST(req: NextRequest) {
 
       // Restrict Editing: Only allow editing if Draft or Revision Requested
       const allowedStatuses = ['draft', 'revision_requested', 'resubmitted'];
+
+      // CRITICAL: Block editing if the article is actively under review or finalized
       if (!allowedStatuses.includes(existingArticle.status)) {
-        logger.warn('Attempt to edit submitted article blocked', { articleId: existingArticle.id, status: existingArticle.status });
+        logger.warn('Attempt to edit locked article blocked', { articleId: existingArticle.id, status: existingArticle.status });
         return apiError(
-          'You cannot edit this article after submission. You can only update it during the revision period.',
+          `You cannot edit this article because it is currently "${existingArticle.status}". You can only update it if revisions are requested.`,
           403,
           undefined,
           'EDIT_LOCKED'
@@ -221,6 +224,7 @@ export async function POST(req: NextRequest) {
             university: author.university,
             order: index + 1,
             isMain: false,
+            // Assuming affiliation is stored in university for simplicity or check schema
           }))
         });
       }
@@ -258,6 +262,28 @@ export async function POST(req: NextRequest) {
         email: user.email
       });
     });
+
+    // Send emails to Co-Authors
+    if (validation.data.coAuthors && validation.data.coAuthors.length > 0) {
+      const coAuthors = validation.data.coAuthors;
+      for (const coAuthor of coAuthors) {
+        if (coAuthor.email) {
+          sendCoAuthorNotification(
+            coAuthor.email,
+            coAuthor.name,
+            user.name,
+            article.title,
+            journalRecord.fullName,
+            article.id,
+            article.submissionDate || new Date()
+          ).catch(error => {
+            logger.error('Failed to send co-author email', error, {
+              coAuthorEmail: coAuthor.email
+            });
+          });
+        }
+      }
+    }
 
     return apiSuccess({
       message: resubmissionId ? 'Article updated successfully' : 'Article submitted successfully',

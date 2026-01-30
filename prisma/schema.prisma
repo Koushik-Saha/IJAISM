@@ -158,6 +158,7 @@ model Article {
   journalId         String
   title             String
   abstract          String
+  fullText          String?       @db.Text
   keywords          String[]
   articleType       String
   doi               String?       @unique

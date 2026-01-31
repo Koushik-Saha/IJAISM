@@ -280,7 +280,7 @@ function SubmitFormContent() {
 
         if (uploadResponse.ok) {
           const uploadData = await uploadResponse.json();
-          manuscriptUrl = uploadData.url;
+          manuscriptUrl = uploadData.data.url;
         } else {
           throw new Error('Failed to upload manuscript');
         }
@@ -301,7 +301,7 @@ function SubmitFormContent() {
 
         if (uploadResponse.ok) {
           const uploadData = await uploadResponse.json();
-          coverLetterUrl = uploadData.url;
+          coverLetterUrl = uploadData.data.url;
         } else {
           throw new Error('Failed to upload cover letter');
         }

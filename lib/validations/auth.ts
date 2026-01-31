@@ -12,5 +12,14 @@ export const registerSchema = z.object({
     university: z.string().min(2, 'University/Affiliation is required'),
 });
 
+export const profileUpdateSchema = z.object({
+    name: z.string().min(2, 'Name must be at least 2 characters').optional(),
+    university: z.string().min(2, 'University must be at least 2 characters').optional(),
+    affiliation: z.string().optional(),
+    orcid: z.string().optional(),
+    bio: z.string().optional(),
+});
+
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
+export type ProfileUpdateInput = z.infer<typeof profileUpdateSchema>;

@@ -1,6 +1,7 @@
 
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import CoverImage from "@/components/ui/CoverImage";
 
 export const dynamic = "force-dynamic";
 
@@ -82,17 +83,15 @@ export default async function BooksPage(props: {
                 >
                   <div className="flex gap-4 mb-4">
                     {/* Book Cover Placeholder or Image */}
-                    {book.coverImageUrl ? (
-                      <img
+                    {/* Book Cover Placeholder or Image */}
+                    <div className="flex-shrink-0 w-32 h-auto">
+                      <CoverImage
                         src={book.coverImageUrl}
                         alt={book.title}
-                        className="flex-shrink-0 w-32 h-auto object-cover rounded shadow-sm border border-gray-100"
+                        className="w-full h-auto rounded shadow-sm border border-gray-100 aspect-[2/3]"
+                        fallbackText={book.title}
                       />
-                    ) : (
-                      <div className="flex-shrink-0 w-32 h-48 bg-gradient-to-br from-primary to-blue-800 rounded flex items-center justify-center text-white font-bold text-center p-4 shadow-sm">
-                        <div className="text-xs leading-tight">{book.title}</div>
-                      </div>
-                    )}
+                    </div>
 
                     {/* Book Details */}
                     <div className="flex-1">

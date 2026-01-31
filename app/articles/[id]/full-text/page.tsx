@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { Metadata } from "next";
+import { sanitizeContent } from "@/lib/security/sanitizer";
 
 export const revalidate = 3600;
 
@@ -115,9 +116,10 @@ export default async function ArticleFullTextPage({ params }: { params: Promise<
 
                 {/* Full Text Content */}
                 <article className="prose prose-lg max-w-none prose-headings:font-bold prose-a:text-blue-600 prose-img:rounded-xl">
-                    <div className="whitespace-pre-wrap leading-relaxed text-gray-800">
-                        {fullText}
-                    </div>
+                    <div
+                        className="whitespace-pre-wrap leading-relaxed text-gray-800"
+                        dangerouslySetInnerHTML={{ __html: sanitizeContent(fullText) }}
+                    />
                 </article>
 
             </div>

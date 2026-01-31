@@ -14,6 +14,8 @@ model User {
   name                    String
   university              String
   orcid                   String?                  @unique
+  orcidAccessToken        String?                  // OAuth Token
+  orcidRefreshToken       String?
   role                    String                   @default("author")
   affiliation             String?
   bio                     String?
@@ -38,6 +40,7 @@ model User {
   reviews                 Review[]
   managedBy               User?                    @relation("UserHierarchy", fields: [managedById], references: [id])
   subordinates            User[]                   @relation("UserHierarchy")
+  activityLogs            ActivityLog[]
 
   @@index([email])
   @@index([role])
@@ -171,6 +174,7 @@ model Article {
   acceptanceDate    DateTime?
   status            String        @default("draft")
   pdfUrl            String?
+  coverLetterUrl    String?
   language          String        @default("en")
   citationCount     Int           @default(0)
   viewCount         Int           @default(0)
@@ -190,11 +194,14 @@ model Article {
   resubmissionCount Int           @default(0)
   issueId           String?
   isBestPaper       Boolean       @default(false)
+  similarityScore   Float?        // Plagiarism Detection
+  plagiarismReportUrl String?
   author            User          @relation(fields: [authorId], references: [id])
   journalIssue      JournalIssue? @relation(fields: [issueId], references: [id])
   journal           Journal       @relation(fields: [journalId], references: [id])
   coAuthors         CoAuthor[]
   reviews           Review[]
+  activityLogs      ActivityLog[]
 
   @@index([journalId])
   @@index([status])
@@ -367,7 +374,7 @@ model Notification {
   id        String    @id @default(uuid())
   userId    String
   type      String
-  title     String
+  title     String?
   message   String
   link      String?
   isRead    Boolean   @default(false)
@@ -430,12 +437,17 @@ model DownloadLog {
   userId       String
   resourceId   String
   resourceType String
+  ipAddress    String?
+  country      String?
+  city         String?
   downloadedAt DateTime @default(now())
   user         User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([downloadedAt])
 }
+
+
 
 model ReviewerInvitation {
   id        String   @id @default(uuid())
@@ -450,4 +462,19 @@ model ReviewerInvitation {
 
   @@index([email])
   @@index([token])
+}
+
+model ActivityLog {
+  id        String   @id @default(uuid())
+  articleId String
+  userId    String
+  action    String
+  details   String?
+  createdAt DateTime @default(now())
+
+  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  user      User    @relation(fields: [userId], references: [id])
+
+  @@index([articleId])
+  @@index([userId])
 }

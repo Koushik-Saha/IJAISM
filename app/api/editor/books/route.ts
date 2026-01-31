@@ -100,7 +100,7 @@ export async function POST(req: NextRequest) {
         return apiSuccess({ book }, "Book created successfully", 201);
     } catch (error: any) {
         if (error instanceof z.ZodError) {
-            return apiError("Validation Error", 400, error.errors);
+            return apiError("Validation Error", 400, error.issues);
         }
         // Handle Unique Constraint (ISBN)
         if (error.code === 'P2002') {

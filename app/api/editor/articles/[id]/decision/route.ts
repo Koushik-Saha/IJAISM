@@ -121,7 +121,7 @@ export async function POST(
                     url: `${appUrl}/articles/${article.id}`,
                     title: article.title,
                     journalTitle: article.journal.fullName,
-                    journalIssn: article.journal.issn,
+                    journalIssn: article.journal.issn || '',
                     publicationDate: now,
                     volume: vol,
                     issue: issue,

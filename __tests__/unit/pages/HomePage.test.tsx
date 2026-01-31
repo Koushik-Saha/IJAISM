@@ -12,6 +12,7 @@ jest.mock('@/lib/prisma', () => ({
         journal: { findMany: jest.fn(), count: jest.fn() },
         article: { findMany: jest.fn(), count: jest.fn() },
         user: { count: jest.fn() },
+        heroSlide: { findMany: jest.fn() },
     },
 }));
 
@@ -54,6 +55,9 @@ describe('HomePage', () => {
         (prisma.journal.count as jest.Mock).mockResolvedValue(5);
         (prisma.article.count as jest.Mock).mockResolvedValue(100);
         (prisma.user.count as jest.Mock).mockResolvedValue(50);
+        (prisma.heroSlide.findMany as jest.Mock).mockResolvedValue([
+            { id: 'h1', title: 'Welcome to C5K Academic Publishing Platform', description: 'Desc', imageUrl: null }
+        ]);
 
         // Call async component
         const jsx = await HomePage();
@@ -78,6 +82,7 @@ describe('HomePage', () => {
         (prisma.journal.count as jest.Mock).mockResolvedValue(0);
         (prisma.article.count as jest.Mock).mockResolvedValue(0);
         (prisma.user.count as jest.Mock).mockResolvedValue(0);
+        (prisma.heroSlide.findMany as jest.Mock).mockResolvedValue([]);
 
         const jsx = await HomePage();
         render(jsx);

@@ -3,9 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { useAuth } from "@/lib/auth"; // Assuming hook exists or we use context
-// If no hook, we'll fetch profile or assume protected layout handles it.
-// We'll use local state for now for simplicity.
 
 import Card from "@/components/ui/Card";
 

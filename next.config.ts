@@ -10,6 +10,22 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'placehold.co', // For demo placeholders
+      },
+      {
+        protocol: 'https',
+        hostname: 'c5k.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.c5k.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+      },
+      {
+        protocol: 'https',
+        hostname: 'fastly.picsum.photos',
       }
     ],
   },
@@ -53,6 +69,10 @@ const nextConfig: NextConfig = {
             key: 'Referrer-Policy',
             value: 'strict-origin-when-cross-origin',
           },
+          {
+            key: 'Content-Security-Policy',
+            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com https://va.vercel-scripts.com https://vercel.live; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https://*.public.blob.vercel-storage.com https://placehold.co https://c5k.com https://www.c5k.com https://picsum.photos https://fastly.picsum.photos; font-src 'self' data:; connect-src 'self' https://api.stripe.com https://*.sentry.io https://*.vercel-storage.com; frame-src 'self' https://js.stripe.com https://hooks.stripe.com; object-src 'none'; base-uri 'self';"
+          }
         ],
       },
     ];

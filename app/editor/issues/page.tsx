@@ -300,8 +300,8 @@ export default function IssuesPage() {
                                                 key={pNum}
                                                 onClick={() => setPagination(prev => ({ ...prev, page: pNum }))}
                                                 className={`px-3 py-1 border rounded min-w-[32px] font-medium transition-colors ${pagination.page === pNum
-                                                        ? 'bg-primary text-white border-primary'
-                                                        : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-300'
+                                                    ? 'bg-primary text-white border-primary'
+                                                    : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-300'
                                                     }`}
                                             >
                                                 {pNum}
@@ -382,7 +382,7 @@ export default function IssuesPage() {
                                         required
                                         className="w-full border rounded p-2"
                                         value={formData.year}
-                                        onChange={(e) => setFormData({ ...formData, year: e.target.value })}
+                                        onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) || new Date().getFullYear() })}
                                     />
                                 </div>
                             </div>

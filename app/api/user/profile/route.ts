@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
+import { profileUpdateSchema } from '@/lib/validations/auth';
+import { apiError, apiSuccess } from '@/lib/api-response';
 
 export async function GET(req: NextRequest) {
   try {
@@ -100,17 +102,24 @@ export async function PATCH(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { name, university, affiliation, orcid, bio } = body;
+
+    // Strict Validation (prevents Mass Assignment)
+    const validation = profileUpdateSchema.safeParse(body);
+    if (!validation.success) {
+      return apiError(
+        'Validation failed',
+        400,
+        validation.error.flatten().fieldErrors,
+        'VALIDATION_ERROR'
+      );
+    }
+
+    // Whitelisted fields only
+    const data = validation.data;
 
     const updatedUser = await prisma.user.update({
       where: { id: decoded.userId },
-      data: {
-        ...(name && { name }),
-        ...(university !== undefined && { university }),
-        ...(affiliation !== undefined && { affiliation }),
-        ...(orcid !== undefined && { orcid }),
-        ...(bio !== undefined && { bio }),
-      },
+      data,
       select: {
         id: true,
         name: true,

@@ -272,6 +272,13 @@ export default function AdminDashboard() {
                   <h3 className="font-bold text-gray-900 mb-2">📰 Manage Blogs</h3>
                   <p className="text-sm text-gray-600">Create and edit blog posts</p>
                 </Link>
+                <Link
+                  href="/admin/analytics"
+                  className="border-2 border-gray-200 rounded-lg p-4 hover:border-primary transition-colors bg-purple-50 border-purple-200"
+                >
+                  <h3 className="font-bold text-purple-900 mb-2">📊 Analytics & Metrics</h3>
+                  <p className="text-sm text-gray-600">Geolocation & Social Impact</p>
+                </Link>
                 {/* Add placeholders for other Super Admin features if they exist or will exist */}
                 <Link
                   href="/editor/dissertations"

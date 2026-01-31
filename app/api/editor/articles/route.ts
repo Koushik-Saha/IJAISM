@@ -84,6 +84,14 @@ export async function GET(req: NextRequest) {
             },
             orderBy: { reviewerNumber: 'asc' },
           },
+          activityLogs: {
+            include: {
+              user: {
+                select: { name: true, role: true },
+              },
+            },
+            orderBy: { createdAt: 'desc' },
+          },
         },
       });
 

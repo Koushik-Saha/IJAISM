@@ -1,4 +1,5 @@
 import Link from "next/link";
+import JournalCoverImage from "@/components/journals/JournalCoverImage";
 import Card from "@/components/ui/Card";
 import { prisma } from "@/lib/prisma";
 import JournalSearch from "@/components/journals/JournalSearch";
@@ -84,18 +85,8 @@ export default async function JournalsPage(props: {
               <Link key={journal.id} href={`/journals/${journal.code.toLowerCase()}`} className="block">
                 <Card className="hover:shadow-lg transition-shadow duration-300 overflow-hidden h-full flex flex-col">
                   <div className="flex flex-col md:flex-row gap-6 h-full">
-                    <div className="md:w-48 flex-shrink-0">
-                      {journal.coverImageUrl ? (
-                        <img
-                          src={journal.coverImageUrl}
-                          alt={journal.code}
-                          className="w-full h-48 md:h-full object-cover rounded-md"
-                        />
-                      ) : (
-                        <div className="w-full h-48 md:h-full min-h-[12rem] bg-gradient-to-br from-primary-light to-primary rounded-md flex items-center justify-center">
-                          <span className="text-white text-4xl font-bold">{journal.code}</span>
-                        </div>
-                      )}
+                    <div className="md:w-48 flex-shrink-0 h-48 md:h-auto">
+                      <JournalCoverImage code={journal.code} coverImageUrl={journal.coverImageUrl} />
                     </div>
                     <div className="flex-1 py-2 flex flex-col">
                       <h2 className="text-2xl font-bold mb-3 text-blue-600 hover:text-blue-800 transition-colors">

@@ -7,6 +7,7 @@ import { sendArticleSubmissionEmail, sendCoAuthorNotification } from '@/lib/emai
 import { canUserSubmit, getMembershipStatus } from '@/lib/membership';
 import { logger } from '@/lib/logger';
 import { apiSuccess, apiError } from '@/lib/api-response';
+import { checkPlagiarism } from '@/lib/integrity/plagiarism';
 
 export async function POST(req: NextRequest) {
   try {
@@ -126,7 +127,13 @@ export async function POST(req: NextRequest) {
           status: 'resubmitted',
           journalId: journalRecord.id,
           ...(manuscriptUrl && { pdfUrl: manuscriptUrl }),
+          ...(coverLetterUrl && { coverLetterUrl: coverLetterUrl }),
           submissionDate: new Date(),
+          // Re-run plagiarism check on resubmission
+          ...(await checkPlagiarism(title + '\n\n' + abstract).then(res => ({
+            similarityScore: res.score,
+            plagiarismReportUrl: res.reportUrl
+          }))),
         },
         include: {
           author: { select: { id: true, name: true, email: true } },
@@ -191,7 +198,13 @@ export async function POST(req: NextRequest) {
           authorId: userId,
           journalId: journalRecord.id,
           pdfUrl: manuscriptUrl || null,
+          coverLetterUrl: coverLetterUrl || null,
           submissionDate: new Date(),
+          // Run initial plagiarism check
+          ...(await checkPlagiarism(title + '\n\n' + abstract).then(res => ({
+            similarityScore: res.score,
+            plagiarismReportUrl: res.reportUrl
+          }))),
         },
         include: {
           author: {
@@ -236,6 +249,15 @@ export async function POST(req: NextRequest) {
         title: article.title
       });
     }
+
+    await prisma.activityLog.create({
+      data: {
+        articleId: article.id,
+        userId: userId,
+        action: resubmissionId ? 'UPDATED' : 'SUBMITTED',
+        details: resubmissionId ? 'Article resubmitted by author' : 'First version submitted',
+      }
+    });
 
     await prisma.notification.create({
       data: {

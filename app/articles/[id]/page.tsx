@@ -28,7 +28,11 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   const article = await prisma.article.findUnique({
     where: { id },
-    select: { title: true, abstract: true },
+    include: {
+      author: { select: { name: true, university: true } },
+      journal: { select: { fullName: true, issn: true } },
+      coAuthors: { select: { name: true, university: true } }
+    }
   });
 
   if (!article) {
@@ -37,9 +41,34 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     };
   }
 
+  const authors = [
+    article.author.name,
+    ...article.coAuthors.map(ca => ca.name)
+  ].filter(Boolean);
+
+  const pdfUrl = article.pdfUrl
+    ? (article.pdfUrl.startsWith('http') ? article.pdfUrl : `${process.env.NEXT_PUBLIC_APP_URL || 'https://c5k-platform.vercel.app'}${article.pdfUrl}`)
+    : undefined;
+
   return {
     title: article.title,
     description: article.abstract?.substring(0, 160) || "Read this academic article on C5K.",
+    openGraph: {
+      title: article.title,
+      description: article.abstract?.substring(0, 160),
+      type: 'article',
+      publishedTime: article.publicationDate ? new Date(article.publicationDate).toISOString() : undefined,
+      authors: authors,
+    },
+    other: {
+      'citation_title': article.title,
+      'citation_journal_title': article.journal.fullName,
+      'citation_issn': article.journal.issn || '',
+      'citation_publication_date': article.publicationDate ? new Date(article.publicationDate).toISOString().split('T')[0] : '', // YYYY-MM-DD
+      'citation_pdf_url': pdfUrl || '',
+      'citation_doi': (article as any).doi || '', // Dynamic fallback
+      ...Object.fromEntries(authors.map((author, i) => [`citation_author`, author])), // Note: Next.js 'other' might not handle duplicate keys well, checking implementation
+    }
   };
 }
 

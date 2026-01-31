@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 import { sendArticleStatusUpdateEmail } from '@/lib/email/send';
+import { registerDoi } from '@/lib/doi/crossref';
+import { pushToOrcid } from '@/lib/orcid/client';
 
 export async function POST(
     req: NextRequest,
@@ -42,7 +44,15 @@ export async function POST(
         const article = await prisma.article.findUnique({
             where: { id },
             include: {
-                author: { select: { name: true, email: true } },
+                author: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        orcid: true,
+                        orcidAccessToken: true
+                    }
+                },
                 journal: true
             }
         });
@@ -98,6 +108,52 @@ export async function POST(
                 editorComments: comments
             };
 
+            // Trigger DOI Registration
+            /*
+             * Note: In a real async system, this should be a background job.
+             * For MVP, we await it or let it run but catch errors so we don't block the UI response.
+             */
+            try {
+                const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://c5k.com';
+                await registerDoi({
+                    id: article.id,
+                    doi: doi || '',
+                    url: `${appUrl}/articles/${article.id}`,
+                    title: article.title,
+                    journalTitle: article.journal.fullName,
+                    journalIssn: article.journal.issn,
+                    publicationDate: now,
+                    volume: vol,
+                    issue: issue,
+                    authors: [{ name: article.author.name || 'Unknown' }]
+                });
+            } catch (doiError) {
+                console.error("DOI Auto-Registration failed:", doiError);
+                // We do NOT block publication for this, but ideally we'd log this to a 'failed_jobs' table
+            }
+
+            // Trigger ORCID Push
+            if (article.author.orcid && article.author.orcidAccessToken) {
+                try {
+                    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://c5k.com';
+                    await pushToOrcid(
+                        article.author.orcid,
+                        article.author.orcidAccessToken,
+                        {
+                            title: article.title,
+                            type: 'journal-article',
+                            publicationDate: now,
+                            journalName: article.journal.fullName,
+                            doi,
+                            url: `${appUrl}/articles/${article.id}`,
+                            abstract: article.abstract
+                        }
+                    );
+                } catch (orcidError) {
+                    console.error("ORCID Push failed:", orcidError);
+                }
+            }
+
         } else if (decision === 'reject') {
             newStatus = 'rejected';
             statusMessage = 'Your article has been declined for publication.';
@@ -121,6 +177,26 @@ export async function POST(
             where: { id },
             data: updateData
         });
+
+        // Create Notification for Author
+        try {
+            let notifType = 'info';
+            if (['accepted', 'published'].includes(newStatus)) notifType = 'success';
+            if (newStatus === 'rejected') notifType = 'error';
+            if (newStatus === 'revision_requested') notifType = 'warning';
+
+            await prisma.notification.create({
+                data: {
+                    userId: article.authorId,
+                    title: `Article ${newStatus.replace('_', ' ')}`,
+                    message: statusMessage,
+                    type: notifType,
+                    link: `/dashboard/submissions/${id}`
+                }
+            });
+        } catch (notifError) {
+            console.error('Failed to create notification:', notifError);
+        }
 
         // Send Email
         try {

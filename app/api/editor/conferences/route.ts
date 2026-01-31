@@ -106,7 +106,7 @@ export async function POST(req: NextRequest) {
         return apiSuccess({ conference }, "Conference created successfully", 201);
     } catch (error: any) {
         if (error instanceof z.ZodError) {
-            return apiError("Validation Error", 400, error.errors);
+            return apiError("Validation Error", 400, error.issues);
         }
         return apiError(error.message, 500);
     }

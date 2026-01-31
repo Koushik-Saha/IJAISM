@@ -12,6 +12,11 @@ jest.mock('@/lib/auth', () => ({
 }));
 jest.mock('@/lib/email/send', () => ({
     sendArticleSubmissionEmail: jest.fn().mockResolvedValue(true),
+    sendCoAuthorNotification: jest.fn().mockResolvedValue(true),
+}));
+
+jest.mock('@/lib/integrity/plagiarism', () => ({
+    checkPlagiarism: jest.fn().mockResolvedValue({ score: 0, isClean: true }),
 }));
 jest.mock('@/lib/membership', () => ({
     canUserSubmit: jest.fn(),
@@ -25,6 +30,7 @@ jest.mock('@/lib/prisma', () => ({
         article: { findUnique: jest.fn(), create: jest.fn(), update: jest.fn() },
         coAuthor: { deleteMany: jest.fn(), createMany: jest.fn() },
         notification: { create: jest.fn() },
+        activityLog: { create: jest.fn() },
     },
 }));
 

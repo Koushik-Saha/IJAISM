@@ -1,10 +1,7 @@
-
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyToken } from "@/lib/auth";
-import fs from 'fs';
-import path from 'path';
-import mime from 'mime';
+import { generateSignedFileToken } from "@/lib/security/url-signer";
 
 export async function GET(
     request: Request,
@@ -13,15 +10,9 @@ export async function GET(
     try {
         const { id: articleId } = await params;
         const url = new URL(request.url);
-        const downloadParam = url.searchParams.get('download');
 
-        // Allow token in query param for easier PDF viewer integration (if needed) 
-        // OR rely on Authorization header. Standard is Header. 
-        // If viewing in browser PDF viewer, headers are hard to pass unless using blob.
-        // Let's check headers first.
+        // Auhtentication
         let token = request.headers.get('authorization')?.split(' ')[1];
-
-        // Fallback to query param token if provided (useful for iframe/direct links)
         if (!token) {
             token = url.searchParams.get('token') || undefined;
         }
@@ -50,7 +41,6 @@ export async function GET(
 
         // Access Control Logic
         let allowAccess = false;
-        let forceInline = false;
 
         // 1. Author
         if (userId && article.authorId === userId) allowAccess = true;
@@ -63,17 +53,11 @@ export async function GET(
             const isAssigned = article.reviews.some(r => r.reviewerId === userId);
             if (isAssigned) {
                 allowAccess = true;
-                forceInline = true; // Reviewers MUST view inline
             }
         }
 
         // 4. Public (if published)
         if (article.status === 'published') {
-            // Public can usually download, unless we want to restrict?
-            // Requirement says "Reviewer can view only... no download".
-            // If it's published, everyone can download.
-            // But if the reviewer is reviewing, it implies it might NOT be published yet (Under Review).
-            // So for unpublished papers, this logic holds.
             allowAccess = true;
         }
 
@@ -81,65 +65,18 @@ export async function GET(
             return NextResponse.json({ error: "Access Denied" }, { status: 403 });
         }
 
-        if (forceInline && downloadParam === 'true') {
-            return NextResponse.json({ error: "Download is restricted for reviewers. View only." }, { status: 403 });
-        }
+        // Generate Signed Token
+        // Valid for 1 hour
+        const signedToken = generateSignedFileToken(article.pdfUrl, 3600);
 
-        // Serve File
-        // Handle Remote URL (Vercel Blob / S3) vs Local File
-        const isRemote = article.pdfUrl.startsWith('http');
+        // Construct Secure URL
+        // We need the base URL to redirect correctly? 
+        // Or relative redirect works in Next.js NextResponse.redirect? Yes, but usually needs absolute.
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || url.origin; // Usage of origin is safer for dynamic envs
+        const secureUrl = `${appUrl}/api/secure-file?token=${signedToken}`;
 
-        if (isRemote) {
-            // Fetch remote file
-            const fileResponse = await fetch(article.pdfUrl);
-            if (!fileResponse.ok) {
-                console.error("Remote PDF Fetch Error:", fileResponse.statusText);
-                return NextResponse.json({ error: "Failed to fetch PDF from storage" }, { status: 502 });
-            }
-
-            const contentType = fileResponse.headers.get('content-type') || 'application/pdf';
-            const fileName = path.basename(new URL(article.pdfUrl).pathname) || 'document.pdf';
-
-            // Force Inline for reviewers, respect param for others (unless forced)
-            const disposition = (forceInline || downloadParam !== 'true') ? 'inline' : `attachment; filename="${fileName}"`;
-
-            // Stream response
-            const headers = new Headers();
-            headers.set('Content-Type', contentType);
-            headers.set('Content-Disposition', disposition);
-            headers.set('Cache-Control', 'public, max-age=3600');
-
-            return new NextResponse(fileResponse.body, { headers });
-
-        } else {
-            // Handle local file path (Development / Local Storage)
-            let filePath = article.pdfUrl;
-            if (filePath.startsWith('/')) {
-                // Remove leading slash for local fs path relative to process.cwd()
-                // Assuming public folder structure
-                if (filePath.startsWith('/uploads')) {
-                    filePath = path.join(process.cwd(), 'public', filePath);
-                } else {
-                    filePath = path.join(process.cwd(), filePath);
-                }
-            }
-
-            if (!fs.existsSync(filePath)) {
-                return NextResponse.json({ error: "File not found on server" }, { status: 404 });
-            }
-
-            const fileBuffer = fs.readFileSync(filePath);
-            const contentType = mime.getType(filePath) || 'application/pdf';
-            const fileName = path.basename(filePath);
-
-            const disposition = (forceInline || downloadParam !== 'true') ? 'inline' : `attachment; filename="${fileName}"`;
-
-            const response = new NextResponse(fileBuffer);
-            response.headers.set('Content-Type', contentType);
-            response.headers.set('Content-Disposition', disposition);
-
-            return response;
-        }
+        // Redirect
+        return NextResponse.redirect(secureUrl);
 
     } catch (error: any) {
         console.error("PDF Serve Error:", error);

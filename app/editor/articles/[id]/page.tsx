@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
+import ArticleAccessButtons from "@/components/articles/ArticleAccessButtons";
 
 interface Article {
   id: string;
@@ -11,6 +12,8 @@ interface Article {
   abstract: string;
   keywords: string[];
   status: string;
+  pdfUrl?: string | null;
+  coverLetterUrl?: string | null;
   author: {
     name: string;
     email: string;
@@ -38,6 +41,18 @@ interface Article {
   }>;
   isApcPaid?: boolean;
   apcAmount?: number;
+  similarityScore?: number;
+  plagiarismReportUrl?: string;
+  activityLogs?: Array<{
+    id: string;
+    action: string;
+    details?: string;
+    createdAt: string;
+    user: {
+      name: string;
+      role: string;
+    }
+  }>;
 }
 
 export default function AdminArticleDetailPage() {
@@ -54,6 +69,7 @@ export default function AdminArticleDetailPage() {
   const [decisionType, setDecisionType] = useState<'publish' | 'reject' | 'revise' | 'accept' | null>(null);
   const [decisionComments, setDecisionComments] = useState('');
   const [isSubmittingDecision, setIsSubmittingDecision] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
 
   // Issue Assignment State
   const [availableIssues, setAvailableIssues] = useState<any[]>([]);
@@ -394,10 +410,12 @@ export default function AdminArticleDetailPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <Link href="/editor/articles" className="text-primary hover:text-primary/80 font-semibold mb-4 inline-block">
-            ← Back to Articles
-          </Link>
-          <h1 className="text-3xl font-bold text-primary">{article.title}</h1>
+          <div>
+            <Link href="/editor/articles" className="text-primary hover:text-primary/80 font-semibold mb-4 inline-block">
+              ← Back to Articles
+            </Link>
+            <h1 className="text-3xl font-bold text-primary">{article.title}</h1>
+          </div>
         </div>
       </div>
 
@@ -416,50 +434,71 @@ export default function AdminArticleDetailPage() {
                   <p className="text-sm text-gray-600">Author</p>
                   <p className="font-semibold">{article.author.name}</p>
                   <p className="text-sm text-gray-600">{article.author.email}</p>
-                  <p className="text-sm text-gray-600">{article.author.university}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Status</p>
-                  <span className={`px-3 py-1 text-xs font-semibold rounded-full ${article.status === 'published' ? 'bg-green-100 text-green-800' :
-                    article.status === 'under_review' ? 'bg-blue-100 text-blue-800' :
-                      article.status === 'resubmitted' ? 'bg-purple-100 text-purple-800' :
-                        'bg-yellow-100 text-yellow-800'
-                    }`}>
-                    {formatStatus(article.status)}
-                  </span>
-                </div>
-
-                <div className="pt-2">
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => window.open(`/articles/${article.id}/full-text`, '_blank')}
-                      className="text-sm bg-purple-50 text-purple-700 px-3 py-1 rounded border border-purple-200 hover:bg-purple-100 font-medium flex items-center gap-1"
-                    >
-                      🌐 View As HTML
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        const token = localStorage.getItem('token');
-                        window.open(`/api/articles/${article.id}/pdf?token=${token}`, '_blank');
-                      }}
-                      className="text-sm bg-blue-50 text-blue-700 px-3 py-1 rounded border border-blue-200 hover:bg-blue-100 font-medium flex items-center gap-1"
-                    >
-                      📄 View Manuscript (PDF)
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        const token = localStorage.getItem('token');
-                        window.open(`/api/articles/${article.id}/pdf?token=${token}&download=true`, '_blank');
-                      }}
-                      className="text-sm bg-gray-50 text-gray-700 px-3 py-1 rounded border border-gray-200 hover:bg-gray-100 font-medium flex items-center gap-1"
-                    >
-                      ⬇️ Download
-                    </button>
+                  <div>
+                    <p className="text-sm text-gray-600">Status</p>
+                    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${article.status === 'published' ? 'bg-green-100 text-green-800' :
+                      article.status === 'under_review' ? 'bg-blue-100 text-blue-800' :
+                        article.status === 'resubmitted' ? 'bg-purple-100 text-purple-800' :
+                          'bg-yellow-100 text-yellow-800'
+                      }`}>
+                      {formatStatus(article.status)}
+                    </span>
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* Plagiarism Check */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                <span>🛡️</span> Academic Integrity
+              </h2>
+              {article.similarityScore !== undefined ? (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-600 mb-1">Similarity Score</p>
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full rounded-full ${article.similarityScore < 15 ? 'bg-green-500' :
+                              article.similarityScore < 30 ? 'bg-yellow-500' : 'bg-red-500'
+                              }`}
+                            style={{ width: `${Math.min(article.similarityScore, 100)}%` }}
+                          ></div>
+                        </div>
+                        <span className={`font-bold text-lg ${article.similarityScore < 15 ? 'text-green-600' :
+                          article.similarityScore < 30 ? 'text-yellow-600' : 'text-red-600'
+                          }`}>
+                          {article.similarityScore}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="text-sm text-gray-700">
+                    {article.similarityScore < 15 ? "This article has a low similarity score. It appears original." :
+                      article.similarityScore < 30 ? "Moderate similarity detected. Please review the report carefully." :
+                        "High similarity detected. Potential plagiarism concern."}
+                  </p>
+
+                  {article.plagiarismReportUrl && (
+                    <a
+                      href={article.plagiarismReportUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline text-sm font-semibold flex items-center gap-1"
+                    >
+                      📄 View Full Plagiarism Report
+                    </a>
+                  )}
+                </div>
+              ) : (
+                <div className="p-4 bg-gray-50 rounded border border-gray-100 text-center">
+                  <p className="text-gray-500">No plagiarism check data available.</p>
+                  <p className="text-xs text-gray-400 mt-1">This feature is active for new submissions.</p>
+                </div>
+              )}
             </div>
 
             <div className="bg-white rounded-lg shadow-md p-6">
@@ -615,7 +654,15 @@ export default function AdminArticleDetailPage() {
               </div>
             ) : (
               <div className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="font-bold text-gray-800 mb-4 text-lg">Assign Reviewers</h3>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-bold text-gray-800 text-lg">Assign Reviewers</h3>
+                  <button
+                    onClick={() => setShowInviteModal(true)}
+                    className="text-xs bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full border border-indigo-200 hover:bg-indigo-100 font-semibold flex items-center gap-1 transition-colors"
+                  >
+                    <span>+</span> Invite New
+                  </button>
+                </div>
 
                 <div className="space-y-2 max-h-64 overflow-y-auto mb-4 border rounded p-2">
                   {reviewers
@@ -688,64 +735,19 @@ export default function AdminArticleDetailPage() {
 
             )}
 
-            {/* Invite New Reviewer */}
+            {/* Access Full Text Card */}
             <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="font-bold text-gray-800 mb-4 text-lg">Invite New Reviewer</h3>
-              <div className="space-y-3">
-                <p className="text-sm text-gray-600">Invite someone via email. If they don't have an account, they'll be asked to register.</p>
-                <input
-                  type="text"
-                  placeholder="Name"
-                  className="w-full border rounded p-2 text-sm"
-                  id="invite-name"
-                />
-                <input
-                  type="email"
-                  placeholder="Email Address"
-                  className="w-full border rounded p-2 text-sm"
-                  id="invite-email"
-                />
-                <button
-                  onClick={async () => {
-                    const nameEl = document.getElementById('invite-name') as HTMLInputElement;
-                    const emailEl = document.getElementById('invite-email') as HTMLInputElement;
-                    const name = nameEl.value;
-                    const email = emailEl.value;
-
-                    if (!name || !email) {
-                      toast.error("Please enter both name and email");
-                      return;
-                    }
-
-                    try {
-                      const token = localStorage.getItem('token');
-                      toast.info("Sending invitation...");
-                      const res = await fetch(`/api/editor/articles/${id}/invite`, {
-                        method: 'POST',
-                        headers: {
-                          'Authorization': `Bearer ${token}`,
-                          'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ name, email })
-                      });
-
-                      const data = await res.json();
-                      if (!res.ok) throw new Error(data.error);
-
-                      toast.success(data.message);
-                      nameEl.value = '';
-                      emailEl.value = '';
-                      fetchReviewers(); // Refresh list in case they auto-assigned
-                    } catch (err: any) {
-                      toast.error(err.message);
-                    }
-                  }}
-                  className="w-full bg-indigo-600 text-white py-2 rounded font-semibold hover:bg-indigo-700 text-sm"
-                >
-                  Send Invitation
-                </button>
-              </div>
+              <h3 className="font-bold text-gray-800 mb-4 text-lg">Access Full Text</h3>
+              <ArticleAccessButtons
+                articleId={article.id}
+                pdfUrl={article.pdfUrl}
+                fullTextAvailable={!!(article as any).fullText || true}
+              />
             </div>
+
+
+
+
             {/* Editor Decision */}
             <div className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-xl font-bold mb-4">Make Decision</h2>
@@ -811,160 +813,239 @@ export default function AdminArticleDetailPage() {
 
           </div>
         </div>
-      </div>
 
-      {
-        showDecisionModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg max-w-md w-full p-6">
-              <h3 className="text-xl font-bold mb-4 capitalize">
-                {decisionType === 'publish' ? 'Confirm Publication' :
-                  decisionType === 'accept' ? 'Accept Article' :
-                    decisionType === 'revise' ? 'Request Revision' : 'Reject Article'}
-              </h3>
 
-              <p className="text-gray-600 mb-4">
-                {decisionType === 'publish' ? 'Are you sure you want to PUBLISH this article? This is final.' :
-                  decisionType === 'accept' ? 'Are you sure you want to ACCEPT this article? The author will be notified to pay the APC fee.' :
-                    decisionType === 'revise' ? 'Please provide instructions for the author regarding required revisions.' :
-                      'Please provide a reason for rejection.'}
-              </p>
+        {
+          showDecisionModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-lg max-w-md w-full p-6">
+                <h3 className="text-xl font-bold mb-4 capitalize">
+                  {decisionType === 'publish' ? 'Confirm Publication' :
+                    decisionType === 'accept' ? 'Accept Article' :
+                      decisionType === 'revise' ? 'Request Revision' : 'Reject Article'}
+                </h3>
 
-              {(decisionType === 'revise' || decisionType === 'reject') && (
-                <div className="mb-4">
-                  <label className="block text-sm font-semibold mb-2">Comments / Reason</label>
-                  <textarea
-                    className="w-full border rounded-lg p-3"
-                    rows={4}
-                    value={decisionComments}
-                    onChange={(e) => setDecisionComments(e.target.value)}
-                    placeholder={decisionType === 'revise' ? "Enter revision details..." : "Enter rejection reason..."}
-                  ></textarea>
-                </div>
-              )}
+                <p className="text-gray-600 mb-4">
+                  {decisionType === 'publish' ? 'Are you sure you want to PUBLISH this article? This is final.' :
+                    decisionType === 'accept' ? 'Are you sure you want to ACCEPT this article? The author will be notified to pay the APC fee.' :
+                      decisionType === 'revise' ? 'Please provide instructions for the author regarding required revisions.' :
+                        'Please provide a reason for rejection.'}
+                </p>
 
-              {decisionType === 'publish' && (
-                <div className="mb-4">
-                  <label className="block text-sm font-semibold mb-2">Editor Comments (Optional)</label>
-                  <textarea
-                    className="w-full border rounded-lg p-3"
-                    rows={2}
-                    value={decisionComments}
-                    onChange={(e) => setDecisionComments(e.target.value)}
-                    placeholder="Optional comments..."
-                  ></textarea>
-                </div>
-              )}
-
-              <div className="flex justify-end gap-3">
-                <button
-                  onClick={() => setShowDecisionModal(false)}
-                  className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
-                  disabled={isSubmittingDecision}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={submitDecision}
-                  disabled={isSubmittingDecision || ((decisionType === 'revise' || decisionType === 'reject') && !decisionComments.trim())}
-                  className={`px-4 py-2 text-white rounded-lg font-bold ${decisionType === 'publish' ? 'bg-green-600 hover:bg-green-700' :
-                    decisionType === 'revise' ? 'bg-yellow-500 hover:bg-yellow-600' :
-                      'bg-red-600 hover:bg-red-700'
-                    } disabled:opacity-50 disabled:cursor-not-allowed`}
-                >
-                  {isSubmittingDecision ? 'Submitting...' : 'Confirm Decision'}
-                </button>
-              </div>
-            </div>
-          </div>
-        )
-      }
-
-      {
-        showCreateIssueModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg max-w-md w-full p-6">
-              <h2 className="text-xl font-bold mb-4">Create New Issue</h2>
-              <form onSubmit={handleCreateIssue} className="space-y-4">
-                <div className="grid grid-cols-3 gap-3">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Volume</label>
-                    <input
-                      type="number"
-                      min="1"
-                      required
-                      className="w-full border rounded p-2"
-                      value={newIssueData.volume}
-                      onChange={(e) => setNewIssueData({ ...newIssueData, volume: e.target.value })}
-                    />
+                {(decisionType === 'revise' || decisionType === 'reject') && (
+                  <div className="mb-4">
+                    <label className="block text-sm font-semibold mb-2">Comments / Reason</label>
+                    <textarea
+                      className="w-full border rounded-lg p-3"
+                      rows={4}
+                      value={decisionComments}
+                      onChange={(e) => setDecisionComments(e.target.value)}
+                      placeholder={decisionType === 'revise' ? "Enter revision details..." : "Enter rejection reason..."}
+                    ></textarea>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Issue</label>
-                    <input
-                      type="number"
-                      min="1"
-                      required
-                      className="w-full border rounded p-2"
-                      value={newIssueData.issue}
-                      onChange={(e) => setNewIssueData({ ...newIssueData, issue: e.target.value })}
-                    />
+                )}
+
+                {decisionType === 'publish' && (
+                  <div className="mb-4">
+                    <label className="block text-sm font-semibold mb-2">Editor Comments (Optional)</label>
+                    <textarea
+                      className="w-full border rounded-lg p-3"
+                      rows={2}
+                      value={decisionComments}
+                      onChange={(e) => setDecisionComments(e.target.value)}
+                      placeholder="Optional comments..."
+                    ></textarea>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Year</label>
-                    <input
-                      type="number"
-                      min="2000"
-                      required
-                      className="w-full border rounded p-2"
-                      value={newIssueData.year}
-                      onChange={(e) => setNewIssueData({ ...newIssueData, year: parseInt(e.target.value) || 0 })}
-                    />
-                  </div>
-                </div>
+                )}
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Title (Optional)</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Special Issue on AI"
-                    className="w-full border rounded p-2"
-                    value={newIssueData.title}
-                    onChange={(e) => setNewIssueData({ ...newIssueData, title: e.target.value })}
-                  />
-                </div>
-
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="modalIsSpecial"
-                    className="h-4 w-4 text-primary rounded"
-                    checked={newIssueData.isSpecial}
-                    onChange={(e) => setNewIssueData({ ...newIssueData, isSpecial: e.target.checked })}
-                  />
-                  <label htmlFor="modalIsSpecial" className="ml-2 text-sm text-gray-700">This is a Special Issue</label>
-                </div>
-
-                <div className="flex justify-end gap-3 mt-6">
+                <div className="flex justify-end gap-3">
                   <button
-                    type="button"
-                    onClick={() => setShowCreateIssueModal(false)}
-                    className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded"
+                    onClick={() => setShowDecisionModal(false)}
+                    className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                    disabled={isSubmittingDecision}
                   >
                     Cancel
                   </button>
                   <button
-                    type="submit"
-                    disabled={createIssueLoading}
-                    className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90 disabled:opacity-50"
+                    onClick={submitDecision}
+                    disabled={isSubmittingDecision || ((decisionType === 'revise' || decisionType === 'reject') && !decisionComments.trim())}
+                    className={`px-4 py-2 text-white rounded-lg font-bold ${decisionType === 'publish' ? 'bg-green-600 hover:bg-green-700' :
+                      decisionType === 'revise' ? 'bg-yellow-500 hover:bg-yellow-600' :
+                        'bg-red-600 hover:bg-red-700'
+                      } disabled:opacity-50 disabled:cursor-not-allowed`}
                   >
-                    {createIssueLoading ? 'Creating...' : 'Create & Select'}
+                    {isSubmittingDecision ? 'Submitting...' : 'Confirm Decision'}
                   </button>
                 </div>
-              </form>
+              </div>
             </div>
-          </div>
-        )
-      }
-    </div >
+          )
+        }
+
+        {
+          showCreateIssueModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-lg max-w-md w-full p-6">
+                <h2 className="text-xl font-bold mb-4">Create New Issue</h2>
+                <form onSubmit={handleCreateIssue} className="space-y-4">
+                  <div className="grid grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Volume</label>
+                      <input
+                        type="number"
+                        min="1"
+                        required
+                        className="w-full border rounded p-2"
+                        value={newIssueData.volume}
+                        onChange={(e) => setNewIssueData({ ...newIssueData, volume: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Issue</label>
+                      <input
+                        type="number"
+                        min="1"
+                        required
+                        className="w-full border rounded p-2"
+                        value={newIssueData.issue}
+                        onChange={(e) => setNewIssueData({ ...newIssueData, issue: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Year</label>
+                      <input
+                        type="number"
+                        min="2000"
+                        required
+                        className="w-full border rounded p-2"
+                        value={newIssueData.year}
+                        onChange={(e) => setNewIssueData({ ...newIssueData, year: parseInt(e.target.value) || 0 })}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Title (Optional)</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Special Issue on AI"
+                      className="w-full border rounded p-2"
+                      value={newIssueData.title}
+                      onChange={(e) => setNewIssueData({ ...newIssueData, title: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="modalIsSpecial"
+                      className="h-4 w-4 text-primary rounded"
+                      checked={newIssueData.isSpecial}
+                      onChange={(e) => setNewIssueData({ ...newIssueData, isSpecial: e.target.checked })}
+                    />
+                    <label htmlFor="modalIsSpecial" className="ml-2 text-sm text-gray-700">This is a Special Issue</label>
+                  </div>
+
+                  <div className="flex justify-end gap-3 mt-6">
+                    <button
+                      type="button"
+                      onClick={() => setShowCreateIssueModal(false)}
+                      className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={createIssueLoading}
+                      className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90 disabled:opacity-50"
+                    >
+                      {createIssueLoading ? 'Creating...' : 'Create & Select'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )
+        }
+        {
+          showInviteModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-lg max-w-sm w-full p-6">
+                <h3 className="text-xl font-bold mb-4 text-gray-800">Invite New Reviewer</h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Send an invitation email. If they don't have an account, they'll be asked to register.
+                </p>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                    <input
+                      type="text"
+                      id="modal-invite-name"
+                      className="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                      placeholder="Dr. Jane Doe"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                    <input
+                      type="email"
+                      id="modal-invite-email"
+                      className="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                      placeholder="jane.doe@university.edu"
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2 mt-4">
+                    <button
+                      onClick={() => setShowInviteModal(false)}
+                      className="px-3 py-2 text-gray-600 hover:bg-gray-100 rounded text-sm font-medium"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={async () => {
+                        const nameEl = document.getElementById('modal-invite-name') as HTMLInputElement;
+                        const emailEl = document.getElementById('modal-invite-email') as HTMLInputElement;
+                        const name = nameEl.value;
+                        const email = emailEl.value;
+
+                        if (!name || !email) {
+                          toast.error("Please enter both name and email");
+                          return;
+                        }
+
+                        try {
+                          const token = localStorage.getItem('token');
+                          toast.info("Sending invitation...");
+                          const res = await fetch(`/api/editor/articles/${id}/invite`, {
+                            method: 'POST',
+                            headers: {
+                              'Authorization': `Bearer ${token}`,
+                              'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ name, email })
+                          });
+
+                          const data = await res.json();
+                          if (!res.ok) throw new Error(data.error);
+
+                          toast.success(data.message);
+                          setShowInviteModal(false);
+                          fetchReviewers();
+                        } catch (err: any) {
+                          toast.error(err.message);
+                        }
+                      }}
+                      className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-sm font-semibold"
+                    >
+                      Send Invitation
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )
+        }
+      </div>
+    </div>
   );
 }

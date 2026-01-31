@@ -3,6 +3,10 @@ import { verifyToken } from '@/lib/auth';
 import { put } from '@vercel/blob';
 import { logger } from '@/lib/logger';
 import { apiSuccess, apiError } from '@/lib/api-response';
+import { scanFile } from '@/lib/security/virus';
+import { writeFile, mkdir } from 'fs/promises';
+import { join } from 'path';
+import { cwd } from 'process';
 
 export async function POST(req: NextRequest) {
   try {
@@ -41,6 +45,12 @@ export async function POST(req: NextRequest) {
       return apiError('Invalid file type. Only PDF, DOC, and DOCX are allowed', 400, undefined, 'INVALID_FILE_TYPE');
     }
 
+    // Virus Scan
+    const scanResult = await scanFile(file);
+    if (!scanResult.safe) {
+      return apiError(scanResult.reason || 'File failed security check', 400, undefined, 'VIRUS_DETECTED');
+    }
+
     const timestamp = Date.now();
     const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
     const fileName = `${fileType}/${timestamp}_${sanitizedName}`;
@@ -70,20 +80,31 @@ export async function POST(req: NextRequest) {
           throw new Error('Vercel Blob Token not configured. Upload failed.');
         }
 
-        logger.warn('Mocking upload success (Blob not configured)', { fileType, fileName });
+        // Local File Storage Fallback (Development Mode)
+        const publicDir = join(cwd(), 'public');
+        const uploadDir = join(publicDir, 'uploads', fileType);
 
-        // valid dummy URL to allow frontend to proceed
-        const mockUrl = fileType === 'manuscript'
-          ? 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
-          : 'https://placehold.co/600x400.png?text=Demo+File';
+        await mkdir(uploadDir, { recursive: true });
+
+        const localFileName = `${timestamp}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+        const finalPath = join(uploadDir, localFileName);
+
+        const bytes = await file.arrayBuffer();
+        const buffer = Buffer.from(bytes);
+
+        await writeFile(finalPath, buffer);
+
+        const localUrl = `/uploads/${fileType}/${localFileName}`;
+
+        logger.info('File saved locally (Blob not configured)', { fileType, localUrl });
 
         return apiSuccess({
-          url: mockUrl,
+          url: localUrl,
           fileName: file.name,
           size: file.size,
           type: file.type,
-          blobId: 'mock-blob-id',
-          warning: 'DEMO MODE: Data not saved to cloud. Using mock URL.',
+          blobId: 'local-file',
+          warning: 'LOCAL MODE: File saved to public/uploads',
         });
       }
 

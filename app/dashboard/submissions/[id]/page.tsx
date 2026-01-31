@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import ArticleAccessButtons from "@/components/articles/ArticleAccessButtons";
 import { useRouter, useParams } from "next/navigation";
 
 interface Article {
@@ -13,6 +14,7 @@ interface Article {
   articleType: string;
   submissionDate: string;
   pdfUrl: string | null;
+  fullText?: string | null;
   journal: {
     fullName: string;
     code: string;
@@ -175,9 +177,20 @@ export default function SubmissionDetailPage() {
               <h1 className="text-3xl font-bold text-primary mb-2">{article.title}</h1>
               <p className="text-gray-600">Submission ID: {article.id}</p>
             </div>
-            <span className={`px-4 py-2 text-sm font-semibold rounded-full ${getStatusColor(article.status)} whitespace-nowrap capitalize`}>
-              {article.status.replace(/_/g, ' ')}
-            </span>
+            <div className="flex flex-col items-end gap-4">
+              <span className={`px-4 py-2 text-sm font-semibold rounded-full ${getStatusColor(article.status)} whitespace-nowrap capitalize`}>
+                {article.status.replace(/_/g, ' ')}
+              </span>
+
+              <div className="flex gap-2">
+                <ArticleAccessButtons
+                  articleId={article.id}
+                  pdfUrl={article.pdfUrl}
+                  fullTextAvailable={!!article.fullText || true} // Force true if we suspect data issue, or rely on logic
+                  variant="compact"
+                />
+              </div>
+            </div>
           </div>
 
           <div className="grid md:grid-cols-2 gap-4 mt-6">
@@ -225,31 +238,7 @@ export default function SubmissionDetailPage() {
           </div>
         </div>
 
-        {/* Manuscript */}
-        {article.pdfUrl && (
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 className="text-xl font-bold text-primary mb-4">Manuscript</h2>
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <div className="flex items-center">
-                <svg className="w-10 h-10 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
-                </svg>
-                <div className="ml-4">
-                  <p className="text-sm font-bold text-gray-900">Manuscript PDF</p>
-                  <p className="text-xs text-gray-600">Click to download or view</p>
-                </div>
-              </div>
-              <a
-                href={article.pdfUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-primary text-white px-6 py-2 rounded-lg font-semibold hover:bg-primary/90 transition-colors"
-              >
-                View PDF
-              </a>
-            </div>
-          </div>
-        )}
+
 
         {/* Review Status */}
         <div className="bg-white rounded-lg shadow-md p-6">
@@ -419,9 +408,9 @@ export default function SubmissionDetailPage() {
                       <div className="flex items-center justify-between mb-2">
                         <span className="font-bold text-gray-700">{review.reviewer?.name || `Reviewer ${index + 1}`}</span>
                         <span className={`text-xs px-2 py-1 rounded font-semibold capitalize ${review.decision === 'accept' ? 'bg-green-100 text-green-800' :
-                            review.decision === 'reject' ? 'bg-red-100 text-red-800' :
-                              review.decision === 'revision_requested' ? 'bg-yellow-100 text-yellow-800' :
-                                'bg-gray-100 text-gray-600'
+                          review.decision === 'reject' ? 'bg-red-100 text-red-800' :
+                            review.decision === 'revision_requested' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-gray-100 text-gray-600'
                           }`}>
                           {review.decision?.replace(/_/g, ' ') || 'Completed'}
                         </span>

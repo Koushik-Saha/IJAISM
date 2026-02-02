@@ -31,21 +31,29 @@ interface AnalyticsDashboardProps {
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
 export function AnalyticsDashboard({ data }: AnalyticsDashboardProps) {
+    // Safety check
+    if (!data) return <div className="p-4 text-center text-gray-500">Loading analytics...</div>;
+
+    const hasArticles = data.articlesByStatus && data.articlesByStatus.length > 0;
+    const hasUsers = data.usersByRole && data.usersByRole.length > 0;
+    const hasGrowth = data.monthlyGrowth && data.monthlyGrowth.some(m => m.users > 0 || m.articles > 0);
+    const hasRevenue = data.revenueByTier && data.revenueByTier.length > 0;
+
     return (
         <div className="space-y-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Articles by Status */}
                 <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
                     <h3 className="text-lg font-semibold mb-4 text-gray-800">Articles by Status</h3>
-                    <div className="h-64">
-                        {data.articlesByStatus.length > 0 ? (
+                    <div className="h-[300px] w-full">
+                        {hasArticles ? (
                             <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={data.articlesByStatus}>
+                                <BarChart data={data.articlesByStatus} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                                     <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis dataKey="name" fontSize={12} tickFormatter={(val) => val.split(' ')[0]} />
+                                    <XAxis dataKey="name" fontSize={12} tickFormatter={(val) => (val ? val.split(' ')[0] : '')} />
                                     <YAxis allowDecimals={false} />
                                     <Tooltip />
-                                    <Bar dataKey="value" fill="#8884d8" radius={[4, 4, 0, 0]}>
+                                    <Bar dataKey="value" fill="#8884d8">
                                         {data.articlesByStatus.map((entry, index) => (
                                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                         ))}
@@ -53,8 +61,9 @@ export function AnalyticsDashboard({ data }: AnalyticsDashboardProps) {
                                 </BarChart>
                             </ResponsiveContainer>
                         ) : (
-                            <div className="h-full flex items-center justify-center text-gray-400">
-                                No article data available
+                            <div className="h-full flex flex-col items-center justify-center text-gray-400">
+                                <span className="text-4xl mb-2">📊</span>
+                                <p>No articles found</p>
                             </div>
                         )}
                     </div>
@@ -63,20 +72,19 @@ export function AnalyticsDashboard({ data }: AnalyticsDashboardProps) {
                 {/* Users by Role */}
                 <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
                     <h3 className="text-lg font-semibold mb-4 text-gray-800">User Distribution</h3>
-                    <div className="h-64">
-                        {data.usersByRole.length > 0 ? (
+                    <div className="h-[300px] w-full">
+                        {hasUsers ? (
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
                                     <Pie
                                         data={data.usersByRole}
                                         cx="50%"
                                         cy="50%"
-                                        innerRadius={60}
+                                        labelLine={false}
                                         outerRadius={80}
                                         fill="#8884d8"
-                                        paddingAngle={5}
                                         dataKey="value"
-                                        label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
+                                        label={({ name, percent }) => `${((percent || 0) * 100).toFixed(0)}%`}
                                     >
                                         {data.usersByRole.map((entry, index) => (
                                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -87,8 +95,9 @@ export function AnalyticsDashboard({ data }: AnalyticsDashboardProps) {
                                 </PieChart>
                             </ResponsiveContainer>
                         ) : (
-                            <div className="h-full flex items-center justify-center text-gray-400">
-                                No user data available
+                            <div className="h-full flex flex-col items-center justify-center text-gray-400">
+                                <span className="text-4xl mb-2">👥</span>
+                                <p>No users found</p>
                             </div>
                         )}
                     </div>
@@ -99,10 +108,10 @@ export function AnalyticsDashboard({ data }: AnalyticsDashboardProps) {
                 {/* Monthly Growth */}
                 <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
                     <h3 className="text-lg font-semibold mb-4 text-gray-800">Monthly Growth</h3>
-                    <div className="h-64">
-                        {data.monthlyGrowth.some(m => m.users > 0 || m.articles > 0) ? (
+                    <div className="h-[300px] w-full">
+                        {hasGrowth ? (
                             <ResponsiveContainer width="100%" height="100%">
-                                <LineChart data={data.monthlyGrowth}>
+                                <LineChart data={data.monthlyGrowth} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                                     <CartesianGrid strokeDasharray="3 3" />
                                     <XAxis dataKey="month" fontSize={12} />
                                     <YAxis allowDecimals={false} />
@@ -113,8 +122,9 @@ export function AnalyticsDashboard({ data }: AnalyticsDashboardProps) {
                                 </LineChart>
                             </ResponsiveContainer>
                         ) : (
-                            <div className="h-full flex items-center justify-center text-gray-400">
-                                No growth data available in last 6 months
+                            <div className="h-full flex flex-col items-center justify-center text-gray-400">
+                                <span className="text-4xl mb-2">📈</span>
+                                <p>No recent activity</p>
                             </div>
                         )}
                     </div>
@@ -123,10 +133,10 @@ export function AnalyticsDashboard({ data }: AnalyticsDashboardProps) {
                 {/* Revenue/Memberships */}
                 <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
                     <h3 className="text-lg font-semibold mb-4 text-gray-800">Membership Distribution</h3>
-                    <div className="h-64">
-                        {data.revenueByTier.length > 0 ? (
+                    <div className="h-[300px] w-full">
+                        {hasRevenue ? (
                             <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={data.revenueByTier} layout="vertical">
+                                <BarChart data={data.revenueByTier} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                                     <CartesianGrid strokeDasharray="3 3" />
                                     <XAxis type="number" allowDecimals={false} />
                                     <YAxis dataKey="name" type="category" width={100} fontSize={12} />
@@ -135,8 +145,9 @@ export function AnalyticsDashboard({ data }: AnalyticsDashboardProps) {
                                 </BarChart>
                             </ResponsiveContainer>
                         ) : (
-                            <div className="h-full flex items-center justify-center text-gray-400">
-                                No membership data available
+                            <div className="h-full flex flex-col items-center justify-center text-gray-400">
+                                <span className="text-4xl mb-2">💳</span>
+                                <p>No memberships active</p>
                             </div>
                         )}
                     </div>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Announcement } from "@prisma/client";
+import CoverImage from "@/components/ui/CoverImage";
 
 interface AnnouncementListClientProps {
     announcements: Announcement[];
@@ -57,12 +58,11 @@ export default function AnnouncementListClient({ announcements }: AnnouncementLi
                                     <div className="flex-1">
                                         <div className="flex flex-col md:flex-row gap-6 mb-4">
                                             {announcement.thumbnailUrl && (
-                                                <div className="flex-shrink-0 w-full md:w-48 h-32 relative rounded-lg overflow-hidden flex items-center justify-center bg-gray-100">
-                                                    {/* Use standard img tag for simplicity with external URLs, or Next Image if domains configured */}
-                                                    <img
+                                                <div className="flex-shrink-0 w-full md:w-48 h-32 relative rounded-lg overflow-hidden bg-gray-100">
+                                                    <CoverImage
                                                         src={announcement.thumbnailUrl}
                                                         alt={announcement.title}
-                                                        className="w-full h-full object-cover"
+                                                        className="w-full h-full"
                                                     />
                                                 </div>
                                             )}

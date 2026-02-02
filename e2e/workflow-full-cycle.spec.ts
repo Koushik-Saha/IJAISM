@@ -38,7 +38,7 @@ test.describe('Full Journal Workflow', () => {
         await page.goto('/login');
         await page.fill('input[type="email"]', motherAdmin.email);
         await page.fill('input[type="password"]', motherAdmin.password);
-        await page.click('button[type="submit"]');
+        await page.getByRole('button', { name: 'Sign In' }).click();
 
         // Debug Login Failure
         try {
@@ -51,12 +51,12 @@ test.describe('Full Journal Workflow', () => {
         }
 
         await page.goto('/editor/users');
-        await page.click('text=Add New User'); // Assuming this button exists
+        await page.click('button:has-text("Create User")'); // Assuming this button exists
         await page.fill('input[name="name"]', superAdmin.name);
         await page.fill('input[name="email"]', superAdmin.email);
         await page.fill('input[name="password"]', superAdmin.password);
         await page.selectOption('select[name="role"]', 'super_admin');
-        await page.click('button[type="submit"]'); // "Create User"
+        await page.getByRole('button', { name: 'Create User' }).click(); // "Create User"
         await expect(page.locator('text=User created successfully')).toBeVisible();
         await page.click('text=Logout');
 
@@ -64,15 +64,15 @@ test.describe('Full Journal Workflow', () => {
         await page.goto('/login');
         await page.fill('input[type="email"]', superAdmin.email);
         await page.fill('input[type="password"]', superAdmin.password);
-        await page.click('button[type="submit"]');
+        await page.getByRole('button', { name: 'Sign In' }).click();
 
         await page.goto('/editor/users');
-        await page.click('text=Add New User');
+        await page.click('button:has-text("Create User")');
         await page.fill('input[name="name"]', editor.name);
         await page.fill('input[name="email"]', editor.email);
         await page.fill('input[name="password"]', editor.password);
         await page.selectOption('select[name="role"]', 'editor');
-        await page.click('button[type="submit"]');
+        await page.getByRole('button', { name: 'Create User' }).click();
         await expect(page.locator('text=User created successfully')).toBeVisible();
 
         // Assign Editor to Journal (Backdoor via DB for stability, UI might be complex dropdown)
@@ -85,36 +85,36 @@ test.describe('Full Journal Workflow', () => {
         await page.goto('/login');
         await page.fill('input[type="email"]', editor.email);
         await page.fill('input[type="password"]', editor.password);
-        await page.click('button[type="submit"]');
+        await page.getByRole('button', { name: 'Sign In' }).click();
 
         await page.goto('/editor/users');
 
         // Create Sub-Editor
-        await page.click('text=Add New User');
+        await page.click('button:has-text("Create User")');
         await page.fill('input[name="name"]', subEditor.name);
         await page.fill('input[name="email"]', subEditor.email);
         await page.fill('input[name="password"]', subEditor.password);
         await page.selectOption('select[name="role"]', 'editor'); // Or sub_editor specific role if UI exposes it
         // If Logic: Created by Editor -> automatically sub-editor.
-        await page.click('button[type="submit"]');
+        await page.getByRole('button', { name: 'Create User' }).click();
         await expect(page.locator('text=User created successfully')).toBeVisible();
 
         // Create Reviewer 1
-        await page.click('text=Add New User');
+        await page.click('button:has-text("Create User")');
         await page.fill('input[name="name"]', reviewer1.name);
         await page.fill('input[name="email"]', reviewer1.email);
         await page.fill('input[name="password"]', reviewer1.password);
         await page.selectOption('select[name="role"]', 'reviewer');
-        await page.click('button[type="submit"]');
+        await page.getByRole('button', { name: 'Create User' }).click();
         await expect(page.locator('text=User created successfully')).toBeVisible();
 
         // Create Reviewer 2
-        await page.click('text=Add New User');
+        await page.click('button:has-text("Create User")');
         await page.fill('input[name="name"]', reviewer2.name);
         await page.fill('input[name="email"]', reviewer2.email);
         await page.fill('input[name="password"]', reviewer2.password);
         await page.selectOption('select[name="role"]', 'reviewer');
-        await page.click('button[type="submit"]');
+        await page.getByRole('button', { name: 'Create User' }).click();
         await expect(page.locator('text=User created successfully')).toBeVisible();
 
         await page.click('text=Logout');
@@ -125,7 +125,7 @@ test.describe('Full Journal Workflow', () => {
         await page.goto('/login');
         await page.fill('input[type="email"]', author.email);
         await page.fill('input[type="password"]', author.password);
-        await page.click('button[type="submit"]');
+        await page.getByRole('button', { name: 'Sign In' }).click();
 
         await page.goto('/submit');
         await page.fill('input[name="title"]', 'E2E Test Article');
@@ -142,7 +142,7 @@ test.describe('Full Journal Workflow', () => {
         await page.goto('/login');
         await page.fill('input[type="email"]', editor.email);
         await page.fill('input[type="password"]', editor.password);
-        await page.click('button[type="submit"]');
+        await page.getByRole('button', { name: 'Sign In' }).click();
 
         await page.goto('/editor/articles');
         await page.click('text=E2E Test Article');
@@ -158,7 +158,7 @@ test.describe('Full Journal Workflow', () => {
         await page.goto('/login');
         await page.fill('input[type="email"]', reviewer1.email);
         await page.fill('input[type="password"]', reviewer1.password);
-        await page.click('button[type="submit"]');
+        await page.getByRole('button', { name: 'Sign In' }).click();
 
         await page.goto('/dashboard/reviews');
         await page.click('text=E2E Test Article');
@@ -174,7 +174,7 @@ test.describe('Full Journal Workflow', () => {
         await page.goto('/login');
         await page.fill('input[type="email"]', editor.email);
         await page.fill('input[type="password"]', editor.password);
-        await page.click('button[type="submit"]');
+        await page.getByRole('button', { name: 'Sign In' }).click();
 
         await page.goto('/editor/articles');
         await page.click('text=E2E Test Article');
@@ -190,7 +190,7 @@ test.describe('Full Journal Workflow', () => {
         await page.goto('/login');
         await page.fill('input[type="email"]', author.email);
         await page.fill('input[type="password"]', author.password);
-        await page.click('button[type="submit"]');
+        await page.getByRole('button', { name: 'Sign In' }).click();
 
         await page.goto('/dashboard/submissions');
         await page.click('text=E2E Test Article');
@@ -205,7 +205,7 @@ test.describe('Full Journal Workflow', () => {
         await page.goto('/login');
         await page.fill('input[type="email"]', editor.email);
         await page.fill('input[type="password"]', editor.password);
-        await page.click('button[type="submit"]');
+        await page.getByRole('button', { name: 'Sign In' }).click();
 
         await page.goto('/editor/articles');
         await page.click('text=E2E Test Article');
@@ -226,7 +226,7 @@ test.describe('Full Journal Workflow', () => {
         await page.goto('/login');
         await page.fill('input[type="email"]', editor.email);
         await page.fill('input[type="password"]', editor.password);
-        await page.click('button[type="submit"]');
+        await page.getByRole('button', { name: 'Sign In' }).click();
 
         await page.goto('/editor/articles');
         await page.click('text=E2E Test Article');

@@ -26,9 +26,11 @@ export default function DissertationsPage() {
     // Form State
     const [formData, setFormData] = useState({
         title: '',
+        abstract: '',
         university: '',
         degreeType: 'masters',
-        authorName: '',
+        authorId: '',
+        year: new Date().getFullYear(),
         status: 'pending'
     });
 
@@ -118,9 +120,11 @@ export default function DissertationsPage() {
         setSelectedItem(item);
         setFormData({
             title: item.title,
+            abstract: item.abstract || '',
             university: item.university,
             degreeType: item.degreeType,
-            authorName: item.authorName || '',
+            authorId: item.authorId || '',
+            year: item.submissionDate ? new Date(item.submissionDate).getFullYear() : new Date().getFullYear(),
             status: item.status
         });
         setIsModalOpen(true);
@@ -130,9 +134,11 @@ export default function DissertationsPage() {
         setSelectedItem(null);
         setFormData({
             title: '',
+            abstract: '',
             university: '',
             degreeType: 'masters',
-            authorName: '',
+            authorId: '',
+            year: new Date().getFullYear(),
             status: 'pending'
         });
         setIsModalOpen(true);
@@ -202,12 +208,22 @@ export default function DissertationsPage() {
                                 <input required className="w-full border rounded p-2" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} />
                             </div>
                             <div>
-                                <label className="block text-sm font-bold mb-1">University</label>
-                                <input required className="w-full border rounded p-2" value={formData.university} onChange={e => setFormData({ ...formData, university: e.target.value })} />
+                                <label className="block text-sm font-bold mb-1">Abstract</label>
+                                <textarea required className="w-full border rounded p-2 h-24" value={formData.abstract} onChange={e => setFormData({ ...formData, abstract: e.target.value })} />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-bold mb-1">University</label>
+                                    <input required className="w-full border rounded p-2" value={formData.university} onChange={e => setFormData({ ...formData, university: e.target.value })} />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-bold mb-1">Year</label>
+                                    <input type="number" required className="w-full border rounded p-2" value={formData.year} onChange={e => setFormData({ ...formData, year: parseInt(e.target.value) })} />
+                                </div>
                             </div>
                             <div>
-                                <label className="block text-sm font-bold mb-1">Author Name (Manual)</label>
-                                <input required className="w-full border rounded p-2" value={formData.authorName} onChange={e => setFormData({ ...formData, authorName: e.target.value })} placeholder="e.g. John Doe" />
+                                <label className="block text-sm font-bold mb-1">Author User ID (UUID)</label>
+                                <input required className="w-full border rounded p-2" value={formData.authorId} onChange={e => setFormData({ ...formData, authorId: e.target.value })} placeholder="UUID of the existing user" />
                             </div>
                             <div>
                                 <label className="block text-sm font-bold mb-1">Degree Type</label>

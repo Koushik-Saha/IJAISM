@@ -14,6 +14,8 @@ model User {
   name                    String
   university              String
   orcid                   String?                  @unique
+  orcidAccessToken        String?                  // OAuth Token
+  orcidRefreshToken       String?
   role                    String                   @default("author")
   affiliation             String?
   bio                     String?
@@ -38,6 +40,7 @@ model User {
   reviews                 Review[]
   managedBy               User?                    @relation("UserHierarchy", fields: [managedById], references: [id])
   subordinates            User[]                   @relation("UserHierarchy")
+  activityLogs            ActivityLog[]
 
   @@index([email])
   @@index([role])
@@ -158,6 +161,7 @@ model Article {
   journalId         String
   title             String
   abstract          String
+  fullText          String?       @db.Text
   keywords          String[]
   articleType       String
   doi               String?       @unique
@@ -170,6 +174,7 @@ model Article {
   acceptanceDate    DateTime?
   status            String        @default("draft")
   pdfUrl            String?
+  coverLetterUrl    String?
   language          String        @default("en")
   citationCount     Int           @default(0)
   viewCount         Int           @default(0)
@@ -189,11 +194,14 @@ model Article {
   resubmissionCount Int           @default(0)
   issueId           String?
   isBestPaper       Boolean       @default(false)
+  similarityScore   Float?        // Plagiarism Detection
+  plagiarismReportUrl String?
   author            User          @relation(fields: [authorId], references: [id])
   journalIssue      JournalIssue? @relation(fields: [issueId], references: [id])
   journal           Journal       @relation(fields: [journalId], references: [id])
   coAuthors         CoAuthor[]
   reviews           Review[]
+  activityLogs      ActivityLog[]
 
   @@index([journalId])
   @@index([status])
@@ -366,7 +374,7 @@ model Notification {
   id        String    @id @default(uuid())
   userId    String
   type      String
-  title     String
+  title     String?
   message   String
   link      String?
   isRead    Boolean   @default(false)
@@ -406,17 +414,40 @@ model Book {
   @@index([field])
 }
 
+model HeroSlide {
+  id                String   @id @default(cuid())
+  title             String
+  subtitle          String?
+  description       String?  @db.Text
+  imageUrl          String?  // Optional background or side image
+  primaryButtonText String?
+  primaryButtonLink String?
+  secondaryButtonText String?
+  secondaryButtonLink String?
+  displayOrder      Int      @default(0)
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("hero_slides")
+}
+
 model DownloadLog {
   id           String   @id @default(uuid())
   userId       String
   resourceId   String
   resourceType String
+  ipAddress    String?
+  country      String?
+  city         String?
   downloadedAt DateTime @default(now())
   user         User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([downloadedAt])
 }
+
+
 
 model ReviewerInvitation {
   id        String   @id @default(uuid())
@@ -431,4 +462,19 @@ model ReviewerInvitation {
 
   @@index([email])
   @@index([token])
+}
+
+model ActivityLog {
+  id        String   @id @default(uuid())
+  articleId String
+  userId    String
+  action    String
+  details   String?
+  createdAt DateTime @default(now())
+
+  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  user      User    @relation(fields: [userId], references: [id])
+
+  @@index([articleId])
+  @@index([userId])
 }

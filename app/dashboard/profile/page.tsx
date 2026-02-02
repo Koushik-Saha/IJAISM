@@ -145,6 +145,45 @@ export default function ProfilePage() {
     }
   };
 
+  // Handle ORCID Return
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('orcid_code');
+    if (code) {
+      linkOrcid(code);
+    }
+  }, []);
+
+  const linkOrcid = async (code: string) => {
+    const toastId = toast.loading('Linking ORCID...');
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch('/api/auth/orcid/link', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ code })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      toast.success("ORCID Connected Successfully!", { id: toastId });
+      fetchProfile();
+      // Clear query param
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } catch (err: any) {
+      toast.error("Failed to link ORCID: " + err.message, { id: toastId });
+    }
+  };
+
+  const connectOrcid = () => {
+    // Save return URL state if needed, but for now just redirect
+    window.location.href = '/api/auth/orcid';
+  };
+
   const handlePasswordUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);

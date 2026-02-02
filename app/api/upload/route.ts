@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
     const fileName = `${fileType}/${timestamp}_${sanitizedName}`;
 
     try {
-      const blob = await put(fileName, file);
+      const blob = await put(fileName, file, { access: 'public' });
 
       logger.info('File uploaded successfully', {
         fileType,
@@ -115,10 +115,7 @@ export async function POST(req: NextRequest) {
       path: '/api/upload'
     });
 
-    // Expose specific configuration errors even in production for debugging
-    const isConfigError = error.message?.includes('Token not configured') || error.message?.includes('BLOB_READ_WRITE_TOKEN');
-    const errorMessage = isConfigError ? error.message : 'Failed to upload file';
-
-    return apiError(errorMessage, 500, process.env.NODE_ENV === 'development' ? { message: error.message } : undefined);
+    // DEBUGGING: Return the actual error message to identify the issue (e.g. invalid token, missing access arg)
+    return apiError(`Upload Failed: ${error.message}`, 500, { originalError: error.message });
   }
 }

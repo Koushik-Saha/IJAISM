@@ -19,7 +19,10 @@ export async function GET(req: NextRequest) {
 
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
-      select: { role: true },
+      select: {
+        role: true,
+        managedJournals: { select: { id: true } }
+      },
     });
 
     if (!user || !['admin', 'editor', 'super_admin'].includes(user.role)) {
@@ -29,15 +32,43 @@ export async function GET(req: NextRequest) {
     // Get query parameters
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
+    const journalId = searchParams.get('journalId');
     const status = searchParams.get('status');
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
     const skip = (page - 1) * limit;
 
-    // If ID is provided, return single article
+    // RBAC: Editors can only see articles for their managed journals
+    const managedJournalIds = user.managedJournals.map(j => j.id);
+
+    // Build where clause
+    const where: any = { deletedAt: null };
+
+    // Apply RBAC Filter
+    if (user.role === 'editor') {
+      if (managedJournalIds.length === 0) {
+        // Editor with no journals sees nothing
+        return NextResponse.json({
+          success: true,
+          articles: [],
+          pagination: { page, limit, total: 0, pages: 0 }
+        });
+      }
+      where.journalId = { in: managedJournalIds };
+    }
+
+    // If ID is provided, return single article (WITH RBAC CHECK)
     if (id) {
+      // If editor, we must ensure the article belongs to one of their journals.
+      // We can add journalId: { in: managedJournalIds } to the query or check after.
+      // Adding to query is safer.
+      const singleArticleWhere: any = { id, deletedAt: null };
+      if (user.role === 'editor') {
+        singleArticleWhere.journalId = { in: managedJournalIds };
+      }
+
       const article = await prisma.article.findUnique({
-        where: { id, deletedAt: null },
+        where: singleArticleWhere,
         include: {
           author: {
             select: { id: true, name: true, email: true, university: true },
@@ -53,6 +84,14 @@ export async function GET(req: NextRequest) {
             },
             orderBy: { reviewerNumber: 'asc' },
           },
+          activityLogs: {
+            include: {
+              user: {
+                select: { name: true, role: true },
+              },
+            },
+            orderBy: { createdAt: 'desc' },
+          },
         },
       });
 
@@ -66,10 +105,12 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // Build where clause
-    const where: any = { deletedAt: null };
     if (status) {
       where.status = status;
+    }
+
+    if (journalId) {
+      where.journalId = journalId;
     }
 
     // Get articles

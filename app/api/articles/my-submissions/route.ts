@@ -60,6 +60,7 @@ export async function GET(req: NextRequest) {
           name: article.journal.fullName,
         },
         status: article.status,
+        isApcPaid: article.isApcPaid,
         createdAt: article.createdAt.toISOString(),
         submittedAt: article.submissionDate?.toISOString(),
         publishedAt: article.publicationDate?.toISOString(),

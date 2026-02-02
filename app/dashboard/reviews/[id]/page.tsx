@@ -243,7 +243,9 @@ export default function ReviewSubmissionPage() {
             <div>
               <p className="text-sm text-gray-600">Journal: <span className="font-medium text-gray-900">{review.article.journal.fullName}</span></p>
               <p className="text-sm text-gray-600">Type: <span className="font-medium text-gray-900 capitalize">{review.article.articleType}</span></p>
-              <p className="text-sm text-gray-600">Author: <span className="font-medium text-gray-900">{review.article.author.name}</span></p>
+              <p className="text-sm text-gray-600">Author: <span className="font-medium text-gray-900">{review.article.author.name}</span>
+                {review.article.author.name.includes('Author') && <span className="ml-2 text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded border">Double-Blind</span>}
+              </p>
               <p className="text-sm text-gray-600">Institution: <span className="font-medium text-gray-900">{review.article.author.university}</span></p>
             </div>
             <div>

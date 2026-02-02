@@ -15,12 +15,14 @@ import {
   ArrowRightOnRectangleIcon
 } from "@heroicons/react/24/outline";
 import AuthModal from "@/components/ui/AuthModal";
+import NotificationBell from "@/components/ui/NotificationBell";
 
 interface UserInfo {
   userId: string;
   email: string;
   name?: string;
   role: string;
+  profileImageUrl?: string;
 }
 
 export default function Header() {
@@ -72,6 +74,7 @@ export default function Header() {
               email: payload.email,
               name: payload.name || payload.email.split('@')[0],
               role: payload.role,
+              profileImageUrl: payload.profileImageUrl,
             });
             // Set login time if not present
             if (!loginTime) {
@@ -151,8 +154,8 @@ export default function Header() {
             </div>
           </Link>
 
-          {/* Search Bar */}
-          <div className="hidden md:flex items-center flex-1 max-w-md mx-4">
+          {/* Search Bar - Centered & Responsive */}
+          <div className="hidden md:flex flex-1 max-w-lg mx-auto px-4 lg:px-8">
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -163,198 +166,236 @@ export default function Header() {
                 router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
                 setShowSearch(false);
               }}
-              className="w-full relative"
+              className="w-full relative group"
             >
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg className="h-5 w-5 text-gray-400 group-focus-within:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
               <input
                 type="text"
-                placeholder="Search..."
+                placeholder="Search resources..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => setShowSearch(true)}
-                className="w-full pl-3 pr-10 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                className="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-full leading-5 bg-gray-50 text-gray-900 placeholder-gray-500 focus:outline-none focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary sm:text-sm transition-all duration-200"
               />
-              <button
-                type="submit"
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-primary transition-colors cursor-pointer z-10"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </button>
             </form>
           </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-2 xl:space-x-3">
-            <Link href="/" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-1">
-              Home
-            </Link>
-            <Link href="/about" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-1">
-              About
-            </Link>
-            <Link href="/journals" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-1">
-              Journals
-            </Link>
-            <Link href="/dissertations" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-1">
-              Dissertation/Thesis
-            </Link>
-            <Link href="/books" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-1">
-              Books
-            </Link>
-            <Link href="/conferences" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-1">
-              Conferences
-            </Link>
-            <Link href="/announcements" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-1">
-              Announcements
-            </Link>
-          </nav>
+          {/* Right Section: Navigation & Actions */}
+          <div className="flex items-center justify-end gap-1 md:gap-2">
 
-          {/* Desktop User Actions */}
-          <div className="hidden lg:flex items-center space-x-2 xl:space-x-3 flex-shrink-0 ml-2">
-
-            <Link
-              href="/submit"
-              onClick={handleSubmitClick}
-              className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-1"
-            >
-              Submit
-            </Link>
+            {/* Desktop Nav Links - Visible on large screens */}
+            <nav className="hidden lg:flex items-center gap-1 mr-2">
+              <Link href="/journals" className="px-2 py-2 rounded-full text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors whitespace-nowrap">
+                Journals
+              </Link>
+              <Link href="/dissertations" className="px-2 py-2 rounded-full text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors whitespace-nowrap">
+                Dissertation/Thesis
+              </Link>
+              <Link href="/books" className="px-2 py-2 rounded-full text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors whitespace-nowrap">
+                Books
+              </Link>
+              <Link href="/conferences" className="px-2 py-2 rounded-full text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors whitespace-nowrap">
+                Conferences
+              </Link>
+              <Link href="/announcements" className="px-2 py-2 rounded-full text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors whitespace-nowrap">
+                Announcements
+              </Link>
+              <Link href="/submit" onClick={handleSubmitClick} className="px-2 py-2 rounded-full text-sm font-medium text-primary hover:bg-primary/5 transition-colors whitespace-nowrap">
+                Submit
+              </Link>
+            </nav>
 
             {!isLoading && (
-              <>
+              <div className="flex items-center gap-2 md:gap-3">
+
+                {/* Submit Action (Mobile/Tablet friendly) */}
+                <Link
+                  href="/submit"
+                  onClick={handleSubmitClick}
+                  className="xl:hidden p-2 text-gray-600 hover:text-primary transition-colors"
+                  aria-label="Submit Article"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
+                  </svg>
+                </Link>
+
                 {user ? (
-                  // Logged in: User Dropdown (Headless UI)
-                  <Menu as="div" className="relative ml-3">
-                    <MenuButton className="w-[12rem] justify-end flex items-center gap-2 p-1 rounded-full hover:bg-gray-100 transition-colors border border-transparent hover:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
-                      <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold shadow-sm">
-                        {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
-                      </div>
-                      <span className="text-sm font-medium text-gray-700 hidden xl:block max-w-[100px] truncate">
-                        {user.name}
-                      </span>
-                      <ChevronDownIcon className="w-4 h-4 text-gray-500" aria-hidden="true" />
-                    </MenuButton>
-                    <Transition
-                      as={Fragment}
-                      enter="transition ease-out duration-100"
-                      enterFrom="transform opacity-0 scale-95"
-                      enterTo="transform opacity-100 scale-100"
-                      leave="transition ease-in duration-75"
-                      leaveFrom="transform opacity-100 scale-100"
-                      leaveTo="transform opacity-0 scale-95"
-                    >
-                      <MenuItems
-                        className="absolute right-0 mt-2 w-60 bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] p-1 ring-1 ring-black ring-opacity-5 focus:outline-none z-50 origin-top-right border border-gray-100"
+                  <>
+                    <NotificationBell />
+
+                    {/* User Menu - Avatar Only (Instagram Style) */}
+                    <Menu as="div" className="relative ml-1">
+                      <MenuButton className="flex items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-transform active:scale-95">
+                        <span className="sr-only">Open user menu</span>
+                        {user.profileImageUrl ? (
+                          <div className="w-9 h-9 md:w-10 md:h-10 rounded-full overflow-hidden border border-gray-200">
+                            <Image
+                              src={user.profileImageUrl || "/placeholder-user.jpg"}
+                              alt={user.name || "User"}
+                              width={40}
+                              height={40}
+                              className="object-cover w-full h-full"
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-primary to-blue-600 text-white flex items-center justify-center text-sm font-bold shadow-md hover:shadow-lg transition-shadow">
+                            {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                          </div>
+                        )}
+                      </MenuButton>
+
+                      <Transition
+                        as={Fragment}
+                        enter="transition ease-out duration-100"
+                        enterFrom="transform opacity-0 scale-95"
+                        enterTo="transform opacity-100 scale-100"
+                        leave="transition ease-in duration-75"
+                        leaveFrom="transform opacity-100 scale-100"
+                        leaveTo="transform opacity-0 scale-95"
                       >
-                        <div className="px-4 py-3 bg-gray-50 rounded-lg mb-1">
-                          <p className="text-sm font-bold text-gray-900 truncate">{user.name}</p>
-                          <p className="text-xs text-gray-500 font-medium truncate">{user.email}</p>
+                        <MenuItems
+                          className="absolute right-0 mt-2 w-72 min-w-[18rem] bg-white rounded-2xl shadow-xl py-2 ring-1 ring-black ring-opacity-5 focus:outline-none z-50 origin-top-right border border-gray-100 divide-y divide-gray-100"
+                        >
+                          <div className="px-4 py-3">
+                            <p className="text-sm font-bold text-gray-900 truncate">{user.name}</p>
+                            <p className="text-xs text-gray-500 font-medium truncate">{user.email}</p>
+                          </div>
 
-                        </div>
+                          {/* Mobile/Tablet Navigation Links (Visible in dropdown) */}
+                          <div className="xl:hidden py-1 border-b border-gray-100">
+                            <MenuItem>
+                              <Link href="/journals" className="group flex items-center px-4 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors">
+                                Journals
+                              </Link>
+                            </MenuItem>
+                            <MenuItem>
+                              <Link href="/dissertations" className="group flex items-center px-4 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors">
+                                Dissertation/Thesis
+                              </Link>
+                            </MenuItem>
+                            <MenuItem>
+                              <Link href="/books" className="group flex items-center px-4 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors">
+                                Books
+                              </Link>
+                            </MenuItem>
+                            <MenuItem>
+                              <Link href="/conferences" className="group flex items-center px-4 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors">
+                                Conferences
+                              </Link>
+                            </MenuItem>
+                            <MenuItem>
+                              <Link href="/announcements" className="group flex items-center px-4 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors">
+                                Announcements
+                              </Link>
+                            </MenuItem>
+                            <MenuItem>
+                              <Link href="/submit" onClick={handleSubmitClick} className="group flex items-center px-4 py-2 text-sm text-primary font-medium hover:bg-primary/5 transition-colors">
+                                Submit Article
+                              </Link>
+                            </MenuItem>
+                          </div>
 
-                        <div className="space-y-1">
-                          <MenuItem>
-                            {({ active }) => (
-                              <Link
-                                href="/dashboard"
-                                className={`${active ? 'bg-primary/5 text-primary' : 'text-gray-700'
-                                  } group flex items-center gap-4 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-200`}
-                              >
-                                <div className={`flex items-center justify-center w-10 h-10 rounded-xl transition-colors ${active ? 'text-primary bg-primary/10' : 'text-gray-400 bg-gray-100/50'
-                                  }`}>
-                                  <Squares2X2Icon className="w-5 h-5" />
-                                </div>
-                                Dashboard
-                              </Link>
-                            )}
-                          </MenuItem>
-                          <MenuItem>
-                            {({ active }) => (
-                              <Link
-                                href="/dashboard/profile"
-                                className={`${active ? 'bg-primary/5 text-primary' : 'text-gray-700'
-                                  } group flex items-center gap-4 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-200`}
-                              >
-                                <div className={`flex items-center justify-center w-10 h-10 rounded-xl transition-colors ${active ? 'text-primary bg-primary/10' : 'text-gray-400 bg-gray-100/50'
-                                  }`}>
-                                  <UserIcon className="w-5 h-5" />
-                                </div>
-                                My Profile
-                              </Link>
-                            )}
-                          </MenuItem>
-                          {user.role === 'reviewer' && (
+                          <div className="py-1">
                             <MenuItem>
                               {({ active }) => (
                                 <Link
-                                  href="/dashboard/reviews"
-                                  className={`${active ? 'bg-primary/5 text-primary' : 'text-gray-700'
-                                    } group flex items-center gap-4 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-200`}
+                                  href="/dashboard"
+                                  className={`${active ? 'bg-gray-50' : ''
+                                    } group flex items-center px-4 py-2.5 text-sm text-gray-700 hover:text-gray-900 transition-colors gap-3`}
                                 >
-                                  <div className={`flex items-center justify-center w-10 h-10 rounded-xl transition-colors ${active ? 'text-primary bg-primary/10' : 'text-gray-400 bg-gray-100/50'
-                                    }`}>
-                                    <ClipboardDocumentListIcon className="w-5 h-5" />
-                                  </div>
-                                  Review Assignments
+                                  <Squares2X2Icon className="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors" />
+                                  Dashboard
                                 </Link>
                               )}
                             </MenuItem>
-                          )}
-                          <MenuItem>
-                            {({ active }) => (
+                            <MenuItem>
+                              {({ active }) => (
+                                <Link
+                                  href="/dashboard/profile"
+                                  className={`${active ? 'bg-gray-50' : ''
+                                    } group flex items-center px-4 py-2.5 text-sm text-gray-700 hover:text-gray-900 transition-colors gap-3`}
+                                >
+                                  <UserIcon className="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors" />
+                                  My Profile
+                                </Link>
+                              )}
+                            </MenuItem>
+                            {user.role === 'reviewer' && (
+                              <MenuItem>
+                                <Link
+                                  href="/dashboard/reviews"
+                                  className="group flex items-center px-4 py-2.5 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors gap-3"
+                                >
+                                  <ClipboardDocumentListIcon className="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors" />
+                                  Review Assignments
+                                </Link>
+                              </MenuItem>
+                            )}
+                          </div>
+
+                          <div className="py-1">
+                            <MenuItem>
                               <Link
                                 href="/membership"
-                                className={`${active ? 'bg-primary/5 text-primary' : 'text-gray-700'
-                                  } group flex items-center gap-4 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-200`}
+                                className="group flex items-center px-4 py-2.5 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors gap-3"
                               >
-                                <div className={`flex items-center justify-center w-10 h-10 rounded-xl transition-colors ${active ? 'text-primary bg-primary/10' : 'text-gray-400 bg-gray-100/50'
-                                  }`}>
-                                  <CreditCardIcon className="w-5 h-5" />
-                                </div>
+                                <CreditCardIcon className="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors" />
                                 Membership
                               </Link>
-                            )}
-                          </MenuItem>
-                        </div>
-
-                        <div className="mt-2 pt-2 border-t border-gray-100/50">
-                          <MenuItem>
-                            {({ active }) => (
-                              <button
-                                onClick={handleLogout}
-                                className={`${active ? 'bg-red-50 text-red-700' : 'text-red-600'
-                                  } group flex w-full items-center gap-4 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-200`}
+                            </MenuItem>
+                            <MenuItem>
+                              <Link
+                                href="/about"
+                                className="group flex items-center px-4 py-2.5 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors gap-3"
                               >
-                                <div className={`flex items-center justify-center w-10 h-10 rounded-xl transition-colors ${active ? 'text-red-600 bg-red-100' : 'text-red-500 bg-red-50'
-                                  }`}>
-                                  <ArrowRightOnRectangleIcon className="w-5 h-5" />
-                                </div>
-                                Sign Out
-                              </button>
-                            )}
-                          </MenuItem>
-                        </div>
-                      </MenuItems>
-                    </Transition>
-                  </Menu>
-                ) : (
-                  // Not logged in: Show sign in and join buttons
-                  <>
-                    <Link href="/login" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors whitespace-nowrap px-2">
-                      Sign In
-                    </Link>
-                    <Link href="/register" className="bg-accent text-white px-3 py-1.5 rounded font-bold hover:bg-accent-dark transition-colors text-sm whitespace-nowrap">
-                      JOIN C5K
-                    </Link>
+                                <svg className="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                About
+                              </Link>
+                            </MenuItem>
+                          </div>
+
+                          <div className="py-1">
+                            <MenuItem>
+                              {({ active }) => (
+                                <button
+                                  onClick={handleLogout}
+                                  className={`${active ? 'bg-red-50 text-red-700' : 'text-gray-700'
+                                    } w-full text-left group flex items-center px-4 py-2.5 text-sm transition-colors gap-3`}
+                                >
+                                  <ArrowRightOnRectangleIcon className="w-5 h-5 text-gray-400 group-hover:text-red-500 transition-colors" />
+                                  Sign Out
+                                </button>
+                              )}
+                            </MenuItem>
+                          </div>
+                        </MenuItems>
+                      </Transition>
+                    </Menu>
                   </>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Link href="/login" className="px-4 py-2 text-sm font-semibold text-gray-700 hover:text-gray-900 transition-colors">
+                      Log In
+                    </Link>
+                    <Link href="/register" className="px-5 py-2 text-sm font-bold text-white bg-primary hover:bg-blue-700 rounded-full shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5">
+                      Sign Up
+                    </Link>
+                  </div>
                 )}
-              </>
+              </div>
             )}
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile Menu Button - Visible up to XL screens */}
           <button
-            className="lg:hidden p-2 rounded-md text-gray-700 hover:text-primary hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary"
+            className="xl:hidden p-2 rounded-md text-gray-700 hover:text-primary hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label="Toggle menu"
             aria-expanded={isMenuOpen}
@@ -371,7 +412,7 @@ export default function Header() {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="lg:hidden border-t border-gray-200 py-4 pb-6 animate-fade-in">
+          <div className="xl:hidden border-t border-gray-200 py-4 pb-6 animate-fade-in">
             <nav className="flex flex-col space-y-3">
               <Link
                 href="/"
@@ -380,13 +421,7 @@ export default function Header() {
               >
                 Home
               </Link>
-              <Link
-                href="/about"
-                className="text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50 px-3 py-2 rounded transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                About
-              </Link>
+
               <Link
                 href="/journals"
                 className="text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50 px-3 py-2 rounded transition-colors"

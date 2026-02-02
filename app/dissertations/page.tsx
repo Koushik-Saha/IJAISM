@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import SecureDownloadButton from "@/components/ui/SecureDownloadButton";
+import CoverImage from "@/components/ui/CoverImage";
 
 export const dynamic = "force-dynamic";
 
@@ -89,12 +90,13 @@ export default async function DissertationsPage(props: {
                 >
                   <div className="flex flex-col md:flex-row gap-6">
                     {/* Added Image Display */}
+                    {/* Added Image Display */}
                     {dissertation.coverImageUrl && (
                       <div className="flex-shrink-0 w-full md:w-32 lg:w-40">
-                        <img
+                        <CoverImage
                           src={dissertation.coverImageUrl}
                           alt={dissertation.title}
-                          className="w-full h-auto object-cover rounded shadow-sm border border-gray-100"
+                          className="w-full h-auto rounded shadow-sm border border-gray-100 aspect-[3/4]"
                         />
                       </div>
                     )}

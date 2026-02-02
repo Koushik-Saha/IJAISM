@@ -2,7 +2,7 @@
 
 import { toast } from "sonner";
 import Card from "@/components/ui/Card";
-import { useState } from "react";
+import ArticleAccessButtons from "@/components/articles/ArticleAccessButtons";
 
 interface ArticleActionsProps {
     articleId: string;
@@ -28,21 +28,9 @@ export default function ArticleActions({
     citations = 0,
 }: ArticleActionsProps) {
 
-    const handleDownload = (e: React.MouseEvent) => {
-        e.preventDefault();
-        const token = localStorage.getItem('token');
-        if (!token) {
-            window.location.href = `/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`;
-            return;
-        }
-        const path = pdfUrl?.replace(/^\/uploads\//, '');
-        window.open(`/api/files/download/${path}?token=${token}`, '_blank');
-    };
-
     const handleCite = (style: string) => {
         let text = "";
         const year = new Date(publicationDate).getFullYear();
-        const authorText = authors.map(a => a.name).join(', '); // Simple join for now
 
         if (style === "APA") {
             text = `${authors[0].name} et al. (${year}). ${title}. ${journalName}.`;
@@ -85,40 +73,14 @@ export default function ArticleActions({
             </Card>
 
             {/* Download/View Options */}
-            {pdfUrl && (
-                <Card className="mb-6">
-                    <h3 className="text-lg font-bold mb-4">Access Full Text</h3>
-                    <div className="flex flex-col gap-2">
-                        <button
-                            onClick={() => {
-                                const token = localStorage.getItem('token');
-                                if (!token) {
-                                    window.location.href = `/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`;
-                                    return;
-                                }
-                                window.open(`/api/articles/${articleId}/pdf?token=${token}`, '_blank');
-                            }}
-                            className="w-full btn-primary text-center pt-2 pb-2"
-                        >
-                            View PDF
-                        </button>
-
-                        <button
-                            onClick={() => {
-                                const token = localStorage.getItem('token');
-                                if (!token) {
-                                    window.location.href = `/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`;
-                                    return;
-                                }
-                                window.location.href = `/api/articles/${articleId}/pdf?token=${token}&download=true`;
-                            }}
-                            className="w-full btn-secondary text-center pt-2 pb-2"
-                        >
-                            Download PDF
-                        </button>
-                    </div>
-                </Card>
-            )}
+            <Card className="mb-6">
+                <h3 className="text-lg font-bold mb-4">Access Full Text</h3>
+                <ArticleAccessButtons
+                    articleId={articleId}
+                    pdfUrl={pdfUrl}
+                    fullTextAvailable={!!fullText}
+                />
+            </Card>
 
             {/* Cite */}
             <Card className="mb-6">

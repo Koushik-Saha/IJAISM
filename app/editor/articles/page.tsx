@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 interface Article {
@@ -22,6 +22,9 @@ interface Article {
 
 export default function AdminArticlesPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const journalId = searchParams.get('journalId');
+
   const [articles, setArticles] = useState<Article[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -31,7 +34,7 @@ export default function AdminArticlesPage() {
 
   useEffect(() => {
     fetchArticles();
-  }, [statusFilter, page]);
+  }, [statusFilter, page, journalId]);
 
   const fetchArticles = async () => {
     try {
@@ -44,6 +47,9 @@ export default function AdminArticlesPage() {
       let url = `/api/editor/articles?page=${page}&limit=${limit}`;
       if (statusFilter !== 'all') {
         url += `&status=${statusFilter}`;
+      }
+      if (journalId) {
+        url += `&journalId=${journalId}`;
       }
 
       const response = await fetch(url, {
@@ -143,6 +149,18 @@ export default function AdminArticlesPage() {
               </button>
             ))}
           </div>
+
+          {journalId && (
+            <div className="mt-4 flex items-center gap-2 p-3 bg-blue-50 text-blue-800 rounded border border-blue-200">
+              <span className="text-sm">Filtered by Journal ID: <span className="font-mono font-bold">{journalId.substring(0, 8)}...</span></span>
+              <button
+                onClick={() => router.push('/editor/articles')}
+                className="text-xs bg-white border border-blue-300 px-2 py-1 rounded hover:bg-blue-100"
+              >
+                Clear Filter
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Articles Table */}

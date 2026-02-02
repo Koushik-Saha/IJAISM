@@ -220,6 +220,8 @@ export function articleSubmissionEmail(
   return emailLayout(content, `Submission received: ${articleTitle}`);
 }
 
+
+
 // 3. Membership Activation Email
 export function membershipActivationEmail(
   userName: string,
@@ -927,4 +929,105 @@ export function reviewerInvitationEmail(
   `;
 
   return emailLayout(content, `Invitation to review for ${journalName}`);
+}
+
+// 16. Co-Author Notification
+export function coAuthorSubmissionEmail(
+  coAuthorName: string,
+  articleTitle: string,
+  journalName: string,
+  submissionId: string,
+  mainAuthorName: string,
+  submissionDate: string
+): string {
+  const content = `
+    <div class="content">
+      <h2>You've been listed as a Co-Author 🤝</h2>
+      <p>Dear ${coAuthorName},</p>
+      <p>
+        <strong>${mainAuthorName}</strong> has just submitted an article to <strong>${journalName}</strong>
+        and listed you as a co-author.
+      </p>
+
+      <div class="info-box">
+        <h3>Article Details</h3>
+        <div class="info-row">
+          <span class="info-label">Title:</span> ${articleTitle}
+        </div>
+        <div class="info-row">
+          <span class="info-label">Journal:</span> ${journalName}
+        </div>
+        <div class="info-row">
+          <span class="info-label">Main Author:</span> ${mainAuthorName}
+        </div>
+        <div class="info-row">
+          <span class="info-label">Date:</span> ${submissionDate}
+        </div>
+      </div>
+
+      <p>
+        The article is now undergoing our review process. You will be notified of major updates regarding publication status.
+      </p>
+
+      <p>
+        If you believe this is an error or you do not wish to be associated with this work, please contact us immediately.
+      </p>
+
+      <p>
+        <a href="${EMAIL_CONFIG.appUrl}/dashboard" class="button">Log In to C5K</a>
+      </p>
+
+      <p>Best regards,<br><strong>The C5K Editorial Team</strong></p>
+    </div>
+  `;
+
+  return emailLayout(content, `Co-Author Notification: ${articleTitle}`);
+}
+// 16. Co-Author Notification Email
+export function coAuthorNotificationEmail(
+  coAuthorName: string,
+  primaryAuthorName: string,
+  articleTitle: string,
+  journalName: string,
+  submissionId: string,
+  submissionDate: string
+): string {
+  const content = `
+    <div class="content">
+      <h2>You've Been Added as a Co-Author 🤝</h2>
+      <p>Dear ${coAuthorName},</p>
+      <p>
+        <strong>${primaryAuthorName}</strong> has listed you as a co-author on a new article submission to <strong>${journalName}</strong>.
+      </p>
+
+      <div class="info-box">
+        <h3>Submission Details</h3>
+        <div class="info-row">
+          <span class="info-label">Article Title:</span> ${articleTitle}
+        </div>
+        <div class="info-row">
+          <span class="info-label">Journal:</span> ${journalName}
+        </div>
+        <div class="info-row">
+          <span class="info-label">Submission Date:</span> ${submissionDate}
+        </div>
+      </div>
+
+      <p>
+        If you believe this is an error, please contact the primary author or our support team immediately.
+      </p>
+
+      <p>
+        You can track the status of this submission by creating an account (if you don't have one) or logging in with this email address.
+      </p>
+
+      <p>
+        <a href="${EMAIL_CONFIG.appUrl}/login" class="button">Log In / Register</a>
+      </p>
+
+      <p>Best regards,<br><strong>The C5K Editorial Team</strong></p>
+    </div>
+  `;
+
+  return emailLayout(content, `Co-Author Notification: ${articleTitle}`);
 }

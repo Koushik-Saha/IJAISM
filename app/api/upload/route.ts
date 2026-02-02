@@ -115,6 +115,10 @@ export async function POST(req: NextRequest) {
       path: '/api/upload'
     });
 
-    return apiError('Failed to upload file', 500, process.env.NODE_ENV === 'development' ? { message: error.message } : undefined);
+    // Expose specific configuration errors even in production for debugging
+    const isConfigError = error.message?.includes('Token not configured') || error.message?.includes('BLOB_READ_WRITE_TOKEN');
+    const errorMessage = isConfigError ? error.message : 'Failed to upload file';
+
+    return apiError(errorMessage, 500, process.env.NODE_ENV === 'development' ? { message: error.message } : undefined);
   }
 }

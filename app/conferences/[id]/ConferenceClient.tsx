@@ -14,6 +14,8 @@ interface ConferenceProps {
         endDate: Date;
         location: string | null;
         venue: string | null;
+        brochureUrl?: string | null;
+        callForPapersUrl?: string | null;
         conferenceType: string | null;
         status: string;
         topics: string[];
@@ -120,16 +122,32 @@ export default function ConferenceClient({ conference }: ConferenceProps) {
                                     Register Now
                                 </button>
 
-                                <button
-                                    onClick={handleDownloadBrochure}
-                                    disabled={downloadingBrochure}
-                                    className="w-full border-2 border-primary text-primary hover:bg-primary/10 px-6 py-3 rounded-lg font-bold transition-colors disabled:opacity-50"
-                                >
-                                    {downloadingBrochure ? 'Downloading...' : 'Download Brochure'}
-                                </button>
+                                {conference.brochureUrl ? (
+                                    <a
+                                        href={conference.brochureUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="block w-full text-center border-2 border-primary text-primary hover:bg-primary/10 px-6 py-3 rounded-lg font-bold transition-colors"
+                                    >
+                                        Download Brochure
+                                    </a>
+                                ) : (
+                                    <button
+                                        onClick={() => {
+                                            if (typeof window !== 'undefined') {
+                                                const { toast } = require('sonner');
+                                                toast.info("Brochure coming soon!");
+                                            }
+                                        }}
+                                        className="w-full border-2 border-gray-300 text-gray-500 cursor-not-allowed px-6 py-3 rounded-lg font-bold transition-colors"
+                                    >
+                                        Brochure Coming Soon
+                                    </button>
+                                )}
 
                                 <Link
-                                    href="/submit"
+                                    href={conference.callForPapersUrl || "/submit"}
+                                    target={conference.callForPapersUrl ? "_blank" : undefined}
                                     className="block w-full text-center border-2 border-gray-300 text-gray-700 hover:bg-gray-50 px-6 py-3 rounded-lg font-bold transition-colors"
                                 >
                                     Submit Paper

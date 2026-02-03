@@ -1,8 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { HeartIcon as HeartIconOutline } from "@heroicons/react/24/outline";
+import { HeartIcon as HeartIconSolid } from "@heroicons/react/24/solid";
 
 interface BookClientProps {
     book: {
@@ -31,6 +34,111 @@ interface BookClientProps {
 export default function BookClient({ book }: BookClientProps) {
     const router = useRouter();
     const [showPreview, setShowPreview] = useState(false);
+    const [isWishlisted, setIsWishlisted] = useState(false);
+    const [isPurchased, setIsPurchased] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        checkStatus();
+    }, [book.id]);
+
+    const checkStatus = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            setIsLoading(false);
+            return;
+        }
+
+        try {
+            const res = await fetch(`/api/books/interact?bookId=${book.id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (data.success) {
+                setIsWishlisted(data.data.isWishlisted);
+                setIsPurchased(data.data.isPurchased);
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleWishlist = async () => {
+        console.log("handleWishlist clicked");
+        const token = localStorage.getItem('token');
+        console.log("Token exists:", !!token);
+
+        if (!token) {
+            toast.error("Please login to use wishlist");
+            router.push('/login');
+            return;
+        }
+
+        try {
+            console.log("Sending request to /api/books/interact");
+            const res = await fetch('/api/books/interact', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ action: 'wishlist', bookId: book.id })
+            });
+            console.log("Response status:", res.status);
+            const data = await res.json();
+            console.log("Response data:", data);
+
+            if (data.success) {
+                setIsWishlisted(data.data.isWishlisted);
+                toast.success(data.data.message);
+                // Trigger header update
+                window.dispatchEvent(new Event('wishlistUpdated'));
+            } else {
+                toast.error(data.error?.message || "Failed");
+            }
+        } catch (error) {
+            console.error("Wishlist error:", error);
+            toast.error("Failed to update wishlist");
+        }
+    };
+
+    const handlePurchase = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            toast.error("Please login to purchase");
+            router.push('/login');
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/books/interact', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    action: 'purchase',
+                    bookId: book.id,
+                    price: book.price
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                setIsPurchased(true);
+                toast.success("Purchase successful! You can now read the full book.");
+            }
+        } catch (error) {
+            toast.error("Purchase failed");
+        }
+    };
+
+    // Filter preview pages (Limit to 10 if not purchased)
+    const displayPages = isPurchased
+        ? book.previewPages // In real app, this would fetch full content
+        : book.previewPages.slice(0, 10);
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -68,31 +176,52 @@ export default function BookClient({ book }: BookClientProps) {
 
                             {/* Price */}
                             <div className="text-center mb-6">
-                                <p className="text-4xl font-bold text-accent mb-2">{book.price}</p>
+                                <p className="text-4xl font-bold text-accent mb-2">{isPurchased ? 'Owned' : book.price}</p>
                                 <p className="text-sm text-gray-600">{book.format}</p>
                             </div>
 
                             {/* Actions */}
                             <div className="space-y-3 mb-6">
-                                <button
-                                    onClick={() => alert("In production, this would add the book to cart and proceed to checkout.")}
-                                    className="w-full bg-accent hover:bg-accent-dark text-white px-6 py-3 rounded-lg font-bold transition-colors"
-                                >
-                                    Purchase Book
-                                </button>
+                                {!isPurchased ? (
+                                    <button
+                                        onClick={handlePurchase}
+                                        className="w-full bg-accent hover:bg-accent-dark text-white px-6 py-3 rounded-lg font-bold transition-colors"
+                                    >
+                                        Purchase Book
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={() => setShowPreview(true)}
+                                        className="w-full bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold transition-colors"
+                                    >
+                                        Read Full Book
+                                    </button>
+                                )}
+
+                                {!isPurchased && (
+                                    <button
+                                        onClick={() => setShowPreview(true)}
+                                        className="w-full border-2 border-primary text-primary hover:bg-primary/10 px-6 py-3 rounded-lg font-bold transition-colors"
+                                    >
+                                        Preview
+                                    </button>
+                                )}
 
                                 <button
-                                    onClick={() => setShowPreview(true)}
-                                    className="w-full border-2 border-primary text-primary hover:bg-primary/10 px-6 py-3 rounded-lg font-bold transition-colors"
+                                    onClick={handleWishlist}
+                                    className={`w-full border-2 ${isWishlisted ? 'border-red-500 text-red-500 bg-red-50' : 'border-gray-300 text-gray-700 hover:bg-gray-50'} px-6 py-3 rounded-lg font-bold transition-colors flex items-center justify-center gap-2`}
                                 >
-                                    Preview
-                                </button>
-
-                                <button
-                                    onClick={() => alert("In production, this would add the book to your wishlist.")}
-                                    className="w-full border-2 border-gray-300 text-gray-700 hover:bg-gray-50 px-6 py-3 rounded-lg font-bold transition-colors"
-                                >
-                                    Add to Wishlist
+                                    {isWishlisted ? (
+                                        <>
+                                            <HeartIconSolid className="w-5 h-5" />
+                                            Wishlist
+                                        </>
+                                    ) : (
+                                        <>
+                                            <HeartIconOutline className="w-5 h-5" />
+                                            Add to Wishlist
+                                        </>
+                                    )}
                                 </button>
                             </div>
 
@@ -226,7 +355,9 @@ export default function BookClient({ book }: BookClientProps) {
                 <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
                     <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-auto">
                         <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex justify-between items-center">
-                            <h3 className="text-2xl font-bold text-gray-800">Book Preview</h3>
+                            <h3 className="text-2xl font-bold text-gray-800">
+                                {isPurchased ? "Full Book Reader" : "Book Preview (10 Pages)"}
+                            </h3>
                             <button
                                 onClick={() => setShowPreview(false)}
                                 className="text-gray-500 hover:text-gray-700 text-3xl leading-none"
@@ -235,34 +366,43 @@ export default function BookClient({ book }: BookClientProps) {
                             </button>
                         </div>
                         <div className="p-8">
-                            {book.previewPages.map((page: any, index: number) => (
-                                <div key={index} className="mb-8">
-                                    <div className="bg-gray-50 rounded-lg p-8">
-                                        <div className="prose max-w-none">
-                                            <pre className="whitespace-pre-wrap font-serif text-gray-800 leading-relaxed">
-                                                {page.content}
-                                            </pre>
+                            {displayPages.length > 0 ? (
+                                displayPages.map((page: any, index: number) => (
+                                    <div key={index} className="mb-8">
+                                        <div className="bg-gray-50 rounded-lg p-8 shadow-inner min-h-[600px]">
+                                            <div className="prose max-w-none">
+                                                <pre className="whitespace-pre-wrap font-serif text-gray-800 leading-relaxed">
+                                                    {page.content || "Page content not available."}
+                                                </pre>
+                                            </div>
                                         </div>
+                                        <p className="text-center text-sm text-gray-600 mt-4">
+                                            Page {page.pageNumber || index + 1} of {book.pages}
+                                        </p>
                                     </div>
-                                    <p className="text-center text-sm text-gray-600 mt-4">
-                                        Page {page.pageNumber} of {book.pages}
-                                    </p>
+                                ))
+                            ) : (
+                                <div className="text-center py-12 text-gray-500">
+                                    No preview pages available.
                                 </div>
-                            ))}
-                            <div className="text-center mt-8 p-6 bg-blue-50 rounded-lg">
-                                <p className="text-gray-700 mb-4">
-                                    This is a preview. Purchase the full book to read all {book.pages} pages.
-                                </p>
-                                <button
-                                    onClick={() => {
-                                        setShowPreview(false);
-                                        alert("In production, this would proceed to checkout.");
-                                    }}
-                                    className="bg-accent hover:bg-accent-dark text-white px-8 py-3 rounded-lg font-bold transition-colors"
-                                >
-                                    Purchase Full Book - {book.price}
-                                </button>
-                            </div>
+                            )}
+
+                            {!isPurchased && (
+                                <div className="text-center mt-8 p-6 bg-blue-50 rounded-lg border border-blue-100">
+                                    <p className="text-gray-700 mb-4 font-medium">
+                                        This is a preview. Purchase the full book to read all {book.pages} pages.
+                                    </p>
+                                    <button
+                                        onClick={() => {
+                                            setShowPreview(false);
+                                            handlePurchase();
+                                        }}
+                                        className="bg-accent hover:bg-accent-dark text-white px-8 py-3 rounded-lg font-bold transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                                    >
+                                        Purchase Full Book - {book.price}
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

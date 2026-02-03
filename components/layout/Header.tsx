@@ -12,7 +12,8 @@ import {
   UserIcon,
   ClipboardDocumentListIcon,
   CreditCardIcon,
-  ArrowRightOnRectangleIcon
+  ArrowRightOnRectangleIcon,
+  HeartIcon
 } from "@heroicons/react/24/outline";
 import AuthModal from "@/components/ui/AuthModal";
 import NotificationBell from "@/components/ui/NotificationBell";
@@ -136,6 +137,22 @@ export default function Header() {
     router.push('/');
   };
 
+  const fetchWishlistCount = async (token: string) => {
+    try {
+      const res = await fetch('/api/dashboard/wishlist', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.data?.wishlist) {
+          setWishlistCount(data.data.wishlist.length);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch wishlist count", error);
+    }
+  };
+
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-200 w-full">
       <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
@@ -226,6 +243,14 @@ export default function Header() {
 
                 {user ? (
                   <>
+                    {/* Wishlist Icon */}
+                    <Link href="/dashboard/wishlist" className="p-2 text-gray-600 hover:text-primary transition-colors relative group">
+                      <HeartIcon className="w-6 h-6" />
+                      <span className="absolute hidden group-hover:block top-full right-0 mt-2 bg-gray-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap z-50">
+                        Wishlist
+                      </span>
+                    </Link>
+
                     <NotificationBell />
 
                     {/* User Menu - Avatar Only (Instagram Style) */}

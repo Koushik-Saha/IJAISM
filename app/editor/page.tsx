@@ -279,7 +279,20 @@ export default function AdminDashboard() {
                   <h3 className="font-bold text-purple-900 mb-2">📊 Analytics & Metrics</h3>
                   <p className="text-sm text-gray-600">Geolocation & Social Impact</p>
                 </Link>
-                {/* Add placeholders for other Super Admin features if they exist or will exist */}
+                <Link
+                  href="/editor/hero-slides"
+                  className="border-2 border-gray-200 rounded-lg p-4 hover:border-primary transition-colors bg-blue-50 border-blue-200"
+                >
+                  <h3 className="font-bold text-blue-900 mb-2">🖼️ Homepage Carousel</h3>
+                  <p className="text-sm text-gray-600">Manage hero slides</p>
+                </Link>
+                <Link
+                  href="/editor/homepage-sections"
+                  className="border-2 border-gray-200 rounded-lg p-4 hover:border-primary transition-colors bg-purple-50 border-purple-200"
+                >
+                  <h3 className="font-bold text-purple-900 mb-2">🏗️ Homepage Layout</h3>
+                  <p className="text-sm text-gray-600">Reorder & manage sections</p>
+                </Link>
                 <Link
                   href="/editor/dissertations"
                   className="border-2 border-gray-200 rounded-lg p-4 hover:border-primary transition-colors"

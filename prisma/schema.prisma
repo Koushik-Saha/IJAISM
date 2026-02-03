@@ -478,3 +478,16 @@ model ActivityLog {
   @@index([articleId])
   @@index([userId])
 }
+
+model HomePageSection {
+  id           String   @id @default(cuid())
+  type         String   // "hero_carousel", "announcements", "journals", "latest_articles", "most_viewed", "newsletter", "stats", "html", "text"
+  title        String?
+  content      Json?    // For custom HTML/Text blocks
+  displayOrder Int      @default(0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("homepage_sections")
+}

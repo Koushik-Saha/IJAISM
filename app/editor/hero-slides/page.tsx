@@ -104,6 +104,36 @@ export default function HeroSlidesManager() {
         }
     };
 
+    const [uploading, setUploading] = useState(false);
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setUploading(true);
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('/api/upload', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: formData
+            });
+
+            if (!res.ok) throw new Error('Upload failed');
+
+            const data = await res.json();
+            setCurrentSlide({ ...currentSlide, imageUrl: data.url });
+            toast.success('Image uploaded successfully');
+        } catch (error) {
+            toast.error('Failed to upload image');
+        } finally {
+            setUploading(false);
+        }
+    };
+
     if (loading) return <div className="p-8">Loading...</div>;
 
     return (
@@ -149,14 +179,39 @@ export default function HeroSlidesManager() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium">Image URL (Optional)</label>
+                                <label className="block text-sm font-medium">Image (Upload or URL)</label>
+                                <div className="flex gap-2 mb-2">
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        id="slide-image-upload"
+                                        onChange={handleImageUpload}
+                                        disabled={uploading}
+                                    />
+                                    <label
+                                        htmlFor="slide-image-upload"
+                                        className={`btn-secondary cursor-pointer ${uploading ? 'opacity-50' : ''}`}
+                                    >
+                                        {uploading ? 'Uploading...' : 'Upload Image'}
+                                    </label>
+                                </div>
                                 <input
                                     className="w-full border p-2 rounded"
                                     placeholder="https://..."
                                     value={currentSlide.imageUrl || ''}
                                     onChange={e => setCurrentSlide({ ...currentSlide, imageUrl: e.target.value })}
                                 />
-                                <p className="text-xs text-gray-500">To upload an image, go to "Files" page first, upload, and copy URL here.</p>
+                                {currentSlide.imageUrl && (
+                                    <div className="mt-2 h-32 w-full relative bg-gray-100 rounded overflow-hidden">
+                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                        <img
+                                            src={currentSlide.imageUrl}
+                                            alt="Preview"
+                                            className="h-full w-full object-cover"
+                                        />
+                                    </div>
+                                )}
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
@@ -220,7 +275,9 @@ export default function HeroSlidesManager() {
 
                             <div className="flex justify-end gap-2 mt-6">
                                 <button type="button" onClick={() => setIsEditing(false)} className="btn-secondary">Cancel</button>
-                                <button type="submit" className="btn-primary">Save Slide</button>
+                                <button type="submit" className="btn-primary" disabled={uploading}>
+                                    {uploading ? 'Uploading...' : 'Save Slide'}
+                                </button>
                             </div>
                         </form>
                     </div>

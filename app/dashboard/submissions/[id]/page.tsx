@@ -14,6 +14,7 @@ interface Article {
   articleType: string;
   submissionDate: string;
   pdfUrl: string | null;
+  coverLetterUrl: string | null;
   fullText?: string | null;
   journal: {
     fullName: string;

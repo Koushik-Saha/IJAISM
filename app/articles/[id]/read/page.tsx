@@ -36,8 +36,10 @@ export default async function ReadArticlePage({ params }: { params: Promise<{ id
     // If remote (http), use directly. If local, use the PDF API route which handles token auth if needed (or public access).
     // Ideally, for a "Reader", we want a raw view.
     // We'll use the API route for consistency if it's not a remote blob.
-    const isRemote = article.pdfUrl.startsWith('http');
-    const pdfSource = isRemote ? article.pdfUrl : `/api/articles/${article.id}/pdf`;
+    // Always use the proxy API route. 
+    // This accepts the Access Control checks (e.g. verified purchase, subscription) 
+    // and serves the file from the same origin, avoiding CSP/CORS issues with direct Blob embeds.
+    const pdfSource = `/api/articles/${article.id}/pdf`;
 
     return (
         <div className="flex flex-col h-screen bg-gray-100 overflow-hidden">

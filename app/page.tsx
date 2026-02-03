@@ -3,6 +3,7 @@ import Card from "@/components/ui/Card";
 import AuthProtectedLink from "@/components/ui/AuthProtectedLink";
 import { prisma } from "@/lib/prisma";
 import HeroCarousel from "@/components/marketing/HeroCarousel";
+import NewsletterSection from "@/components/marketing/NewsletterSection";
 
 export const dynamic = "force-dynamic";
 
@@ -298,22 +299,11 @@ export default async function HomePage() {
 
       case 'newsletter':
         return (
-          <section key={section.id} className="py-16 bg-primary text-white">
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-              <h2 className="text-3xl font-bold mb-4">{section.title || 'Subscribe to C5K for Updates'}</h2>
-              <p className="text-lg mb-8">Stay informed about the latest research, publications, and academic events.</p>
-              <form className="flex flex-col sm:flex-row gap-4 justify-center">
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  className="px-6 py-3 rounded text-gray-900 w-full sm:w-96"
-                />
-                <button type="submit" className="btn-accent">
-                  Subscribe
-                </button>
-              </form>
-            </div>
-          </section>
+          <NewsletterSection
+            key={section.id}
+            title={section.title}
+            content={section.content}
+          />
         );
 
       case 'stats':

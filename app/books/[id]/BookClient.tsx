@@ -28,6 +28,8 @@ interface BookClientProps {
         previewPages: any[];
         reviews: any[];
         relatedTopics: string[];
+        createdAt: string;
+        updatedAt: string;
     };
 }
 

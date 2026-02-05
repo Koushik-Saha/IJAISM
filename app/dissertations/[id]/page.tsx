@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import SecureDownloadButton from "@/components/ui/SecureDownloadButton";
+import DissertationActions from "./DissertationActions";
 
 export const dynamic = "force-dynamic";
 
@@ -171,42 +172,7 @@ export default async function DissertationDetailPage({ params }: { params: Promi
               </div>
 
               {/* Actions */}
-              <div className="space-y-3">
-                {hasPdf ? (
-                  <SecureDownloadButton
-                    pdfUrl={dissertation.pdfUrl || ""}
-                    className="w-full text-center block bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg font-bold transition-colors"
-                  />
-                ) : (
-                  <button
-                    disabled
-                    className="w-full bg-gray-300 text-gray-500 px-6 py-3 rounded-lg font-bold cursor-not-allowed"
-                  >
-                    PDF Not Available
-                  </button>
-                )}
-
-                <Link
-                  href={`mailto:?subject=${encodeURIComponent(dissertation.title)}&body=${encodeURIComponent(`Check out this dissertation: ${dissertation.title} by ${dissertation.author.name}`)}`}
-                  className="w-full block text-center border-2 border-gray-300 text-gray-700 hover:bg-gray-50 px-6 py-3 rounded-lg font-bold transition-colors"
-                >
-                  Share
-                </Link>
-              </div>
-
-              {/* Submit Your Own */}
-              <div className="mt-8 pt-6 border-t border-gray-200">
-                <h4 className="font-bold text-gray-800 mb-3">Submit Your Dissertation</h4>
-                <p className="text-sm text-gray-600 mb-4">
-                  Share your doctoral research with the global academic community
-                </p>
-                <Link
-                  href="/dashboard/submit-dissertation"
-                  className="block text-center bg-accent hover:bg-accent-dark text-white px-6 py-3 rounded-lg font-bold transition-colors"
-                >
-                  Submit Now
-                </Link>
-              </div>
+              <DissertationActions pdfUrl={dissertation.pdfUrl} title={dissertation.title} />
             </div>
           </div>
         </div>

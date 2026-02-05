@@ -16,6 +16,8 @@ const updateConferenceSchema = z.object({
     websiteUrl: z.string().url().optional().or(z.literal("")),
     bannerImageUrl: z.string().url().optional().or(z.literal("")),
     status: z.enum(["upcoming", "ongoing", "completed", "cancelled"]).optional(),
+    brochureUrl: z.string().url().optional().or(z.literal("")),
+    callForPapersUrl: z.string().url().optional().or(z.literal(""))
 });
 
 export async function GET(

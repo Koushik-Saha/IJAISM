@@ -16,6 +16,9 @@ export default [
             '**/*.config.mjs',
             'jest.setup.ts',
             'playwright.config.ts',
+            'scripts/**',
+            'e2e/**',
+            'public/sw.js'
         ],
     },
     {

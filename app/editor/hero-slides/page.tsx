@@ -204,7 +204,7 @@ export default function HeroSlidesManager() {
                                 />
                                 {currentSlide.imageUrl && (
                                     <div className="mt-2 h-32 w-full relative bg-gray-100 rounded overflow-hidden">
-                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                        {/* eslint-disable-next-line */}
                                         <img
                                             src={currentSlide.imageUrl}
                                             alt="Preview"

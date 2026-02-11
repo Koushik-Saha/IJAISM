@@ -10,13 +10,13 @@ export default function Footer() {
             <h3 className="text-white text-lg font-bold mb-4">ABOUT C5K</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/contact" className="hover:text-white transition-colors">
+                <Link href="/about" className="hover:text-white transition-colors">
                   Mission & Vision
                 </Link>
               </li>
               <li>
                 <Link href="/contact" className="hover:text-white transition-colors">
-                  Contract
+                  Contact Us
                 </Link>
               </li>
               <li>

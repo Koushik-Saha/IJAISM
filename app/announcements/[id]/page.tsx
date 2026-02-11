@@ -103,6 +103,17 @@ export default async function AnnouncementDetailPage({ params }: { params: Promi
             </div>
           </div>
 
+          {/* Featured Image */}
+          {ann.thumbnailUrl && (
+            <div className="mb-10">
+              <img
+                src={ann.thumbnailUrl}
+                alt={ann.title}
+                className="w-full h-auto max-h-[500px] object-cover rounded-lg shadow-sm"
+              />
+            </div>
+          )}
+
           {/* Content */}
           <div
             className="prose prose-lg max-w-none text-gray-700 leading-relaxed"

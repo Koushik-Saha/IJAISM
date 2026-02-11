@@ -41,6 +41,8 @@ model User {
   managedBy               User?                    @relation("UserHierarchy", fields: [managedById], references: [id])
   subordinates            User[]                   @relation("UserHierarchy")
   activityLogs            ActivityLog[]
+  wishlist                Wishlist[]
+  purchasedBooks          PurchasedBook[]
 
   @@index([email])
   @@index([role])
@@ -295,6 +297,8 @@ model Conference {
   createdAt          DateTime                 @default(now())
   updatedAt          DateTime                 @updatedAt
   deletedAt          DateTime?
+  brochureUrl        String?
+  callForPapersUrl   String?
   acronym            String?
   fullDescription    String?
   importantDates     Json?
@@ -409,6 +413,8 @@ model Book {
   relatedTopics   String[]
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+  wishlistedBy    Wishlist[]
+  purchasedBy     PurchasedBook[]
 
   @@index([isbn])
   @@index([field])
@@ -490,4 +496,41 @@ model HomePageSection {
   updatedAt    DateTime @updatedAt
 
   @@map("homepage_sections")
+}
+
+model NewsletterSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("newsletter_subscribers")
+}
+
+model Wishlist {
+  id        String   @id @default(cuid())
+  userId    String
+  bookId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, bookId])
+  @@map("wishlists")
+}
+
+model PurchasedBook {
+  id        String   @id @default(cuid())
+  userId    String
+  bookId    String
+  price     String
+  purchasedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, bookId])
+  @@map("purchased_books")
 }

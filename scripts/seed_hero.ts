@@ -22,7 +22,7 @@ async function main() {
             secondaryButtonText: "Browse Journals",
             secondaryButtonLink: "/journals",
             displayOrder: 1,
-            imageUrl: "https://placehold.co/1920x1080/1e3a8a/ffffff/png?text=C5K+Research", // Blue
+            imageUrl: "/images/hero/research_publishing.png",
         },
         {
             title: "Fast & Rigorous Peer Review",
@@ -33,7 +33,7 @@ async function main() {
             secondaryButtonText: null,
             secondaryButtonLink: null,
             displayOrder: 2,
-            imageUrl: "https://placehold.co/1920x1080/065f46/ffffff/png?text=Peer+Review", // Green
+            imageUrl: "/images/hero/peer_review.png",
         },
         {
             title: "Global Reach & Impact",
@@ -44,7 +44,7 @@ async function main() {
             secondaryButtonText: "Our Community",
             secondaryButtonLink: "/community",
             displayOrder: 3,
-            imageUrl: "https://placehold.co/1920x1080/7c2d12/ffffff/png?text=Global+Reach", // Brown/Orange
+            imageUrl: "/images/hero/global_network.png",
         },
         {
             title: "Open Access for All",
@@ -55,7 +55,7 @@ async function main() {
             secondaryButtonText: null,
             secondaryButtonLink: null,
             displayOrder: 4,
-            imageUrl: "https://placehold.co/1920x1080/4c1d95/ffffff/png?text=Open+Access", // Purple
+            imageUrl: "/images/hero/open_access.png",
         },
         {
             title: "Join the C5K Community",
@@ -66,7 +66,7 @@ async function main() {
             secondaryButtonText: "Contact Us",
             secondaryButtonLink: "/contact",
             displayOrder: 5,
-            imageUrl: "https://placehold.co/1920x1080/111827/ffffff/png?text=Community", // Dark Gray
+            imageUrl: "/images/hero/community.png",
         }
     ];
 

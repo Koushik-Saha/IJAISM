@@ -15,6 +15,8 @@ const createConferenceSchema = z.object({
     websiteUrl: z.string().url().optional().or(z.literal("")),
     bannerImageUrl: z.string().url().optional().or(z.literal("")),
     status: z.enum(["upcoming", "ongoing", "completed", "cancelled"]).default("upcoming"),
+    brochureUrl: z.string().url().optional().or(z.literal("")),
+    callForPapersUrl: z.string().url().optional().or(z.literal(""))
 });
 
 export async function GET(req: NextRequest) {
@@ -100,6 +102,8 @@ export async function POST(req: NextRequest) {
                 websiteUrl: validated.websiteUrl || null,
                 bannerImageUrl: validated.bannerImageUrl || null,
                 status: validated.status,
+                brochureUrl: validated.brochureUrl || null,
+                callForPapersUrl: validated.callForPapersUrl || null
             },
         });
 

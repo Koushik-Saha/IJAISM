@@ -12,7 +12,8 @@ import {
   UserIcon,
   ClipboardDocumentListIcon,
   CreditCardIcon,
-  ArrowRightOnRectangleIcon
+  ArrowRightOnRectangleIcon,
+  HeartIcon
 } from "@heroicons/react/24/outline";
 import AuthModal from "@/components/ui/AuthModal";
 import NotificationBell from "@/components/ui/NotificationBell";
@@ -31,6 +32,7 @@ export default function Header() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [user, setUser] = useState<UserInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [wishlistCount, setWishlistCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -80,6 +82,7 @@ export default function Header() {
             if (!loginTime) {
               localStorage.setItem('loginTime', Date.now().toString());
             }
+            fetchWishlistCount(token);
           }
         } catch (error) {
           console.error('Error decoding token:', error);
@@ -93,17 +96,21 @@ export default function Header() {
 
     checkAuth();
 
+    // Listen for wishlist updates
+    const handleWishlistUpdate = () => {
+      const token = localStorage.getItem('token');
+      if (token) fetchWishlistCount(token);
+    };
+    window.addEventListener('wishlistUpdated', handleWishlistUpdate);
+
     // Listen for storage events (login/logout in other tabs)
     window.addEventListener('storage', checkAuth);
-
-    // Listen for custom login event
-    window.addEventListener('userLoggedIn', checkAuth);
-    window.addEventListener('userLoggedOut', checkAuth);
 
     return () => {
       window.removeEventListener('storage', checkAuth);
       window.removeEventListener('userLoggedIn', checkAuth);
       window.removeEventListener('userLoggedOut', checkAuth);
+      window.removeEventListener('wishlistUpdated', handleWishlistUpdate);
     };
   }, []);
 
@@ -134,6 +141,22 @@ export default function Header() {
     }
 
     router.push('/');
+  };
+
+  const fetchWishlistCount = async (token: string) => {
+    try {
+      const res = await fetch('/api/dashboard/wishlist', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.data?.wishlist) {
+          setWishlistCount(data.data.wishlist.length);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch wishlist count", error);
+    }
   };
 
   return (
@@ -226,6 +249,19 @@ export default function Header() {
 
                 {user ? (
                   <>
+                    {/* Wishlist Icon */}
+                    <Link href="/dashboard/wishlist" className="p-2 text-gray-600 hover:text-primary transition-colors relative group">
+                      <HeartIcon className="w-6 h-6" />
+                      {wishlistCount > 0 && (
+                        <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-white">
+                          {wishlistCount}
+                        </span>
+                      )}
+                      <span className="absolute hidden group-hover:block top-full right-0 mt-2 bg-gray-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap z-50">
+                        Wishlist
+                      </span>
+                    </Link>
+
                     <NotificationBell />
 
                     {/* User Menu - Avatar Only (Instagram Style) */}

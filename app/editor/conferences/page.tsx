@@ -30,7 +30,9 @@ export default function ConferencesPage() {
         city: '',
         country: '',
         description: '',
-        status: 'upcoming'
+        status: 'upcoming',
+        brochureUrl: '',
+        callForPapersUrl: ''
     });
 
     useEffect(() => { checkAuth(); }, []);
@@ -63,9 +65,12 @@ export default function ConferencesPage() {
         e.preventDefault();
         try {
             const token = localStorage.getItem('token');
-            const url = '/api/editor/conferences';
+            const url = selectedItem
+                ? `/api/editor/conferences/${selectedItem.id}`
+                : '/api/editor/conferences';
             const method = selectedItem ? 'PATCH' : 'POST';
-            const body = selectedItem ? { ...formData, id: selectedItem.id } : formData;
+            // For PATCH, we don't need to send the ID in the body as it's in the URL
+            const body = formData;
 
             const res = await fetch(url, {
                 method,
@@ -84,7 +89,7 @@ export default function ConferencesPage() {
         if (!selectedItem) return;
         try {
             const token = localStorage.getItem('token');
-            await fetch(`/api/editor/conferences?id=${selectedItem.id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+            await fetch(`/api/editor/conferences/${selectedItem.id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
             toast.success("Conference deleted");
             setIsDeleteModalOpen(false);
             fetchData();
@@ -102,7 +107,9 @@ export default function ConferencesPage() {
             city: item.city || '',
             country: item.country || '',
             description: item.description || '',
-            status: item.status
+            status: item.status,
+            brochureUrl: item.brochureUrl || '',
+            callForPapersUrl: item.callForPapersUrl || ''
         });
         setIsModalOpen(true);
     };
@@ -118,7 +125,9 @@ export default function ConferencesPage() {
             city: '',
             country: '',
             description: '',
-            status: 'upcoming'
+            status: 'upcoming',
+            brochureUrl: '',
+            callForPapersUrl: ''
         });
         setIsModalOpen(true);
     };
@@ -201,6 +210,9 @@ export default function ConferencesPage() {
                                 <div><label className="block text-sm font-bold mb-1">City</label><input required className="w-full border rounded p-2" value={formData.city} onChange={e => setFormData({ ...formData, city: e.target.value })} /></div>
                                 <div><label className="block text-sm font-bold mb-1">Country</label><input required className="w-full border rounded p-2" value={formData.country} onChange={e => setFormData({ ...formData, country: e.target.value })} /></div>
                             </div>
+
+                            <div><label className="block text-sm font-bold mb-1">Brochure URL</label><input className="w-full border rounded p-2" value={formData.brochureUrl} onChange={e => setFormData({ ...formData, brochureUrl: e.target.value })} placeholder="https://..." /></div>
+                            <div><label className="block text-sm font-bold mb-1">Call for Papers URL</label><input className="w-full border rounded p-2" value={formData.callForPapersUrl} onChange={e => setFormData({ ...formData, callForPapersUrl: e.target.value })} placeholder="https://..." /></div>
 
                             <div>
                                 <label className="block text-sm font-bold mb-1">Status</label>

@@ -68,6 +68,9 @@ describe('Payment & Webhook Tests', () => {
         jest.clearAllMocks();
         process.env.STRIPE_SECRET_KEY = 'mock_key';
         process.env.STRIPE_WEBHOOK_SECRET = 'mock_wh_secret';
+        process.env.STRIPE_PRICE_BASIC = 'price_mock_basic';
+        process.env.STRIPE_PRICE_PREMIUM = 'price_mock_premium';
+        process.env.STRIPE_PRICE_INSTITUTIONAL = 'price_mock_institutional';
     });
 
     describe('Checkout Session API', () => {

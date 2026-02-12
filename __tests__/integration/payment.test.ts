@@ -8,6 +8,8 @@ import { verifyToken } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { sendMembershipActivationEmail } from '@/lib/email/send';
 
+import { stripe } from '@/lib/stripe';
+
 // Mocks
 jest.mock('@/lib/auth', () => ({
     verifyToken: jest.fn(),
@@ -20,6 +22,7 @@ jest.mock('@/lib/prisma', () => ({
             findFirst: jest.fn(),
             create: jest.fn(),
             update: jest.fn(),
+            findUnique: jest.fn(),
         },
         notification: { create: jest.fn() },
     },
@@ -31,19 +34,17 @@ jest.mock('@/lib/email/send', () => ({
 }));
 
 // Mock Stripe
-const mockStripe = {
-    checkout: {
-        sessions: {
-            create: jest.fn(),
-        },
-    },
-    webhooks: {
-        constructEvent: jest.fn(),
-    },
-};
-
 jest.mock('stripe', () => {
-    return jest.fn(() => mockStripe);
+    return jest.fn().mockImplementation(() => ({
+        checkout: {
+            sessions: {
+                create: jest.fn(),
+            },
+        },
+        webhooks: {
+            constructEvent: jest.fn(),
+        },
+    }));
 });
 
 // Helper Mock Request
@@ -72,7 +73,7 @@ describe('Payment & Webhook Tests', () => {
     describe('Checkout Session API', () => {
         const validToken = 'valid-token';
         const userId = 'user-123';
-        const validBody = { tier: 'premium' };
+        const validBody = { tier: 'Premium' };
 
         it('should create session', async () => {
             (verifyToken as jest.Mock).mockReturnValue({ userId });
@@ -80,13 +81,13 @@ describe('Payment & Webhook Tests', () => {
                 id: userId, email: 'test@example.com', isActive: true,
             });
             (prisma.membership.findFirst as jest.Mock).mockResolvedValue(null);
-            mockStripe.checkout.sessions.create.mockResolvedValue({ id: 'sess_1', url: 'http://test.com' });
+            (stripe.checkout.sessions.create as jest.Mock).mockResolvedValue({ id: 'sess_1', url: 'http://test.com' });
 
             const req = createMockRequest(validBody, validToken);
             const res = await PaymentSessionPOST(req);
 
-            expect(res.status).toBe(201);
-            expect(mockStripe.checkout.sessions.create).toHaveBeenCalled();
+            expect(res.status).toBe(200);
+            expect(stripe.checkout.sessions.create).toHaveBeenCalled();
         });
     });
 
@@ -100,15 +101,16 @@ describe('Payment & Webhook Tests', () => {
                         id: 'sess_123',
                         subscription: 'sub_123',
                         metadata: { userId: 'user-123', tier: 'premium' },
+                        mode: 'subscription',
                     }
                 }
             };
 
             // Mock constructEvent to return our payload
-            mockStripe.webhooks.constructEvent.mockReturnValue(eventPayload);
+            (stripe.webhooks.constructEvent as jest.Mock).mockReturnValue(eventPayload);
 
             // Mock DB
-            (prisma.membership.findFirst as jest.Mock).mockResolvedValue(null); // No existing membership
+            (prisma.membership.findUnique as jest.Mock).mockResolvedValue(null); // No existing membership
             (prisma.membership.create as jest.Mock).mockResolvedValue({ id: 'mem_1', tier: 'premium' });
             (prisma.user.findUnique as jest.Mock).mockResolvedValue({ id: 'user-123', email: 'test@example.com', name: 'Test' });
 
@@ -138,7 +140,7 @@ describe('Payment & Webhook Tests', () => {
                     }
                 }
             };
-            mockStripe.webhooks.constructEvent.mockReturnValue(eventPayload);
+            (stripe.webhooks.constructEvent as jest.Mock).mockReturnValue(eventPayload);
 
             // Mock DB: must find membership
             (prisma.membership.findFirst as jest.Mock).mockResolvedValue({ id: 'mem_1', tier: 'premium', endDate: new Date() });

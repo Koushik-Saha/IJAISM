@@ -1,0 +1,436 @@
+
+> c5k-platform@1.0.0 test
+> jest --bail
+
+jest-haste-map: Watchman crawl failed. Retrying once with node crawler.
+  Usually this happens when watchman isn't running. Create an empty `.watchmanconfig` file in your project's root folder or initialize a git or hg repository in your project.
+  Error: Watchman error: std::__1::system_error: open: /Users/koushiksaha/Desktop/FixItUp/c5k-platform: Operation not permitted. Make sure watchman is running for this project. See https://facebook.github.io/watchman/docs/troubleshooting.
+PASS __tests__/unit/api/reviews/id.test.ts
+PASS __tests__/api/article-submission.test.ts
+PASS __tests__/unit/api/articles/submit.test.ts
+  ● Console
+
+    console.warn
+      {"timestamp":"2026-02-12T06:51:15.926Z","level":"warn","message":"Submission attempt with invalid token"}
+
+      43 |
+      44 |     warn(message: string, context?: Record<string, any>) {
+    > 45 |         console.warn(this.format('warn', message, context));
+         |                 ^
+      46 |     }
+      47 |
+      48 |     error(message: string, error?: Error | unknown, context?: Record<string, any>) {
+
+      at Logger.warn (lib/logger.ts:45:17)
+      at warn (app/api/articles/submit/route.ts:23:14)
+      at Object.<anonymous> (__tests__/unit/api/articles/submit.test.ts:79:31)
+
+    console.log
+      {"timestamp":"2026-02-12T06:51:15.952Z","level":"info","message":"Article submitted successfully","context":{"articleId":"art-1","userId":"user-1","journalCode":"JITMB","title":"My Research Paper Title"}}
+
+      at Logger.log [as info] (lib/logger.ts:41:17)
+
+    console.log
+      {"timestamp":"2026-02-12T06:51:15.954Z","level":"info","message":"Submission rejected due to limit","context":{"userId":"user-1","tier":"free","limit":1,"used":1}}
+
+      at Logger.log [as info] (lib/logger.ts:41:17)
+
+PASS __tests__/unit/api/search.test.ts
+PASS __tests__/unit/api/auth/login.test.ts
+PASS __tests__/unit/api/user/profile.test.ts
+PASS __tests__/unit/lib/email/send.test.ts
+  ● Console
+
+    console.log
+      [EMAIL] Sent (SMTP) successfully to user@test.com: Welcome to Test App! (ID: smtp-123)
+
+      at log (lib/email/send.ts:30:17)
+
+    console.log
+      [EMAIL] Sent (Resend) successfully to user@test.com: Welcome to Test App! (ID: resend-123)
+
+      at log (lib/email/send.ts:57:15)
+
+    console.warn
+      [EMAIL] Would send to author@test.com: Article Submission Received: My Paper
+
+      60 |
+      61 |     // 3. Dev Mode (No provider)
+    > 62 |     console.warn(`[EMAIL] Would send to ${to}: ${subject}`);
+         |             ^
+      63 |     console.warn('[EMAIL] No email provider configured (SMTP or Resend). Set SMTP_* or RESEND_API_KEY.');
+      64 |     return { success: true, messageId: 'dev-mode-no-send' };
+      65 |
+
+      at warn (lib/email/send.ts:62:13)
+      at sendEmail (lib/email/send.ts:110:10)
+      at Object.<anonymous> (__tests__/unit/lib/email/send.test.ts:89:60)
+
+    console.warn
+      [EMAIL] No email provider configured (SMTP or Resend). Set SMTP_* or RESEND_API_KEY.
+
+      61 |     // 3. Dev Mode (No provider)
+      62 |     console.warn(`[EMAIL] Would send to ${to}: ${subject}`);
+    > 63 |     console.warn('[EMAIL] No email provider configured (SMTP or Resend). Set SMTP_* or RESEND_API_KEY.');
+         |             ^
+      64 |     return { success: true, messageId: 'dev-mode-no-send' };
+      65 |
+      66 |   } catch (error: any) {
+
+      at warn (lib/email/send.ts:63:13)
+      at sendEmail (lib/email/send.ts:110:10)
+      at Object.<anonymous> (__tests__/unit/lib/email/send.test.ts:89:60)
+
+PASS __tests__/unit/api/articles/public.test.ts
+  ● Console
+
+    console.error
+      Error fetching articles: Error: DB Fail
+          at Object.<anonymous> (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/__tests__/unit/api/articles/public.test.ts:95:66)
+          at Promise.finally.completed (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+          at _callCircusTest (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)
+          at processTicksAndRejections (node:internal/process/task_queues:95:5)
+          at _runTest (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/jestAdapterInit.js:947:3)
+          at /Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+          at _runTestsForDescribeBlock (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+          at _runTestsForDescribeBlock (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+          at run (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+          at runAndTransformResultsToJestFormat (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+          at jestAdapter (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/runner.js:101:19)
+          at runTestInternal (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-runner/build/testWorker.js:275:16)
+          at runTest (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-runner/build/testWorker.js:343:7)
+          at Object.worker (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-runner/build/testWorker.js:497:12)
+
+       96 |     });
+       97 |   } catch (error: any) {
+    >  98 |     console.error('Error fetching articles:', error);
+          |             ^
+       99 |     return NextResponse.json(
+      100 |       { error: 'Failed to fetch articles' },
+      101 |       { status: 500 }
+
+      at error (app/api/articles/public/route.ts:98:13)
+      at Object.<anonymous> (__tests__/unit/api/articles/public.test.ts:98:21)
+
+PASS __tests__/unit/api/auth/register.test.ts
+  ● Console
+
+    console.error
+      Error processing reviewer invitations: TypeError: Cannot read properties of undefined (reading 'findMany')
+          at findMany (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/app/api/auth/register/route.ts:94:59)
+          at processTicksAndRejections (node:internal/process/task_queues:95:5)
+          at Object.<anonymous> (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/__tests__/unit/api/auth/register.test.ts:95:21)
+
+      131 |       }
+      132 |     } catch (invError) {
+    > 133 |       console.error("Error processing reviewer invitations:", invError);
+          |               ^
+      134 |       // Do not fail registration
+      135 |     }
+      136 |
+
+      at error (app/api/auth/register/route.ts:133:15)
+      at Object.<anonymous> (__tests__/unit/api/auth/register.test.ts:95:21)
+
+PASS __tests__/unit/components/ui/SecureDownloadButton.test.tsx
+PASS __tests__/unit/pages/HomePage.test.tsx
+  ● Console
+
+    console.error
+      Error loading sections: TypeError: Cannot read properties of undefined (reading 'findMany')
+          at findMany (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/app/page.tsx:111:51)
+          at getHomepageSections (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/app/page.tsx:148:26)
+          at processTicksAndRejections (node:internal/process/task_queues:95:5)
+          at Object.<anonymous> (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/__tests__/unit/pages/HomePage.test.tsx:63:21)
+
+      130 |     return sections;
+      131 |   } catch (error) {
+    > 132 |     console.error("Error loading sections:", error);
+          |             ^
+      133 |     // Fallback on error to ensure homepage never breaks
+      134 |     return [
+      135 |       { type: 'hero_carousel', id: 'default-hero' },
+
+      at error (app/page.tsx:132:13)
+      at getHomepageSections (app/page.tsx:148:26)
+      at Object.<anonymous> (__tests__/unit/pages/HomePage.test.tsx:63:21)
+
+    console.error
+      Error loading sections: TypeError: Cannot read properties of undefined (reading 'findMany')
+          at findMany (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/app/page.tsx:111:51)
+          at getHomepageSections (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/app/page.tsx:148:26)
+          at processTicksAndRejections (node:internal/process/task_queues:95:5)
+          at Object.<anonymous> (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/__tests__/unit/pages/HomePage.test.tsx:87:21)
+
+      130 |     return sections;
+      131 |   } catch (error) {
+    > 132 |     console.error("Error loading sections:", error);
+          |             ^
+      133 |     // Fallback on error to ensure homepage never breaks
+      134 |     return [
+      135 |       { type: 'hero_carousel', id: 'default-hero' },
+
+      at error (app/page.tsx:132:13)
+      at getHomepageSections (app/page.tsx:148:26)
+      at Object.<anonymous> (__tests__/unit/pages/HomePage.test.tsx:87:21)
+
+PASS __tests__/integration/api/login.test.ts
+PASS __tests__/unit/lib/api-response.test.ts
+PASS __tests__/unit/components/ui/Card.test.tsx
+PASS __tests__/unit/lib/auth.test.ts
+PASS __tests__/unit/pages/ArticlePage.test.tsx
+  ● Console
+
+    console.error
+      Database connection failed during page generation: TypeError: Cannot read properties of null (reading 'author')
+          at author (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/app/articles/[id]/page.tsx:133:23)
+          at processTicksAndRejections (node:internal/process/task_queues:95:5)
+          at Object.<anonymous> (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/__tests__/unit/pages/ArticlePage.test.tsx:66:13)
+
+      345 |     );
+      346 |   } catch (error) {
+    > 347 |     console.error("Database connection failed during page generation:", error);
+          |             ^
+      348 |     notFound();
+      349 |   }
+      350 | }
+
+      at error (app/articles/[id]/page.tsx:347:13)
+      at Object.<anonymous> (__tests__/unit/pages/ArticlePage.test.tsx:66:13)
+
+PASS __tests__/unit/lib/rate-limit.test.ts
+PASS __tests__/unit/api/articles/id.test.ts
+PASS __tests__/unit/lib/membership/benefits.test.ts
+PASS __tests__/unit/lib/reviews/utils.test.ts
+PASS __tests__/unit/api/editor/users.test.ts
+PASS __tests__/unit/api/editor/journals.test.ts
+PASS __tests__/unit/edge-cases/api-robustness.test.ts
+  ● Console
+
+    console.error
+      Login error: Error: Unexpected end of JSON input
+          at Object.<anonymous> (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/__tests__/unit/edge-cases/api-robustness.test.ts:23:48)
+          at Promise.finally.completed (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+          at _callCircusTest (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)
+          at processTicksAndRejections (node:internal/process/task_queues:95:5)
+          at _runTest (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/jestAdapterInit.js:947:3)
+          at /Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+          at _runTestsForDescribeBlock (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+          at _runTestsForDescribeBlock (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+          at run (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+          at runAndTransformResultsToJestFormat (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+          at jestAdapter (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/runner.js:101:19)
+          at runTestInternal (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-runner/build/testWorker.js:275:16)
+          at runTest (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-runner/build/testWorker.js:343:7)
+          at Object.worker (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-runner/build/testWorker.js:497:12)
+
+       97 |     );
+       98 |   } catch (error) {
+    >  99 |     console.error('Login error:', error);
+          |             ^
+      100 |     return apiError('An error occurred during login', 500);
+      101 |   }
+      102 | }
+
+      at error (app/api/auth/login/route.ts:99:13)
+      at Object.<anonymous> (__tests__/unit/edge-cases/api-robustness.test.ts:26:25)
+
+    console.error
+      Login error: Error: Database connection timeout
+          at Object.<anonymous> (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/__tests__/unit/edge-cases/api-robustness.test.ts:45:65)
+          at Promise.finally.completed (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+          at _callCircusTest (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)
+          at processTicksAndRejections (node:internal/process/task_queues:95:5)
+          at _runTest (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/jestAdapterInit.js:947:3)
+          at /Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+          at _runTestsForDescribeBlock (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+          at _runTestsForDescribeBlock (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+          at run (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+          at runAndTransformResultsToJestFormat (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+          at jestAdapter (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/runner.js:101:19)
+          at runTestInternal (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-runner/build/testWorker.js:275:16)
+          at runTest (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-runner/build/testWorker.js:343:7)
+          at Object.worker (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-runner/build/testWorker.js:497:12)
+
+       97 |     );
+       98 |   } catch (error) {
+    >  99 |     console.error('Login error:', error);
+          |             ^
+      100 |     return apiError('An error occurred during login', 500);
+      101 |   }
+      102 | }
+
+      at error (app/api/auth/login/route.ts:99:13)
+      at Object.<anonymous> (__tests__/unit/edge-cases/api-robustness.test.ts:47:21)
+
+PASS __tests__/unit/api/announcements/public/id.test.ts
+  ● Console
+
+    console.error
+      Error fetching announcement: Error: DB Error
+          at Object.<anonymous> (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/__tests__/unit/api/announcements/public/id.test.ts:70:73)
+          at Promise.finally.completed (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+          at _callCircusTest (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)
+          at processTicksAndRejections (node:internal/process/task_queues:95:5)
+          at _runTest (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/jestAdapterInit.js:947:3)
+          at /Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+          at _runTestsForDescribeBlock (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+          at _runTestsForDescribeBlock (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+          at run (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+          at runAndTransformResultsToJestFormat (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+          at jestAdapter (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-circus/build/runner.js:101:19)
+          at runTestInternal (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-runner/build/testWorker.js:275:16)
+          at runTest (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-runner/build/testWorker.js:343:7)
+          at Object.worker (/Users/koushiksaha/Desktop/FixItUp/c5k-platform/node_modules/jest-runner/build/testWorker.js:497:12)
+
+      62 |         return NextResponse.json({ announcement, relatedAnnouncements });
+      63 |     } catch (error) {
+    > 64 |         console.error('Error fetching announcement:', error);
+         |                 ^
+      65 |         return NextResponse.json(
+      66 |             { error: 'Failed to fetch announcement' },
+      67 |             { status: 500 }
+
+      at error (app/api/announcements/public/[id]/route.ts:64:17)
+      at Object.<anonymous> (__tests__/unit/api/announcements/public/id.test.ts:75:21)
+
+PASS __tests__/unit/api/editor/reviewers.test.ts
+PASS __tests__/unit/lib/logger.test.ts
+PASS __tests__/integration/components/RoleGuard.test.tsx
+FAIL __tests__/unit/api/webhooks/stripe.test.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'mockConstructEvent' before initialization
+
+      43 |     return jest.fn().mockImplementation(() => ({
+      44 |         webhooks: {
+    > 45 |             constructEvent: mockConstructEvent,
+         |                             ^
+      46 |         },
+      47 |     }));
+      48 | });
+
+      at mockConstructor.mockConstructEvent (__tests__/unit/api/webhooks/stripe.test.ts:45:29)
+      at Object.<anonymous> (lib/stripe.ts:4:23)
+      at Object.<anonymous> (app/api/webhooks/stripe/route.ts:12:17)
+      at Object.<anonymous> (__tests__/unit/api/webhooks/stripe.test.ts:45:16)
+
+PASS __tests__/unit/api/files.test.ts
+  ● Console
+
+    console.warn
+      {"timestamp":"2026-02-12T06:51:17.458Z","level":"warn","message":"Prisma client stale, downloadLog model missing. Keys available:","context":["$queryRaw","$executeRaw"]}
+
+      43 |
+      44 |     warn(message: string, context?: Record<string, any>) {
+    > 45 |         console.warn(this.format('warn', message, context));
+         |                 ^
+      46 |     }
+      47 |
+      48 |     error(message: string, error?: Error | unknown, context?: Record<string, any>) {
+
+      at Logger.warn (lib/logger.ts:45:17)
+      at warn (app/api/files/download/[...path]/route.ts:76:20)
+      at Object.<anonymous> (__tests__/unit/api/files.test.ts:81:21)
+
+    console.warn
+      {"timestamp":"2026-02-12T06:51:17.468Z","level":"warn","message":"Prisma client stale, downloadLog model missing. Keys available:","context":["$queryRaw","$executeRaw"]}
+
+      43 |
+      44 |     warn(message: string, context?: Record<string, any>) {
+    > 45 |         console.warn(this.format('warn', message, context));
+         |                 ^
+      46 |     }
+      47 |
+      48 |     error(message: string, error?: Error | unknown, context?: Record<string, any>) {
+
+      at Logger.warn (lib/logger.ts:45:17)
+      at warn (app/api/files/download/[...path]/route.ts:76:20)
+      at Object.<anonymous> (__tests__/unit/api/files.test.ts:110:21)
+
+    console.warn
+      {"timestamp":"2026-02-12T06:51:17.477Z","level":"warn","message":"Prisma client stale, downloadLog model missing. Keys available:","context":["$queryRaw","$executeRaw"]}
+
+      43 |
+      44 |     warn(message: string, context?: Record<string, any>) {
+    > 45 |         console.warn(this.format('warn', message, context));
+         |                 ^
+      46 |     }
+      47 |
+      48 |     error(message: string, error?: Error | unknown, context?: Record<string, any>) {
+
+      at Logger.warn (lib/logger.ts:45:17)
+      at warn (app/api/files/download/[...path]/route.ts:76:20)
+      at Object.<anonymous> (__tests__/unit/api/files.test.ts:130:21)
+
+FAIL __tests__/integration/payment.test.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'mockStripe' before initialization
+
+      44 |
+      45 | jest.mock('stripe', () => {
+    > 46 |     return jest.fn(() => mockStripe);
+         |                          ^
+      47 | });
+      48 |
+      49 | // Helper Mock Request
+
+      at mockConstructor.mockStripe (__tests__/integration/payment.test.ts:46:26)
+      at Object.<anonymous> (lib/stripe.ts:4:23)
+      at Object.<anonymous> (app/api/payments/create-checkout-session/route.ts:12:17)
+      at Object.<anonymous> (__tests__/integration/payment.test.ts:37:16)
+
+PASS __tests__/unit/auth.test.ts
+
+Summary of all failing tests
+FAIL __tests__/unit/api/webhooks/stripe.test.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'mockConstructEvent' before initialization
+
+      43 |     return jest.fn().mockImplementation(() => ({
+      44 |         webhooks: {
+    > 45 |             constructEvent: mockConstructEvent,
+         |                             ^
+      46 |         },
+      47 |     }));
+      48 | });
+
+      at mockConstructor.mockConstructEvent (__tests__/unit/api/webhooks/stripe.test.ts:45:29)
+      at Object.<anonymous> (lib/stripe.ts:4:23)
+      at Object.<anonymous> (app/api/webhooks/stripe/route.ts:12:17)
+      at Object.<anonymous> (__tests__/unit/api/webhooks/stripe.test.ts:45:16)
+
+FAIL __tests__/integration/payment.test.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'mockStripe' before initialization
+
+      44 |
+      45 | jest.mock('stripe', () => {
+    > 46 |     return jest.fn(() => mockStripe);
+         |                          ^
+      47 | });
+      48 |
+      49 | // Helper Mock Request
+
+      at mockConstructor.mockStripe (__tests__/integration/payment.test.ts:46:26)
+      at Object.<anonymous> (lib/stripe.ts:4:23)
+      at Object.<anonymous> (app/api/payments/create-checkout-session/route.ts:12:17)
+      at Object.<anonymous> (__tests__/integration/payment.test.ts:37:16)
+
+
+Test Suites: 2 failed, 29 passed, 31 total
+Tests:       128 passed, 128 total
+Snapshots:   0 total
+Time:        3.41 s, estimated 6 s
+Ran all test suites.

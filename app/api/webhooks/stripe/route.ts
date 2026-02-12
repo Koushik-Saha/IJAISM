@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { prisma } from '@/lib/prisma';
 import Stripe from 'stripe';
+import { sendMembershipActivationEmail, sendPaymentFailedEmail } from '@/lib/email/send';
 
 async function handleMembershipSubscription(session: Stripe.Checkout.Session) {
     const userId = session.metadata?.userId;
@@ -42,6 +43,12 @@ async function handleMembershipSubscription(session: Stripe.Checkout.Session) {
             }
         });
     }
+
+    // Send email
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (user && user.email) {
+        await sendMembershipActivationEmail(user.email, user.name || 'Member', tier, endDate, subscriptionId);
+    }
 }
 
 async function handleApcPayment(session: Stripe.Checkout.Session) {
@@ -59,6 +66,44 @@ async function handleApcPayment(session: Stripe.Checkout.Session) {
             stripePaymentId: paymentId
         }
     });
+}
+
+async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
+    const subscriptionId = invoice.subscription as string;
+    const membership = await prisma.membership.findFirst({
+        where: { stripeSubscriptionId: subscriptionId },
+        include: { user: true }
+    });
+
+    if (membership && membership.user.email) {
+        await sendPaymentFailedEmail(membership.user.email, membership.user.name || 'Member', invoice.hosted_invoice_url || '#');
+
+        await prisma.notification.create({
+            data: {
+                userId: membership.userId,
+                title: 'Payment Failed',
+                message: 'Your membership renewal payment failed. Please update your payment method.',
+                type: 'system',
+            }
+        });
+    }
+}
+
+async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
+    const subscriptionId = subscription.id;
+    const membership = await prisma.membership.findFirst({
+        where: { stripeSubscriptionId: subscriptionId }
+    });
+
+    if (membership) {
+        await prisma.membership.update({
+            where: { id: membership.id },
+            data: {
+                status: 'expired',
+                autoRenew: false
+            }
+        });
+    }
 }
 
 export async function POST(req: NextRequest) {
@@ -92,6 +137,14 @@ export async function POST(req: NextRequest) {
                 break;
             case 'invoice.payment_succeeded':
                 // logic to extend subscription on recurring payment
+                break;
+            case 'invoice.payment_failed':
+                const invoice = event.data.object as Stripe.Invoice;
+                await handleInvoicePaymentFailed(invoice);
+                break;
+            case 'customer.subscription.deleted':
+                const subscription = event.data.object as Stripe.Subscription;
+                await handleSubscriptionDeleted(subscription);
                 break;
             default:
                 console.log(`Unhandled event type ${event.type}`);

@@ -69,7 +69,7 @@ async function handleApcPayment(session: Stripe.Checkout.Session) {
 }
 
 async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
-    const subscriptionId = invoice.subscription as string;
+    const subscriptionId = (invoice as any).subscription as string;
     const membership = await prisma.membership.findFirst({
         where: { stripeSubscriptionId: subscriptionId },
         include: { user: true }

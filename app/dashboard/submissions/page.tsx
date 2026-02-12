@@ -17,6 +17,7 @@ interface Article {
   journal: {
     code: string;
     name: string;
+    articleProcessingCharge?: number;
   };
   status: string;
   isApcPaid: boolean;
@@ -250,9 +251,10 @@ export default function MySubmissionsPage() {
 
   return (
     <PayPalScriptProvider options={{
-      clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "test",
+      clientId: "AZOcrumfPpUuRElUqvh92PG0dwyqkXvUTyTWniy9lzRUAIxSYduKe5mxmpvcN1DynetRHe7HKayLB7Ve",
       components: "buttons",
-      currency: "USD"
+      currency: "USD",
+      intent: "capture"
     }}>
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -401,38 +403,13 @@ export default function MySubmissionsPage() {
 
                       {/* Pay APC Button for Accepted Articles */}
                       {article.status === 'accepted' && !article.isApcPaid && (
-                        <div className="w-full space-y-2">
-                          <div className="flex justify-center bg-gray-100 p-1 rounded-md">
-                            <button
-                              onClick={() => togglePaymentMethod(article.id, 'stripe')}
-                              className={`flex-1 text-xs py-1 rounded transition-all ${(paymentMethods[article.id] || 'stripe') === 'stripe' ? 'bg-white shadow text-gray-900 font-bold' : 'text-gray-500 hover:text-gray-900'
-                                }`}
-                            >
-                              Card
-                            </button>
-                            <button
-                              onClick={() => togglePaymentMethod(article.id, 'paypal')}
-                              className={`flex-1 text-xs py-1 rounded transition-all ${paymentMethods[article.id] === 'paypal' ? 'bg-white shadow text-blue-600 font-bold' : 'text-gray-500 hover:text-gray-900'
-                                }`}
-                            >
-                              PayPal
-                            </button>
-                          </div>
-
-                          {(paymentMethods[article.id] || 'stripe') === 'stripe' ? (
-                            <button
-                              onClick={() => handleStripeApc(article.id)}
-                              className="w-full bg-primary hover:bg-primary-dark text-white text-sm py-2 rounded font-bold shadow-sm"
-                            >
-                              Pay with Card
-                            </button>
-                          ) : (
-                            <PayPalButtons
-                              style={{ layout: "horizontal", height: 35, tagline: false }}
-                              createOrder={() => createApcOrder(article.id)}
-                              onApprove={(data) => onApcApprove(data, article.id)}
-                            />
-                          )}
+                        <div className="w-full">
+                          <Link
+                            href={`/dashboard/payments/${article.id}`}
+                            className="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center text-sm font-bold py-2 px-4 rounded transition-colors shadow-sm"
+                          >
+                            Pay APC Fee
+                          </Link>
                         </div>
                       )}
 

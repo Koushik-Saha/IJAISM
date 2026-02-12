@@ -314,6 +314,13 @@ export default function AdminDashboard() {
                   <h3 className="font-bold text-gray-900 mb-2">🗓️ Conferences</h3>
                   <p className="text-sm text-gray-600">Manage conferences</p>
                 </Link>
+                <Link
+                  href="/admin/settings"
+                  className="border-2 border-gray-200 rounded-lg p-4 hover:border-primary transition-colors bg-green-50 border-green-200"
+                >
+                  <h3 className="font-bold text-green-900 mb-2">⚙️ Global Settings</h3>
+                  <p className="text-sm text-gray-600">APC Fee & Platform Config</p>
+                </Link>
               </>
             )}
           </div>

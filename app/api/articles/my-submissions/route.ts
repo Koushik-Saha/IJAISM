@@ -30,6 +30,7 @@ export async function GET(req: NextRequest) {
             id: true,
             code: true,
             fullName: true,
+            articleProcessingCharge: true,
           },
         },
         reviews: {
@@ -58,6 +59,7 @@ export async function GET(req: NextRequest) {
         journal: {
           code: article.journal.code,
           name: article.journal.fullName,
+          articleProcessingCharge: article.journal.articleProcessingCharge,
         },
         status: article.status,
         isApcPaid: article.isApcPaid,

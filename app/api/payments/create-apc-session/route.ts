@@ -28,10 +28,12 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Article not found' }, { status: 404 });
         }
 
-        const amount = article.journal.articleProcessingCharge || 0;
-        if (amount <= 0) {
-            return NextResponse.json({ error: 'No APC required for this journal' }, { status: 400 });
-        }
+        // Get Global APC Fee
+        const globalSettings = await prisma.globalSettings.findUnique({
+            where: { key: 'apc_fee' }
+        });
+        const apcFee = globalSettings ? parseFloat(globalSettings.value) : 500;
+        const amount = apcFee;
 
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],

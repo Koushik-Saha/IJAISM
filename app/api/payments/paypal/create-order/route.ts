@@ -53,9 +53,14 @@ export async function POST(req: NextRequest) {
             });
             if (!article) return NextResponse.json({ error: 'Article not found' }, { status: 404 });
             if (article.isApcPaid) return NextResponse.json({ error: 'APC already paid' }, { status: 409 });
-            if (!article.journal.articleProcessingCharge) return NextResponse.json({ error: 'No APC defined for this journal' }, { status: 400 });
 
-            amount = article.journal.articleProcessingCharge.toString();
+            // Get Global APC Fee
+            const globalSettings = await prisma.globalSettings.findUnique({
+                where: { key: 'apc_fee' }
+            });
+            const fee = globalSettings ? globalSettings.value : "500.00";
+
+            amount = fee;
             description = `APC for Article: ${article.title}`;
             customId = `APC_${itemId}_USER_${userId}`;
         }

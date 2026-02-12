@@ -4,6 +4,12 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Card from '@/components/ui/Card';
+import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+import { toast } from "sonner";
+import { loadStripe } from '@stripe/stripe-js';
+
+// Initialize Stripe
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 interface Article {
   id: string;
@@ -11,6 +17,7 @@ interface Article {
   journal: {
     code: string;
     name: string;
+    articleProcessingCharge?: number;
   };
   status: string;
   isApcPaid: boolean;
@@ -35,6 +42,40 @@ export default function MySubmissionsPage() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [paymentMethods, setPaymentMethods] = useState<Record<string, 'stripe' | 'paypal'>>({});
+
+  const togglePaymentMethod = (articleId: string, method: 'stripe' | 'paypal') => {
+    setPaymentMethods(prev => ({ ...prev, [articleId]: method }));
+  };
+
+  const handleStripeApc = async (articleId: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        router.push('/login');
+        return;
+      }
+
+      const res = await fetch('/api/payments/create-apc-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ articleId })
+      });
+
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        toast.error(data.error || 'Failed to start Stripe checkout');
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('An error occurred');
+    }
+  };
 
   useEffect(() => {
     fetchSubmissions();
@@ -114,9 +155,63 @@ export default function MySubmissionsPage() {
 
       // Refresh list
       fetchSubmissions();
-      alert('Article withdrawn successfully.');
+      toast.success('Article withdrawn successfully.');
     } catch (err: any) {
-      alert(err.message);
+      toast.error(err.message);
+    }
+  };
+
+  const createApcOrder = async (articleId: string) => {
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error("Authentication required");
+
+    try {
+      const response = await fetch('/api/payments/paypal/create-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          type: 'apc',
+          itemId: articleId
+        })
+      });
+
+      const orderData = await response.json();
+      if (orderData.id) return orderData.id;
+      throw new Error(orderData.error || "Order creation failed");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to initiate APC payment");
+      throw err;
+    }
+  };
+
+  const onApcApprove = async (data: any, articleId: string) => {
+    const token = localStorage.getItem('token');
+    try {
+      const response = await fetch('/api/payments/paypal/capture-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          orderID: data.orderID
+        })
+      });
+
+      const result = await response.json();
+      if (result.status === 'COMPLETED') {
+        toast.success("APC Payment Successful!");
+        fetchSubmissions(); // Refresh to show paid status
+      } else {
+        toast.error("Payment not completed");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to capture payment");
     }
   };
 
@@ -155,201 +250,192 @@ export default function MySubmissionsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">My Submissions</h1>
-          <p className="text-gray-600">
-            Track the status of your submitted articles and review progress
-          </p>
-        </div>
+    <PayPalScriptProvider options={{
+      clientId: "AZOcrumfPpUuRElUqvh92PG0dwyqkXvUTyTWniy9lzRUAIxSYduKe5mxmpvcN1DynetRHe7HKayLB7Ve",
+      components: "buttons",
+      currency: "USD",
+      intent: "capture"
+    }}>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold mb-2">My Submissions</h1>
+            <p className="text-gray-600">
+              Track the status of your submitted articles and review progress
+            </p>
+          </div>
 
-        {articles.length === 0 ? (
-          <Card>
-            <div className="text-center py-12">
-              <div className="text-4xl mb-4">📝</div>
-              <h2 className="text-xl font-bold mb-2">No Submissions Yet</h2>
-              <p className="text-gray-600 mb-6">
-                You haven't submitted any articles yet.
-              </p>
-              <Link href="/submit" className="btn-primary">
-                Submit Your First Article
-              </Link>
-            </div>
-          </Card>
-        ) : (
-          <div className="space-y-6">
-            {articles.map((article) => (
-              <Card key={article.id}>
-                <div className="flex flex-col md:flex-row gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <Link href={`/articles/${article.id}`}>
-                          <h2 className="text-xl font-bold text-primary hover:text-primary-dark mb-2">
-                            {article.title}
-                          </h2>
-                        </Link>
-                        <p className="text-sm text-gray-600 mb-2">
-                          {article.journal.name} ({article.journal.code})
-                        </p>
+          {articles.length === 0 ? (
+            <Card>
+              <div className="text-center py-12">
+                <div className="text-4xl mb-4">📝</div>
+                <h2 className="text-xl font-bold mb-2">No Submissions Yet</h2>
+                <p className="text-gray-600 mb-6">
+                  You haven't submitted any articles yet.
+                </p>
+                <Link href="/submit" className="btn-primary">
+                  Submit Your First Article
+                </Link>
+              </div>
+            </Card>
+          ) : (
+            <div className="space-y-6">
+              {articles.map((article) => (
+                <Card key={article.id}>
+                  <div className="flex flex-col md:flex-row gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-start justify-between mb-3">
+                        <div>
+                          <Link href={`/articles/${article.id}`}>
+                            <h2 className="text-xl font-bold text-primary hover:text-primary-dark mb-2">
+                              {article.title}
+                            </h2>
+                          </Link>
+                          <p className="text-sm text-gray-600 mb-2">
+                            {article.journal.name} ({article.journal.code})
+                          </p>
+                        </div>
+                        {getStatusBadge(article.status)}
                       </div>
-                      {getStatusBadge(article.status)}
-                    </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 text-sm">
-                      <div>
-                        <span className="text-gray-500">Submitted:</span>
-                        <div className="font-semibold">
-                          {formatDate(article.submittedAt || article.createdAt)}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 text-sm">
+                        <div>
+                          <span className="text-gray-500">Submitted:</span>
+                          <div className="font-semibold">
+                            {formatDate(article.submittedAt || article.createdAt)}
+                          </div>
+                        </div>
+                        {article.publishedAt && (
+                          <div>
+                            <span className="text-gray-500">Published:</span>
+                            <div className="font-semibold">
+                              {formatDate(article.publishedAt)}
+                            </div>
+                          </div>
+                        )}
+                        <div>
+                          <span className="text-gray-500">Reviews Completed:</span>
+                          <div className="font-semibold">
+                            {article.reviewProgress.completed}
+                          </div>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Total Assigned:</span>
+                          <div className="font-semibold">
+                            {article.reviewProgress.total}
+                          </div>
                         </div>
                       </div>
-                      {article.publishedAt && (
-                        <div>
-                          <span className="text-gray-500">Published:</span>
-                          <div className="font-semibold">
-                            {formatDate(article.publishedAt)}
+
+                      {/* Review Progress Bar */}
+                      {article.status === 'under_review' && (
+                        <div className="mb-4">
+                          <div className="flex justify-between text-sm text-gray-600 mb-1">
+                            <span>Review Progress</span>
+                            <span>
+                              {article.reviewProgress.completed} completed
+                            </span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div
+                              className="bg-primary h-2 rounded-full transition-all"
+                              style={{
+                                width: `${(article.reviewProgress.completed / (article.reviewProgress.required || 4)) * 100}%`,
+                              }}
+                            />
                           </div>
                         </div>
                       )}
-                      <div>
-                        <span className="text-gray-500">Reviews Completed:</span>
-                        <div className="font-semibold">
-                          {article.reviewProgress.completed}
+
+                      {/* Reviewers List - Only visible if Revision Requested */}
+                      {article.status === 'revision_requested' && article.reviews.length > 0 && (
+                        <div className="mt-4 bg-orange-50 border border-orange-100 rounded-lg p-4">
+                          <h3 className="text-sm font-bold text-orange-900 mb-3">Reviewer Feedback:</h3>
+                          <div className="space-y-3">
+                            {article.reviews.map((review) => (
+                              <div
+                                key={review.id}
+                                className="bg-white p-3 rounded border border-orange-100 shadow-sm"
+                              >
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="font-semibold text-sm text-gray-900">{review.reviewerName}</span>
+                                  <span className={`text-xs px-2 py-1 rounded font-medium ${review.decision === 'accept' ? 'bg-green-100 text-green-700' :
+                                    review.decision === 'reject' ? 'bg-red-100 text-red-700' :
+                                      'bg-yellow-100 text-yellow-700'
+                                    }`}>
+                                    {review.decision ? review.decision.replace('_', ' ').toUpperCase() : 'PENDING'}
+                                  </span>
+                                </div>
+                                {/* Note: Comments would be displayed here if available in the API response */}
+                              </div>
+                            ))}
+                          </div>
+                          <div className="mt-4 pt-3 border-t border-orange-200">
+                            <p className="text-sm text-orange-800 mb-2">
+                              Please address the feedback above and resubmit your article.
+                            </p>
+                            <Link
+                              href={`/submit?resubmit=${article.id}`}
+                              className="inline-flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium px-4 py-2 rounded transition-colors"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                              </svg>
+                              Resubmit Article
+                            </Link>
+                          </div>
                         </div>
-                      </div>
-                      <div>
-                        <span className="text-gray-500">Total Assigned:</span>
-                        <div className="font-semibold">
-                          {article.reviewProgress.total}
-                        </div>
-                      </div>
+                      )}
                     </div>
 
-                    {/* Review Progress Bar */}
-                    {article.status === 'under_review' && (
-                      <div className="mb-4">
-                        <div className="flex justify-between text-sm text-gray-600 mb-1">
-                          <span>Review Progress</span>
-                          <span>
-                            {article.reviewProgress.completed} completed
-                          </span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div
-                            className="bg-primary h-2 rounded-full transition-all"
-                            style={{
-                              width: `${(article.reviewProgress.completed / (article.reviewProgress.required || 4)) * 100}%`,
-                            }}
-                          />
-                        </div>
-                      </div>
-                    )}
+                    <div className="flex flex-col gap-2 min-w-[200px]">
+                      <Link
+                        href={`/articles/${article.id}`}
+                        className="btn-primary text-sm px-4 py-2 whitespace-nowrap text-center"
+                      >
+                        View Details
+                      </Link>
+                      {article.status === 'published' && (
+                        <button className="btn-secondary text-sm px-4 py-2 whitespace-nowrap">
+                          Download PDF
+                        </button>
+                      )}
 
-                    {/* Reviewers List - Only visible if Revision Requested */}
-                    {article.status === 'revision_requested' && article.reviews.length > 0 && (
-                      <div className="mt-4 bg-orange-50 border border-orange-100 rounded-lg p-4">
-                        <h3 className="text-sm font-bold text-orange-900 mb-3">Reviewer Feedback:</h3>
-                        <div className="space-y-3">
-                          {article.reviews.map((review) => (
-                            <div
-                              key={review.id}
-                              className="bg-white p-3 rounded border border-orange-100 shadow-sm"
-                            >
-                              <div className="flex items-center justify-between mb-2">
-                                <span className="font-semibold text-sm text-gray-900">{review.reviewerName}</span>
-                                <span className={`text-xs px-2 py-1 rounded font-medium ${review.decision === 'accept' ? 'bg-green-100 text-green-700' :
-                                  review.decision === 'reject' ? 'bg-red-100 text-red-700' :
-                                    'bg-yellow-100 text-yellow-700'
-                                  }`}>
-                                  {review.decision ? review.decision.replace('_', ' ').toUpperCase() : 'PENDING'}
-                                </span>
-                              </div>
-                              {/* Note: Comments would be displayed here if available in the API response */}
-                            </div>
-                          ))}
-                        </div>
-                        <div className="mt-4 pt-3 border-t border-orange-200">
-                          <p className="text-sm text-orange-800 mb-2">
-                            Please address the feedback above and resubmit your article.
-                          </p>
+                      {/* Pay APC Button for Accepted Articles */}
+                      {article.status === 'accepted' && !article.isApcPaid && (
+                        <div className="w-full">
                           <Link
-                            href={`/submit?resubmit=${article.id}`}
-                            className="inline-flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium px-4 py-2 rounded transition-colors"
+                            href={`/dashboard/payments/${article.id}`}
+                            className="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center text-sm font-bold py-2 px-4 rounded transition-colors shadow-sm"
                           >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                            </svg>
-                            Resubmit Article
+                            Pay APC Fee
                           </Link>
                         </div>
-                      </div>
-                    )}
+                      )}
+
+                      {article.status === 'accepted' && article.isApcPaid && (
+                        <span className="px-4 py-2 bg-green-50 text-green-700 border border-green-200 rounded-lg text-sm font-bold whitespace-nowrap cursor-default text-center">
+                          ✓ APC Paid
+                        </span>
+                      )}
+
+                      {/* Withdraw Button */}
+                      {article.status !== 'withdrawn' && article.status !== 'published' && article.reviewProgress.total === 0 && (
+                        <button
+                          onClick={() => handleWithdraw(article.id)}
+                          className="px-4 py-2 border border-red-200 text-red-600 hover:bg-red-50 rounded-lg text-sm font-medium transition-colors whitespace-nowrap"
+                        >
+                          Withdraw Article
+                        </button>
+                      )}
+                    </div>
                   </div>
-
-                  <div className="flex flex-col gap-2">
-                    <Link
-                      href={`/articles/${article.id}`}
-                      className="btn-primary text-sm px-4 py-2 whitespace-nowrap text-center"
-                    >
-                      View Details
-                    </Link>
-                    {article.status === 'published' && (
-                      <button className="btn-secondary text-sm px-4 py-2 whitespace-nowrap">
-                        Download PDF
-                      </button>
-                    )}
-
-                    {/* Pay APC Button for Accepted Articles */}
-                    {article.status === 'accepted' && !article.isApcPaid && (
-                      <button
-                        onClick={async () => {
-                          try {
-                            const token = localStorage.getItem('token');
-                            const res = await fetch('/api/payments/create-apc-session', {
-                              method: 'POST',
-                              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                              body: JSON.stringify({ articleId: article.id })
-                            });
-                            const data = await res.json();
-                            if (data.url) {
-                              window.location.href = data.url;
-                            } else {
-                              alert('Failed to start payment: ' + (data.error || 'Unknown error'));
-                            }
-                          } catch (e) {
-                            console.error(e);
-                            alert('Payment initialization failed');
-                          }
-                        }}
-                        className="px-4 py-2 bg-green-600 text-white hover:bg-green-700 rounded-lg text-sm font-medium transition-colors whitespace-nowrap shadow-sm"
-                      >
-                        Card: Pay APC Fee
-                      </button>
-                    )}
-
-                    {article.status === 'accepted' && article.isApcPaid && (
-                      <span className="px-4 py-2 bg-green-50 text-green-700 border border-green-200 rounded-lg text-sm font-bold whitespace-nowrap cursor-default">
-                        ✓ APC Paid
-                      </span>
-                    )}
-
-                    {/* Withdraw Button */}
-                    {article.status !== 'withdrawn' && article.status !== 'published' && article.reviewProgress.total === 0 && (
-                      <button
-                        onClick={() => handleWithdraw(article.id)}
-                        className="px-4 py-2 border border-red-200 text-red-600 hover:bg-red-50 rounded-lg text-sm font-medium transition-colors whitespace-nowrap"
-                      >
-                        Withdraw Article
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        )}
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </PayPalScriptProvider>
   );
 }

@@ -7,6 +7,14 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
+model GlobalSettings {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
 model User {
   id                      String                   @id @default(uuid())
   email                   String                   @unique
@@ -43,6 +51,7 @@ model User {
   activityLogs            ActivityLog[]
   wishlist                Wishlist[]
   purchasedBooks          PurchasedBook[]
+  newsletterSubscription  NewsletterSubscriber?
 
   @@index([email])
   @@index([role])
@@ -87,6 +96,7 @@ model Membership {
   startDate            DateTime
   endDate              DateTime
   autoRenew            Boolean  @default(true)
+  paypalSubscriptionId String?
   stripeSubscriptionId String?
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
@@ -188,7 +198,8 @@ model Article {
   updatedAt         DateTime      @updatedAt
   isApcPaid         Boolean       @default(false)
   apcAmount         Float?
-  stripePaymentId   String?       // For Payment Tracking
+  paypalOrderId     String?       // For PayPal
+  stripePaymentId   String?       // For Stripe
   deletedAt         DateTime?
   authorId          String
   editorComments    String?
@@ -322,6 +333,7 @@ model ConferenceRegistration {
   registrationType String
   paymentStatus    String     @default("pending")
   paymentAmount    Float?
+  paypalOrderId    String?
   stripePaymentId  String?
   registeredAt     DateTime   @default(now())
   createdAt        DateTime   @default(now())
@@ -499,13 +511,19 @@ model HomePageSection {
 }
 
 model NewsletterSubscriber {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                   String   @id @default(cuid())
+  email                String   @unique
+  isActive             Boolean  @default(true)
+  paypalSubscriptionId String?
+  userId               String?  @unique
+  status               String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  user                 User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("newsletter_subscribers")
+  @@index([userId])
+  @@index([status])
 }
 
 model Wishlist {
@@ -526,6 +544,8 @@ model PurchasedBook {
   userId    String
   bookId    String
   price     String
+  paypalOrderId String?
+  stripePaymentId String?
   purchasedAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)

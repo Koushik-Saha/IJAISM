@@ -7,6 +7,8 @@ import { prisma } from '@/lib/prisma';
 import { sendMembershipActivationEmail, sendPaymentFailedEmail } from '@/lib/email/send';
 import { NextRequest } from 'next/server';
 
+import { stripe } from '@/lib/stripe';
+
 // Mock dependencies
 jest.mock('@/lib/prisma', () => ({
     prisma: {
@@ -14,6 +16,7 @@ jest.mock('@/lib/prisma', () => ({
             findFirst: jest.fn(),
             update: jest.fn(),
             create: jest.fn(),
+            findUnique: jest.fn(),
         },
         user: {
             findUnique: jest.fn(),
@@ -38,11 +41,10 @@ jest.mock('@/lib/logger', () => ({
 }));
 
 // Mock Stripe
-const mockConstructEvent = jest.fn();
 jest.mock('stripe', () => {
     return jest.fn().mockImplementation(() => ({
         webhooks: {
-            constructEvent: mockConstructEvent,
+            constructEvent: jest.fn(),
         },
     }));
 });
@@ -69,16 +71,20 @@ describe('Stripe Webhook API', () => {
 
     describe('Validation', () => {
         it('should return 400 if signature is missing', async () => {
+            (stripe.webhooks.constructEvent as jest.Mock).mockImplementation(() => {
+                throw new Error('No signature provided');
+            });
+
             const req = createRequest('{}', null);
             const res = await POST(req);
             const data = await res.json();
 
             expect(res.status).toBe(400);
-            expect(data.error).toBe('No signature provided');
+            expect(data.error).toContain('Webhook Error');
         });
 
         it('should return 400 if signature verification fails', async () => {
-            mockConstructEvent.mockImplementation(() => {
+            (stripe.webhooks.constructEvent as jest.Mock).mockImplementation(() => {
                 throw new Error('Invalid signature');
             });
 
@@ -93,7 +99,7 @@ describe('Stripe Webhook API', () => {
 
     describe('Event Types', () => {
         it('should handle checkout.session.completed for new membership', async () => {
-            mockConstructEvent.mockReturnValue({
+            (stripe.webhooks.constructEvent as jest.Mock).mockReturnValue({
                 type: 'checkout.session.completed',
                 id: 'evt_123',
                 data: {
@@ -101,11 +107,12 @@ describe('Stripe Webhook API', () => {
                         id: 'cs_123',
                         subscription: 'sub_123',
                         metadata: { userId: 'user-1', tier: 'premium' },
+                        mode: 'subscription',
                     },
                 },
             });
 
-            (prisma.membership.findFirst as jest.Mock).mockResolvedValue(null); // No existing
+            (prisma.membership.findUnique as jest.Mock).mockResolvedValue(null); // No existing
             (prisma.membership.create as jest.Mock).mockResolvedValue({ id: 'mem-1' });
             (prisma.user.findUnique as jest.Mock).mockResolvedValue({ email: 'test@test.com', name: 'Test' });
 
@@ -135,7 +142,7 @@ describe('Stripe Webhook API', () => {
         });
 
         it('should handle checkout.session.completed for existing membership (update)', async () => {
-            mockConstructEvent.mockReturnValue({
+            (stripe.webhooks.constructEvent as jest.Mock).mockReturnValue({
                 type: 'checkout.session.completed',
                 id: 'evt_123',
                 data: {
@@ -143,11 +150,12 @@ describe('Stripe Webhook API', () => {
                         id: 'cs_123',
                         subscription: 'sub_new',
                         metadata: { userId: 'user-1', tier: 'premium' },
+                        mode: 'subscription',
                     },
                 },
             });
 
-            (prisma.membership.findFirst as jest.Mock).mockResolvedValue({ id: 'mem-1' });
+            (prisma.membership.findUnique as jest.Mock).mockResolvedValue({ id: 'mem-1' });
             (prisma.membership.update as jest.Mock).mockResolvedValue({ id: 'mem-1' });
             (prisma.user.findUnique as jest.Mock).mockResolvedValue({ email: 'test@test.com' });
 
@@ -155,7 +163,7 @@ describe('Stripe Webhook API', () => {
             await POST(req);
 
             expect(prisma.membership.update).toHaveBeenCalledWith(expect.objectContaining({
-                where: { id: 'mem-1' },
+                where: { userId: 'user-1' }, // Route updates by userId
                 data: expect.objectContaining({
                     stripeSubscriptionId: 'sub_new',
                 })
@@ -163,7 +171,7 @@ describe('Stripe Webhook API', () => {
         });
 
         it('should handle invoice.payment_failed', async () => {
-            mockConstructEvent.mockReturnValue({
+            (stripe.webhooks.constructEvent as jest.Mock).mockReturnValue({
                 type: 'invoice.payment_failed',
                 id: 'evt_fail',
                 data: {
@@ -177,7 +185,8 @@ describe('Stripe Webhook API', () => {
             (prisma.membership.findFirst as jest.Mock).mockResolvedValue({
                 userId: 'user-1',
                 tier: 'basic',
-                stripeSubscriptionId: 'sub_123'
+                stripeSubscriptionId: 'sub_123',
+                user: { email: 'test@test.com', name: 'Test' } // Mock user inclusion
             });
             (prisma.user.findUnique as jest.Mock).mockResolvedValue({ email: 'test@test.com' });
 

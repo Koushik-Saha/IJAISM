@@ -442,3 +442,26 @@ export async function sendCoAuthorNotification(
     html
   );
 }
+
+// 17. Send General Payment Success Email
+export async function sendPaymentSuccessEmail(
+  to: string,
+  subject: string,
+  description: string,
+  amount: string | number
+): Promise<EmailResult> {
+  const html = `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+        <h1 style="color: #4F46E5;">Payment Successful</h1>
+        <p>Thank you for your purchase.</p>
+        <div style="background-color: #F3F4F6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <p style="margin: 5px 0;"><strong>Item:</strong> ${description}</p>
+            <p style="margin: 5px 0;"><strong>Amount:</strong> $${amount}</p>
+        </div>
+        <p>Your access has been granted immediately. You can view your purchase in your dashboard.</p>
+        <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 30px 0;" />
+        <p style="color: #6B7280; font-size: 12px;">${EMAIL_CONFIG.appName}</p>
+      </div>
+    `;
+  return sendEmail(to, subject, html);
+}

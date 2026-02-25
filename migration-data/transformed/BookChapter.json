@@ -1,0 +1,402 @@
+[
+  {
+    "id": "ae38bcd9-bad8-48bb-acf9-9472797c1127",
+    "bookId": "3c16dec5-288f-472d-87c2-a3cc2773961e",
+    "title": "The Cybersecurity Imperative: Protecting Digital Assets",
+    "pageRange": "13-20",
+    "pdfUrl": "1750427625_685567e909c46.pdf",
+    "summary": "<p>zdsfsdfsdf dfsdf</p>",
+    "createdAt": "2024-12-27T23:22:34.000Z",
+    "updatedAt": "2025-06-20T20:53:45.000Z"
+  },
+  {
+    "id": "33d6983c-95cc-4286-b1f1-6353a4ad8997",
+    "bookId": "3c16dec5-288f-472d-87c2-a3cc2773961e",
+    "title": "Understanding Cyber Threats: An Evolving Landscape",
+    "pageRange": "21-27",
+    "pdfUrl": "1750441775_68559f2fd4f9d.pdf",
+    "summary": null,
+    "createdAt": "2024-12-27T23:22:34.000Z",
+    "updatedAt": "2025-06-21T00:49:35.000Z"
+  },
+  {
+    "id": "b3090062-440b-48f8-a5ca-4c643ab1e35d",
+    "bookId": "3c16dec5-288f-472d-87c2-a3cc2773961e",
+    "title": "The Strategic Role of Cybersecurity in Business Growth:",
+    "pageRange": "28-34",
+    "pdfUrl": "1750427729_68556851be146.pdf",
+    "summary": null,
+    "createdAt": "2024-12-27T23:22:34.000Z",
+    "updatedAt": "2025-09-19T00:07:47.000Z"
+  },
+  {
+    "id": "b0a22856-6c3d-4e38-a436-93b0f7184230",
+    "bookId": "3c16dec5-288f-472d-87c2-a3cc2773961e",
+    "title": "Risk Management Fundamentals in the Digital Age",
+    "pageRange": "35-42",
+    "pdfUrl": "1750427779_6855688358873.pdf",
+    "summary": null,
+    "createdAt": "2024-12-27T23:22:34.000Z",
+    "updatedAt": "2025-09-19T00:43:05.000Z"
+  },
+  {
+    "id": "2979b3e9-c1a4-43df-b4a2-a45b8658bc06",
+    "bookId": "3c16dec5-288f-472d-87c2-a3cc2773961e",
+    "title": "Proactive Strategies for Business Continuity",
+    "pageRange": "43-49",
+    "pdfUrl": "1750427828_685568b4472c0.pdf",
+    "summary": null,
+    "createdAt": "2024-12-27T23:22:34.000Z",
+    "updatedAt": "2025-09-19T00:43:17.000Z"
+  },
+  {
+    "id": "530c7d7b-14a1-41d5-99cb-a90185c274e3",
+    "bookId": "ceeec0ee-c053-45e2-9ad2-5b62ce5e1235",
+    "title": "Introduction to Artificial Intelligence and Data Analytics",
+    "pageRange": "19-26",
+    "pdfUrl": "1750426282_685562aac74b0.pdf",
+    "summary": null,
+    "createdAt": "2024-12-27T23:23:18.000Z",
+    "updatedAt": "2025-09-19T00:12:53.000Z"
+  },
+  {
+    "id": "47d0e7d1-8cbc-4e88-8a35-fe2ff2e026e1",
+    "bookId": "ceeec0ee-c053-45e2-9ad2-5b62ce5e1235",
+    "title": "The Role of AI in Modern Business",
+    "pageRange": "27-35",
+    "pdfUrl": "1750426609_685563f1459ec.pdf",
+    "summary": null,
+    "createdAt": "2024-12-27T23:23:18.000Z",
+    "updatedAt": "2025-06-20T20:36:49.000Z"
+  },
+  {
+    "id": "fad71261-ce3a-46a9-80d4-7ec69582ba59",
+    "bookId": "ceeec0ee-c053-45e2-9ad2-5b62ce5e1235",
+    "title": "Key Concepts in Data Analytics",
+    "pageRange": "31-41",
+    "pdfUrl": "1750426900_6855651471cc6.pdf",
+    "summary": null,
+    "createdAt": "2024-12-27T23:23:18.000Z",
+    "updatedAt": "2025-09-19T00:35:27.000Z"
+  },
+  {
+    "id": "f72e884c-e225-4560-9ff7-c26a544814b7",
+    "bookId": "ceeec0ee-c053-45e2-9ad2-5b62ce5e1235",
+    "title": "AI and Data Analytics for Decision-Making",
+    "pageRange": "42-47",
+    "pdfUrl": "1750427391_685566ff61ead.pdf",
+    "summary": null,
+    "createdAt": "2024-12-27T23:23:18.000Z",
+    "updatedAt": "2025-09-19T00:35:35.000Z"
+  },
+  {
+    "id": "d0131431-db15-448d-ad3b-1be0f7e852ef",
+    "bookId": "ceeec0ee-c053-45e2-9ad2-5b62ce5e1235",
+    "title": "The Ethical Dimensions of AI in Business",
+    "pageRange": "48-53",
+    "pdfUrl": "1750427485_6855675d5623e.pdf",
+    "summary": null,
+    "createdAt": "2024-12-27T23:23:18.000Z",
+    "updatedAt": "2025-09-19T00:35:44.000Z"
+  },
+  {
+    "id": "b172de99-4c76-4c26-9b1a-3784f281497c",
+    "bookId": "edd745a5-fe52-4eee-bd26-9f087f1a40ad",
+    "title": "Introduction to Introduction to Digital Transformation for Executives",
+    "pageRange": "18-24",
+    "pdfUrl": "1750427977_685569498c80f.pdf",
+    "summary": null,
+    "createdAt": "2024-12-27T23:23:38.000Z",
+    "updatedAt": "2025-09-19T00:39:08.000Z"
+  },
+  {
+    "id": "9f8a1724-29d0-44d3-9f11-f2f779e46657",
+    "bookId": "edd745a5-fe52-4eee-bd26-9f087f1a40ad",
+    "title": "Understanding the Digital Landscape",
+    "pageRange": "25-33",
+    "pdfUrl": "1750428017_68556971c795c.pdf",
+    "summary": null,
+    "createdAt": "2024-12-27T23:23:38.000Z",
+    "updatedAt": "2025-09-19T00:39:33.000Z"
+  },
+  {
+    "id": "2dec4a69-6122-4ca0-8c82-39421dd23ad7",
+    "bookId": "edd745a5-fe52-4eee-bd26-9f087f1a40ad",
+    "title": "Building the Business Case for Digital Transformation",
+    "pageRange": "27-40",
+    "pdfUrl": "1750428873_68556cc9c3e78.pdf",
+    "summary": null,
+    "createdAt": "2024-12-27T23:23:38.000Z",
+    "updatedAt": "2025-09-19T00:42:53.000Z"
+  },
+  {
+    "id": "e591e486-2596-4eb4-8559-f874f6b8c250",
+    "bookId": "edd745a5-fe52-4eee-bd26-9f087f1a40ad",
+    "title": "The Internet of Things (IoT) and Its Role in Digital Transformation",
+    "pageRange": "41-49",
+    "pdfUrl": "1750428913_68556cf1b6e98.pdf",
+    "summary": null,
+    "createdAt": "2024-12-27T23:23:38.000Z",
+    "updatedAt": "2025-09-19T00:43:27.000Z"
+  },
+  {
+    "id": "dd523f25-aa1c-41e8-a8f2-197dc90f15f0",
+    "bookId": "edd745a5-fe52-4eee-bd26-9f087f1a40ad",
+    "title": "Automation and Robotics: Transforming Business Operations",
+    "pageRange": "50-60",
+    "pdfUrl": "1750428971_68556d2b4f5b3.pdf",
+    "summary": null,
+    "createdAt": "2024-12-27T23:23:38.000Z",
+    "updatedAt": "2025-09-19T00:43:38.000Z"
+  },
+  {
+    "id": "66610986-660f-49bd-ba09-766b56ec84ee",
+    "bookId": "f65baf44-7885-4f6d-9046-6e5f319d1df6",
+    "title": "The Power of Data in Business",
+    "pageRange": "14-21",
+    "pdfUrl": "1758217626_68cc459a02126.PDF",
+    "summary": null,
+    "createdAt": "2026-02-24T20:03:45.306Z",
+    "updatedAt": "2025-09-19T00:47:06.000Z"
+  },
+  {
+    "id": "9f5321fa-37ce-4502-a76c-0833567499ae",
+    "bookId": "f65baf44-7885-4f6d-9046-6e5f319d1df6",
+    "title": "Information Technology as a Strategic Enabler",
+    "pageRange": "22-28",
+    "pdfUrl": "1758217690_68cc45da157b6.pdf",
+    "summary": null,
+    "createdAt": "2026-02-24T20:03:45.306Z",
+    "updatedAt": "2025-09-19T00:48:10.000Z"
+  },
+  {
+    "id": "f8dfaad5-6881-424a-8ec7-aee914dd6758",
+    "bookId": "f65baf44-7885-4f6d-9046-6e5f319d1df6",
+    "title": "Building a Data-Driven Culture in Your Organization",
+    "pageRange": "25-35",
+    "pdfUrl": "www.test.com",
+    "summary": null,
+    "createdAt": "2026-02-24T20:03:45.306Z",
+    "updatedAt": "2025-09-19T00:50:48.000Z"
+  },
+  {
+    "id": "83f10173-ff60-46c5-9598-584cfbe2ed6f",
+    "bookId": "f65baf44-7885-4f6d-9046-6e5f319d1df6",
+    "title": "Data-Driven Decision Making",
+    "pageRange": "36-41",
+    "pdfUrl": "www.test.com",
+    "summary": null,
+    "createdAt": "2026-02-24T20:03:45.306Z",
+    "updatedAt": "2025-09-19T00:52:08.000Z"
+  },
+  {
+    "id": "a92fd5b3-3d5a-4e1d-836e-83c665b73f46",
+    "bookId": "f65baf44-7885-4f6d-9046-6e5f319d1df6",
+    "title": "Retail and E-Commerce",
+    "pageRange": "42-48",
+    "pdfUrl": "www.test.com",
+    "summary": null,
+    "createdAt": "2026-02-24T20:03:45.306Z",
+    "updatedAt": "2025-09-19T00:52:19.000Z"
+  },
+  {
+    "id": "9728afe0-ef45-44c3-86ee-b13991739b8f",
+    "bookId": "68daaad6-dc0c-48fa-9ee0-c84e995970d3",
+    "title": "Introduction to IT and Strategic Growth",
+    "pageRange": "18-22",
+    "pdfUrl": "1750430666_685573ca9ea33.pdf",
+    "summary": null,
+    "createdAt": "2026-02-24T20:03:45.306Z",
+    "updatedAt": "2025-06-20T21:44:26.000Z"
+  },
+  {
+    "id": "59b55c50-eeac-48f7-baf2-6301fea4f30d",
+    "bookId": "68daaad6-dc0c-48fa-9ee0-c84e995970d3",
+    "title": "The Digital Transformation Imperative",
+    "pageRange": "23-26",
+    "pdfUrl": "1750430721_685574017d87d.pdf",
+    "summary": "<p>ddd</p>",
+    "createdAt": "2026-02-24T20:03:45.306Z",
+    "updatedAt": "2025-06-21T00:54:05.000Z"
+  },
+  {
+    "id": "7c9a3d3e-a774-4730-88d6-44e993a3ed4f",
+    "bookId": "9f62c7be-72b5-4662-82ff-14a78fd0206a",
+    "title": "Introduction to Sustainable Business Practices",
+    "pageRange": "13-20",
+    "pdfUrl": "1750429130_68556dcaebf65.pdf",
+    "summary": null,
+    "createdAt": "2026-02-24T20:03:45.306Z",
+    "updatedAt": "2025-06-20T21:18:50.000Z"
+  },
+  {
+    "id": "4ad7153d-89a4-4bff-b1ea-d960d6de868c",
+    "bookId": "9f62c7be-72b5-4662-82ff-14a78fd0206a",
+    "title": "The Intersection of IT and Sustainability",
+    "pageRange": "21-29",
+    "pdfUrl": "1750430248_685572288f7f0.pdf",
+    "summary": null,
+    "createdAt": "2026-02-24T20:03:45.306Z",
+    "updatedAt": "2025-06-21T00:54:57.000Z"
+  },
+  {
+    "id": "ecfa0200-24b0-41a5-97b4-34a2dadbacfa",
+    "bookId": "9f62c7be-72b5-4662-82ff-14a78fd0206a",
+    "title": "Green IT and Energy Efficiency",
+    "pageRange": "19-52",
+    "pdfUrl": "1750430442_685572ea1d0bc.pdf",
+    "summary": "<p>dfsf</p>",
+    "createdAt": "2025-06-20T21:40:42.000Z",
+    "updatedAt": "2025-09-19T01:05:42.000Z"
+  },
+  {
+    "id": "87952cd9-22b8-4a3d-b56b-0896176c1fea",
+    "bookId": "9f62c7be-72b5-4662-82ff-14a78fd0206a",
+    "title": "IT and Carbon Footprint Reduction",
+    "pageRange": "20-28",
+    "pdfUrl": "1750430518_68557336ab45e.pdf",
+    "summary": "<p>dfdfgdgf</p>",
+    "createdAt": "2025-06-20T21:41:58.000Z",
+    "updatedAt": "2025-09-19T01:05:50.000Z"
+  },
+  {
+    "id": "449f0756-2bdf-40df-bc21-1ed516bef6a4",
+    "bookId": "9f62c7be-72b5-4662-82ff-14a78fd0206a",
+    "title": "Digital Tools for Resource Optimization",
+    "pageRange": "30-40",
+    "pdfUrl": "1750430576_68557370118d0.pdf",
+    "summary": "<p>dfsfdfg</p>",
+    "createdAt": "2025-06-20T21:42:56.000Z",
+    "updatedAt": "2025-09-19T01:06:00.000Z"
+  },
+  {
+    "id": "e3c231ab-b994-40e5-a259-d07d911e9923",
+    "bookId": "68daaad6-dc0c-48fa-9ee0-c84e995970d3",
+    "title": "Understanding Business Strategy through IT",
+    "pageRange": "13-20",
+    "pdfUrl": "1750430789_685574451983b.pdf",
+    "summary": "<p>sdsd</p>",
+    "createdAt": "2025-06-20T21:46:29.000Z",
+    "updatedAt": "2025-09-19T00:58:20.000Z"
+  },
+  {
+    "id": "90810d0b-abb2-4813-9af9-22fba9b66e24",
+    "bookId": "68daaad6-dc0c-48fa-9ee0-c84e995970d3",
+    "title": "Data Analytics for Decision-Making",
+    "pageRange": "19-28",
+    "pdfUrl": "1750430834_685574729d90a.pdf",
+    "summary": "<p>sdsfdsf</p>",
+    "createdAt": "2025-06-20T21:47:14.000Z",
+    "updatedAt": "2025-09-19T00:58:32.000Z"
+  },
+  {
+    "id": "0525e01e-d8b1-42ea-8e20-9e01d842ac74",
+    "bookId": "68daaad6-dc0c-48fa-9ee0-c84e995970d3",
+    "title": "Cloud Computing and Scalability",
+    "pageRange": "30-39",
+    "pdfUrl": "1750430887_685574a7304d6.pdf",
+    "summary": "<p>dfdfgdfg</p>",
+    "createdAt": "2025-06-20T21:48:07.000Z",
+    "updatedAt": "2025-09-19T00:58:42.000Z"
+  },
+  {
+    "id": "6a43c372-7141-4b9e-87a2-2ba0b6befdfb",
+    "bookId": "07683145-e2ef-4467-be83-d77704c9aff7",
+    "title": "Introduction to Sustainable Innovation in Business",
+    "pageRange": "16-19",
+    "pdfUrl": "1750955268_685d750489ab4.pdf",
+    "summary": "<p>sdsd</p>",
+    "createdAt": "2025-06-26T23:27:48.000Z",
+    "updatedAt": "2025-09-19T01:11:10.000Z"
+  },
+  {
+    "id": "7e799299-3a90-4325-88ad-c61b6fc7b290",
+    "bookId": "07683145-e2ef-4467-be83-d77704c9aff7",
+    "title": "The Role of Innovation in Business Growth",
+    "pageRange": "20-23",
+    "pdfUrl": "1750955500_685d75eca0c53.pdf",
+    "summary": "<p>dsfds</p>",
+    "createdAt": "2025-06-26T23:31:40.000Z",
+    "updatedAt": "2025-09-19T01:11:20.000Z"
+  },
+  {
+    "id": "bad4ebd3-85f7-42b4-a56d-92f3b44b5b74",
+    "bookId": "07683145-e2ef-4467-be83-d77704c9aff7",
+    "title": "Challenges and Opportunities in Sustainable Innovation",
+    "pageRange": "24-27",
+    "pdfUrl": "1750955584_685d764025af3.pdf",
+    "summary": "<p>ssf</p>",
+    "createdAt": "2025-06-26T23:33:04.000Z",
+    "updatedAt": "2025-09-19T01:15:56.000Z"
+  },
+  {
+    "id": "e0ca6b59-dcd5-4ede-81a8-39507427d289",
+    "bookId": "b1111926-cab7-45e1-8985-0f7503913d69",
+    "title": "What is Artificial Intelligence?",
+    "pageRange": "1-8",
+    "pdfUrl": "1758219598_68cc4d4ee7a78.pdf",
+    "summary": "<p>dfsdf</p>",
+    "createdAt": "2025-08-12T17:59:10.000Z",
+    "updatedAt": "2025-09-19T01:19:58.000Z"
+  },
+  {
+    "id": "b1b45efc-4664-486c-81f9-34630220dce1",
+    "bookId": "b1111926-cab7-45e1-8985-0f7503913d69",
+    "title": "Historical Context: The Evolution of Health Care Technology",
+    "pageRange": "1-10",
+    "pdfUrl": "1758219620_68cc4d6426ad8.pdf",
+    "summary": "<p>dfsdf</p>",
+    "createdAt": "2025-08-12T17:59:51.000Z",
+    "updatedAt": "2025-09-19T01:20:20.000Z"
+  },
+  {
+    "id": "18f970e3-a797-4ba2-92f3-f862c2ed9b6b",
+    "bookId": "b1111926-cab7-45e1-8985-0f7503913d69",
+    "title": "Overview of Current AI Applications in Health Care",
+    "pageRange": "1-16",
+    "pdfUrl": "1758219649_68cc4d81a8c58.pdf",
+    "summary": "<p>dfsdfs</p>",
+    "createdAt": "2025-08-12T18:00:27.000Z",
+    "updatedAt": "2025-09-19T01:22:32.000Z"
+  },
+  {
+    "id": "4b23d824-b6d7-49d6-a23d-504260be1a6a",
+    "bookId": "a8549c96-aa76-4cfe-acdd-576727a860d7",
+    "title": "The Evolution of Artificial Intelligence in Medicine",
+    "pageRange": "1-9",
+    "pdfUrl": "1756060661_68ab5bf5a5003.pdf",
+    "summary": null,
+    "createdAt": "2025-08-25T01:37:41.000Z",
+    "updatedAt": "2025-09-19T01:23:39.000Z"
+  },
+  {
+    "id": "02f0e372-9027-4f86-bc2f-b72574af9eeb",
+    "bookId": "a8549c96-aa76-4cfe-acdd-576727a860d7",
+    "title": "Medical Data: The Fuel for Intelligent Systems",
+    "pageRange": "1-7",
+    "pdfUrl": "1756060714_68ab5c2a0840e.pdf",
+    "summary": null,
+    "createdAt": "2025-08-25T01:38:34.000Z",
+    "updatedAt": "2025-09-19T01:25:15.000Z"
+  },
+  {
+    "id": "fe77ecbc-c3dd-4c30-808b-af9e02e5e732",
+    "bookId": "970093dc-bfee-4797-bf5c-e1bd99b6f2ee",
+    "title": "ntroduction to Autism Spectrum Disorder and Machine Learning",
+    "pageRange": "1-5",
+    "pdfUrl": "1759259356_68dc2adca4cc4.pdf",
+    "summary": null,
+    "createdAt": "2025-10-01T02:09:16.000Z",
+    "updatedAt": "2025-10-01T02:09:16.000Z"
+  },
+  {
+    "id": "d74589c4-a2e5-4050-a36a-b446826c82d9",
+    "bookId": "970093dc-bfee-4797-bf5c-e1bd99b6f2ee",
+    "title": "Data Science and Machine Learning Fundamentals",
+    "pageRange": "1-4",
+    "pdfUrl": "1759259405_68dc2b0dc4ac1.pdf",
+    "summary": null,
+    "createdAt": "2025-10-01T02:10:05.000Z",
+    "updatedAt": "2025-10-01T02:10:05.000Z"
+  }
+]

@@ -1,0 +1,164 @@
+[
+  {
+    "id": 1,
+    "thesis_id": 1,
+    "title": "Introduction to AI",
+    "page_range": "1-10",
+    "pdf_url": "url-to-ai-chapter1.pdf",
+    "created_at": "2024-12-28 15:34:39",
+    "updated_at": "2024-12-28 15:34:39"
+  },
+  {
+    "id": 2,
+    "thesis_id": 1,
+    "title": "Neural Networks",
+    "page_range": "11-20",
+    "pdf_url": "url-to-ai-chapter2.pdf",
+    "created_at": "2024-12-28 15:34:39",
+    "updated_at": "2024-12-28 15:34:39"
+  },
+  {
+    "id": 3,
+    "thesis_id": 1,
+    "title": "Deep Learning Techniques",
+    "page_range": "21-30",
+    "pdf_url": "url-to-ai-chapter3.pdf",
+    "created_at": "2024-12-28 15:34:39",
+    "updated_at": "2024-12-28 15:34:39"
+  },
+  {
+    "id": 4,
+    "thesis_id": 2,
+    "title": "Introduction to Quantum Computing",
+    "page_range": "1-10",
+    "pdf_url": "url-to-quantum-chapter1.pdf",
+    "created_at": "2024-12-28 15:34:39",
+    "updated_at": "2024-12-28 15:34:39"
+  },
+  {
+    "id": 5,
+    "thesis_id": 2,
+    "title": "Quantum Algorithms",
+    "page_range": "11-20",
+    "pdf_url": "url-to-quantum-chapter2.pdf",
+    "created_at": "2024-12-28 15:34:39",
+    "updated_at": "2024-12-28 15:34:39"
+  },
+  {
+    "id": 6,
+    "thesis_id": 2,
+    "title": "Applications of Quantum Computing",
+    "page_range": "21-30",
+    "pdf_url": "url-to-quantum-chapter3.pdf",
+    "created_at": "2024-12-28 15:34:39",
+    "updated_at": "2024-12-28 15:34:39"
+  },
+  {
+    "id": 7,
+    "thesis_id": 3,
+    "title": "Climate Science Basics",
+    "page_range": "1-10",
+    "pdf_url": "url-to-climate-chapter1.pdf",
+    "created_at": "2024-12-28 15:34:39",
+    "updated_at": "2024-12-28 15:34:39"
+  },
+  {
+    "id": 8,
+    "thesis_id": 3,
+    "title": "Impact of Climate Change",
+    "page_range": "11-20",
+    "pdf_url": "url-to-climate-chapter2.pdf",
+    "created_at": "2024-12-28 15:34:39",
+    "updated_at": "2024-12-28 15:34:39"
+  },
+  {
+    "id": 9,
+    "thesis_id": 3,
+    "title": "Mitigation Strategies",
+    "page_range": "21-30",
+    "pdf_url": "url-to-climate-chapter3.pdf",
+    "created_at": "2024-12-28 15:34:39",
+    "updated_at": "2024-12-28 15:34:39"
+  },
+  {
+    "id": 10,
+    "thesis_id": 4,
+    "title": "Blockchain Fundamentals",
+    "page_range": "1-10",
+    "pdf_url": "url-to-blockchain-chapter1.pdf",
+    "created_at": "2024-12-28 15:34:39",
+    "updated_at": "2024-12-28 15:34:39"
+  },
+  {
+    "id": 11,
+    "thesis_id": 4,
+    "title": "Cryptography in Blockchain",
+    "page_range": "11-20",
+    "pdf_url": "url-to-blockchain-chapter2.pdf",
+    "created_at": "2024-12-28 15:34:39",
+    "updated_at": "2024-12-28 15:34:39"
+  },
+  {
+    "id": 12,
+    "thesis_id": 4,
+    "title": "Blockchain Applications",
+    "page_range": "21-30",
+    "pdf_url": "url-to-blockchain-chapter3.pdf",
+    "created_at": "2024-12-28 15:34:39",
+    "updated_at": "2024-12-28 15:34:39"
+  },
+  {
+    "id": 13,
+    "thesis_id": 5,
+    "title": "Renewable Energy Basics",
+    "page_range": "1-10",
+    "pdf_url": "url-to-renewable-chapter1.pdf",
+    "created_at": "2024-12-28 15:34:39",
+    "updated_at": "2024-12-28 15:34:39"
+  },
+  {
+    "id": 14,
+    "thesis_id": 5,
+    "title": "Solar and Wind Energy",
+    "page_range": "11-20",
+    "pdf_url": "url-to-renewable-chapter2.pdf",
+    "created_at": "2024-12-28 15:34:39",
+    "updated_at": "2024-12-28 15:34:39"
+  },
+  {
+    "id": 15,
+    "thesis_id": 5,
+    "title": "Hydroelectric Power",
+    "page_range": "21-30",
+    "pdf_url": "url-to-renewable-chapter3.pdf",
+    "created_at": "2024-12-28 15:34:39",
+    "updated_at": "2024-12-28 15:34:39"
+  },
+  {
+    "id": 16,
+    "thesis_id": 6,
+    "title": "Introduction to Cybersecurity",
+    "page_range": "1-10",
+    "pdf_url": "url-to-cyber-chapter1.pdf",
+    "created_at": "2024-12-28 15:34:39",
+    "updated_at": "2024-12-28 15:34:39"
+  },
+  {
+    "id": 17,
+    "thesis_id": 6,
+    "title": "Threat Detection",
+    "page_range": "11-20",
+    "pdf_url": "url-to-cyber-chapter2.pdf",
+    "created_at": "2024-12-28 15:34:39",
+    "updated_at": "2024-12-28 15:34:39"
+  },
+  {
+    "id": 18,
+    "thesis_id": 6,
+    "title": "Cybersecurity Policies",
+    "page_range": "21-30",
+    "pdf_url": "url-to-cyber-chapter3.pdf",
+    "created_at": "2024-12-28 15:34:39",
+    "updated_at": "2024-12-28 15:34:39"
+  }
+]

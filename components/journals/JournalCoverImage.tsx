@@ -21,10 +21,10 @@ export default function JournalCoverImage({ code, coverImageUrl }: JournalCoverI
         return <Placeholder />;
     }
 
-    // Handle URL logic
+    // Handle URL logic - legacy images were stored in public/backend/journal/
     const src = coverImageUrl.startsWith('http')
         ? coverImageUrl
-        : `https://c5k.com/${coverImageUrl.replace(/^\//, '')}`;
+        : `https://c5k.com/public/backend/journal/${coverImageUrl.replace(/^\//, '')}`;
 
     return (
         <img

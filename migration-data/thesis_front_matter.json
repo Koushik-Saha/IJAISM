@@ -1,0 +1,86 @@
+[
+  {
+    "id": 1,
+    "name": "Introduction",
+    "thesis_id": 1,
+    "pages_range": "1-6",
+    "pdf_url": "Explore_How_Big_Data_Analytics_Can_Enhance_Customer_Experience.pdf"
+  },
+  {
+    "id": 2,
+    "name": "Abstract",
+    "thesis_id": 2,
+    "pages_range": "1-6",
+    "pdf_url": "The_Implementation_and_Impact_of_Iot_Technologies_on_Urban_Infrastructure.pdf"
+  },
+  {
+    "id": 3,
+    "name": "Acknowledgments",
+    "thesis_id": 3,
+    "pages_range": "1-6",
+    "pdf_url": "Benefits_And_Challenges_of_Edge_Computing.pdf"
+  },
+  {
+    "id": 4,
+    "name": "Table of Contents",
+    "thesis_id": 4,
+    "pages_range": "1-6",
+    "pdf_url": "Explore_Specific_Applications_of_Quantum_Computing_in_Fields.pdf"
+  },
+  {
+    "id": 5,
+    "name": "Chapter 1",
+    "thesis_id": 5,
+    "pages_range": "1-6",
+    "pdf_url": "The_Economic_and_Environmen_al_Dynamics_of_Electric.pdf"
+  },
+  {
+    "id": 6,
+    "name": "Chapter 2",
+    "thesis_id": 6,
+    "pages_range": "1-6",
+    "pdf_url": "Technological_Innovations_to_Overcome_Cross_Border_ECommerce.pdf"
+  },
+  {
+    "id": 7,
+    "name": "Chapter 3",
+    "thesis_id": 7,
+    "pages_range": "1-6",
+    "pdf_url": "The_Local_Government_of_Bangladesh_and_its_Institutions_Play.pdf"
+  },
+  {
+    "id": 8,
+    "name": "Conclusion",
+    "thesis_id": 8,
+    "pages_range": "1-6",
+    "pdf_url": "Rahingya_Persecution_in_Myanmar_and_whether.pdf"
+  },
+  {
+    "id": 9,
+    "name": "References",
+    "thesis_id": 9,
+    "pages_range": "1-6",
+    "pdf_url": "Financial_position_Analysis_of_Bank_Asia_Limited.pdf"
+  },
+  {
+    "id": 10,
+    "name": "Appendices",
+    "thesis_id": 10,
+    "pages_range": "1-6",
+    "pdf_url": "Multi_Storey_Steel_Office_Teaching.pdf"
+  },
+  {
+    "id": 11,
+    "name": "Appendices",
+    "thesis_id": 12,
+    "pages_range": "1-66",
+    "pdf_url": "Evaluation of Credit Performance of National Bank Ltd.pdf"
+  },
+  {
+    "id": 12,
+    "name": "Appendices",
+    "thesis_id": 11,
+    "pages_range": "1-54",
+    "pdf_url": "Level of emplyee job satisfaction.pdf"
+  }
+]

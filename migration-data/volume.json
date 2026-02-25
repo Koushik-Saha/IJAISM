@@ -1,0 +1,212 @@
+[
+  {
+    "id": 1,
+    "volume_name": "Volume 1",
+    "image_path": "tmbh.jpg",
+    "journal_id": 9,
+    "month": "December",
+    "created_at": "2024-12-12 11:25:52",
+    "updated_at": "2025-07-01 17:52:22",
+    "issue": "issue 1"
+  },
+  {
+    "id": 2,
+    "volume_name": "Volume 1",
+    "image_path": "ojbem.jpg",
+    "journal_id": 4,
+    "month": "December",
+    "created_at": "2024-12-12 19:00:31",
+    "updated_at": "2025-07-01 17:52:20",
+    "issue": "issue 1"
+  },
+  {
+    "id": 3,
+    "volume_name": "Volume 1",
+    "image_path": "praihi.jpg",
+    "journal_id": 3,
+    "month": null,
+    "created_at": "2024-12-12 16:19:22",
+    "updated_at": "2025-07-01 17:52:17",
+    "issue": "issue 1"
+  },
+  {
+    "id": 4,
+    "volume_name": "Volume 1",
+    "image_path": "jsae.jpg",
+    "journal_id": 6,
+    "month": null,
+    "created_at": "2024-12-17 17:18:17",
+    "updated_at": "2025-07-01 17:52:15",
+    "issue": "issue 1"
+  },
+  {
+    "id": 5,
+    "volume_name": "Volume 1",
+    "image_path": "jbvad.jpg",
+    "journal_id": 2,
+    "month": null,
+    "created_at": "2024-12-18 13:29:25",
+    "updated_at": "2025-07-01 17:52:12",
+    "issue": "issue 1"
+  },
+  {
+    "id": 6,
+    "volume_name": "Volume 1",
+    "image_path": "prom.jpg",
+    "journal_id": 12,
+    "month": null,
+    "created_at": "2024-12-19 15:43:47",
+    "updated_at": "2025-07-01 17:52:10",
+    "issue": "issue 1"
+  },
+  {
+    "id": 7,
+    "volume_name": "Volume 1",
+    "image_path": "jamsa.jpg",
+    "journal_id": 14,
+    "month": null,
+    "created_at": "2024-12-26 15:24:37",
+    "updated_at": "2025-07-01 17:52:07",
+    "issue": "issue 1"
+  },
+  {
+    "id": 8,
+    "volume_name": "Volume 1",
+    "image_path": "aesi.jpg",
+    "journal_id": 15,
+    "month": null,
+    "created_at": "2024-12-29 13:30:43",
+    "updated_at": "2025-07-01 17:52:05",
+    "issue": "issue 1"
+  },
+  {
+    "id": 9,
+    "volume_name": "Volume 1",
+    "image_path": "tbfli.jpg",
+    "journal_id": 11,
+    "month": null,
+    "created_at": "2024-12-29 13:43:51",
+    "updated_at": "2025-07-01 17:52:03",
+    "issue": "issue 1"
+  },
+  {
+    "id": 10,
+    "volume_name": "Volume 1",
+    "image_path": "amlids.jpg\n",
+    "journal_id": 5,
+    "month": null,
+    "created_at": "2024-12-29 14:26:31",
+    "updated_at": "2025-07-01 17:52:00",
+    "issue": "issue 1"
+  },
+  {
+    "id": 11,
+    "volume_name": "Volume 1",
+    "image_path": "pmsri.jpg",
+    "journal_id": 10,
+    "month": null,
+    "created_at": "2024-11-02 15:16:22",
+    "updated_at": "2025-07-01 17:51:58",
+    "issue": "issue 1"
+  },
+  {
+    "id": 12,
+    "volume_name": "Volume 1",
+    "image_path": "rsdr.jpg",
+    "journal_id": 13,
+    "month": null,
+    "created_at": "2024-11-02 15:46:19",
+    "updated_at": "2025-07-01 17:51:48",
+    "issue": "issue 1"
+  },
+  {
+    "id": 15,
+    "volume_name": "Volume 1",
+    "image_path": "isseu.jpg",
+    "journal_id": 11,
+    "month": "",
+    "created_at": "2024-12-12 11:25:52",
+    "updated_at": "2025-07-01 18:10:10",
+    "issue": "issue 2\n"
+  },
+  {
+    "id": 16,
+    "volume_name": "Volume 1",
+    "image_path": "isseu.jpg",
+    "journal_id": 5,
+    "month": null,
+    "created_at": "2024-12-18 13:29:25",
+    "updated_at": "2025-07-01 17:50:32",
+    "issue": "issue 2\r\n"
+  },
+  {
+    "id": 17,
+    "volume_name": "Volume 1",
+    "image_path": "isseu.jpg",
+    "journal_id": 6,
+    "month": null,
+    "created_at": "2024-12-18 13:29:25",
+    "updated_at": "2025-07-01 17:50:32",
+    "issue": "issue 2\r\n"
+  },
+  {
+    "id": 18,
+    "volume_name": "Volume 1",
+    "image_path": "isseu.jpg",
+    "journal_id": 3,
+    "month": null,
+    "created_at": "2024-12-18 13:29:25",
+    "updated_at": "2025-07-01 17:50:32",
+    "issue": "issue 2\r\n"
+  },
+  {
+    "id": 19,
+    "volume_name": "Volume 1",
+    "image_path": "isseu.jpg",
+    "journal_id": 4,
+    "month": null,
+    "created_at": "2024-12-18 13:29:25",
+    "updated_at": "2025-07-01 17:50:32",
+    "issue": "issue 2\r\n"
+  },
+  {
+    "id": 20,
+    "volume_name": "Volume 1",
+    "image_path": "isseu.jpg",
+    "journal_id": 14,
+    "month": null,
+    "created_at": "2024-12-18 13:29:25",
+    "updated_at": "2025-07-01 17:50:32",
+    "issue": "issue 2\r\n"
+  },
+  {
+    "id": 21,
+    "volume_name": "Volume 1",
+    "image_path": "isseu.jpg",
+    "journal_id": 13,
+    "month": null,
+    "created_at": "2024-12-18 13:29:25",
+    "updated_at": "2025-10-20 17:40:53",
+    "issue": "issue 2\r\n"
+  },
+  {
+    "id": 22,
+    "volume_name": "Volume 1",
+    "image_path": "isseu.jpg",
+    "journal_id": 2,
+    "month": null,
+    "created_at": "2024-12-18 13:29:25",
+    "updated_at": "2025-10-20 17:40:53",
+    "issue": "issue 2\r\n"
+  },
+  {
+    "id": 23,
+    "volume_name": "Volume 1",
+    "image_path": "isseu.jpg",
+    "journal_id": 9,
+    "month": null,
+    "created_at": "2024-12-18 13:29:25",
+    "updated_at": "2025-10-20 17:40:53",
+    "issue": "issue 2\r\n"
+  }
+]

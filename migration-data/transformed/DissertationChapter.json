@@ -1,0 +1,164 @@
+[
+  {
+    "id": "e04b4324-2061-4b2f-b7e4-fdaf22a5b891",
+    "dissertationId": "1f917705-a52e-48de-bada-50a6645a5340",
+    "title": "Introduction to AI",
+    "pageRange": "1-10",
+    "pdfUrl": "url-to-ai-chapter1.pdf",
+    "createdAt": "2024-12-28T23:34:39.000Z",
+    "updatedAt": "2024-12-28T23:34:39.000Z"
+  },
+  {
+    "id": "06cb2989-ab3a-4352-acbc-5c930eea2d2f",
+    "dissertationId": "1f917705-a52e-48de-bada-50a6645a5340",
+    "title": "Neural Networks",
+    "pageRange": "11-20",
+    "pdfUrl": "url-to-ai-chapter2.pdf",
+    "createdAt": "2024-12-28T23:34:39.000Z",
+    "updatedAt": "2024-12-28T23:34:39.000Z"
+  },
+  {
+    "id": "db70de3f-b0cd-4329-a669-99f6e29c11a3",
+    "dissertationId": "1f917705-a52e-48de-bada-50a6645a5340",
+    "title": "Deep Learning Techniques",
+    "pageRange": "21-30",
+    "pdfUrl": "url-to-ai-chapter3.pdf",
+    "createdAt": "2024-12-28T23:34:39.000Z",
+    "updatedAt": "2024-12-28T23:34:39.000Z"
+  },
+  {
+    "id": "92d5b8b1-9cc9-4227-8af6-70d8913f3b8b",
+    "dissertationId": "79869b3d-bf7c-4911-a03a-9e84f4056393",
+    "title": "Introduction to Quantum Computing",
+    "pageRange": "1-10",
+    "pdfUrl": "url-to-quantum-chapter1.pdf",
+    "createdAt": "2024-12-28T23:34:39.000Z",
+    "updatedAt": "2024-12-28T23:34:39.000Z"
+  },
+  {
+    "id": "68514bbf-7dca-4f31-a979-5f77f51e120a",
+    "dissertationId": "79869b3d-bf7c-4911-a03a-9e84f4056393",
+    "title": "Quantum Algorithms",
+    "pageRange": "11-20",
+    "pdfUrl": "url-to-quantum-chapter2.pdf",
+    "createdAt": "2024-12-28T23:34:39.000Z",
+    "updatedAt": "2024-12-28T23:34:39.000Z"
+  },
+  {
+    "id": "28ef054b-ba2c-4267-880a-288c0a271765",
+    "dissertationId": "79869b3d-bf7c-4911-a03a-9e84f4056393",
+    "title": "Applications of Quantum Computing",
+    "pageRange": "21-30",
+    "pdfUrl": "url-to-quantum-chapter3.pdf",
+    "createdAt": "2024-12-28T23:34:39.000Z",
+    "updatedAt": "2024-12-28T23:34:39.000Z"
+  },
+  {
+    "id": "631ce86a-5581-45a0-a13a-a87486a24378",
+    "dissertationId": "4d65db2e-7049-466e-af76-af08e6fd7eac",
+    "title": "Climate Science Basics",
+    "pageRange": "1-10",
+    "pdfUrl": "url-to-climate-chapter1.pdf",
+    "createdAt": "2024-12-28T23:34:39.000Z",
+    "updatedAt": "2024-12-28T23:34:39.000Z"
+  },
+  {
+    "id": "508eeb58-886b-47a7-92a1-231171756a58",
+    "dissertationId": "4d65db2e-7049-466e-af76-af08e6fd7eac",
+    "title": "Impact of Climate Change",
+    "pageRange": "11-20",
+    "pdfUrl": "url-to-climate-chapter2.pdf",
+    "createdAt": "2024-12-28T23:34:39.000Z",
+    "updatedAt": "2024-12-28T23:34:39.000Z"
+  },
+  {
+    "id": "c2576022-b82c-4afa-8876-4b4582081282",
+    "dissertationId": "4d65db2e-7049-466e-af76-af08e6fd7eac",
+    "title": "Mitigation Strategies",
+    "pageRange": "21-30",
+    "pdfUrl": "url-to-climate-chapter3.pdf",
+    "createdAt": "2024-12-28T23:34:39.000Z",
+    "updatedAt": "2024-12-28T23:34:39.000Z"
+  },
+  {
+    "id": "bd649989-cc76-447f-8fac-4aa3676e57e3",
+    "dissertationId": "a0024b32-ff16-402d-93df-fac638b29b27",
+    "title": "Blockchain Fundamentals",
+    "pageRange": "1-10",
+    "pdfUrl": "url-to-blockchain-chapter1.pdf",
+    "createdAt": "2024-12-28T23:34:39.000Z",
+    "updatedAt": "2024-12-28T23:34:39.000Z"
+  },
+  {
+    "id": "d4646a45-10f5-49f1-928d-f6f8033cad2d",
+    "dissertationId": "a0024b32-ff16-402d-93df-fac638b29b27",
+    "title": "Cryptography in Blockchain",
+    "pageRange": "11-20",
+    "pdfUrl": "url-to-blockchain-chapter2.pdf",
+    "createdAt": "2024-12-28T23:34:39.000Z",
+    "updatedAt": "2024-12-28T23:34:39.000Z"
+  },
+  {
+    "id": "8dc56caf-d9a5-4bd4-aec4-f92cc7dc8f91",
+    "dissertationId": "a0024b32-ff16-402d-93df-fac638b29b27",
+    "title": "Blockchain Applications",
+    "pageRange": "21-30",
+    "pdfUrl": "url-to-blockchain-chapter3.pdf",
+    "createdAt": "2024-12-28T23:34:39.000Z",
+    "updatedAt": "2024-12-28T23:34:39.000Z"
+  },
+  {
+    "id": "e17b7cc6-bec6-4a2b-ae63-8ba75a74bbf9",
+    "dissertationId": "2db400b6-6ad5-43be-b2a4-82ab2883b228",
+    "title": "Renewable Energy Basics",
+    "pageRange": "1-10",
+    "pdfUrl": "url-to-renewable-chapter1.pdf",
+    "createdAt": "2024-12-28T23:34:39.000Z",
+    "updatedAt": "2024-12-28T23:34:39.000Z"
+  },
+  {
+    "id": "5d2df012-a360-456d-accc-daa84938d125",
+    "dissertationId": "2db400b6-6ad5-43be-b2a4-82ab2883b228",
+    "title": "Solar and Wind Energy",
+    "pageRange": "11-20",
+    "pdfUrl": "url-to-renewable-chapter2.pdf",
+    "createdAt": "2024-12-28T23:34:39.000Z",
+    "updatedAt": "2024-12-28T23:34:39.000Z"
+  },
+  {
+    "id": "80404ccd-4d00-4750-b842-8e577f4941b3",
+    "dissertationId": "2db400b6-6ad5-43be-b2a4-82ab2883b228",
+    "title": "Hydroelectric Power",
+    "pageRange": "21-30",
+    "pdfUrl": "url-to-renewable-chapter3.pdf",
+    "createdAt": "2024-12-28T23:34:39.000Z",
+    "updatedAt": "2024-12-28T23:34:39.000Z"
+  },
+  {
+    "id": "65c5527d-a3f7-450f-a827-d42a8df36209",
+    "dissertationId": "c0636b45-3720-41b2-ac49-c2bc0c95db65",
+    "title": "Introduction to Cybersecurity",
+    "pageRange": "1-10",
+    "pdfUrl": "url-to-cyber-chapter1.pdf",
+    "createdAt": "2024-12-28T23:34:39.000Z",
+    "updatedAt": "2024-12-28T23:34:39.000Z"
+  },
+  {
+    "id": "acbd1680-d7c0-4d82-a0c6-a03d79f4e751",
+    "dissertationId": "c0636b45-3720-41b2-ac49-c2bc0c95db65",
+    "title": "Threat Detection",
+    "pageRange": "11-20",
+    "pdfUrl": "url-to-cyber-chapter2.pdf",
+    "createdAt": "2024-12-28T23:34:39.000Z",
+    "updatedAt": "2024-12-28T23:34:39.000Z"
+  },
+  {
+    "id": "5db7ced5-6918-434c-b276-3f2e727bc1ca",
+    "dissertationId": "c0636b45-3720-41b2-ac49-c2bc0c95db65",
+    "title": "Cybersecurity Policies",
+    "pageRange": "21-30",
+    "pdfUrl": "url-to-cyber-chapter3.pdf",
+    "createdAt": "2024-12-28T23:34:39.000Z",
+    "updatedAt": "2024-12-28T23:34:39.000Z"
+  }
+]

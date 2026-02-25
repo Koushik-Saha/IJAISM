@@ -79,20 +79,20 @@ export default async function AboutPage() {
           </div>
           {/* Note: Real user data would come from DB, but matching static content for now as requested */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+            <div className="bg-white p-6 rounded-lg shadow-sm text-center border-t-4 border-t-blue-500">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">👨‍💻</div>
-              <h3 className="font-bold text-lg text-gray-900">Information Technology</h3>
-              <p className="text-gray-600 text-sm mt-2">Expert oversight on systems, security, and protocols.</p>
+              <h3 className="font-bold text-lg text-gray-900">Dr. John Doe</h3>
+              <p className="text-gray-600 text-sm mt-2 font-medium">Information Technology & Management</p>
             </div>
-            <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+            <div className="bg-white p-6 rounded-lg shadow-sm text-center border-t-4 border-t-teal-500">
               <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">🤖</div>
-              <h3 className="font-bold text-lg text-gray-900">Machine Learning & AI</h3>
-              <p className="text-gray-600 text-sm mt-2">Specialized review for algorithms and intelligent systems.</p>
+              <h3 className="font-bold text-lg text-gray-900">Dr. Jane Smith</h3>
+              <p className="text-gray-600 text-sm mt-2 font-medium">Machine Learning & AI</p>
             </div>
-            <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+            <div className="bg-white p-6 rounded-lg shadow-sm text-center border-t-4 border-t-orange-500">
               <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">📊</div>
-              <h3 className="font-bold text-lg text-gray-900">Business Management</h3>
-              <p className="text-gray-600 text-sm mt-2">Strategic insights into marketing, finance, and leadership.</p>
+              <h3 className="font-bold text-lg text-gray-900">Prof. Alan Brown</h3>
+              <p className="text-gray-600 text-sm mt-2 font-medium">Business Management</p>
             </div>
           </div>
         </section>
@@ -135,6 +135,24 @@ export default async function AboutPage() {
             {journals.length === 0 && (
               <div className="col-span-3 text-center py-10 text-gray-500 italic">No journals found.</div>
             )}
+          </div>
+        </section>
+
+        {/* Location Section */}
+        <section className="bg-white border rounded-xl p-10 shadow-sm mt-16">
+          <div className="text-center max-w-2xl mx-auto">
+            <h2 className="text-3xl font-bold text-gray-900 mb-6 font-serif">Location</h2>
+            <div className="flex flex-col items-center justify-center gap-4">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center text-3xl">📍</div>
+              <div>
+                <p className="text-xl font-bold text-gray-800">C5K Academic Publishing</p>
+                <p className="text-lg text-gray-600 mt-2">761 STATE HIGHWAY 100</p>
+                <p className="text-lg text-gray-600">Port Isabel, TX 78578 USA</p>
+              </div>
+              <a href="mailto:contact@c5k.com" className="mt-4 px-6 py-2 bg-[#006d77] text-white rounded font-bold hover:bg-[#005a63] transition-colors">
+                Contact & Support
+              </a>
+            </div>
           </div>
         </section>
 

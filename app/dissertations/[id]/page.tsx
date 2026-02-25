@@ -70,7 +70,7 @@ export default async function DissertationDetailPage({ params }: { params: Promi
               {dissertation.coverImageUrl && (
                 <div className="mb-8 p-4 bg-gray-50 rounded-lg flex justify-center">
                   <img
-                    src={dissertation.coverImageUrl}
+                    src={dissertation.coverImageUrl.startsWith('http') ? dissertation.coverImageUrl : `https://c5k.com/public/backend/thesis/${dissertation.coverImageUrl.replace(/^\//, '')}`}
                     alt={dissertation.title}
                     className="max-h-[400px] w-auto object-contain rounded shadow-sm"
                   />

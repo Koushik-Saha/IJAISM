@@ -196,7 +196,7 @@ export default async function HomePage() {
                     <Link key={journal.id} href={`/journals/${journal.code.toLowerCase()}`}>
                       <Card className="h-full">
                         {journal.coverImageUrl ? (
-                          <img src={journal.coverImageUrl} alt={journal.code} className="h-48 w-full object-cover rounded mb-4" />
+                          <img src={journal.coverImageUrl.startsWith('http') ? journal.coverImageUrl : `https://c5k.com/public/backend/journal/${journal.coverImageUrl.replace(/^\//, '')}`} alt={journal.code} className="h-48 w-full object-cover rounded mb-4" />
                         ) : (
                           <div className="h-48 bg-gradient-to-br from-primary-light to-primary rounded mb-4 flex items-center justify-center">
                             <span className="text-white text-3xl font-bold">{journal.code}</span>

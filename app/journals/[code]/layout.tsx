@@ -43,7 +43,7 @@ export default async function JournalLayout({
                         <div className="w-48 h-64 bg-white rounded-sm shadow-xl flex-shrink-0 overflow-hidden relative border-4 border-white/20">
                             {journal.coverImageUrl ? (
                                 <img
-                                    src={journal.coverImageUrl}
+                                    src={journal.coverImageUrl.startsWith('http') ? journal.coverImageUrl : `https://c5k.com/public/backend/journal/${journal.coverImageUrl.replace(/^\//, '')}`}
                                     alt={journal.code}
                                     className="w-full h-full object-cover"
                                 />

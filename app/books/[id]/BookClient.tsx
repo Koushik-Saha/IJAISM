@@ -250,7 +250,7 @@ export default function BookClient({ book }: BookClientProps) {
                                 {/* Book Cover */}
                                 {book.coverImageUrl ? (
                                     <img
-                                        src={book.coverImageUrl}
+                                        src={book.coverImageUrl.startsWith('http') ? book.coverImageUrl : `https://c5k.com/public/backend/books/${book.coverImageUrl.replace(/^\//, '')}`}
                                         alt={book.title}
                                         className="w-full aspect-[2/3] object-cover rounded-lg mb-6 shadow-sm"
                                     />

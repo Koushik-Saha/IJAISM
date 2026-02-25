@@ -7,7 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model GlobalSettings {
   id        String   @id @default(uuid())
   key       String   @unique
@@ -22,7 +21,7 @@ model User {
   name                    String
   university              String
   orcid                   String?                  @unique
-  orcidAccessToken        String?                  // OAuth Token
+  orcidAccessToken        String? // OAuth Token
   orcidRefreshToken       String?
   role                    String                   @default("author")
   affiliation             String?
@@ -169,52 +168,52 @@ model JournalIssue {
 }
 
 model Article {
-  id                String        @id @default(uuid())
-  journalId         String
-  title             String
-  abstract          String
-  fullText          String?       @db.Text
-  keywords          String[]
-  articleType       String
-  doi               String?       @unique
-  volume            Int?
-  issue             Int?
-  pageStart         Int?
-  pageEnd           Int?
-  publicationDate   DateTime?
-  submissionDate    DateTime?
-  acceptanceDate    DateTime?
-  status            String        @default("draft")
-  pdfUrl            String?
-  coverLetterUrl    String?
-  language          String        @default("en")
-  citationCount     Int           @default(0)
-  viewCount         Int           @default(0)
-  downloadCount     Int           @default(0)
-  isOpenAccess      Boolean       @default(true)
+  id              String    @id @default(uuid())
+  journalId       String
+  title           String
+  abstract        String
+  fullText        String?   @db.Text
+  keywords        String[]
+  articleType     String
+  doi             String?   @unique
+  volume          Int?
+  issue           Int?
+  pageStart       Int?
+  pageEnd         Int?
+  publicationDate DateTime?
+  submissionDate  DateTime?
+  acceptanceDate  DateTime?
+  status          String    @default("draft")
+  pdfUrl          String?
+  coverLetterUrl  String?
+  language        String    @default("en")
+  citationCount   Int       @default(0)
+  viewCount       Int       @default(0)
+  downloadCount   Int       @default(0)
+  isOpenAccess    Boolean   @default(true)
 
-  createdAt         DateTime      @default(now())
+  createdAt           DateTime             @default(now())
   reviewerInvitations ReviewerInvitation[]
-  updatedAt         DateTime      @updatedAt
-  isApcPaid         Boolean       @default(false)
-  apcAmount         Float?
-  paypalOrderId     String?       // For PayPal
-  stripePaymentId   String?       // For Stripe
-  deletedAt         DateTime?
-  authorId          String
-  editorComments    String?
-  rejectionReason   String?
-  resubmissionCount Int           @default(0)
-  issueId           String?
-  isBestPaper       Boolean       @default(false)
-  similarityScore   Float?        // Plagiarism Detection
+  updatedAt           DateTime             @updatedAt
+  isApcPaid           Boolean              @default(false)
+  apcAmount           Float?
+  paypalOrderId       String? // For PayPal
+  stripePaymentId     String? // For Stripe
+  deletedAt           DateTime?
+  authorId            String
+  editorComments      String?
+  rejectionReason     String?
+  resubmissionCount   Int                  @default(0)
+  issueId             String?
+  isBestPaper         Boolean              @default(false)
+  similarityScore     Float? // Plagiarism Detection
   plagiarismReportUrl String?
-  author            User          @relation(fields: [authorId], references: [id])
-  journalIssue      JournalIssue? @relation(fields: [issueId], references: [id])
-  journal           Journal       @relation(fields: [journalId], references: [id])
-  coAuthors         CoAuthor[]
-  reviews           Review[]
-  activityLogs      ActivityLog[]
+  author              User                 @relation(fields: [authorId], references: [id])
+  journalIssue        JournalIssue?        @relation(fields: [issueId], references: [id])
+  journal             Journal              @relation(fields: [journalId], references: [id])
+  coAuthors           CoAuthor[]
+  reviews             Review[]
+  activityLogs        ActivityLog[]
 
   @@index([journalId])
   @@index([status])
@@ -283,6 +282,7 @@ model Dissertation {
   coverImageUrl  String?
   authorName     String?
   author         User      @relation(fields: [authorId], references: [id])
+  chapters       DissertationChapter[]
 
   @@index([authorId])
   @@index([degreeType])
@@ -404,11 +404,11 @@ model Notification {
 }
 
 model Book {
-  id              String   @id @default(uuid())
+  id              String          @id @default(uuid())
   title           String
   authors         String[]
   year            Int
-  isbn            String   @unique
+  isbn            String          @unique
   pages           Int
   field           String
   description     String
@@ -423,29 +423,30 @@ model Book {
   previewPages    Json?
   reviews         Json?
   relatedTopics   String[]
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
   wishlistedBy    Wishlist[]
   purchasedBy     PurchasedBook[]
+  chapters        BookChapter[]
 
   @@index([isbn])
   @@index([field])
 }
 
 model HeroSlide {
-  id                String   @id @default(cuid())
-  title             String
-  subtitle          String?
-  description       String?  @db.Text
-  imageUrl          String?  // Optional background or side image
-  primaryButtonText String?
-  primaryButtonLink String?
+  id                  String   @id @default(cuid())
+  title               String
+  subtitle            String?
+  description         String?  @db.Text
+  imageUrl            String? // Optional background or side image
+  primaryButtonText   String?
+  primaryButtonLink   String?
   secondaryButtonText String?
   secondaryButtonLink String?
-  displayOrder      Int      @default(0)
-  isActive          Boolean  @default(true)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  displayOrder        Int      @default(0)
+  isActive            Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
   @@map("hero_slides")
 }
@@ -464,8 +465,6 @@ model DownloadLog {
   @@index([userId])
   @@index([downloadedAt])
 }
-
-
 
 model ReviewerInvitation {
   id        String   @id @default(uuid())
@@ -490,8 +489,8 @@ model ActivityLog {
   details   String?
   createdAt DateTime @default(now())
 
-  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
-  user      User    @relation(fields: [userId], references: [id])
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id])
 
   @@index([articleId])
   @@index([userId])
@@ -499,9 +498,9 @@ model ActivityLog {
 
 model HomePageSection {
   id           String   @id @default(cuid())
-  type         String   // "hero_carousel", "announcements", "journals", "latest_articles", "most_viewed", "newsletter", "stats", "html", "text"
+  type         String // "hero_carousel", "announcements", "journals", "latest_articles", "most_viewed", "newsletter", "stats", "html", "text"
   title        String?
-  content      Json?    // For custom HTML/Text blocks
+  content      Json? // For custom HTML/Text blocks
   displayOrder Int      @default(0)
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
@@ -521,9 +520,9 @@ model NewsletterSubscriber {
   updatedAt            DateTime @updatedAt
   user                 User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@map("newsletter_subscribers")
   @@index([userId])
   @@index([status])
+  @@map("newsletter_subscribers")
 }
 
 model Wishlist {
@@ -540,17 +539,48 @@ model Wishlist {
 }
 
 model PurchasedBook {
-  id        String   @id @default(cuid())
-  userId    String
-  bookId    String
-  price     String
-  paypalOrderId String?
+  id              String   @id @default(cuid())
+  userId          String
+  bookId          String
+  price           String
+  paypalOrderId   String?
   stripePaymentId String?
-  purchasedAt DateTime @default(now())
+  purchasedAt     DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
 
   @@unique([userId, bookId])
   @@map("purchased_books")
+}
+
+model BookChapter {
+  id        String   @id @default(uuid())
+  bookId    String
+  title     String
+  pageRange String?
+  pdfUrl    String?
+  summary   String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@index([bookId])
+  @@map("book_chapters")
+}
+
+model DissertationChapter {
+  id             String       @id @default(uuid())
+  dissertationId String
+  title          String
+  pageRange      String?
+  pdfUrl         String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  
+  dissertation   Dissertation @relation(fields: [dissertationId], references: [id], onDelete: Cascade)
+
+  @@index([dissertationId])
+  @@map("dissertation_chapters")
 }

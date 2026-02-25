@@ -97,6 +97,7 @@ export default async function DissertationsPage(props: {
                           src={dissertation.coverImageUrl}
                           alt={dissertation.title}
                           className="w-full h-auto rounded shadow-sm border border-gray-100 aspect-[3/4]"
+                          basePath="https://c5k.com/public/backend/thesis/"
                         />
                       </div>
                     )}

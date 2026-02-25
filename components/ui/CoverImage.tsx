@@ -7,9 +7,10 @@ interface CoverImageProps {
     alt: string;
     fallbackText?: string;
     className?: string;
+    basePath?: string;
 }
 
-export default function CoverImage({ src, alt, fallbackText, className }: CoverImageProps) {
+export default function CoverImage({ src, alt, fallbackText, className, basePath }: CoverImageProps) {
     const [error, setError] = useState(false);
 
     // Helper to fix URLs
@@ -17,7 +18,9 @@ export default function CoverImage({ src, alt, fallbackText, className }: CoverI
         if (!url) return '';
         if (url.startsWith('http') || url.startsWith('//')) return url;
         // Fix relative paths from backend
-        return `https://c5k.com/${url.replace(/^\//, '')}`;
+        // Note: Old site used 'public/backend/books' for most book/thesis covers
+        const path = basePath || 'https://c5k.com/public/backend/books/';
+        return `${path}${url.replace(/^\//, '')}`;
     };
 
     const finalSrc = src ? getFixedUrl(src) : '';

@@ -79,6 +79,15 @@ export default function MySubmissionsPage() {
 
   useEffect(() => {
     fetchSubmissions();
+
+    if (typeof window !== 'undefined' && window.location.search.includes('success=true')) {
+      import("@vercel/analytics").then(({ track }) => {
+        track('Successful Payment', { method: 'stripe', type: 'apc' });
+      });
+      toast.success("Payment Successful!");
+      // Clean up URL to prevent duplicate tracking on refresh
+      window.history.replaceState({}, '', '/dashboard/submissions');
+    }
   }, []);
 
   const fetchSubmissions = async () => {

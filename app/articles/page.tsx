@@ -63,15 +63,7 @@ export default function ArticlesPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-xl text-gray-600">Loading articles...</div>
-        </div>
-      </div>
-    );
-  }
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -152,7 +144,31 @@ export default function ArticlesPage() {
             </div>
 
             <div className="space-y-6">
-              {articles.length > 0 ? (
+              {loading ? (
+                [1, 2, 3, 4, 5].map((i) => (
+                  <Card key={i} className="animate-pulse">
+                    <div className="flex flex-col sm:flex-row gap-4">
+                      <div className="flex-1 space-y-4">
+                        <div className="h-5 bg-gray-200 rounded w-16 mb-2"></div>
+                        <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+                        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                        <div className="space-y-2">
+                          <div className="h-4 bg-gray-200 rounded w-full"></div>
+                          <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+                        </div>
+                        <div className="flex gap-2">
+                          <div className="h-6 bg-gray-200 rounded w-16"></div>
+                          <div className="h-6 bg-gray-200 rounded w-16"></div>
+                        </div>
+                      </div>
+                      <div className="flex sm:flex-col gap-2">
+                        <div className="h-10 bg-gray-200 rounded w-24"></div>
+                        <div className="h-10 bg-gray-200 rounded w-28"></div>
+                      </div>
+                    </div>
+                  </Card>
+                ))
+              ) : articles.length > 0 ? (
                 articles.map((article) => (
                   <Card key={article.id}>
                     <div className="flex flex-col sm:flex-row gap-4">
@@ -200,8 +216,12 @@ export default function ArticlesPage() {
                 ))
               ) : (
                 <Card>
-                  <div className="text-center py-8 text-gray-500">
-                    No articles found. Try adjusting your filters.
+                  <div className="text-center py-16 bg-white border border-dashed border-gray-300 rounded-lg">
+                    <svg className="mx-auto h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                    <h3 className="mt-2 text-sm font-medium text-gray-900">No articles found</h3>
+                    <p className="mt-1 text-sm text-gray-500">Try adjusting your filters to find what you're looking for.</p>
                   </div>
                 </Card>
               )}
@@ -235,8 +255,8 @@ export default function ArticlesPage() {
                       key={pageNum}
                       onClick={() => handlePageChange(pageNum)}
                       className={`px-4 py-2 border rounded ${pagination.page === pageNum
-                          ? "bg-primary text-white border-primary"
-                          : "border-gray-300 hover:bg-gray-100"
+                        ? "bg-primary text-white border-primary"
+                        : "border-gray-300 hover:bg-gray-100"
                         }`}
                     >
                       {pageNum}

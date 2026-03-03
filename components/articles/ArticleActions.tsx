@@ -3,6 +3,7 @@
 import { toast } from "sonner";
 import Card from "@/components/ui/Card";
 import ArticleAccessButtons from "@/components/articles/ArticleAccessButtons";
+import { track } from "@vercel/analytics";
 
 interface ArticleActionsProps {
     articleId: string;
@@ -40,6 +41,7 @@ export default function ArticleActions({
             text = `@article{${articleId},\n  title={${title}},\n  author={${authors.map(a => a.name).join(' and ')}},\n  journal={${journalName}},\n  year={${year}}\n}`;
         }
         navigator.clipboard.writeText(text);
+        track('Copy Citation', { style, articleId });
         toast.success(`Copied ${style} citation to clipboard!`);
     };
 
@@ -52,6 +54,7 @@ export default function ArticleActions({
         a.href = url;
         a.download = `citation-${articleId}.bib`;
         a.click();
+        track('Download BibTeX', { articleId });
         toast.success("Downloaded BibTeX file");
     };
 

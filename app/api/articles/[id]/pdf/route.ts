@@ -40,29 +40,97 @@ export async function GET(
         }
 
         // Access Control Logic
-        let allowAccess = false;
+        let isStaffOrAuthor = false;
 
         // 1. Author
-        if (userId && article.authorId === userId) allowAccess = true;
+        if (userId && article.authorId === userId) isStaffOrAuthor = true;
 
         // 2. Editor / Admin
-        if (['editor', 'super_admin', 'mother_admin'].includes(userRole)) allowAccess = true;
+        if (['editor', 'super_admin', 'mother_admin'].includes(userRole)) isStaffOrAuthor = true;
 
         // 3. Reviewer
         if (userId && userRole === 'reviewer') {
             const isAssigned = article.reviews.some(r => r.reviewerId === userId);
             if (isAssigned) {
-                allowAccess = true;
+                isStaffOrAuthor = true;
             }
         }
 
+        let allowAccess = false;
+        let requiresCredits = false;
+
         // 4. Public (if published)
-        if (article.status === 'published') {
+        if (isStaffOrAuthor) {
+            allowAccess = true;
+        } else if (article.status === 'published') {
+            if (!userId) {
+                // Temporary redirect to login if guest attempts to download
+                // Using standard redirect to `/login` since this is often triggered via window.location.href or direct linking
+                return NextResponse.redirect(`${url.origin}/login?redirect=/articles/${articleId}`);
+            }
+            requiresCredits = true;
             allowAccess = true;
         }
 
         if (!allowAccess) {
             return NextResponse.json({ error: "Access Denied" }, { status: 403 });
+        }
+
+        if (requiresCredits && userId) {
+            const user = await prisma.user.findUnique({
+                where: { id: userId },
+                include: { membership: true }
+            });
+
+            if (!user) {
+                return NextResponse.redirect(`${url.origin}/login`);
+            }
+
+            let tier = 'free';
+            if (user.membership && user.membership.status === 'active' && user.membership.endDate > new Date()) {
+                tier = user.membership.tier.toLowerCase();
+            }
+
+            let limit = 0;
+            if (tier === 'free') limit = 3;
+            else if (tier === 'basic') limit = 10;
+            else if (tier === 'premium' || tier === 'institutional') limit = Infinity;
+
+            if (limit !== Infinity) {
+                const startOfMonth = new Date();
+                startOfMonth.setDate(1);
+                startOfMonth.setHours(0, 0, 0, 0);
+
+                const downloads = await prisma.downloadLog.findMany({
+                    where: { userId, resourceType: 'article', downloadedAt: { gte: startOfMonth } },
+                    select: { resourceId: true },
+                    distinct: ['resourceId']
+                });
+
+                const hasDownloadedBefore = downloads.some(d => d.resourceId === articleId);
+
+                if (!hasDownloadedBefore) {
+                    if (downloads.length >= limit) {
+                        return NextResponse.redirect(`${url.origin}/membership?upgrade=true&reason=limit_reached`);
+                    }
+                }
+            }
+
+            // Log download to consume credits
+            await prisma.downloadLog.create({
+                data: {
+                    userId,
+                    resourceId: articleId,
+                    resourceType: 'article',
+                    ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip')
+                }
+            });
+
+            // Update global download count
+            await prisma.article.update({
+                where: { id: articleId },
+                data: { downloadCount: { increment: 1 } }
+            });
         }
 
         // Generate Signed Token

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import { track } from "@vercel/analytics";
 
 interface NewsletterSectionProps {
     title?: string | null;
@@ -27,6 +28,7 @@ export default function NewsletterSection({ title, content }: NewsletterSectionP
             const data = await res.json();
 
             if (data.success) {
+                track('Newsletter Signup', { location: window.location.pathname });
                 toast.success(data.message || "Subscribed successfully!");
                 setEmail("");
             } else {

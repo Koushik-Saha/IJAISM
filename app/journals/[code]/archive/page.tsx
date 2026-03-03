@@ -82,8 +82,12 @@ export default async function ArchivePage({ params }: { params: Promise<{ code: 
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center py-12 text-gray-500 italic">
-                            No issues found in the archive.
+                        <div className="text-center py-16 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                            <svg className="mx-auto h-12 w-12 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                            </svg>
+                            <h3 className="text-lg font-medium text-gray-900">No Archive Data</h3>
+                            <p className="mt-1 text-gray-500">There are no past issues available in the archive for this journal yet.</p>
                         </div>
                     )}
                 </div>

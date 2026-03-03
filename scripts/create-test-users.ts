@@ -1,88 +1,109 @@
-
 import { PrismaClient } from '@prisma/client';
-import * as bcrypt from 'bcryptjs';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
-async function main() {
-    console.log('Creating test users...');
+async function seedUsers() {
+    console.log('Seeding test users...');
 
-    const passwordHash = await bcrypt.hash('password123', 10);
+    const passwordHash = await bcrypt.hash('Password123!', 10);
 
-    const users = [
-        {
-            email: 'author@c5k.com',
-            name: 'Test Author',
-            university: 'Test University',
+    const testUsers = [];
+
+    // 1. Mother Admin
+    testUsers.push({
+        email: 'mother@c5k.co',
+        name: 'Mother Admin',
+        role: 'mother_admin',
+        university: 'Platform Administration',
+        passwordHash,
+        isEmailVerified: true
+    });
+
+    // 2. Super Admin
+    testUsers.push({
+        email: 'super@c5k.co',
+        name: 'Super Admin',
+        role: 'super_admin',
+        university: 'Global Administration',
+        passwordHash,
+        isEmailVerified: true
+    });
+
+    // 3. Authors (3)
+    for (let i = 1; i <= 3; i++) {
+        testUsers.push({
+            email: `author${i}@c5k.co`,
+            name: `Test Author ${i}`,
             role: 'author',
-            affiliation: 'Department of Testing',
-        },
-        {
-            email: 'reviewer@c5k.com',
-            name: 'Test Reviewer 1',
-            university: 'Review University',
-            role: 'reviewer',
-            affiliation: 'Department of Reviews',
-        },
-        {
-            email: 'reviewer2@c5k.com',
-            name: 'Test Reviewer 2',
-            university: 'Review University',
-            role: 'reviewer',
-            affiliation: 'Department of Reviews',
-        },
-        {
-            email: 'editor@c5k.com',
-            name: 'Test Editor',
-            university: 'Editorial Board',
-            role: 'editor',
-            affiliation: 'Editorial Office',
-        },
-        {
-            email: 'superadmin@c5k.com',
-            name: 'Test Super Admin',
-            university: 'System Administrator',
-            role: 'super_admin',
-            affiliation: 'IT Department',
-        },
-    ];
+            university: `University of Authors ${i}`,
+            passwordHash,
+            isEmailVerified: true
+        });
+    }
 
-    for (const userData of users) {
-        try {
-            const user = await prisma.user.upsert({
-                where: { email: userData.email },
-                update: {
-                    name: userData.name,
-                    university: userData.university,
-                    role: userData.role,
-                    passwordHash, // Ensure password is set/reset to known value
-                },
-                create: {
-                    email: userData.email,
-                    passwordHash,
-                    name: userData.name,
-                    university: userData.university,
-                    role: userData.role,
-                    affiliation: userData.affiliation,
-                    isEmailVerified: true,
-                    isActive: true,
-                },
+    // 4. Reviewers (3)
+    for (let i = 1; i <= 3; i++) {
+        testUsers.push({
+            email: `reviewer${i}@c5k.co`,
+            name: `Test Reviewer ${i}`,
+            role: 'reviewer',
+            university: `Reviewer Institute ${i}`,
+            passwordHash,
+            isEmailVerified: true
+        });
+    }
+
+    // 5. Editors (3)
+    for (let i = 1; i <= 3; i++) {
+        testUsers.push({
+            email: `editor${i}@c5k.co`,
+            name: `Test Editor ${i}`,
+            role: 'editor',
+            university: `Editorial Board ${i}`,
+            passwordHash,
+            isEmailVerified: true
+        });
+    }
+
+    // Clear existing test users to prevent unique constraint errors
+    const testEmails = testUsers.map(u => u.email);
+    await prisma.user.deleteMany({
+        where: { email: { in: testEmails } }
+    });
+
+    // Create all users
+    const createdUsers = [];
+    for (const userData of testUsers) {
+        const user = await prisma.user.create({
+            data: userData
+        });
+        createdUsers.push(user);
+        console.log(`Created: ${user.name} (${user.email}) - Role: ${user.role}`);
+    }
+
+    // Assign Journals to Editors
+    const editors = createdUsers.filter(u => u.role === 'editor');
+    const journals = await prisma.journal.findMany({ take: 3 });
+
+    for (let i = 0; i < editors.length; i++) {
+        const editor = editors[i];
+        const journal = journals[i]; // May be undefined if fewer than 3 journals
+
+        if (journal) {
+            await prisma.journal.update({
+                where: { id: journal.id },
+                data: { editorId: editor.id }
             });
-            console.log(`✓ Created/Updated user: ${userData.email} (${userData.role})`);
-        } catch (error) {
-            console.error(`✗ Error creating user ${userData.email}:`, error);
+            console.log(`Assigned Editor ${editor.name} to Journal: ${journal.fullName}`);
+        } else {
+            console.log(`No journal available to assign to Editor ${editor.name}`);
         }
     }
 
-    console.log('\nTest users created successfully!');
-    console.log('All users have password: password123');
+    console.log('Seeding complete!');
 }
 
-main()
-    .catch((e) => {
-        console.error(e);
-        process.exit(1);
-    })
-    .finally(async () => {
-        await prisma.$disconnect();
-    });
+seedUsers()
+    .catch(console.error)
+    .finally(() => prisma.$disconnect());

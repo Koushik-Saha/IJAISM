@@ -78,8 +78,10 @@ export default async function BestPapersPage({ params }: { params: Promise<{ cod
                                     </div>
                                 ))
                             ) : (
-                                <div className="text-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-                                    <p className="text-gray-500 italic">No awards have been listed yet.</p>
+                                <div className="text-center py-16 bg-white rounded-lg border border-dashed border-gray-300 shadow-sm relative z-20">
+                                    <TrophyIcon className="mx-auto h-16 w-16 text-gray-200 mb-4" />
+                                    <h3 className="text-lg font-medium text-gray-900">No Awards Yet</h3>
+                                    <p className="mt-2 text-gray-500 max-w-sm mx-auto">Best Paper awards for this journal have not been announced yet. Check back soon to see the winners!</p>
                                 </div>
                             )}
                         </div>

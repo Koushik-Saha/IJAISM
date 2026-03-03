@@ -61,6 +61,11 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
         publishedTime: article.publicationDate ? new Date(article.publicationDate).toISOString() : undefined,
         authors: authors,
       },
+      twitter: {
+        card: "summary_large_image",
+        title: article.title,
+        description: article.abstract?.substring(0, 160) || "Read this academic article on C5K.",
+      },
       other: {
         'citation_title': article.title,
         'citation_journal_title': article.journal.fullName,

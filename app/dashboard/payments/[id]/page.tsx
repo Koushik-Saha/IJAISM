@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { loadStripe } from '@stripe/stripe-js';
 import { toast } from "sonner";
+import { track } from "@vercel/analytics";
 import Card from '@/components/ui/Card';
 
 // Initialize Stripe
@@ -128,6 +129,7 @@ export default function PaymentPage() {
 
             const result = await response.json();
             if (result.status === 'COMPLETED') {
+                track('Successful Payment', { method: 'paypal', articleId });
                 toast.success("Payment Successful!");
                 router.push('/dashboard/submissions?success=true');
             } else {
@@ -169,8 +171,8 @@ export default function PaymentPage() {
                             <button
                                 onClick={() => setPaymentMethod('card')}
                                 className={`p-3 border rounded-lg flex flex-col items-center justify-center gap-2 transition-all ${paymentMethod === 'card'
-                                        ? 'border-blue-500 bg-blue-50 text-blue-700 ring-1 ring-blue-500'
-                                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                                    ? 'border-blue-500 bg-blue-50 text-blue-700 ring-1 ring-blue-500'
+                                    : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                                     }`}
                             >
                                 <span className="font-bold">Credit Card</span>
@@ -180,8 +182,8 @@ export default function PaymentPage() {
                             <button
                                 onClick={() => setPaymentMethod('paypal')}
                                 className={`p-3 border rounded-lg flex flex-col items-center justify-center gap-2 transition-all ${paymentMethod === 'paypal'
-                                        ? 'border-blue-500 bg-blue-50 text-blue-700 ring-1 ring-blue-500'
-                                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                                    ? 'border-blue-500 bg-blue-50 text-blue-700 ring-1 ring-blue-500'
+                                    : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                                     }`}
                             >
                                 <span className="font-bold">PayPal</span>

@@ -211,7 +211,7 @@ export default function Header() {
           <div className="flex items-center justify-end gap-1 md:gap-2">
 
             {/* Desktop Nav Links - Visible on large screens */}
-            <nav className="hidden lg:flex items-center gap-1 mr-2">
+            <nav className="hidden xl:flex items-center gap-1 mr-2">
               <Link href="/journals" className="px-2 py-2 rounded-full text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors whitespace-nowrap">
                 Journals
               </Link>

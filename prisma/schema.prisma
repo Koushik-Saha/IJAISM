@@ -29,6 +29,7 @@ model User {
   profileImageUrl         String?
   isEmailVerified         Boolean                  @default(false)
   isActive                Boolean                  @default(true)
+  forcePasswordChange     Boolean                  @default(false)
   lastLoginAt             DateTime?
   createdAt               DateTime                 @default(now())
   updatedAt               DateTime                 @updatedAt
@@ -168,29 +169,30 @@ model JournalIssue {
 }
 
 model Article {
-  id              String    @id @default(uuid())
-  journalId       String
-  title           String
-  abstract        String
-  fullText        String?   @db.Text
-  keywords        String[]
-  articleType     String
-  doi             String?   @unique
-  volume          Int?
-  issue           Int?
-  pageStart       Int?
-  pageEnd         Int?
-  publicationDate DateTime?
-  submissionDate  DateTime?
-  acceptanceDate  DateTime?
-  status          String    @default("draft")
-  pdfUrl          String?
-  coverLetterUrl  String?
-  language        String    @default("en")
-  citationCount   Int       @default(0)
-  viewCount       Int       @default(0)
-  downloadCount   Int       @default(0)
-  isOpenAccess    Boolean   @default(true)
+  id                 String    @id @default(uuid())
+  journalId          String
+  title              String
+  abstract           String
+  fullText           String?   @db.Text
+  keywords           String[]
+  articleType        String
+  doi                String?   @unique
+  volume             Int?
+  issue              Int?
+  pageStart          Int?
+  pageEnd            Int?
+  publicationDate    DateTime?
+  submissionDate     DateTime?
+  acceptanceDate     DateTime?
+  status             String    @default("draft")
+  pdfUrl             String?
+  coverLetterUrl     String?
+  supplementaryFiles String[]
+  language           String    @default("en")
+  citationCount      Int       @default(0)
+  viewCount          Int       @default(0)
+  downloadCount      Int       @default(0)
+  isOpenAccess       Boolean   @default(true)
 
   createdAt           DateTime             @default(now())
   reviewerInvitations ReviewerInvitation[]
@@ -249,6 +251,7 @@ model Review {
   assignedAt       DateTime  @default(now())
   dueDate          DateTime?
   submittedAt      DateTime?
+  reviewerFiles    String[]  @default([])
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
   article          Article   @relation(fields: [articleId], references: [id], onDelete: Cascade)
@@ -261,7 +264,7 @@ model Review {
 }
 
 model Dissertation {
-  id             String    @id @default(uuid())
+  id             String                @id @default(uuid())
   title          String
   abstract       String
   authorId       String
@@ -273,15 +276,15 @@ model Dissertation {
   defenseDate    DateTime?
   keywords       String[]
   pdfUrl         String?
-  status         String    @default("pending")
-  viewCount      Int       @default(0)
-  downloadCount  Int       @default(0)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  status         String                @default("pending")
+  viewCount      Int                   @default(0)
+  downloadCount  Int                   @default(0)
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
   deletedAt      DateTime?
   coverImageUrl  String?
   authorName     String?
-  author         User      @relation(fields: [authorId], references: [id])
+  author         User                  @relation(fields: [authorId], references: [id])
   chapters       DissertationChapter[]
 
   @@index([authorId])
@@ -563,23 +566,23 @@ model BookChapter {
   summary   String?  @db.Text
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
-  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
 
   @@index([bookId])
   @@map("book_chapters")
 }
 
 model DissertationChapter {
-  id             String       @id @default(uuid())
+  id             String   @id @default(uuid())
   dissertationId String
   title          String
   pageRange      String?
   pdfUrl         String?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  
-  dissertation   Dissertation @relation(fields: [dissertationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  dissertation Dissertation @relation(fields: [dissertationId], references: [id], onDelete: Cascade)
 
   @@index([dissertationId])
   @@map("dissertation_chapters")

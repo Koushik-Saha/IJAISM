@@ -45,6 +45,7 @@ function SubmitFormContent() {
     keywords: string;
     manuscript: File | null;
     coverLetter: File | null;
+    supplementaryFiles: File[];
     coAuthors: { name: string; email: string; university: string }[];
   }>({
     submissionType: "article",
@@ -54,6 +55,7 @@ function SubmitFormContent() {
     keywords: "",
     manuscript: null,
     coverLetter: null,
+    supplementaryFiles: [],
     coAuthors: [],
   });
 
@@ -264,6 +266,7 @@ function SubmitFormContent() {
       // Upload files if provided
       let manuscriptUrl = null;
       let coverLetterUrl = null;
+      let supplementaryFileUrls: string[] = [];
 
       if (formData.manuscript) {
         const manuscriptFormData = new FormData();
@@ -307,6 +310,29 @@ function SubmitFormContent() {
         }
       }
 
+      if (formData.supplementaryFiles && formData.supplementaryFiles.length > 0) {
+        for (const file of formData.supplementaryFiles) {
+          const supplementaryFormData = new FormData();
+          supplementaryFormData.append('file', file);
+          supplementaryFormData.append('fileType', 'supplementaryFile');
+
+          const uploadResponse = await fetch('/api/upload', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+            body: supplementaryFormData,
+          });
+
+          if (uploadResponse.ok) {
+            const uploadData = await uploadResponse.json();
+            supplementaryFileUrls.push(uploadData.data.url);
+          } else {
+            throw new Error(`Failed to upload supplementary file: ${file.name}`);
+          }
+        }
+      }
+
       // Prepare submission data
       const submissionData = {
         submissionType: formData.submissionType,
@@ -316,6 +342,7 @@ function SubmitFormContent() {
         keywords: formData.keywords,
         manuscriptUrl,
         coverLetterUrl,
+        supplementaryFiles: supplementaryFileUrls,
         coAuthors: formData.coAuthors,
         ...(isResubmission && { resubmissionId: resubmitId }),
       };
@@ -774,6 +801,23 @@ function SubmitFormContent() {
                   setFormData({ ...formData, coverLetter: e.target.files?.[0] || null })
                 }
               />
+            </div>
+
+            {/* Supplementary Files */}
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">
+                Supplementary Files (Optional)
+              </label>
+              <input
+                type="file"
+                multiple
+                accept=".zip,.rar,.pdf,.doc,.docx,.xls,.xlsx,.csv,.png,.jpg,.jpeg"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
+                onChange={(e) =>
+                  setFormData({ ...formData, supplementaryFiles: e.target.files ? Array.from(e.target.files) : [] })
+                }
+              />
+              <p className="text-xs text-gray-500 mt-1">Upload additional materials (datasets, images, etc.)</p>
             </div>
 
 

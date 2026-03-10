@@ -127,7 +127,8 @@ export async function submitReviewDecision(
   reviewerId: string,
   decision: ReviewDecision,
   commentsToAuthor: string,
-  commentsToEditor?: string
+  commentsToEditor?: string,
+  reviewerFiles?: string[]
 ) {
   // Verify reviewer owns this review
   const review = await prisma.review.findFirst({
@@ -167,6 +168,7 @@ export async function submitReviewDecision(
       commentsToAuthor,
       commentsToEditor: commentsToEditor || null,
       submittedAt: new Date(),
+      ...(reviewerFiles && reviewerFiles.length > 0 ? { reviewerFiles } : {})
     },
   });
 

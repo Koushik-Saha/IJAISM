@@ -4,6 +4,7 @@ export const reviewDecisionSchema = z.object({
     decision: z.enum(['accept', 'reject', 'revision_requested']),
     commentsToAuthor: z.string(),
     commentsToEditor: z.string().optional(),
+    reviewerFiles: z.array(z.string()).optional(),
 }).superRefine((data, ctx) => {
     if (data.decision === 'revision_requested') {
         if (data.commentsToAuthor.trim().length < 50) {

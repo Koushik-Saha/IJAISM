@@ -106,6 +106,10 @@ export default function Header() {
     // Listen for storage events (login/logout in other tabs)
     window.addEventListener('storage', checkAuth);
 
+    // Listen for auth events dispatched from the same tab (e.g. login/register pages)
+    window.addEventListener('userLoggedIn', checkAuth);
+    window.addEventListener('userLoggedOut', checkAuth);
+
     return () => {
       window.removeEventListener('storage', checkAuth);
       window.removeEventListener('userLoggedIn', checkAuth);

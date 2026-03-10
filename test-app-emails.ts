@@ -11,7 +11,7 @@ async function run() {
     const res2 = await sendPasswordResetEmail(email, "Koushik Saha", "token-123");
     console.log("Reset Email:", res2);
 
-    const res3 = await sendReviewerInvitationEmail(email, "Koushik Saha", "Test Article Integration", "IJAISM", "INV-123");
+    const res3 = await sendReviewerInvitationEmail(email, "Koushik Saha", "Test Article Integration", "This is a dummy test abstract injection for the invitation workflow compiler validation.", "IJAISM", "INV-123");
     console.log("Reviewer Email:", res3);
 }
 

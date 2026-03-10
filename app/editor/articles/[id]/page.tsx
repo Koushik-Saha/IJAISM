@@ -14,6 +14,7 @@ interface Article {
   status: string;
   pdfUrl?: string | null;
   coverLetterUrl?: string | null;
+  supplementaryFiles?: string[];
   author: {
     name: string;
     email: string;
@@ -38,6 +39,7 @@ interface Article {
     decision?: string;
     commentsToAuthor?: string;
     commentsToEditor?: string;
+    reviewerFiles?: string[];
   }>;
   isApcPaid?: boolean;
   apcAmount?: number;
@@ -85,6 +87,8 @@ export default function AdminArticleDetailPage() {
     isSpecial: false
   });
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [reviewerSearch, setReviewerSearch] = useState('');
+  const [showAllReviewers, setShowAllReviewers] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -556,6 +560,32 @@ export default function AdminArticleDetailPage() {
                               <div className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed">{review.commentsToEditor}</div>
                             </div>
                           )}
+
+                          {/* File Attachments */}
+                          {review.reviewerFiles && review.reviewerFiles.length > 0 && (
+                            <div className="bg-gray-50 p-4 rounded border border-gray-200 shadow-sm mt-4">
+                              <p className="text-sm font-bold text-gray-700 uppercase mb-2 flex items-center gap-2">
+                                <span>📎</span> Uploaded Files
+                              </p>
+                              <div className="flex flex-col gap-2 mt-2">
+                                {review.reviewerFiles.map((fileUrl, index) => {
+                                  const fileName = fileUrl.split('/').pop() || `Attachment ${index + 1}`;
+                                  return (
+                                    <button
+                                      key={index}
+                                      onClick={() => window.open(fileUrl, '_blank')}
+                                      className="text-left w-full bg-white border border-gray-200 hover:border-primary hover:bg-blue-50 px-3 py-2 rounded text-sm text-gray-700 transition-colors flex items-center gap-2"
+                                    >
+                                      <svg className="w-4 h-4 text-primary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                      </svg>
+                                      <span className="truncate">{fileName}</span>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
@@ -658,77 +688,144 @@ export default function AdminArticleDetailPage() {
                   <h3 className="font-bold text-gray-800 text-lg">Assign Reviewers</h3>
                   <button
                     onClick={() => setShowInviteModal(true)}
-                    className="text-xs bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full border border-indigo-200 hover:bg-indigo-100 font-semibold flex items-center gap-1 transition-colors"
+                    className="text-xs bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-full border border-indigo-200 hover:bg-indigo-100 font-semibold flex items-center gap-1 transition-colors"
                   >
-                    <span>+</span> Invite New
+                    <span className="text-base leading-none">+</span> Invite New
                   </button>
                 </div>
 
-                <div className="space-y-2 max-h-64 overflow-y-auto mb-4 border rounded p-2">
-                  {reviewers
-                    .filter(reviewer => !article.reviews.some(r => r.reviewer.email === reviewer.email))
-                    .map((reviewer) => (
-                      <label
-                        key={reviewer.id}
-                        className={`flex items-center p-2 rounded hover:bg-gray-50 cursor-pointer transition ${selectedReviewers.includes(reviewer.id) ? 'bg-blue-50 border-blue-100' : 'border border-transparent'
-                          }`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedReviewers.includes(reviewer.id)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedReviewers([...selectedReviewers, reviewer.id]);
-                            } else {
-                              setSelectedReviewers(selectedReviewers.filter(id => id !== reviewer.id));
-                            }
-                          }}
-                          className="mr-3 h-4 w-4 text-primary"
-                        />
-                        <div className="flex-1">
-                          <p className="font-semibold text-sm">{reviewer.name}</p>
-                          <p className="text-xs text-gray-600">{reviewer.email}</p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            {reviewer._count?.reviews || 0} active reviews
-                          </p>
+                {/* Search Input */}
+                <div className="relative mb-3">
+                  <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <input
+                    type="text"
+                    placeholder="Search by name or email..."
+                    value={(reviewerSearch as string) || ''}
+                    onChange={(e) => setReviewerSearch(e.target.value)}
+                    className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-transparent bg-gray-50 placeholder-gray-400"
+                  />
+                </div>
+
+                {/* Reviewer List */}
+                <div className="space-y-2 mb-4">
+                  {(() => {
+                    const searchTerm = reviewerSearch.toLowerCase().trim();
+                    const available = reviewers.filter((reviewer) => {
+                      const notAssigned = !article.reviews.some(
+                        (r) => r.reviewer.email === reviewer.email
+                      );
+                      const matchesSearch =
+                        !searchTerm ||
+                        (reviewer.name || '').toLowerCase().includes(searchTerm) ||
+                        (reviewer.email || '').toLowerCase().includes(searchTerm);
+                      return notAssigned && matchesSearch;
+                    });
+                    const showAll = reviewerSearch || (showAllReviewers as boolean);
+                    const displayList = showAll ? available : available.slice(0, 3);
+
+                    if (available.length === 0) {
+                      return <p className="text-gray-400 text-center py-6 text-sm">No reviewers found.</p>;
+                    }
+
+                    return (
+                      <>
+                        <div className="space-y-2">
+                          {displayList.map((reviewer) => {
+                            const isSelected = selectedReviewers.includes(reviewer.id);
+                            return (
+                              <button
+                                key={reviewer.id}
+                                type="button"
+                                onClick={() => {
+                                  if (isSelected) {
+                                    setSelectedReviewers(selectedReviewers.filter(id => id !== reviewer.id));
+                                  } else {
+                                    setSelectedReviewers([...selectedReviewers, reviewer.id]);
+                                  }
+                                }}
+                                className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${isSelected
+                                  ? 'border-indigo-500 bg-indigo-50 shadow-sm'
+                                  : 'border-gray-100 bg-gray-50 hover:border-gray-300 hover:bg-white'
+                                  }`}
+                              >
+                                {/* Custom Checkbox */}
+                                <div className={`shrink-0 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${isSelected ? 'bg-indigo-600 border-indigo-600' : 'border-gray-300 bg-white'
+                                  }`}>
+                                  {isSelected && (
+                                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                  )}
+                                </div>
+
+                                {/* Avatar */}
+                                <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${isSelected ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-600'
+                                  }`}>
+                                  {(reviewer.name || 'R').charAt(0).toUpperCase()}
+                                </div>
+
+                                {/* Info */}
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-semibold text-sm text-gray-900 truncate">{reviewer.name}</p>
+                                  <p className="text-xs text-gray-500 truncate">{reviewer.email}</p>
+                                  <p className="text-xs text-gray-400 mt-0.5">
+                                    {reviewer._count?.reviews || 0} active review{(reviewer._count?.reviews || 0) !== 1 ? 's' : ''}
+                                  </p>
+                                </div>
+                              </button>
+                            );
+                          })}
                         </div>
-                      </label>
-                    ))}
-                  {reviewers.filter(reviewer => !article.reviews.some(r => r.reviewer.email === reviewer.email)).length === 0 && (
-                    <p className="text-gray-500 text-center py-4 text-sm">No available reviewers found.</p>
-                  )}
+
+                        {/* Show All / Show Less toggle */}
+                        {!reviewerSearch && available.length > 3 && (
+                          <button
+                            type="button"
+                            onClick={() => setShowAllReviewers(!showAllReviewers)}
+                            className="w-full text-xs text-indigo-600 hover:text-indigo-800 font-medium py-1 transition-colors"
+                          >
+                            {showAllReviewers ? `↑ Show less` : `↓ Show all ${available.length} reviewers`}
+                          </button>
+                        )}
+                      </>
+                    );
+                  })()}
                 </div>
 
                 <div className="space-y-3">
-                  <p className="text-sm text-gray-600">
-                    <span className="font-semibold">Selected:</span> {selectedReviewers.length}
-                  </p>
+                  {selectedReviewers.length > 0 && (
+                    <div className="flex items-center gap-2 bg-indigo-50 border border-indigo-100 rounded-lg px-3 py-2">
+                      <div className="w-5 h-5 bg-indigo-600 rounded-full flex items-center justify-center shrink-0">
+                        <span className="text-white text-xs font-bold">{selectedReviewers.length}</span>
+                      </div>
+                      <p className="text-sm text-indigo-700 font-medium">
+                        {selectedReviewers.length} reviewer{selectedReviewers.length !== 1 ? 's' : ''} selected
+                      </p>
+                    </div>
+                  )}
+
                   <button
                     onClick={handleAssignReviewers}
                     disabled={selectedReviewers.length === 0 || isAssigning}
-                    className="w-full bg-primary text-white py-2 px-4 rounded-lg font-semibold hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed mb-2"
+                    className="w-full bg-indigo-600 text-white py-2.5 px-4 rounded-xl font-semibold hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                   >
-                    {isAssigning ? 'Inviting...' : `Invite ${selectedReviewers.length} Reviewer(s)`}
+                    {isAssigning ? 'Inviting...' : `Invite ${selectedReviewers.length > 0 ? selectedReviewers.length : ''} Reviewer${selectedReviewers.length !== 1 ? 's' : ''}`}
                   </button>
 
-                  <div className="relative flex py-2 items-center">
-                    <div className="flex-grow border-t border-gray-300"></div>
-                    <span className="flex-shrink-0 mx-4 text-gray-400 text-xs">OR</span>
-                    <div className="flex-grow border-t border-gray-300"></div>
+                  <div className="relative flex py-1 items-center">
+                    <div className="flex-grow border-t border-gray-200"></div>
+                    <span className="flex-shrink-0 mx-4 text-gray-400 text-xs font-medium">OR</span>
+                    <div className="flex-grow border-t border-gray-200"></div>
                   </div>
 
                   <button
                     onClick={handleAutoAssign}
                     disabled={isAssigning}
-                    className="w-full bg-purple-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                    className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-2.5 px-4 rounded-xl font-semibold hover:from-purple-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all shadow-sm"
                   >
-                    {isAssigning ? (
-                      'Auto-Assigning...'
-                    ) : (
-                      <>
-                        <span className="mr-2">✨</span> Auto-Assign
-                      </>
-                    )}
+                    {isAssigning ? 'Auto-Assigning...' : <><span>✨</span> Auto-Assign</>}
                   </button>
                 </div>
               </div>
@@ -743,6 +840,34 @@ export default function AdminArticleDetailPage() {
                 pdfUrl={article.pdfUrl}
                 fullTextAvailable={!!(article as any).fullText || true}
               />
+              {(article.coverLetterUrl || (article.supplementaryFiles && article.supplementaryFiles.length > 0)) && (
+                <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col gap-2">
+                  <p className="text-sm font-semibold text-gray-700 mb-1">Additional Files:</p>
+                  {article.coverLetterUrl && (
+                    <button
+                      onClick={() => {
+                        const token = localStorage.getItem("token");
+                        window.open(`/api/articles/${article.id}/pdf?type=coverLetter&token=${token || ''}`, '_blank');
+                      }}
+                      className="w-full text-center py-2 flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded font-medium transition-colors border border-gray-200 text-sm"
+                    >
+                      <span>📎</span> View Cover Letter
+                    </button>
+                  )}
+                  {article.supplementaryFiles && article.supplementaryFiles.map((fileUrl, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        const token = localStorage.getItem("token");
+                        window.open(`/api/articles/${article.id}/pdf?type=supplementary&index=${index}&token=${token || ''}`, '_blank');
+                      }}
+                      className="w-full text-center py-2 flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded font-medium transition-colors border border-gray-200 text-sm"
+                    >
+                      <span>📁</span> View Supplementary File {index + 1}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
 
@@ -994,6 +1119,16 @@ export default function AdminArticleDetailPage() {
                       placeholder="jane.doe@university.edu"
                     />
                   </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Temporary Password</label>
+                    <input
+                      type="text"
+                      id="modal-invite-password"
+                      className="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                      placeholder="Temporary password (e.g., ChangeMe123!)"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">If the user does not exist, they will use this to log in and be forced to change it.</p>
+                  </div>
                   <div className="flex justify-end gap-2 mt-4">
                     <button
                       onClick={() => setShowInviteModal(false)}
@@ -1005,8 +1140,10 @@ export default function AdminArticleDetailPage() {
                       onClick={async () => {
                         const nameEl = document.getElementById('modal-invite-name') as HTMLInputElement;
                         const emailEl = document.getElementById('modal-invite-email') as HTMLInputElement;
+                        const passwordEl = document.getElementById('modal-invite-password') as HTMLInputElement;
                         const name = nameEl.value;
                         const email = emailEl.value;
+                        const tempPassword = passwordEl?.value;
 
                         if (!name || !email) {
                           toast.error("Please enter both name and email");
@@ -1022,7 +1159,7 @@ export default function AdminArticleDetailPage() {
                               'Authorization': `Bearer ${token}`,
                               'Content-Type': 'application/json'
                             },
-                            body: JSON.stringify({ name, email })
+                            body: JSON.stringify({ name, email, tempPassword })
                           });
 
                           const data = await res.json();
@@ -1045,7 +1182,7 @@ export default function AdminArticleDetailPage() {
             </div>
           )
         }
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }

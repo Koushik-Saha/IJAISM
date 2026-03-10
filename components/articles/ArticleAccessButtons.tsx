@@ -99,22 +99,17 @@ export default function ArticleAccessButtons({
     if (variant === "compact") {
         return (
             <div className={`flex flex-wrap gap-2 ${className}`}>
-                <button
-                    onClick={handleViewHtml}
-                    className="text-xs bg-purple-50 text-purple-700 px-2 py-1 rounded border border-purple-200 hover:bg-purple-100 font-medium flex items-center gap-1"
-                    title="View as Webpage"
-                >
-                    🌐 HTML
-                </button>
+                {fullTextAvailable && (
+                    <button
+                        onClick={handleReadPdf}
+                        className="text-xs bg-[#e8701a] text-white px-2 py-1 rounded border border-[#e8701a] hover:bg-[#d56113] font-medium flex items-center gap-1 shadow-sm"
+                        title="Interactive Reader"
+                    >
+                        🌐 Interactive Reader
+                    </button>
+                )}
                 {pdfUrl && (
                     <>
-                        <button
-                            onClick={handleReadPdf}
-                            className="text-xs bg-orange-50 text-orange-700 px-2 py-1 rounded border border-orange-200 hover:bg-orange-100 font-medium flex items-center gap-1"
-                            title="Interactive Reader"
-                        >
-                            📖 Read
-                        </button>
                         <button
                             onClick={handleViewPdf}
                             className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded border border-blue-200 hover:bg-blue-100 font-medium flex items-center gap-1"
@@ -162,43 +157,34 @@ export default function ArticleAccessButtons({
     return (
         <div className={`flex flex-col gap-2 w-full ${className}`}>
             <button
-                onClick={handleViewHtml}
-                className="w-full btn-primary text-center py-2 flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white border-transparent"
+                onClick={handleReadPdf}
+                className="w-full text-center py-2 flex items-center justify-center gap-2 bg-[#e8701a] hover:bg-[#d56113] text-white rounded font-medium transition-colors shadow-sm"
             >
-                <span>🌐</span> View Full Text (HTML)
+                <span>🌐</span> Interactive Reader (HTML)
             </button>
 
             {pdfUrl && (
-                <>
+                <div className="grid grid-cols-2 gap-2 mt-1">
                     <button
-                        onClick={handleReadPdf}
-                        className="w-full text-center py-2 flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white rounded font-medium transition-colors shadow-sm"
+                        onClick={handleViewPdf}
+                        className="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-center py-2 flex items-center justify-center gap-2 text-sm rounded transition-colors font-medium"
                     >
-                        <span>📖</span> Interactive Reader
+                        <span>📄</span> View PDF
                     </button>
+                    <button
+                        onClick={handleDownloadPdf}
+                        disabled={isChecking}
+                        className={`w-full bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 text-center py-2 flex items-center justify-center gap-2 text-sm rounded transition-colors font-medium ${isChecking ? 'opacity-70 cursor-not-allowed' : ''}`}
+                    >
+                        <span>{isChecking ? "⏳" : "⬇️"}</span> {isChecking ? "Checking..." : "Download PDF"}
+                    </button>
+                </div>
+            )}
 
-                    <div className="grid grid-cols-2 gap-2">
-                        <button
-                            onClick={handleViewPdf}
-                            className="w-full btn-secondary text-center py-2 flex items-center justify-center gap-2 text-sm"
-                        >
-                            <span>📄</span> View PDF
-                        </button>
-                        <button
-                            onClick={handleDownloadPdf}
-                            disabled={isChecking}
-                            className={`w-full btn-secondary text-center py-2 flex items-center justify-center gap-2 text-sm ${isChecking ? 'opacity-70 cursor-not-allowed' : ''}`}
-                        >
-                            <span>{isChecking ? "⏳" : "⬇️"}</span> {isChecking ? "Checking..." : "Download"}
-                        </button>
-                    </div>
-
-                    {downloadStats?.authenticated && downloadStats?.limit !== 'unlimited' && downloadStats?.tier !== 'admin' && (
-                        <div className="text-xs text-center text-gray-500 mt-2">
-                            {downloadStats.remaining} free {downloadStats.remaining === 1 ? 'download' : 'downloads'} remaining this month.
-                        </div>
-                    )}
-                </>
+            {pdfUrl && downloadStats?.authenticated && downloadStats?.limit !== 'unlimited' && downloadStats?.tier !== 'admin' && (
+                <div className="text-xs text-center text-gray-500 mt-2">
+                    {downloadStats.remaining} free {downloadStats.remaining === 1 ? 'download' : 'downloads'} remaining this month.
+                </div>
             )}
 
             {/* Upgrade Modal Default */}

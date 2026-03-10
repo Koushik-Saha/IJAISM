@@ -35,8 +35,27 @@ export async function GET(
             }
         });
 
-        if (!article || !article.pdfUrl) {
-            return NextResponse.json({ error: "PDF not found" }, { status: 404 });
+        if (!article) {
+            return NextResponse.json({ error: "Article not found" }, { status: 404 });
+        }
+
+        const type = url.searchParams.get('type') || 'pdf';
+        const index = parseInt(url.searchParams.get('index') || '0', 10);
+
+        let targetUrl = article.pdfUrl;
+        if (type === 'coverLetter') {
+            targetUrl = article.coverLetterUrl;
+        } else if (type === 'supplementary') {
+            const suppFiles = (article as any).supplementaryFiles || [];
+            if (suppFiles.length > index) {
+                targetUrl = suppFiles[index];
+            } else {
+                targetUrl = null;
+            }
+        }
+
+        if (!targetUrl) {
+            return NextResponse.json({ error: "File not found" }, { status: 404 });
         }
 
         // Access Control Logic
@@ -135,12 +154,10 @@ export async function GET(
 
         // Generate Signed Token
         // Valid for 1 hour
-        const signedToken = generateSignedFileToken(article.pdfUrl, 3600);
+        const signedToken = generateSignedFileToken(targetUrl, 3600);
 
         // Construct Secure URL
-        // We need the base URL to redirect correctly? 
-        // Or relative redirect works in Next.js NextResponse.redirect? Yes, but usually needs absolute.
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || url.origin; // Usage of origin is safer for dynamic envs
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || url.origin;
         const secureUrl = `${appUrl}/api/secure-file?token=${signedToken}`;
 
         // Redirect

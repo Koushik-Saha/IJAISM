@@ -1,12 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
-import { put } from '@vercel/blob';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { logger } from '@/lib/logger';
 import { apiSuccess, apiError } from '@/lib/api-response';
 import { scanFile } from '@/lib/security/virus';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { cwd } from 'process';
+
+const s3Client = new S3Client({
+  region: process.env.AWS_REGION || 'us-east-2',
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
+  },
+});
+const BUCKET_NAME = process.env.AWS_S3_BUCKET_NAME || 'koushik-freedomshippingllc-reports';
 
 export async function POST(req: NextRequest) {
   try {
@@ -56,28 +65,41 @@ export async function POST(req: NextRequest) {
     const fileName = `${fileType}/${timestamp}_${sanitizedName}`;
 
     try {
-      const blob = await put(fileName, file, { access: 'public' });
+      const bytes = await file.arrayBuffer();
+      const buffer = Buffer.from(bytes);
 
-      logger.info('File uploaded successfully', {
+      const command = new PutObjectCommand({
+        Bucket: BUCKET_NAME,
+        Key: fileName,
+        Body: buffer,
+        ContentType: file.type,
+        // ACL is generally managed by bucket policy now for newer buckets, avoiding ACL: 'public-read' unless explicitly required
+      });
+
+      await s3Client.send(command);
+
+      const s3Url = `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION || 'us-east-2'}.amazonaws.com/${fileName}`;
+
+      logger.info('File uploaded successfully to S3', {
         fileType,
         fileName: file.name,
         size: file.size,
-        blobUrl: blob.url,
+        url: s3Url,
         userId: decoded.userId
       });
 
       return apiSuccess({
-        url: blob.url,
+        url: s3Url,
         fileName: file.name,
         size: file.size,
         type: file.type,
-        blobId: blob.url,
+        blobId: s3Url,
       });
-    } catch (blobError: any) {
-      if (blobError.message?.includes('BLOB_READ_WRITE_TOKEN') || !process.env.BLOB_READ_WRITE_TOKEN) {
+    } catch (uploadError: any) {
+      if (!process.env.AWS_ACCESS_KEY_ID || uploadError.name === 'CredentialsProviderError') {
         // PRODUCTION SAFETY:
         if (process.env.NODE_ENV === 'production' && !process.env.ENABLE_MOCK_UPLOAD_IN_PROD) {
-          throw new Error('Vercel Blob Token not configured. Upload failed.');
+          throw new Error('AWS S3 Credentials not configured. Upload failed.');
         }
 
         // Local File Storage Fallback (Development Mode)
@@ -96,7 +118,7 @@ export async function POST(req: NextRequest) {
 
         const localUrl = `/uploads/${fileType}/${localFileName}`;
 
-        logger.info('File saved locally (Blob not configured)', { fileType, localUrl });
+        logger.info('File saved locally (S3 not configured)', { fileType, localUrl });
 
         return apiSuccess({
           url: localUrl,
@@ -108,7 +130,7 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      throw blobError;
+      throw uploadError;
     }
   } catch (error: any) {
     logger.error('Error uploading file', error, {

@@ -15,6 +15,7 @@ interface Article {
   submissionDate: string;
   pdfUrl: string | null;
   coverLetterUrl: string | null;
+  supplementaryFiles: string[];
   fullText?: string | null;
   journal: {
     fullName: string;
@@ -191,6 +192,37 @@ export default function SubmissionDetailPage() {
                   variant="compact"
                 />
               </div>
+
+              {/* Additional files group under the main buttons */}
+              {(article.coverLetterUrl || (article.supplementaryFiles && article.supplementaryFiles.length > 0)) && (
+                <div className="flex flex-col gap-2 items-end w-full mt-2">
+                  {article.coverLetterUrl && (
+                    <button
+                      onClick={() => {
+                        const token = localStorage.getItem("token");
+                        window.open(`/api/articles/${article.id}/pdf?type=coverLetter&token=${token || ''}`, '_blank');
+                      }}
+                      className="text-xs bg-gray-50 text-gray-700 px-2 py-1 rounded border border-gray-200 hover:bg-gray-100 font-medium flex items-center gap-1"
+                      title="View Cover Letter"
+                    >
+                      📎 Cover Letter
+                    </button>
+                  )}
+                  {article.supplementaryFiles && article.supplementaryFiles.map((fileUrl, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        const token = localStorage.getItem("token");
+                        window.open(`/api/articles/${article.id}/pdf?type=supplementary&index=${index}&token=${token || ''}`, '_blank');
+                      }}
+                      className="text-xs bg-gray-50 text-gray-700 px-2 py-1 rounded border border-gray-200 hover:bg-gray-100 font-medium flex items-center gap-1"
+                      title={`View Supplementary File ${index + 1}`}
+                    >
+                      📁 Supp. File {index + 1}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 

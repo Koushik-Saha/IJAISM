@@ -156,7 +156,7 @@ export async function POST(
       );
     }
 
-    const { decision, commentsToAuthor, commentsToEditor } = validation.data;
+    const { decision, commentsToAuthor, commentsToEditor, reviewerFiles } = validation.data;
 
     // 6. Submit review
     const updatedReview = await submitReviewDecision(
@@ -164,7 +164,8 @@ export async function POST(
       userId,
       decision,
       commentsToAuthor.trim(),
-      commentsToEditor?.trim()
+      commentsToEditor?.trim(),
+      reviewerFiles
     );
 
     // 7. Return success

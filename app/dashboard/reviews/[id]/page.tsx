@@ -22,6 +22,8 @@ interface Review {
     articleType: string;
     submissionDate: string;
     pdfUrl: string | null;
+    coverLetterUrl: string | null;
+    supplementaryFiles: string[];
     author: {
       name: string;
       email: string;
@@ -46,10 +48,16 @@ export default function ReviewSubmissionPage() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    decision: string;
+    commentsToAuthor: string;
+    commentsToEditor: string;
+    reviewerFiles: File[];
+  }>({
     decision: '',
     commentsToAuthor: '',
     commentsToEditor: '',
+    reviewerFiles: [],
   });
 
   useEffect(() => {
@@ -81,6 +89,12 @@ export default function ReviewSubmissionPage() {
         }
 
         const data = await response.json();
+
+        if (['invited', 'declined'].includes(data.review.status)) {
+          setError('You must accept this review invitation before accessing the manuscript.');
+          return;
+        }
+
         setReview(data.review);
 
         // If already completed, populate form with previous data
@@ -89,6 +103,7 @@ export default function ReviewSubmissionPage() {
             decision: data.review.decision || '',
             commentsToAuthor: data.review.commentsToAuthor || '',
             commentsToEditor: data.review.commentsToEditor || '',
+            reviewerFiles: [], // They cannot edit files after submission currently, so keep empty for strictly viewing
           });
         }
       } catch (err: any) {
@@ -154,13 +169,46 @@ export default function ReviewSubmissionPage() {
 
     try {
       const token = localStorage.getItem('token');
+
+      let reviewerFileUrls: string[] = [];
+
+      if (formData.reviewerFiles.length > 0) {
+        for (const file of formData.reviewerFiles) {
+          const fileFormData = new FormData();
+          fileFormData.append('file', file);
+          fileFormData.append('fileType', 'reviewerFile');
+
+          const uploadResponse = await fetch('/api/upload', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+            body: fileFormData,
+          });
+
+          if (uploadResponse.ok) {
+            const uploadData = await uploadResponse.json();
+            reviewerFileUrls.push(uploadData.data.url);
+          } else {
+            throw new Error(`Failed to upload file: ${file.name}`);
+          }
+        }
+      }
+
+      const payload = {
+        decision: formData.decision,
+        commentsToAuthor: formData.commentsToAuthor,
+        commentsToEditor: formData.commentsToEditor,
+        reviewerFiles: reviewerFileUrls
+      };
+
       const response = await fetch(`/api/reviews/${id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
@@ -322,8 +370,39 @@ export default function ReviewSubmissionPage() {
                 View PDF
               </button>
             </div>
+
+            {/* Additional Files for Reviewer */}
+            {(review.article.coverLetterUrl || (review.article.supplementaryFiles && review.article.supplementaryFiles.length > 0)) && (
+              <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col gap-2">
+                <p className="text-sm font-semibold text-gray-700 mb-1">Additional Files:</p>
+                {review.article.coverLetterUrl && (
+                  <button
+                    onClick={() => {
+                      const token = localStorage.getItem("token");
+                      window.open(`/api/articles/${review.article.id}/pdf?type=coverLetter&token=${token || ''}`, '_blank');
+                    }}
+                    className="w-full text-center py-2 flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded font-medium transition-colors border border-gray-200 text-sm"
+                  >
+                    <span>📎</span> View Cover Letter
+                  </button>
+                )}
+                {review.article.supplementaryFiles && review.article.supplementaryFiles.map((fileUrl, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      const token = localStorage.getItem("token");
+                      window.open(`/api/articles/${review.article.id}/pdf?type=supplementary&index=${index}&token=${token || ''}`, '_blank');
+                    }}
+                    className="w-full text-center py-2 flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded font-medium transition-colors border border-gray-200 text-sm"
+                  >
+                    <span>📁</span> View Supplementary File {index + 1}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
-        )}
+        )
+        }
 
         {/* Review Form */}
         <div className="bg-white rounded-lg shadow-md p-6">
@@ -442,6 +521,53 @@ export default function ReviewSubmissionPage() {
               />
             </div>
 
+            {/* Reviewer Supplementary Files Upload */}
+            {!isCompleted && (
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  Attach Files (Optional)
+                </label>
+                <p className="text-xs text-gray-500 mb-2">Upload marked-up manuscripts, datasets, or supplementary notes for the author and editor.</p>
+                <input
+                  type="file"
+                  multiple
+                  disabled={isCompleted || isSubmitting}
+                  accept=".pdf,.doc,.docx,.jpg,.png,.jpeg,.csv,.xlsx"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 transition-all cursor-pointer"
+                  onChange={(e) => {
+                    if (e.target.files) {
+                      setFormData({
+                        ...formData,
+                        reviewerFiles: Array.from(e.target.files)
+                      });
+                    }
+                  }}
+                />
+
+                {formData.reviewerFiles.length > 0 && (
+                  <div className="mt-4 flex flex-col gap-2">
+                    <p className="text-xs font-semibold text-gray-700">Selected Files:</p>
+                    {formData.reviewerFiles.map((file, idx) => (
+                      <div key={idx} className="flex items-center justify-between bg-gray-50 border px-3 py-2 rounded">
+                        <span className="text-sm text-gray-800 truncate pr-4">{file.name}</span>
+                        <button
+                          type="button"
+                          className="text-red-500 hover:text-red-700 text-xs font-bold shrink-0"
+                          onClick={() => {
+                            const newFiles = [...formData.reviewerFiles];
+                            newFiles.splice(idx, 1);
+                            setFormData({ ...formData, reviewerFiles: newFiles });
+                          }}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Error Message */}
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
@@ -461,7 +587,7 @@ export default function ReviewSubmissionPage() {
             )}
           </form>
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }

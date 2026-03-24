@@ -359,40 +359,19 @@ export default function MySubmissionsPage() {
                       {/* Reviewers List - Only visible if Revision Requested */}
                       {article.status === 'revision_requested' && article.reviews.length > 0 && (
                         <div className="mt-4 bg-orange-50 border border-orange-100 rounded-lg p-4">
-                          <h3 className="text-sm font-bold text-orange-900 mb-3">Reviewer Feedback:</h3>
-                          <div className="space-y-3">
-                            {article.reviews.map((review) => (
-                              <div
-                                key={review.id}
-                                className="bg-white p-3 rounded border border-orange-100 shadow-sm"
-                              >
-                                <div className="flex items-center justify-between mb-2">
-                                  <span className="font-semibold text-sm text-gray-900">{review.reviewerName}</span>
-                                  <span className={`text-xs px-2 py-1 rounded font-medium ${review.decision === 'accept' ? 'bg-green-100 text-green-700' :
-                                    review.decision === 'reject' ? 'bg-red-100 text-red-700' :
-                                      'bg-yellow-100 text-yellow-700'
-                                    }`}>
-                                    {review.decision ? review.decision.replace('_', ' ').toUpperCase() : 'PENDING'}
-                                  </span>
-                                </div>
-                                {/* Note: Comments would be displayed here if available in the API response */}
-                              </div>
-                            ))}
-                          </div>
-                          <div className="mt-4 pt-3 border-t border-orange-200">
-                            <p className="text-sm text-orange-800 mb-2">
-                              Please address the feedback above and resubmit your article.
-                            </p>
-                            <Link
-                              href={`/submit?resubmit=${article.id}`}
-                              className="inline-flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium px-4 py-2 rounded transition-colors"
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                              </svg>
-                              Resubmit Article
-                            </Link>
-                          </div>
+                          <h3 className="text-sm font-bold text-orange-900 mb-2">Editor Feedback Available</h3>
+                          <p className="text-sm text-orange-800 mb-3">
+                            Please review the editor's feedback by clicking "View Details" and resubmit your article.
+                          </p>
+                          <Link
+                            href={`/submit?resubmit=${article.id}`}
+                            className="inline-flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium px-4 py-2 rounded transition-colors"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            Resubmit Article
+                          </Link>
                         </div>
                       )}
                     </div>

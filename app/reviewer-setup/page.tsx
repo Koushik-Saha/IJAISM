@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, Loader2, AlertCircle, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 
-export default function ReviewerSetupPage() {
+function ReviewerSetupForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -238,5 +238,15 @@ export default function ReviewerSetupPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function ReviewerSetupPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>}>
+            <ReviewerSetupForm />
+        </Suspense>
     );
 }

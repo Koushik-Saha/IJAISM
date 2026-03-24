@@ -89,6 +89,7 @@ export default function AdminArticleDetailPage() {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [reviewerSearch, setReviewerSearch] = useState('');
   const [showAllReviewers, setShowAllReviewers] = useState(false);
+  const [sharedReviews, setSharedReviews] = useState<{ reviewId: string; shareComments: boolean; sharedFiles: string[] }[]>([]);
 
   useEffect(() => {
     if (id) {
@@ -287,7 +288,8 @@ export default function AdminArticleDetailPage() {
       return;
     }
 
-    if (totalAfterAssignment > 4) {
+    const isLockedStatus = ['accepted', 'published'].includes(article?.status || '');
+    if (!isLockedStatus && totalAfterAssignment > 4) {
       toast.error('Too many reviewers', {
         description: `You can only assign ${4 - currentReviewerCount} more reviewer(s)`,
         duration: 3000,
@@ -335,6 +337,20 @@ export default function AdminArticleDetailPage() {
     // @ts-ignore
     setDecisionType(type);
     setDecisionComments('');
+    
+    if (type === 'revise' && article) {
+      const completedReviews = article.reviews.filter(r => r.status === 'completed');
+      setSharedReviews(
+        completedReviews.map(r => ({
+          reviewId: r.id,
+          shareComments: !!r.commentsToAuthor, 
+          sharedFiles: r.reviewerFiles ? [...r.reviewerFiles] : []
+        }))
+      );
+    } else {
+      setSharedReviews([]);
+    }
+    
     setShowDecisionModal(true);
   };
 
@@ -352,7 +368,8 @@ export default function AdminArticleDetailPage() {
         },
         body: JSON.stringify({
           decision: decisionType,
-          comments: decisionComments
+          comments: decisionComments,
+          ...(decisionType === 'revise' ? { sharedReviews } : {})
         }),
       });
 
@@ -381,12 +398,25 @@ export default function AdminArticleDetailPage() {
   };
 
   const formatStatus = (status: string) => {
-    return status
-      .replace(/_/g, ' ')
-      .toLowerCase()
-      .split(' ')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
+    if (!status) return status;
+    const statusMap: Record<string, string> = {
+      submitted: 'Submitted',
+      under_review: 'Under Review',
+      waiting_for_editor: 'Waiting for Final Decision',
+      revision_requested: 'Revision Requested',
+      resubmitted: 'Resubmitted',
+      accepted: 'Accepted',
+      published: 'Published',
+      rejected: 'Rejected',
+      pending: 'Pending',
+      in_progress: 'In Progress',
+      completed: 'Completed',
+      declined: 'Declined',
+      minor_revision: 'Minor Revision',
+      major_revision: 'Major Revision',
+      no_recommendation: 'No Recommendation'
+    };
+    return statusMap[status] || status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   };
 
   if (isLoading) {
@@ -612,7 +642,6 @@ export default function AdminArticleDetailPage() {
                       className="w-full border rounded-md p-2 text-sm disabled:bg-gray-100 disabled:text-gray-500"
                       value={selectedIssue}
                       onChange={(e) => setSelectedIssue(e.target.value)}
-                      disabled={(article as any).issueId && currentUser?.role !== 'super_admin'}
                     >
                       <option value="">-- Unassigned --</option>
                       {availableIssues.map(issue => (
@@ -623,19 +652,13 @@ export default function AdminArticleDetailPage() {
                     </select>
                   </div>
 
-                  {(article as any).issueId && currentUser?.role !== 'super_admin' ? (
-                    <div className="text-xs text-orange-600 bg-orange-50 p-2 rounded border border-orange-100 italic flex items-center gap-2">
-                      <span>🔒</span> Assignment locked. Only Super Admin can change this.
-                    </div>
-                  ) : (
-                    <button
-                      onClick={handleAssignIssue}
-                      disabled={isAssigningIssue || !selectedIssue}
-                      className="w-full bg-[#006d77] text-white py-2 rounded-lg font-semibold hover:bg-[#00555d] disabled:opacity-50 text-sm"
-                    >
-                      {isAssigningIssue ? 'Saving...' : 'Save Assignment'}
-                    </button>
-                  )}
+                  <button
+                    onClick={handleAssignIssue}
+                    disabled={isAssigningIssue || !selectedIssue}
+                    className="w-full bg-[#006d77] text-white py-2 rounded-lg font-semibold hover:bg-[#00555d] disabled:opacity-50 text-sm"
+                  >
+                    {isAssigningIssue ? 'Saving...' : 'Save Assignment'}
+                  </button>
 
                   {(article as any).issueId && (
                     <p className="text-xs text-green-600 font-medium text-center">
@@ -713,14 +736,11 @@ export default function AdminArticleDetailPage() {
                   {(() => {
                     const searchTerm = reviewerSearch.toLowerCase().trim();
                     const available = reviewers.filter((reviewer) => {
-                      const notAssigned = !article.reviews.some(
-                        (r) => r.reviewer.email === reviewer.email
-                      );
                       const matchesSearch =
                         !searchTerm ||
                         (reviewer.name || '').toLowerCase().includes(searchTerm) ||
                         (reviewer.email || '').toLowerCase().includes(searchTerm);
-                      return notAssigned && matchesSearch;
+                      return matchesSearch;
                     });
                     const showAll = reviewerSearch || (showAllReviewers as boolean);
                     const displayList = showAll ? available : available.slice(0, 3);
@@ -733,11 +753,15 @@ export default function AdminArticleDetailPage() {
                       <>
                         <div className="space-y-2">
                           {displayList.map((reviewer) => {
+                            const isAlreadyAssigned = article.reviews.some(
+                              (r) => r.reviewer.email === reviewer.email
+                            );
                             const isSelected = selectedReviewers.includes(reviewer.id);
                             return (
                               <button
                                 key={reviewer.id}
                                 type="button"
+                                disabled={isAlreadyAssigned}
                                 onClick={() => {
                                   if (isSelected) {
                                     setSelectedReviewers(selectedReviewers.filter(id => id !== reviewer.id));
@@ -745,23 +769,33 @@ export default function AdminArticleDetailPage() {
                                     setSelectedReviewers([...selectedReviewers, reviewer.id]);
                                   }
                                 }}
-                                className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${isSelected
-                                  ? 'border-indigo-500 bg-indigo-50 shadow-sm'
-                                  : 'border-gray-100 bg-gray-50 hover:border-gray-300 hover:bg-white'
+                                className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
+                                  isAlreadyAssigned
+                                    ? 'opacity-60 cursor-not-allowed bg-gray-50 border-gray-200'
+                                    : isSelected
+                                      ? 'border-indigo-500 bg-indigo-50 shadow-sm'
+                                      : 'border-gray-100 bg-gray-50 hover:border-gray-300 hover:bg-white'
                                   }`}
                               >
                                 {/* Custom Checkbox */}
-                                <div className={`shrink-0 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${isSelected ? 'bg-indigo-600 border-indigo-600' : 'border-gray-300 bg-white'
+                                <div className={`shrink-0 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${
+                                  isAlreadyAssigned
+                                    ? 'border-gray-300 bg-gray-200'
+                                    : isSelected
+                                      ? 'bg-indigo-600 border-indigo-600'
+                                      : 'border-gray-300 bg-white'
                                   }`}>
-                                  {isSelected && (
-                                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  {(isSelected || isAlreadyAssigned) && (
+                                    <svg className={`w-3 h-3 ${isAlreadyAssigned ? 'text-gray-400' : 'text-white'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                                     </svg>
                                   )}
                                 </div>
 
                                 {/* Avatar */}
-                                <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${isSelected ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-600'
+                                <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                                  isAlreadyAssigned ? 'bg-gray-300 text-gray-500' :
+                                  isSelected ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-600'
                                   }`}>
                                   {(reviewer.name || 'R').charAt(0).toUpperCase()}
                                 </div>
@@ -774,6 +808,13 @@ export default function AdminArticleDetailPage() {
                                     {reviewer._count?.reviews || 0} active review{(reviewer._count?.reviews || 0) !== 1 ? 's' : ''}
                                   </p>
                                 </div>
+
+                                {/* Assigned Badge */}
+                                {isAlreadyAssigned && (
+                                  <span className="text-xs font-semibold text-gray-500 bg-gray-200 px-2 py-1 rounded">
+                                    Assigned
+                                  </span>
+                                )}
                               </button>
                             );
                           })}
@@ -943,7 +984,7 @@ export default function AdminArticleDetailPage() {
         {
           showDecisionModal && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-              <div className="bg-white rounded-lg max-w-md w-full p-6">
+              <div className={`bg-white rounded-lg w-full p-6 ${decisionType === 'revise' ? 'max-w-2xl' : 'max-w-md'}`}>
                 <h3 className="text-xl font-bold mb-4 capitalize">
                   {decisionType === 'publish' ? 'Confirm Publication' :
                     decisionType === 'accept' ? 'Accept Article' :
@@ -967,6 +1008,73 @@ export default function AdminArticleDetailPage() {
                       onChange={(e) => setDecisionComments(e.target.value)}
                       placeholder={decisionType === 'revise' ? "Enter revision details..." : "Enter rejection reason..."}
                     ></textarea>
+                  </div>
+                )}
+
+                {decisionType === 'revise' && article && article.reviews.some(r => r.status === 'completed') && (
+                  <div className="mb-4 bg-gray-50 border border-gray-200 rounded-lg p-4 max-h-64 overflow-y-auto">
+                    <h4 className="text-sm font-bold text-gray-800 mb-3 border-b pb-2">Select Feedback to Share with Author</h4>
+                    <div className="space-y-4">
+                      {article.reviews.filter(r => r.status === 'completed').map(review => {
+                        const sharedState = sharedReviews.find(s => s.reviewId === review.id);
+                        if (!sharedState) return null;
+
+                        return (
+                          <div key={review.id} className="bg-white p-3 rounded border border-gray-200 shadow-sm">
+                            <p className="text-sm font-bold text-gray-800 mb-2">{review.reviewer?.name || `Reviewer ${review.reviewerNumber}`}</p>
+                            
+                            {/* Comments Checkbox */}
+                            {review.commentsToAuthor && (
+                              <label className="flex items-start gap-2 cursor-pointer mb-2">
+                                <input 
+                                  type="checkbox" 
+                                  className="mt-1"
+                                  checked={sharedState.shareComments}
+                                  onChange={(e) => {
+                                    setSharedReviews(prev => prev.map(s => 
+                                      s.reviewId === review.id ? { ...s, shareComments: e.target.checked } : s
+                                    ));
+                                  }}
+                                />
+                                <div>
+                                  <span className="text-sm font-semibold block text-gray-700">Forward Comments to Author</span>
+                                  <p className="text-xs text-gray-500 line-clamp-2 mt-0.5">{review.commentsToAuthor}</p>
+                                </div>
+                              </label>
+                            )}
+
+                            {/* Files Checkboxes */}
+                            {review.reviewerFiles && review.reviewerFiles.length > 0 && (
+                              <div className="ml-1 pl-5 border-l-2 border-indigo-100 mt-2 space-y-2">
+                                <p className="text-xs font-semibold text-gray-600 mb-1">Uploaded Files:</p>
+                                {review.reviewerFiles.map((fileUrl, idx) => {
+                                  const fileName = fileUrl.split('/').pop() || `File ${idx + 1}`;
+                                  const isShared = sharedState.sharedFiles.includes(fileUrl);
+                                  return (
+                                    <label key={idx} className="flex items-center gap-2 cursor-pointer">
+                                      <input 
+                                        type="checkbox" 
+                                        checked={isShared}
+                                        onChange={(e) => {
+                                          setSharedReviews(prev => prev.map(s => {
+                                            if (s.reviewId !== review.id) return s;
+                                            const newFiles = e.target.checked 
+                                              ? [...s.sharedFiles, fileUrl] 
+                                              : s.sharedFiles.filter(f => f !== fileUrl);
+                                            return { ...s, sharedFiles: newFiles };
+                                          }));
+                                        }}
+                                      />
+                                      <span className="text-xs text-gray-700 truncate">{fileName}</span>
+                                    </label>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
 

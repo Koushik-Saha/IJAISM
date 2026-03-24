@@ -10,7 +10,7 @@ import ForcePasswordChangeModal from "@/components/auth/ForcePasswordChangeModal
 
 
 export const metadata: Metadata = {
-  title: "C5K - International Journal of Advanced Information Systems and Management",
+  title: "C5K - Academic Publishing Platform",
   description: "Dedicated to publishing groundbreaking research in information technology, business management, and related disciplines",
   manifest: "/manifest.json",
   appleWebApp: {

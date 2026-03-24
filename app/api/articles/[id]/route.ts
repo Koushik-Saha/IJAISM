@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { generateSignedFileToken } from "@/lib/security/url-signer";
 import { verifyToken } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
@@ -91,21 +92,44 @@ export async function GET(
       );
     }
 
-    // 5. Mask Data if not Editor (i.e. Author)
-    if (!isEditor) {
-      // Mask Reviewer Data & HIDE Confidential Comments
-      (article.reviews as any) = article.reviews.map((review, index) => {
-        // Create a compliant object removing confidential fields
-        const { commentsToEditor, ...safeReview } = review as any;
+    // 5. Secure File Access & Mask Data
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    
+    (article.reviews as any) = article.reviews.map((review, index) => {
+      let safeReview = { ...review } as any;
 
+      // Cryptographically sign S3 URLs so they can be viewed
+      const signFileArray = (files: string[]) => {
+        if (!files) return [];
+        return files.map(fileUrl => {
+          if (fileUrl.includes('.s3.') || fileUrl.includes('amazonaws.com')) {
+            const token = generateSignedFileToken(fileUrl, 3600);
+            return `${appUrl}/api/secure-file?token=${token}`;
+          }
+          return fileUrl;
+        });
+      };
+
+      if (safeReview.reviewerFiles) {
+        safeReview.reviewerFiles = signFileArray(safeReview.reviewerFiles);
+      }
+      if (safeReview.sharedFiles) {
+        safeReview.sharedFiles = signFileArray(safeReview.sharedFiles);
+      }
+
+      // If they are NOT an editor, mask names and remove confidential editor comments
+      if (!isEditor) {
+        const { commentsToEditor, ...redactedReview } = safeReview;
         return {
-          ...safeReview, // This excludes commentsToEditor
+          ...redactedReview,
           reviewer: {
             name: `Reviewer ${index + 1}`
           }
         };
-      });
-    }
+      }
+
+      return safeReview;
+    });
 
     // 5. Return article
     return NextResponse.json(

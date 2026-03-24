@@ -1,18 +1,37 @@
 require('dotenv').config();
-import { sendArticleSubmissionEmail, sendPasswordResetEmail, sendReviewerInvitationEmail } from './lib/email/send';
+import { sendReviewerTempPasswordEmail, sendReviewerAssignmentEmail } from './lib/email/send';
 
 async function run() {
-    console.log("Testing application email functions...");
+    console.log("Testing Reviewer Emails...");
     const email = "koushik.saha666@gmail.com";
 
-    const res1 = await sendArticleSubmissionEmail(email, "Koushik Saha", "Test Article Integration", "IJAISM", "SUB-123", new Date());
-    console.log("Submission Email:", res1);
+    console.log("1. Sending New User (Temp Password) Email...");
+    const res1 = await sendReviewerTempPasswordEmail(
+        email, 
+        "Dr. New Reviewer", 
+        "Advances in Quantum Computing architecture and cryptography", 
+        "This is a dummy test abstract injection for the invitation workflow.", 
+        "C5K", 
+        "tempPass123!", 
+        "REV-NEW-123"
+    );
+    console.log("Result:", res1);
 
-    const res2 = await sendPasswordResetEmail(email, "Koushik Saha", "token-123");
-    console.log("Reset Email:", res2);
-
-    const res3 = await sendReviewerInvitationEmail(email, "Koushik Saha", "Test Article Integration", "This is a dummy test abstract injection for the invitation workflow compiler validation.", "IJAISM", "INV-123");
-    console.log("Reviewer Email:", res3);
+    console.log("2. Sending Existing User (Assignment) Email...");
+    // dueDate 3 weeks from now
+    const dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + 21);
+    
+    const res2 = await sendReviewerAssignmentEmail(
+        email, 
+        "Dr. Existing Reviewer", 
+        "Advances in Machine Learning, IoT and Data Security", 
+        "This is an abstract added for the testing assignment. This paper explores various paradigms in IoT and Machine Learning for advanced information systems and big data security infrastructures.",
+        "C5K", 
+        dueDate, 
+        "REV-EXISTING-123"
+    );
+    console.log("Result:", res2);
 }
 
 run();

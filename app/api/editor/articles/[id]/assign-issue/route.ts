@@ -38,11 +38,7 @@ export async function POST(
             return NextResponse.json({ error: "Article not found" }, { status: 404 });
         }
 
-        if (existingArticle.issueId && decoded.role !== 'super_admin') {
-            return NextResponse.json({
-                error: "Permission Denied: Only Super Admin can re-assign issues."
-            }, { status: 403 });
-        }
+        // Editors and super admins can freely reassign issues
 
         const issue = await prisma.journalIssue.findUnique({
             where: { id: issueId }

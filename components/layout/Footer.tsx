@@ -104,7 +104,7 @@ export default function Footer() {
 
         {/* Bottom Bar */}
         <div className="border-t border-gray-700 mt-8 pt-8 text-center">
-          <p>&copy; {new Date().getFullYear()} C5K - International Journal of Advanced Information Systems and Management. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} C5K - Academic Publishing Platform. All rights reserved.</p>
         </div>
       </div>
     </footer>

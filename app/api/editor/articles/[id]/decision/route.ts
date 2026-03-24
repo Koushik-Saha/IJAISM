@@ -34,7 +34,7 @@ export async function POST(
 
         const { id } = await params;
         const body = await req.json();
-        const { decision, comments } = body;
+        const { decision, comments, sharedReviews } = body;
 
         // Validate decision
         if (!['publish', 'reject', 'revise', 'accept'].includes(decision)) {
@@ -170,6 +170,19 @@ export async function POST(
                 status: 'revision_requested',
                 editorComments: comments
             };
+            
+            // Process selective sharing
+            if (sharedReviews && Array.isArray(sharedReviews) && sharedReviews.length > 0) {
+                for (const review of sharedReviews) {
+                    await prisma.review.update({
+                        where: { id: review.reviewId },
+                        data: {
+                            isSharedWithAuthor: review.shareComments,
+                            sharedFiles: review.sharedFiles || []
+                        }
+                    });
+                }
+            }
         }
 
         // Update Article

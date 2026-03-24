@@ -278,11 +278,11 @@ export async function sendEmailVerificationConfirmationEmail(
   );
 }
 
-// 11. Send reviewer assignment email
 export async function sendReviewerAssignmentEmail(
   reviewerEmail: string,
   reviewerName: string,
   articleTitle: string,
+  articleAbstract: string,
   journalName: string,
   dueDate: Date,
   reviewId: string
@@ -296,6 +296,7 @@ export async function sendReviewerAssignmentEmail(
   const html = templates.reviewerAssignmentEmail(
     reviewerName,
     articleTitle,
+    articleAbstract,
     journalName,
     formattedDueDate,
     reviewId

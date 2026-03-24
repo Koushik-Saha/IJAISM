@@ -1,12 +1,12 @@
 import { z } from 'zod';
 
 export const reviewDecisionSchema = z.object({
-    decision: z.enum(['accept', 'reject', 'revision_requested']),
+    decision: z.enum(['accept', 'reject', 'minor_revision', 'major_revision', 'no_recommendation']),
     commentsToAuthor: z.string(),
     commentsToEditor: z.string().optional(),
     reviewerFiles: z.array(z.string()).optional(),
 }).superRefine((data, ctx) => {
-    if (data.decision === 'revision_requested') {
+    if (data.decision === 'minor_revision' || data.decision === 'major_revision') {
         if (data.commentsToAuthor.trim().length < 50) {
             ctx.addIssue({
                 code: z.ZodIssueCode.custom,

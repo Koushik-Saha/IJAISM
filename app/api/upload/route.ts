@@ -46,10 +46,6 @@ export async function POST(req: NextRequest) {
 
     const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
 
-    if (fileType === 'manuscript' && file.type !== 'application/pdf') {
-      return apiError('Manuscripts must be in PDF format', 400, undefined, 'INVALID_FILE_TYPE');
-    }
-
     if (!allowedTypes.includes(file.type)) {
       return apiError('Invalid file type. Only PDF, DOC, and DOCX are allowed', 400, undefined, 'INVALID_FILE_TYPE');
     }

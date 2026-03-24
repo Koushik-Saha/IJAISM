@@ -435,30 +435,59 @@ export default function SubmissionDetailPage() {
             <div className="mt-6">
               <h3 className="text-lg font-bold text-gray-800 mb-4">Peer Review Feedback</h3>
               <div className="space-y-4">
-                {(article as any).reviews.map((review: any, index: number) => (
-                  review.status === 'completed' && (
-                    <div key={index} className="bg-white border rounded-lg p-4 shadow-sm">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-bold text-gray-700">{review.reviewer?.name || `Reviewer ${index + 1}`}</span>
-                        <span className={`text-xs px-2 py-1 rounded font-semibold capitalize ${review.decision === 'accept' ? 'bg-green-100 text-green-800' :
-                          review.decision === 'reject' ? 'bg-red-100 text-red-800' :
-                            review.decision === 'revision_requested' ? 'bg-yellow-100 text-yellow-800' :
-                              'bg-gray-100 text-gray-600'
-                          }`}>
-                          {review.decision?.replace(/_/g, ' ') || 'Completed'}
-                        </span>
+                {(article as any).reviews.map((review: any, index: number) => {
+                  if (review.status !== 'completed') return null;
+                  
+                  // Only display review if the editor explicitly shared comments OR files
+                  const hasSharedComments = review.isSharedWithAuthor && review.commentsToAuthor;
+                  const hasSharedFiles = review.sharedFiles && review.sharedFiles.length > 0;
+                  
+                  // Fallback for older reviews before Phase 15 where isSharedWithAuthor defaulted to true
+                  // But we will respect the flags going forward
+                  if (!hasSharedComments && !hasSharedFiles) {
+                     // If it was just an empty review
+                     if (!review.commentsToAuthor && (!review.reviewerFiles || review.reviewerFiles.length === 0)) return null;
+                     
+                     // If the editor un-shared EVERYTHING, don't render this reviewer's block at all to keep UI clean
+                     return null;
+                  }
+
+                  return (
+                    <div key={index} className="bg-white border rounded-lg p-4 shadow-sm mb-4">
+                      <div className="flex items-center justify-between mb-2 border-b pb-2">
+                        <span className="font-bold text-gray-700">Reviewer {index + 1}</span>
                       </div>
 
-                      {review.commentsToAuthor ? (
+                      {hasSharedComments && (
                         <div className="text-sm text-gray-700 whitespace-pre-wrap bg-gray-50 p-3 rounded">
                           {review.commentsToAuthor}
                         </div>
-                      ) : (
-                        <p className="text-sm text-gray-500 italic">No comments provided.</p>
+                      )}
+
+                      {hasSharedFiles && (
+                        <div className="mt-3 bg-indigo-50/50 p-3 rounded-lg border border-indigo-100 flex flex-col gap-2">
+                          <p className="text-xs font-semibold text-gray-700">Attachments for Author:</p>
+                          {review.sharedFiles.map((fileUrl: string, fIdx: number) => {
+                            const fileName = fileUrl.split('/').pop() || `File ${fIdx + 1}`;
+                            return (
+                              <div key={fIdx} className="flex items-center justify-between bg-white border border-gray-200 p-2 rounded shadow-sm">
+                                <span className="text-sm font-medium text-gray-700 truncate">{fileName}</span>
+                                <a 
+                                  href={fileUrl} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="bg-blue-50 text-indigo-700 hover:bg-blue-100 px-3 py-1.5 rounded-md text-xs font-bold transition-colors shrink-0 border border-indigo-200"
+                                >
+                                  Download
+                                </a>
+                              </div>
+                            );
+                          })}
+                        </div>
                       )}
                     </div>
-                  )
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}

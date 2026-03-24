@@ -285,7 +285,8 @@ function SubmitFormContent() {
           const uploadData = await uploadResponse.json();
           manuscriptUrl = uploadData.data.url;
         } else {
-          throw new Error('Failed to upload manuscript');
+          const errData = await uploadResponse.json().catch(() => ({}));
+          throw new Error(errData.error?.message || errData.error || 'Failed to upload manuscript');
         }
       }
 
@@ -306,7 +307,8 @@ function SubmitFormContent() {
           const uploadData = await uploadResponse.json();
           coverLetterUrl = uploadData.data.url;
         } else {
-          throw new Error('Failed to upload cover letter');
+          const errData = await uploadResponse.json().catch(() => ({}));
+          throw new Error(errData.error?.message || errData.error || 'Failed to upload cover letter');
         }
       }
 
@@ -328,7 +330,8 @@ function SubmitFormContent() {
             const uploadData = await uploadResponse.json();
             supplementaryFileUrls.push(uploadData.data.url);
           } else {
-            throw new Error(`Failed to upload supplementary file: ${file.name}`);
+            const errData = await uploadResponse.json().catch(() => ({}));
+            throw new Error(errData.error?.message || errData.error || `Failed to upload supplementary file: ${file.name}`);
           }
         }
       }

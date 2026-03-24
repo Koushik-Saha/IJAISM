@@ -239,23 +239,25 @@ model CoAuthor {
 }
 
 model Review {
-  id               String    @id @default(uuid())
-  articleId        String
-  reviewerId       String
-  reviewerNumber   Int
-  round            Int       @default(1)
-  status           String    @default("invited")
-  decision         String?
-  commentsToAuthor String?
-  commentsToEditor String?
-  assignedAt       DateTime  @default(now())
-  dueDate          DateTime?
-  submittedAt      DateTime?
-  reviewerFiles    String[]  @default([])
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-  article          Article   @relation(fields: [articleId], references: [id], onDelete: Cascade)
-  reviewer         User      @relation(fields: [reviewerId], references: [id])
+  id                 String    @id @default(uuid())
+  articleId          String
+  reviewerId         String
+  reviewerNumber     Int
+  round              Int       @default(1)
+  status             String    @default("invited")
+  decision           String?
+  commentsToAuthor   String?
+  commentsToEditor   String?
+  assignedAt         DateTime  @default(now())
+  dueDate            DateTime?
+  submittedAt        DateTime?
+  reviewerFiles      String[]  @default([])
+  isSharedWithAuthor Boolean   @default(true)
+  sharedFiles        String[]  @default([])
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  article            Article   @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  reviewer           User      @relation(fields: [reviewerId], references: [id])
 
   @@unique([articleId, reviewerNumber])
   @@index([articleId])

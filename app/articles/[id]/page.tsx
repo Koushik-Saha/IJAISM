@@ -5,6 +5,7 @@ import Card from "@/components/ui/Card";
 import ArticleActions from "@/components/articles/ArticleActions";
 import ReviewerFeedback from "@/components/articles/ReviewerFeedback";
 import { Metadata } from "next";
+import { generateSignedFileToken } from "@/lib/security/url-signer";
 
 export const revalidate = 3600; // Revalidate every hour
 
@@ -211,10 +212,22 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
                 <ReviewerFeedback
                   articleId={article.id}
                   originalTitle={article.title}
-                  reviews={article.reviews.map(r => ({
-                    ...r,
-                    decision: r.decision || 'PENDING'
-                  }))}
+                  reviews={article.reviews.map(r => {
+                    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+                    const secureSharedFiles = ((r as any).sharedFiles || []).map((url: string) => {
+                      if (url.includes('.s3.') || url.includes('amazonaws.com')) {
+                        const token = generateSignedFileToken(url, 3600);
+                        return `${appUrl}/api/secure-file?token=${token}`;
+                      }
+                      return url;
+                    });
+
+                    return {
+                      ...r,
+                      decision: r.decision || 'PENDING',
+                      sharedFiles: secureSharedFiles
+                    };
+                  })}
                 />
               )}
 

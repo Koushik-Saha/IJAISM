@@ -38,12 +38,11 @@ async function loadData() {
         }
     }
 
-    // 2. Journals (already 13 real journals in db, we want to map new issues to them)
+    // 2. Journals
     const journals = readJSON('Journal.json');
     if (journals.length > 0) {
         console.log(`Loading ${journals.length} Journals...`);
-        // We removed skipDuplicates loading for Journals because we want to preserve the real ones we synced,
-        // and we don't want to blindly create duplicates. We will just use the ones already in the DB.
+        await prisma.journal.createMany({ data: journals, skipDuplicates: true });
     }
     const dbJournals = await prisma.journal.findMany({ select: { id: true, code: true } });
     const validJournalIds = new Set(dbJournals.map(j => j.id));
@@ -51,7 +50,6 @@ async function loadData() {
     // Create a mapping from the transformed JSON's journalId -> Real DB Journal ID
     const transformToRealJournalId: Record<string, string> = {};
     for (const jsonJournal of journals) {
-        // Find the real journal in the DB with the same code
         const real = dbJournals.find(j => j.code === jsonJournal.code);
         if (real) {
             transformToRealJournalId[jsonJournal.id] = real.id;
@@ -60,7 +58,6 @@ async function loadData() {
 
     // 3. JournalIssues
     let issues = readJSON('JournalIssue.json');
-    // Map their journalId to the real ones
     issues = issues.map((i: any) => ({
         ...i,
         journalId: transformToRealJournalId[i.journalId] || i.journalId
@@ -92,28 +89,53 @@ async function loadData() {
         await prisma.article.createMany({ data: validArticles, skipDuplicates: true });
     }
 
-    // 5. Books (SKIP - User already manually curated)
-    /*
+    // 5. Books
     const books = readJSON('Book.json');
-    if (books.length > 0) {
-        console.log(`Loading ${books.length} Books...`);
-        await prisma.book.createMany({ data: books, skipDuplicates: true });
+    // Map authors for books
+    books.forEach((b: any) => {
+        if (b.authorId && transformToRealUserId[b.authorId]) {
+            b.authorId = transformToRealUserId[b.authorId];
+        }
+    });
+    // For books, we just check if author exists (if authorId is present)
+    const validBooks = books.filter((b: any) => !b.authorId || validUserIds.has(b.authorId));
+    if (validBooks.length > 0) {
+        console.log(`Loading ${validBooks.length} Books...`);
+        await prisma.book.createMany({ data: validBooks, skipDuplicates: true });
     }
-    */
+    const dbBooks = await prisma.book.findMany({ select: { id: true } });
+    const validBookIds = new Set(dbBooks.map(b => b.id));
 
-    // 6. BookChapters (SKIP)
+    // 6. BookChapters
+    const bookChapters = readJSON('BookChapter.json');
+    const validBookChapters = bookChapters.filter((c: any) => validBookIds.has(c.bookId));
+    if (validBookChapters.length > 0) {
+        console.log(`Loading ${validBookChapters.length} BookChapters...`);
+        await prisma.bookChapter.createMany({ data: validBookChapters, skipDuplicates: true });
+    }
 
-    // 7. Dissertations (SKIP - User already manually curated)
-    /*
+    // 7. Dissertations
     const dissertations = readJSON('Dissertation.json');
+    dissertations.forEach((d: any) => {
+        if (d.authorId && transformToRealUserId[d.authorId]) {
+            d.authorId = transformToRealUserId[d.authorId];
+        }
+    });
     const validDissertations = dissertations.filter((d: any) => validUserIds.has(d.authorId));
     if (validDissertations.length > 0) {
         console.log(`Loading ${validDissertations.length} Dissertations...`);
         await prisma.dissertation.createMany({ data: validDissertations, skipDuplicates: true });
     }
-    */
+    const dbDissertations = await prisma.dissertation.findMany({ select: { id: true } });
+    const validDissertationIds = new Set(dbDissertations.map(d => d.id));
 
-    // 8. DissertationChapters (SKIP)
+    // 8. DissertationChapters
+    const dissChapters = readJSON('DissertationChapter.json');
+    const validDissChapters = dissChapters.filter((c: any) => validDissertationIds.has(c.dissertationId));
+    if (validDissChapters.length > 0) {
+        console.log(`Loading ${validDissChapters.length} DissertationChapters...`);
+        await prisma.dissertationChapter.createMany({ data: validDissChapters, skipDuplicates: true });
+    }
 
     // 9. Newsletter Subscribers
     const subscribers = readJSON('NewsletterSubscriber.json');

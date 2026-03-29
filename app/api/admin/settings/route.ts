@@ -1,9 +1,6 @@
-
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
-
-const prisma = new PrismaClient();
 
 export async function GET(request: Request) {
     try {
@@ -11,7 +8,7 @@ export async function GET(request: Request) {
         if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         const user = verifyToken(token);
-        if (!user || (user.role !== 'admin' && user.role !== 'editor')) { // Allowing editor for now, strict admin later
+        if (!user) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
@@ -36,7 +33,7 @@ export async function POST(request: Request) {
         if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         const user = verifyToken(token);
-        if (!user || user.role !== 'admin') {
+        if (!user || !['admin', 'mother_admin', 'super_admin'].includes(user.role)) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 

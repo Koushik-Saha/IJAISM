@@ -21,20 +21,21 @@ model User {
   name                    String
   university              String
   orcid                   String?                  @unique
-  orcidAccessToken        String? // OAuth Token
-  orcidRefreshToken       String?
   role                    String                   @default("author")
   affiliation             String?
   bio                     String?
   profileImageUrl         String?
   isEmailVerified         Boolean                  @default(false)
   isActive                Boolean                  @default(true)
-  forcePasswordChange     Boolean                  @default(false)
   lastLoginAt             DateTime?
   createdAt               DateTime                 @default(now())
   updatedAt               DateTime                 @updatedAt
   deletedAt               DateTime?
   managedById             String?
+  forcePasswordChange     Boolean                  @default(false)
+  orcidAccessToken        String?
+  orcidRefreshToken       String?
+  activityLogs            ActivityLog[]
   articles                Article[]
   blogs                   Blog[]
   conferences             ConferenceRegistration[]
@@ -48,10 +49,9 @@ model User {
   reviews                 Review[]
   managedBy               User?                    @relation("UserHierarchy", fields: [managedById], references: [id])
   subordinates            User[]                   @relation("UserHierarchy")
-  activityLogs            ActivityLog[]
-  wishlist                Wishlist[]
-  purchasedBooks          PurchasedBook[]
   newsletterSubscription  NewsletterSubscriber?
+  purchasedBooks          PurchasedBook[]
+  wishlist                Wishlist[]
 
   @@index([email])
   @@index([role])
@@ -96,10 +96,10 @@ model Membership {
   startDate            DateTime
   endDate              DateTime
   autoRenew            Boolean  @default(true)
-  paypalSubscriptionId String?
   stripeSubscriptionId String?
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
+  paypalSubscriptionId String?
   user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
@@ -125,18 +125,18 @@ model Journal {
   createdAt                 DateTime       @default(now())
   updatedAt                 DateTime       @updatedAt
   deletedAt                 DateTime?
-  citeScore                 Float?
-  themeColor                String?        @default("#006d77")
   acceptanceToPublication   String?
+  citeScore                 Float?
+  editingService            String?
+  editorialBoard            Json?
+  editorialBoardDescription String?
   indexing                  String?
   reviewTime                String?
   revisionTime              String?
   subjectAreas              String?
   submissionToAcceptance    String?
+  themeColor                String?        @default("#006d77")
   timeToFirstDecision       String?
-  editingService            String?
-  editorialBoard            Json?
-  editorialBoardDescription String?
   editorId                  String?
   articles                  Article[]
   editor                    User?          @relation("JournalEditor", fields: [editorId], references: [id])
@@ -169,53 +169,52 @@ model JournalIssue {
 }
 
 model Article {
-  id                 String    @id @default(uuid())
-  journalId          String
-  title              String
-  abstract           String
-  fullText           String?   @db.Text
-  keywords           String[]
-  articleType        String
-  doi                String?   @unique
-  volume             Int?
-  issue              Int?
-  pageStart          Int?
-  pageEnd            Int?
-  publicationDate    DateTime?
-  submissionDate     DateTime?
-  acceptanceDate     DateTime?
-  status             String    @default("draft")
-  pdfUrl             String?
-  coverLetterUrl     String?
-  supplementaryFiles String[]
-  language           String    @default("en")
-  citationCount      Int       @default(0)
-  viewCount          Int       @default(0)
-  downloadCount      Int       @default(0)
-  isOpenAccess       Boolean   @default(true)
-
+  id                  String               @id @default(uuid())
+  journalId           String
+  title               String
+  abstract            String
+  keywords            String[]
+  articleType         String
+  doi                 String?              @unique
+  volume              Int?
+  issue               Int?
+  pageStart           Int?
+  pageEnd             Int?
+  publicationDate     DateTime?
+  submissionDate      DateTime?
+  acceptanceDate      DateTime?
+  status              String               @default("draft")
+  pdfUrl              String?
+  language            String               @default("en")
+  citationCount       Int                  @default(0)
+  viewCount           Int                  @default(0)
+  downloadCount       Int                  @default(0)
+  isOpenAccess        Boolean              @default(true)
   createdAt           DateTime             @default(now())
-  reviewerInvitations ReviewerInvitation[]
   updatedAt           DateTime             @updatedAt
-  isApcPaid           Boolean              @default(false)
-  apcAmount           Float?
-  paypalOrderId       String? // For PayPal
-  stripePaymentId     String? // For Stripe
   deletedAt           DateTime?
   authorId            String
   editorComments      String?
+  isBestPaper         Boolean              @default(false)
+  issueId             String?
   rejectionReason     String?
   resubmissionCount   Int                  @default(0)
-  issueId             String?
-  isBestPaper         Boolean              @default(false)
-  similarityScore     Float? // Plagiarism Detection
+  apcAmount           Float?
+  isApcPaid           Boolean              @default(false)
+  stripePaymentId     String?
+  coverLetterUrl      String?
+  fullText            String?
+  paypalOrderId       String?
   plagiarismReportUrl String?
+  similarityScore     Float?
+  supplementaryFiles  String[]
+  activityLogs        ActivityLog[]
   author              User                 @relation(fields: [authorId], references: [id])
   journalIssue        JournalIssue?        @relation(fields: [issueId], references: [id])
   journal             Journal              @relation(fields: [journalId], references: [id])
   coAuthors           CoAuthor[]
   reviews             Review[]
-  activityLogs        ActivityLog[]
+  reviewerInvitations ReviewerInvitation[]
 
   @@index([journalId])
   @@index([status])
@@ -251,11 +250,12 @@ model Review {
   assignedAt         DateTime  @default(now())
   dueDate            DateTime?
   submittedAt        DateTime?
-  reviewerFiles      String[]  @default([])
-  isSharedWithAuthor Boolean   @default(true)
-  sharedFiles        String[]  @default([])
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
+  isSharedWithAuthor Boolean   @default(true)
+  reviewerFiles      String[]  @default([])
+  sharedFiles        String[]  @default([])
+  isCertified        Boolean   @default(false)
   article            Article   @relation(fields: [articleId], references: [id], onDelete: Cascade)
   reviewer           User      @relation(fields: [reviewerId], references: [id])
 
@@ -284,8 +284,8 @@ model Dissertation {
   createdAt      DateTime              @default(now())
   updatedAt      DateTime              @updatedAt
   deletedAt      DateTime?
-  coverImageUrl  String?
   authorName     String?
+  coverImageUrl  String?
   author         User                  @relation(fields: [authorId], references: [id])
   chapters       DissertationChapter[]
 
@@ -313,8 +313,6 @@ model Conference {
   createdAt          DateTime                 @default(now())
   updatedAt          DateTime                 @updatedAt
   deletedAt          DateTime?
-  brochureUrl        String?
-  callForPapersUrl   String?
   acronym            String?
   fullDescription    String?
   importantDates     Json?
@@ -325,6 +323,8 @@ model Conference {
   schedule           Json?
   topics             String[]
   venueDetails       Json?
+  brochureUrl        String?
+  callForPapersUrl   String?
   registrations      ConferenceRegistration[]
 
   @@index([startDate])
@@ -338,10 +338,10 @@ model ConferenceRegistration {
   registrationType String
   paymentStatus    String     @default("pending")
   paymentAmount    Float?
-  paypalOrderId    String?
   stripePaymentId  String?
   registeredAt     DateTime   @default(now())
   createdAt        DateTime   @default(now())
+  paypalOrderId    String?
   conference       Conference @relation(fields: [conferenceId], references: [id], onDelete: Cascade)
   user             User       @relation(fields: [userId], references: [id])
 
@@ -430,9 +430,9 @@ model Book {
   relatedTopics   String[]
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
-  wishlistedBy    Wishlist[]
-  purchasedBy     PurchasedBook[]
   chapters        BookChapter[]
+  purchasedBy     PurchasedBook[]
+  wishlistedBy    Wishlist[]
 
   @@index([isbn])
   @@index([field])
@@ -442,8 +442,8 @@ model HeroSlide {
   id                  String   @id @default(cuid())
   title               String
   subtitle            String?
-  description         String?  @db.Text
-  imageUrl            String? // Optional background or side image
+  description         String?
+  imageUrl            String?
   primaryButtonText   String?
   primaryButtonLink   String?
   secondaryButtonText String?
@@ -461,10 +461,10 @@ model DownloadLog {
   userId       String
   resourceId   String
   resourceType String
-  ipAddress    String?
-  country      String?
-  city         String?
   downloadedAt DateTime @default(now())
+  city         String?
+  country      String?
+  ipAddress    String?
   user         User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
@@ -477,7 +477,7 @@ model ReviewerInvitation {
   name      String
   articleId String
   token     String   @unique
-  status    String   @default("pending") // pending, accepted, expired
+  status    String   @default("pending")
   createdAt DateTime @default(now())
   expiresAt DateTime
   article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
@@ -493,9 +493,8 @@ model ActivityLog {
   action    String
   details   String?
   createdAt DateTime @default(now())
-
-  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
-  user    User    @relation(fields: [userId], references: [id])
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id])
 
   @@index([articleId])
   @@index([userId])
@@ -503,9 +502,9 @@ model ActivityLog {
 
 model HomePageSection {
   id           String   @id @default(cuid())
-  type         String // "hero_carousel", "announcements", "journals", "latest_articles", "most_viewed", "newsletter", "stats", "html", "text"
+  type         String
   title        String?
-  content      Json? // For custom HTML/Text blocks
+  content      Json?
   displayOrder Int      @default(0)
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
@@ -535,9 +534,8 @@ model Wishlist {
   userId    String
   bookId    String
   createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, bookId])
   @@map("wishlists")
@@ -551,9 +549,8 @@ model PurchasedBook {
   paypalOrderId   String?
   stripePaymentId String?
   purchasedAt     DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  book            Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, bookId])
   @@map("purchased_books")
@@ -565,26 +562,24 @@ model BookChapter {
   title     String
   pageRange String?
   pdfUrl    String?
-  summary   String?  @db.Text
+  summary   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
 
   @@index([bookId])
   @@map("book_chapters")
 }
 
 model DissertationChapter {
-  id             String   @id @default(uuid())
+  id             String       @id @default(uuid())
   dissertationId String
   title          String
   pageRange      String?
   pdfUrl         String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  dissertation Dissertation @relation(fields: [dissertationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  dissertation   Dissertation @relation(fields: [dissertationId], references: [id], onDelete: Cascade)
 
   @@index([dissertationId])
   @@map("dissertation_chapters")

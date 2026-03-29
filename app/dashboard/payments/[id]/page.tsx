@@ -19,7 +19,9 @@ export default function PaymentPage() {
     const [loading, setLoading] = useState(true);
     const [article, setArticle] = useState<any>(null);
     const [apcFee, setApcFee] = useState<number>(500);
-    const [paymentMethod, setPaymentMethod] = useState<'card' | 'paypal' | null>(null);
+    const [paymentMethod, setPaymentMethod] = useState<'card' | 'paypal' | 'mock' | null>(null);
+
+    const allowMock = process.env.NEXT_PUBLIC_MOCK_PAYMENT === 'true';
 
     useEffect(() => {
         if (articleId) {
@@ -141,6 +143,31 @@ export default function PaymentPage() {
         }
     };
 
+    const handleMockCheckout = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('/api/payments/mock', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ articleId })
+            });
+
+            const data = await res.json();
+            if (res.ok && data.success) {
+                toast.success('Mock Payment Successful!');
+                router.push('/dashboard/submissions?success=true');
+            } else {
+                toast.error(data.error || 'Failed to process mock payment');
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error('An error occurred');
+        }
+    };
+
     if (loading) return <div className="p-8 text-center">Loading payment details...</div>;
     if (!article) return <div className="p-8 text-center text-red-600">Article not found</div>;
 
@@ -189,6 +216,19 @@ export default function PaymentPage() {
                                 <span className="font-bold">PayPal</span>
                                 <span className="text-xs text-gray-500">Fast Checkout</span>
                             </button>
+                            
+                            {allowMock && (
+                                <button
+                                    onClick={() => setPaymentMethod('mock')}
+                                    className={`p-3 border rounded-lg flex flex-col items-center justify-center gap-2 transition-all col-span-2 ${paymentMethod === 'mock'
+                                        ? 'border-green-500 bg-green-50 text-green-700 ring-1 ring-green-500'
+                                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                                        }`}
+                                >
+                                    <span className="font-bold">Mock Payment</span>
+                                    <span className="text-xs text-gray-500">Test Server Bypass</span>
+                                </button>
+                            )}
                         </div>
 
                         <div className="mt-6">
@@ -220,6 +260,15 @@ export default function PaymentPage() {
                                         />
                                     </PayPalScriptProvider>
                                 </div>
+                            )}
+
+                            {paymentMethod === 'mock' && allowMock && (
+                                <button
+                                    onClick={handleMockCheckout}
+                                    className="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-bold hover:bg-green-700 transition-colors shadow-lg"
+                                >
+                                    Simulate Payment Success
+                                </button>
                             )}
 
                             {!paymentMethod && (

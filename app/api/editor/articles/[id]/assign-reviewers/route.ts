@@ -76,15 +76,17 @@ export async function POST(
 
     // Send email notification to author
     try {
-      await sendArticleStatusUpdateEmail(
-        article.author.email,
-        article.author.name || article.author.email.split('@')[0],
-        article.title,
-        article.status,
-        'under_review',
-        article.id,
-        'Your article has been assigned to 4 reviewers. The review process typically takes 4-6 weeks.'
-      );
+      if (article.status !== 'under_review') {
+        await sendArticleStatusUpdateEmail(
+          article.author.email,
+          article.author.name || article.author.email.split('@')[0],
+          article.title,
+          article.status,
+          'under_review',
+          article.id,
+          `Your article has been assigned to ${reviewerIds.length} reviewer(s). The review process typically takes 4-6 weeks.`
+        );
+      }
     } catch (emailError) {
       console.error('Failed to send email:', emailError);
       // Don't fail the assignment if email fails

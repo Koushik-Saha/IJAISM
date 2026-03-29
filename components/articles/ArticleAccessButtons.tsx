@@ -156,12 +156,14 @@ export default function ArticleAccessButtons({
     // Default Variant (Sidebar / Card style)
     return (
         <div className={`flex flex-col gap-2 w-full ${className}`}>
-            <button
-                onClick={handleReadPdf}
-                className="w-full text-center py-2 flex items-center justify-center gap-2 bg-[#e8701a] hover:bg-[#d56113] text-white rounded font-medium transition-colors shadow-sm"
-            >
-                <span>🌐</span> Interactive Reader (HTML)
-            </button>
+            {fullTextAvailable && (
+                <button
+                    onClick={handleReadPdf}
+                    className="w-full text-center py-2 flex items-center justify-center gap-2 bg-[#e8701a] hover:bg-[#d56113] text-white rounded font-medium transition-colors shadow-sm"
+                >
+                    <span>🌐</span> Interactive Reader (HTML)
+                </button>
+            )}
 
             {pdfUrl && (
                 <div className="grid grid-cols-2 gap-2 mt-1">

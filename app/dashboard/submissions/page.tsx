@@ -295,7 +295,7 @@ export default function MySubmissionsPage() {
                     <div className="flex-1">
                       <div className="flex items-start justify-between mb-3">
                         <div>
-                          <Link href={`/articles/${article.id}`}>
+                          <Link href={`/dashboard/submissions/${article.id}`}>
                             <h2 className="text-xl font-bold text-primary hover:text-primary-dark mb-2">
                               {article.title}
                             </h2>
@@ -378,11 +378,21 @@ export default function MySubmissionsPage() {
 
                     <div className="flex flex-col gap-2 min-w-[200px]">
                       <Link
-                        href={`/articles/${article.id}`}
-                        className="btn-primary text-sm px-4 py-2 whitespace-nowrap text-center"
+                        href={`/dashboard/submissions/${article.id}`}
+                        className="btn-primary text-sm px-4 py-2 whitespace-nowrap text-center text-white"
                       >
                         View Details
                       </Link>
+                      
+                      {article.status === 'proof_requested' && (
+                        <Link
+                          href={`/dashboard/submissions/${article.id}/proof`}
+                          className="bg-purple-600 hover:bg-purple-700 text-white text-sm px-4 py-2 rounded text-center font-bold whitespace-nowrap transition"
+                        >
+                          Submit Proof
+                        </Link>
+                      )}
+                      
                       {article.status === 'published' && (
                         <button className="btn-secondary text-sm px-4 py-2 whitespace-nowrap">
                           Download PDF

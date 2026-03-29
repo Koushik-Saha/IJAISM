@@ -68,7 +68,7 @@ export default function AdminArticleDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isAssigning, setIsAssigning] = useState(false);
   const [showDecisionModal, setShowDecisionModal] = useState(false);
-  const [decisionType, setDecisionType] = useState<'publish' | 'reject' | 'revise' | 'accept' | null>(null);
+  const [decisionType, setDecisionType] = useState<'publish' | 'reject' | 'revise' | 'accept' | 'proof_requested' | null>(null);
   const [decisionComments, setDecisionComments] = useState('');
   const [isSubmittingDecision, setIsSubmittingDecision] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
@@ -288,14 +288,6 @@ export default function AdminArticleDetailPage() {
       return;
     }
 
-    const isLockedStatus = ['accepted', 'published'].includes(article?.status || '');
-    if (!isLockedStatus && totalAfterAssignment > 4) {
-      toast.error('Too many reviewers', {
-        description: `You can only assign ${4 - currentReviewerCount} more reviewer(s)`,
-        duration: 3000,
-      });
-      return;
-    }
 
     setIsAssigning(true);
     try {
@@ -333,7 +325,7 @@ export default function AdminArticleDetailPage() {
 
   /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
   // @ts-ignore
-  const openDecisionModal = (type: 'publish' | 'reject' | 'revise' | 'accept') => {
+  const openDecisionModal = (type: 'publish' | 'reject' | 'revise' | 'accept' | 'proof_requested') => {
     // @ts-ignore
     setDecisionType(type);
     setDecisionComments('');
@@ -397,6 +389,24 @@ export default function AdminArticleDetailPage() {
     }
   };
 
+  const handleApproveCertificate = async (reviewId: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/editor/reviews/${reviewId}/certify`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (!response.ok) throw new Error("Failed to grant certificate");
+      toast.success("Certificate granted successfully");
+      fetchArticle();
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  };
+
+
   const formatStatus = (status: string) => {
     if (!status) return status;
     const statusMap: Record<string, string> = {
@@ -414,7 +424,9 @@ export default function AdminArticleDetailPage() {
       declined: 'Declined',
       minor_revision: 'Minor Revision',
       major_revision: 'Major Revision',
-      no_recommendation: 'No Recommendation'
+      no_recommendation: 'No Recommendation',
+      proof_requested: 'Final Proofing Requested',
+      proof_resubmitted: 'Final Proof Resubmitted'
     };
     return statusMap[status] || status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   };
@@ -568,6 +580,23 @@ export default function AdminArticleDetailPage() {
                             {review.status === 'completed' ? (review.decision ? formatStatus(review.decision) : 'Completed') : formatStatus(review.status)}
                           </span>
                         </div>
+                        {review.status === 'completed' && (
+                          <div className="flex shrink-0 ml-2">
+                            {(review as any).isCertified ? (
+                              <span className="text-xs font-semibold text-green-700 bg-green-100 px-2 py-1 rounded flex items-center gap-1">
+                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+                                Certificate Granted
+                              </span>
+                            ) : (
+                              <button
+                                onClick={() => handleApproveCertificate(review.id)}
+                                className="text-xs bg-white text-indigo-700 hover:bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-full font-bold shadow-sm transition-colors"
+                              >
+                                Approve Certificate
+                              </button>
+                            )}
+                          </div>
+                        )}
                       </div>
                       <div className="mb-4">
                         <p className="text-base text-gray-700 font-medium">{review.reviewer.name}</p>
@@ -687,35 +716,16 @@ export default function AdminArticleDetailPage() {
               )}
             </div>
 
-            {/* Assign Reviewers */}
-            {article.status === 'resubmitted' ? (
-              <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-md shadow-sm">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <span className="text-xl">⚠️</span>
-                  </div>
-                  <div className="ml-3">
-                    <h3 className="text-sm font-medium text-yellow-800">Resubmitted Article</h3>
-                    <div className="mt-2 text-sm text-yellow-700">
-                      <p>
-                        This article has been resubmitted by the author. Reviewer assignment is disabled for this stage.
-                        Please rely on existing reviewers or proceed to decision.
-                      </p>
-                    </div>
-                  </div>
-                </div>
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-bold text-gray-800 text-lg">Assign Reviewers</h3>
+                <button
+                  onClick={() => setShowInviteModal(true)}
+                  className="text-xs bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-full border border-indigo-200 hover:bg-indigo-100 font-semibold flex items-center gap-1 transition-colors"
+                >
+                  <span className="text-base leading-none">+</span> Invite New
+                </button>
               </div>
-            ) : (
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-bold text-gray-800 text-lg">Assign Reviewers</h3>
-                  <button
-                    onClick={() => setShowInviteModal(true)}
-                    className="text-xs bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-full border border-indigo-200 hover:bg-indigo-100 font-semibold flex items-center gap-1 transition-colors"
-                  >
-                    <span className="text-base leading-none">+</span> Invite New
-                  </button>
-                </div>
 
                 {/* Search Input */}
                 <div className="relative mb-3">
@@ -742,8 +752,6 @@ export default function AdminArticleDetailPage() {
                         (reviewer.email || '').toLowerCase().includes(searchTerm);
                       return matchesSearch;
                     });
-                    const showAll = reviewerSearch || (showAllReviewers as boolean);
-                    const displayList = showAll ? available : available.slice(0, 3);
 
                     if (available.length === 0) {
                       return <p className="text-gray-400 text-center py-6 text-sm">No reviewers found.</p>;
@@ -752,9 +760,11 @@ export default function AdminArticleDetailPage() {
                     return (
                       <>
                         <div className="space-y-2">
-                          {displayList.map((reviewer) => {
+                          {available.map((reviewer) => {
+                            // Only prevent assignment if they are currently assigned and the review is incomplete.
+                            // If they completed or declined a previous review round, they CAN be assigned again.
                             const isAlreadyAssigned = article.reviews.some(
-                              (r) => r.reviewer.email === reviewer.email
+                              (r) => r.reviewer.email === reviewer.email && r.status !== 'completed' && r.status !== 'declined'
                             );
                             const isSelected = selectedReviewers.includes(reviewer.id);
                             return (
@@ -802,16 +812,17 @@ export default function AdminArticleDetailPage() {
 
                                 {/* Info */}
                                 <div className="flex-1 min-w-0">
-                                  <p className="font-semibold text-sm text-gray-900 truncate">{reviewer.name}</p>
-                                  <p className="text-xs text-gray-500 truncate">{reviewer.email}</p>
-                                  <p className="text-xs text-gray-400 mt-0.5">
-                                    {reviewer._count?.reviews || 0} active review{(reviewer._count?.reviews || 0) !== 1 ? 's' : ''}
+                                  <p className={`text-sm font-semibold truncate ${
+                                    isAlreadyAssigned ? 'text-gray-500' : 'text-gray-900'
+                                    }`}>
+                                    {reviewer.name}
                                   </p>
+                                  <p className="text-xs text-gray-500 truncate">{reviewer.email}</p>
                                 </div>
 
                                 {/* Assigned Badge */}
                                 {isAlreadyAssigned && (
-                                  <span className="text-xs font-semibold text-gray-500 bg-gray-200 px-2 py-1 rounded">
+                                  <span className="text-xs font-semibold text-gray-400 bg-gray-100 px-2 py-1 rounded">
                                     Assigned
                                   </span>
                                 )}
@@ -819,17 +830,6 @@ export default function AdminArticleDetailPage() {
                             );
                           })}
                         </div>
-
-                        {/* Show All / Show Less toggle */}
-                        {!reviewerSearch && available.length > 3 && (
-                          <button
-                            type="button"
-                            onClick={() => setShowAllReviewers(!showAllReviewers)}
-                            className="w-full text-xs text-indigo-600 hover:text-indigo-800 font-medium py-1 transition-colors"
-                          >
-                            {showAllReviewers ? `↑ Show less` : `↓ Show all ${available.length} reviewers`}
-                          </button>
-                        )}
                       </>
                     );
                   })()}
@@ -871,15 +871,13 @@ export default function AdminArticleDetailPage() {
                 </div>
               </div>
 
-            )}
-
             {/* Access Full Text Card */}
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="font-bold text-gray-800 mb-4 text-lg">Access Full Text</h3>
               <ArticleAccessButtons
                 articleId={article.id}
                 pdfUrl={article.pdfUrl}
-                fullTextAvailable={!!(article as any).fullText || true}
+                fullTextAvailable={['accepted', 'published', 'proof_requested', 'proof_resubmitted'].includes(article.status.toLowerCase().replace(' ', '_'))}
               />
               {(article.coverLetterUrl || (article.supplementaryFiles && article.supplementaryFiles.length > 0)) && (
                 <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col gap-2">
@@ -920,7 +918,7 @@ export default function AdminArticleDetailPage() {
               <div className="space-y-3">
 
                 {/* Accept Button (Only if not already accepted/published) */}
-                {article.status !== 'accepted' && article.status !== 'published' && (
+                {article.status !== 'accepted' && article.status !== 'published' && (!article.isApcPaid || currentUser?.role === 'mother_admin') && (
                   <button
                     className="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-bold hover:bg-green-700 transition"
                     onClick={() => openDecisionModal('accept')}
@@ -929,12 +927,12 @@ export default function AdminArticleDetailPage() {
                   </button>
                 )}
 
-                {/* Publish Button (Only if Accepted) */}
-                {article.status === 'accepted' && (
+                {/* Post-Acceptance Actions */}
+                {(article.status === 'accepted' || article.status === 'proof_requested' || article.status === 'proof_resubmitted') && (
                   <div className="space-y-2">
-                    {!article.isApcPaid && currentUser?.role !== 'mother_admin' ? (
+                    {!article.isApcPaid && !['mother_admin', 'super_admin'].includes(currentUser?.role || '') ? (
                       <div className="bg-yellow-50 p-3 rounded border border-yellow-200 text-sm text-yellow-800 mb-2">
-                        ⚠️ Authors must pay APC fee before you can publish.
+                        ⚠️ Authors must pay APC fee before you can proceed with publication workflow.
                         <br />
                         <span className="font-semibold">Payment Status: Pending</span>
                       </div>
@@ -946,19 +944,31 @@ export default function AdminArticleDetailPage() {
                       )
                     )}
 
-                    <button
-                      className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-bold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                      onClick={() => openDecisionModal('publish')}
-                      disabled={!article.isApcPaid && currentUser?.role !== 'mother_admin'}
-                    >
-                      📢 Publish Article
-                      {currentUser?.role === 'mother_admin' && !article.isApcPaid && " (Admin Bypass)"}
-                    </button>
+                    {/* Request Final Proofing - Available when paid */}
+                    {((article as any).isApcPaid || ['mother_admin', 'super_admin'].includes(currentUser?.role || '')) && (
+                      <button
+                        className="w-full bg-purple-600 text-white py-3 px-4 rounded-lg font-bold hover:bg-purple-700 transition"
+                        onClick={() => openDecisionModal('proof_requested')}
+                      >
+                        📝 Request Final Proofing
+                      </button>
+                    )}
+
+                    {/* Publish - Super Admin Only */}
+                    {['mother_admin', 'super_admin'].includes(currentUser?.role || '') && (
+                      <button
+                        className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-bold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={() => openDecisionModal('publish')}
+                      >
+                        📢 Publish Article
+                        {!article.isApcPaid && " (Admin Bypass)"}
+                      </button>
+                    )}
                   </div>
                 )}
-
-
-                {article.status !== 'published' && article.status !== 'rejected' && (
+                
+                {/* Revise / Reject Buttons */}
+                {article.status !== 'published' && article.status !== 'rejected' && (!article.isApcPaid || currentUser?.role === 'mother_admin') && (
                   <>
                     <button
                       className="w-full bg-yellow-500 text-white py-3 px-4 rounded-lg font-bold hover:bg-yellow-600 transition"
@@ -988,17 +998,19 @@ export default function AdminArticleDetailPage() {
                 <h3 className="text-xl font-bold mb-4 capitalize">
                   {decisionType === 'publish' ? 'Confirm Publication' :
                     decisionType === 'accept' ? 'Accept Article' :
-                      decisionType === 'revise' ? 'Request Revision' : 'Reject Article'}
+                      decisionType === 'proof_requested' ? 'Request Final Proofing' :
+                        decisionType === 'revise' ? 'Request Revision' : 'Reject Article'}
                 </h3>
 
                 <p className="text-gray-600 mb-4">
                   {decisionType === 'publish' ? 'Are you sure you want to PUBLISH this article? This is final.' :
                     decisionType === 'accept' ? 'Are you sure you want to ACCEPT this article? The author will be notified to pay the APC fee.' :
-                      decisionType === 'revise' ? 'Please provide instructions for the author regarding required revisions.' :
-                        'Please provide a reason for rejection.'}
+                      decisionType === 'proof_requested' ? 'Please provide instructions for the author regarding final metadata or content edits (e.g., author details, affiliation).' :
+                        decisionType === 'revise' ? 'Please provide instructions for the author regarding required revisions.' :
+                          'Please provide a reason for rejection.'}
                 </p>
 
-                {(decisionType === 'revise' || decisionType === 'reject') && (
+                {(decisionType === 'revise' || decisionType === 'reject' || decisionType === 'proof_requested') && (
                   <div className="mb-4">
                     <label className="block text-sm font-semibold mb-2">Comments / Reason</label>
                     <textarea
@@ -1006,7 +1018,7 @@ export default function AdminArticleDetailPage() {
                       rows={4}
                       value={decisionComments}
                       onChange={(e) => setDecisionComments(e.target.value)}
-                      placeholder={decisionType === 'revise' ? "Enter revision details..." : "Enter rejection reason..."}
+                      placeholder={decisionType === 'proof_requested' ? "Enter proofing instructions..." : decisionType === 'revise' ? "Enter revision details..." : "Enter rejection reason..."}
                     ></textarea>
                   </div>
                 )}
@@ -1101,9 +1113,9 @@ export default function AdminArticleDetailPage() {
                   </button>
                   <button
                     onClick={submitDecision}
-                    disabled={isSubmittingDecision || ((decisionType === 'revise' || decisionType === 'reject') && !decisionComments.trim())}
+                    disabled={isSubmittingDecision || ((decisionType === 'revise' || decisionType === 'reject' || decisionType === 'proof_requested') && !decisionComments.trim())}
                     className={`px-4 py-2 text-white rounded-lg font-bold ${decisionType === 'publish' ? 'bg-green-600 hover:bg-green-700' :
-                      decisionType === 'revise' ? 'bg-yellow-500 hover:bg-yellow-600' :
+                      decisionType === 'revise' || decisionType === 'proof_requested' ? 'bg-yellow-500 hover:bg-yellow-600' :
                         'bg-red-600 hover:bg-red-700'
                       } disabled:opacity-50 disabled:cursor-not-allowed`}
                   >

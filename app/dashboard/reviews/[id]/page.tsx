@@ -431,22 +431,30 @@ export default function ReviewSubmissionPage() {
           </h2>
 
           {isCompleted && (
-            <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-6 flex justify-between items-center">
+            <div className={`border-l-4 p-4 mb-6 flex justify-between items-center ${(review as any).isCertified ? 'bg-green-50 border-green-500' : 'bg-blue-50 border-blue-500'}`}>
               <div>
-                <p className="text-sm text-green-700 font-semibold">
+                <p className={`text-sm font-semibold ${(review as any).isCertified ? 'text-green-700' : 'text-blue-700'}`}>
                   ✓ Review completed and submitted
                 </p>
-                <p className="text-xs text-green-600 mt-1">Thank you for your contribution.</p>
+                <p className={`text-xs mt-1 ${(review as any).isCertified ? 'text-green-600' : 'text-blue-600'}`}>
+                  Thank you for your contribution.
+                </p>
               </div>
-              <button
-                onClick={() => {
-                  const token = localStorage.getItem('token');
-                  window.open(`/api/reviews/${review.id}/certificate?token=${token}`, '_blank');
-                }}
-                className="bg-green-600 text-white px-4 py-2 rounded text-sm font-bold hover:bg-green-700 transition flex items-center gap-2"
-              >
-                <span>📜</span> Download Certificate
-              </button>
+              {(review as any).isCertified ? (
+                <button
+                  onClick={() => {
+                    const token = localStorage.getItem('token');
+                    window.open(`/api/reviews/${review.id}/certificate?token=${token}`, '_blank');
+                  }}
+                  className="bg-green-600 text-white px-4 py-2 rounded text-sm font-bold hover:bg-green-700 transition flex items-center gap-2 shrink-0 ml-4"
+                >
+                  <span>📜</span> Download Certificate
+                </button>
+              ) : (
+                <div className="bg-white/60 text-blue-800 px-3 py-1.5 rounded text-xs font-semibold border border-blue-200 shrink-0 ml-4">
+                  Pending Editor Approval
+                </div>
+              )}
             </div>
           )}
 

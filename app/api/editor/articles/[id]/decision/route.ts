@@ -37,7 +37,7 @@ export async function POST(
         const { decision, comments, sharedReviews } = body;
 
         // Validate decision
-        if (!['publish', 'reject', 'revise', 'accept'].includes(decision)) {
+        if (!['publish', 'reject', 'revise', 'accept', 'proof_requested'].includes(decision)) {
             return NextResponse.json({ error: 'Invalid decision' }, { status: 400 });
         }
 
@@ -80,9 +80,19 @@ export async function POST(
             };
 
         } else if (decision === 'publish') {
-            // Check APC Payment
+            // Check Admin Role
             const isMotherAdmin = user.role === 'mother_admin';
-            if (!article.isApcPaid && !isMotherAdmin) {
+            const isSuperAdmin = user.role === 'super_admin';
+            
+            if (!isMotherAdmin && !isSuperAdmin) {
+                return NextResponse.json({
+                    error: 'Only Super Admins can publish articles.',
+                    code: 'FORBIDDEN'
+                }, { status: 403 });
+            }
+
+            // Check APC Payment
+            if (!article.isApcPaid && !isMotherAdmin && !isSuperAdmin) {
                 return NextResponse.json({
                     error: 'Cannot publish. APC Fee has not been paid by the author.',
                     code: 'APC_NOT_PAID'
@@ -170,7 +180,6 @@ export async function POST(
                 status: 'revision_requested',
                 editorComments: comments
             };
-            
             // Process selective sharing
             if (sharedReviews && Array.isArray(sharedReviews) && sharedReviews.length > 0) {
                 for (const review of sharedReviews) {
@@ -183,6 +192,13 @@ export async function POST(
                     });
                 }
             }
+        } else if (decision === 'proof_requested') {
+            newStatus = 'proof_requested';
+            statusMessage = 'Final proofing revisions have been requested. Please review and update metadata or address the minor changes requested by the editor.';
+            updateData = {
+                status: 'proof_requested',
+                editorComments: comments
+            };
         }
 
         // Update Article

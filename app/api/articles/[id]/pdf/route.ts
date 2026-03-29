@@ -121,7 +121,11 @@ export async function GET(
                 startOfMonth.setHours(0, 0, 0, 0);
 
                 const downloads = await prisma.downloadLog.findMany({
-                    where: { userId, resourceType: 'article', downloadedAt: { gte: startOfMonth } },
+                    where: { 
+                        userId, 
+                        resourceType: { startsWith: 'article' }, 
+                        downloadedAt: { gte: startOfMonth } 
+                    },
                     select: { resourceId: true },
                     distinct: ['resourceId']
                 });
@@ -134,23 +138,26 @@ export async function GET(
                     }
                 }
             }
+        }
 
-            // Log download to consume credits
+        // Always log download if we know who the user is for analytics (including authors)
+        if (userId) {
+            const isDownload = url.searchParams.get('download') === 'true';
             await prisma.downloadLog.create({
                 data: {
                     userId,
                     resourceId: articleId,
-                    resourceType: 'article',
+                    resourceType: isDownload ? 'article_download' : 'article_view',
                     ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip')
                 }
             });
-
-            // Update global download count
-            await prisma.article.update({
-                where: { id: articleId },
-                data: { downloadCount: { increment: 1 } }
-            });
         }
+
+        // Always update global download count
+        await prisma.article.update({
+            where: { id: articleId },
+            data: { downloadCount: { increment: 1 } }
+        });
 
         // Generate Signed Token
         // Valid for 1 hour

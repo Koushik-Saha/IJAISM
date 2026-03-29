@@ -1,4 +1,4 @@
-import { getResendClient, getNodemailerTransport, EMAIL_CONFIG } from './client';
+import { getResendClient, EMAIL_CONFIG } from './client';
 import * as templates from './templates';
 
 // Email sending result type
@@ -15,34 +15,12 @@ export async function sendEmail(
   html: string
 ): Promise<EmailResult> {
   try {
-    // 1. Try SMTP (Nodemailer)
-    const transporter = getNodemailerTransport();
-    if (transporter) {
-      try {
-        const info = await transporter.sendMail({
-          from: `"${EMAIL_CONFIG.fromName}" <${EMAIL_CONFIG.from}>`,
-          to,
-          subject,
-          html,
-          replyTo: EMAIL_CONFIG.replyTo,
-        });
-
-        console.log(`[EMAIL] Sent (SMTP) successfully to ${to}: ${subject} (ID: ${info.messageId})`);
-        return { success: true, messageId: info.messageId };
-      } catch (smtpError: any) {
-        console.error('[EMAIL] SMTP Send Error:', smtpError);
-        // Fallback to Resend or return error?
-        // Let's return error to avoid confused fallback if SMTP was intended but failed credentials
-        return { success: false, error: smtpError.message };
-      }
-    }
-
-    // 2. Try Resend
+    // 1. Try Resend
     const resend = getResendClient();
 
     if (resend) {
       const result = await resend.emails.send({
-        from: EMAIL_CONFIG.from,
+        from: `"${EMAIL_CONFIG.fromName}" <${EMAIL_CONFIG.from}>`,
         to,
         subject,
         html,
@@ -58,9 +36,9 @@ export async function sendEmail(
       return { success: true, messageId: result.data?.id };
     }
 
-    // 3. Dev Mode (No provider)
+    // 2. Dev Mode (No provider)
     console.warn(`[EMAIL] Would send to ${to}: ${subject}`);
-    console.warn('[EMAIL] No email provider configured (SMTP or Resend). Set SMTP_* or RESEND_API_KEY.');
+    console.warn('[EMAIL] No email provider configured. Set RESEND_API_KEY.');
     return { success: true, messageId: 'dev-mode-no-send' };
 
   } catch (error: any) {
@@ -300,11 +278,11 @@ export async function sendEmailVerificationConfirmationEmail(
   );
 }
 
-// 11. Send reviewer assignment email
 export async function sendReviewerAssignmentEmail(
   reviewerEmail: string,
   reviewerName: string,
   articleTitle: string,
+  articleAbstract: string,
   journalName: string,
   dueDate: Date,
   reviewId: string
@@ -318,6 +296,7 @@ export async function sendReviewerAssignmentEmail(
   const html = templates.reviewerAssignmentEmail(
     reviewerName,
     articleTitle,
+    articleAbstract,
     journalName,
     formattedDueDate,
     reviewId
@@ -387,22 +366,16 @@ export async function sendReviewerInvitationEmail(
   email: string,
   name: string,
   articleTitle: string,
+  articleAbstract: string,
   journalName: string,
-  tokenOrType: string
+  reviewId: string
 ): Promise<EmailResult> {
-  let inviteLink;
-
-  if (tokenOrType === 'EXISTING_USER_LOGIN') {
-    inviteLink = `${EMAIL_CONFIG.appUrl}/login?redirect=/dashboard/reviews`;
-  } else {
-    inviteLink = `${EMAIL_CONFIG.appUrl}/register?invitation=${tokenOrType}`;
-  }
-
   const html = templates.reviewerInvitationEmail(
     name,
     articleTitle,
+    articleAbstract,
     journalName,
-    inviteLink
+    reviewId
   );
 
   return sendEmail(
@@ -464,4 +437,59 @@ export async function sendPaymentSuccessEmail(
       </div>
     `;
   return sendEmail(to, subject, html);
+}
+
+// 18. Send Reviewer Temporary Password Email
+export async function sendReviewerTempPasswordEmail(
+  email: string,
+  name: string,
+  articleTitle: string,
+  articleAbstract: string,
+  journalName: string,
+  tempPassword: string,
+  reviewId: string
+): Promise<EmailResult> {
+  const html = templates.reviewerTempPasswordEmail(
+    name,
+    email,
+    articleTitle,
+    articleAbstract,
+    journalName,
+    tempPassword,
+    reviewId
+  );
+
+  return sendEmail(
+    email,
+    `Invitation to Review & Account Credentials: ${articleTitle}`,
+    html
+  );
+}
+
+// 19. Send Reviewer Response Notification to Editor
+export async function sendReviewerResponseNotification(
+  editorEmail: string,
+  editorName: string,
+  reviewerName: string,
+  articleTitle: string,
+  journalName: string,
+  decision: 'accepted' | 'declined',
+  articleId: string
+): Promise<EmailResult> {
+  const articleLink = `${EMAIL_CONFIG.appUrl}/editor/articles/${articleId}`;
+
+  const html = templates.reviewerResponseNotificationEmail(
+    editorName,
+    reviewerName,
+    articleTitle,
+    journalName,
+    decision,
+    articleLink
+  );
+
+  return sendEmail(
+    editorEmail,
+    `Reviewer ${decision.toUpperCase()}: ${articleTitle}`,
+    html
+  );
 }

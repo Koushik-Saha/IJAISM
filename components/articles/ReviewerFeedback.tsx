@@ -7,7 +7,11 @@ interface Review {
     id: string;
     reviewer: { name: string } | null;
     decision: string;
+    status: string;
     commentsToAuthor?: string | null;
+    isSharedWithAuthor?: boolean;
+    sharedFiles?: string[];
+    reviewerFiles?: string[];
 }
 
 interface ReviewerFeedbackProps {
@@ -17,36 +21,67 @@ interface ReviewerFeedbackProps {
 }
 
 export default function ReviewerFeedback({ articleId, originalTitle, reviews }: ReviewerFeedbackProps) {
-    if (reviews.length === 0) return null;
+    // Filter to only completed reviews that have shared content
+    const visibleReviews = reviews.filter(review => {
+        if (review.status !== 'completed') return false;
+        
+        const hasSharedComments = review.isSharedWithAuthor && review.commentsToAuthor;
+        const hasSharedFiles = review.sharedFiles && review.sharedFiles.length > 0;
+        
+        // Fallback for older reviews before phase 15
+        if (!hasSharedComments && !hasSharedFiles) {
+             if (!review.commentsToAuthor && (!review.reviewerFiles || review.reviewerFiles.length === 0)) return false;
+             return false;
+        }
+        
+        return true;
+    });
+
+    if (visibleReviews.length === 0) return null;
 
     return (
         <Card className="mb-6 bg-orange-50 border-orange-200">
-            <h2 className="text-xl font-bold mb-4 text-orange-900">Reviewer Feedback</h2>
+            <h2 className="text-xl font-bold mb-4 text-orange-900">Editor Feedback</h2>
             <div className="space-y-4">
-                {reviews.map((review) => (
-                    <div key={review.id} className="bg-white p-4 rounded border border-orange-100 shadow-sm">
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="font-semibold text-gray-900">
-                                {review.reviewer?.name || "Anonymous Reviewer"}
-                            </span>
-                            <span
-                                className={`text-xs px-2 py-1 rounded font-medium ${review.decision === "accept"
-                                        ? "bg-green-100 text-green-700"
-                                        : review.decision === "reject"
-                                            ? "bg-red-100 text-red-700"
-                                            : "bg-yellow-100 text-yellow-700"
-                                    }`}
-                            >
-                                {review.decision ? review.decision.replace("_", " ").toUpperCase() : "PENDING"}
-                            </span>
-                        </div>
-                        {review.commentsToAuthor && (
-                            <div className="text-gray-800 text-sm whitespace-pre-wrap">
-                                {review.commentsToAuthor}
+                {visibleReviews.map((review, index) => {
+                    const hasSharedComments = review.isSharedWithAuthor && review.commentsToAuthor;
+                    const hasSharedFiles = review.sharedFiles && review.sharedFiles.length > 0;
+
+                    return (
+                        <div key={review.id} className="bg-white p-4 rounded border border-orange-100 shadow-sm">
+                            <div className="flex items-center justify-between mb-2 border-b pb-2">
+                                <span className="font-semibold text-gray-900">
+                                    Reviewer {index + 1}
+                                </span>
                             </div>
-                        )}
-                    </div>
-                ))}
+                            
+                            {hasSharedComments && (
+                                <div className="text-gray-800 text-sm whitespace-pre-wrap bg-gray-50 p-3 rounded">
+                                    {review.commentsToAuthor}
+                                </div>
+                            )}
+
+                            {hasSharedFiles && (
+                                <div className="mt-3 p-3 rounded-lg border border-indigo-100 flex flex-col gap-2">
+                                    <p className="text-xs font-semibold text-gray-700">Attachments for Author:</p>
+                                    {review.sharedFiles!.map((fileUrl: string, fIdx: number) => {
+                                        const fileName = fileUrl.split('/').pop() || `File ${fIdx + 1}`;
+                                        return (
+                                            <div key={fIdx} className="flex items-center justify-between bg-white border border-gray-200 p-2 rounded shadow-sm">
+                                                <span className="text-xs text-gray-700 font-medium truncate max-w-[70%]">
+                                                    {fileName.length > 30 ? fileName.substring(0, 15) + '...' + fileName.substring(fileName.length - 10) : fileName}
+                                                </span>
+                                                <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="text-xs bg-indigo-50 text-indigo-700 px-2 py-1 rounded border border-indigo-200 hover:bg-indigo-100 transition-colors">
+                                                    View
+                                                </a>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
             </div>
 
             <div className="mt-6 pt-4 border-t border-orange-200">

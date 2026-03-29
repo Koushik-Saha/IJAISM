@@ -22,6 +22,36 @@ export async function GET(req: NextRequest) {
     try {
         // Handle Remote URL (Vercel Blob / S3)
         if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
+
+            // Generate S3 Pre-signed URL directly to solve AccessDenied for private buckets
+            if (filePath.includes('.s3.') && filePath.includes('amazonaws.com')) {
+                const { S3Client, GetObjectCommand } = await import('@aws-sdk/client-s3');
+                const { getSignedUrl } = await import('@aws-sdk/s3-request-presigner');
+
+                const urlObj = new URL(filePath);
+                const bucketMatch = urlObj.host.match(/^(.*?)\.s3/);
+                const bucketName = bucketMatch ? bucketMatch[1] : (process.env.AWS_S3_BUCKET_NAME || 'koushik-freedomshippingllc-reports');
+                const key = urlObj.pathname.startsWith('/') ? urlObj.pathname.substring(1) : urlObj.pathname;
+
+                const s3Client = new S3Client({
+                    region: process.env.AWS_REGION || 'us-east-2',
+                    credentials: {
+                        accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
+                        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
+                    },
+                });
+
+                const command = new GetObjectCommand({
+                    Bucket: bucketName,
+                    Key: decodeURIComponent(key),
+                    ResponseContentDisposition: `inline; filename="${path.basename(key)}"`,
+                });
+
+                const presignedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+                return NextResponse.redirect(presignedUrl);
+            }
+
+            // Fallback for non-S3 external URLs
             const response = await fetch(filePath);
 
             if (!response.ok) {

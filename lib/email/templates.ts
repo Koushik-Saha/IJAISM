@@ -101,12 +101,12 @@ function emailLayout(content: string, preheader?: string): string {
   <div class="container">
     <div class="header">
       <h1>C5K</h1>
-      <p>International Journal of Advanced Information Systems</p>
+      <p>Academic Publishing Platform</p>
     </div>
     ${content}
     <div class="footer">
       <p>
-        <strong>${EMAIL_CONFIG.appName}</strong><br>
+        <strong>C5K</strong><br>
         Advancing Knowledge and Innovation<br>
         <a href="${EMAIL_CONFIG.appUrl}">Visit Website</a> •
         <a href="${EMAIL_CONFIG.appUrl}/contact">Contact Support</a>
@@ -129,7 +129,7 @@ export function welcomeEmail(userName: string, userEmail: string): string {
       <h2>Welcome to C5K! 🎓</h2>
       <p>Dear ${userName},</p>
       <p>
-        Thank you for joining the International Journal of Advanced Information Systems and Management (C5K).
+        Thank you for joining the C5K Academic Publishing Platform.
         We're thrilled to have you as part of our global community of researchers, academics, and professionals.
       </p>
 
@@ -723,26 +723,28 @@ export function passwordResetConfirmationEmail(
 export function reviewerAssignmentEmail(
   reviewerName: string,
   articleTitle: string,
+  articleAbstract: string,
   journalName: string,
   dueDate: string,
   reviewId: string
 ): string {
+  const inviteLink = `${EMAIL_CONFIG.appUrl}/dashboard/reviews/${reviewId}`;
+
   const content = `
     <div class="content">
-      <h2>New Review Assignment 📝</h2>
+      <h2>Invitation to Review 📝</h2>
       <p>Dear ${reviewerName},</p>
       <p>
-        You have been selected to review a new article submission for <strong>${journalName}</strong>.
-        Your expertise would be invaluable in evaluating this work.
+        You have been invited to review a new article submission for <strong>${journalName}</strong>:
       </p>
 
       <div class="info-box">
-        <h3>Assignment Details</h3>
+        <h3>Manuscript Details</h3>
         <div class="info-row">
-          <span class="info-label">Article:</span> ${articleTitle}
+          <span class="info-label">Title:</span> ${articleTitle}
         </div>
         <div class="info-row">
-          <span class="info-label">Journal:</span> ${journalName}
+          <span class="info-label">Abstract:</span> ${articleAbstract}
         </div>
         <div class="info-row">
           <span class="info-label">Due Date:</span> ${dueDate}
@@ -750,23 +752,16 @@ export function reviewerAssignmentEmail(
       </div>
 
       <p>
-        Please log in to your dashboard to view the full manuscript and submit your review.
+        Please click the button below to view the full details and securely <strong>Accept</strong> or <strong>Decline</strong> this invitation.
       </p>
 
       <p>
-        <a href="${EMAIL_CONFIG.appUrl}/dashboard/reviews/${reviewId}" class="button">View Assignment</a>
+        <a href="${inviteLink}" class="button">Respond to Invitation</a>
       </p>
 
-      <h3>Review Guidelines</h3>
-      <ul>
-        <li>Evaluate scientific/academic rigor</li>
-        <li>Check for clarity and structure</li>
-        <li>Provide constructive feedback</li>
-        <li>Maintain confidentiality</li>
-      </ul>
-
       <p>
-        If you are unable to accept this assignment, please contact the editor immediately.
+        Or copy and paste this link:<br>
+        <a href="${inviteLink}" style="color: #1e40af; word-break: break-all;">${inviteLink}</a>
       </p>
 
       <p>Best regards,<br><strong>The C5K Editorial Team</strong></p>
@@ -885,16 +880,18 @@ export function reviewFeedbackToEditor(
 export function reviewerInvitationEmail(
   reviewerName: string,
   articleTitle: string,
+  articleAbstract: string,
   journalName: string,
-  inviteLink: string
+  reviewId: string
 ): string {
+  const inviteLink = `${EMAIL_CONFIG.appUrl}/invitation/${reviewId}`;
+
   const content = `
     <div class="content">
       <h2>Invitation to Review 📝</h2>
       <p>Dear ${reviewerName},</p>
       <p>
-        You have been invited to review a manuscript submitted to <strong>${journalName}</strong>. 
-        We believe your expertise would be valuable in evaluating this work.
+        You have been invited to review a new article submission for <strong>${journalName}</strong>:
       </p>
 
       <div class="info-box">
@@ -903,25 +900,21 @@ export function reviewerInvitationEmail(
           <span class="info-label">Title:</span> ${articleTitle}
         </div>
         <div class="info-row">
-          <span class="info-label">Journal:</span> ${journalName}
+          <span class="info-label">Abstract:</span> ${articleAbstract}
         </div>
       </div>
 
       <p>
-        Please click the button below to accept this invitation and create your reviewer account (or log in).
+        Please click the button below to view the full details and securely <strong>Accept</strong> or <strong>Decline</strong> this invitation.
       </p>
 
       <p>
-        <a href="${inviteLink}" class="button">Accept Invitation</a>
+        <a href="${inviteLink}" class="button">Respond to Invitation</a>
       </p>
 
       <p>
         Or copy and paste this link:<br>
         <a href="${inviteLink}" style="color: #1e40af; word-break: break-all;">${inviteLink}</a>
-      </p>
-
-      <p>
-        If you are unable to review at this time, you can ignore this email.
       </p>
 
       <p>Best regards,<br><strong>The C5K Editorial Team</strong></p>
@@ -1027,7 +1020,136 @@ export function coAuthorNotificationEmail(
 
       <p>Best regards,<br><strong>The C5K Editorial Team</strong></p>
     </div>
+    </div>
   `;
 
   return emailLayout(content, `Co-Author Notification: ${articleTitle}`);
+}
+
+// 17. Reviewer Temporary Password Email
+export function reviewerTempPasswordEmail(
+  name: string,
+  email: string,
+  articleTitle: string,
+  articleAbstract: string,
+  journalName: string,
+  tempPassword: string,
+  reviewId: string
+): string {
+  const inviteLink = `${EMAIL_CONFIG.appUrl}/invitation/${reviewId}`;
+
+  const content = `
+    <div class="content">
+      <h2>Invitation to Review & Account Created 📝</h2>
+      <p>Dear ${name},</p>
+      <p>
+        You have been invited to review a new article submission for <strong>${journalName}</strong>:
+      </p>
+
+      <div class="info-box">
+        <h3>Manuscript Details</h3>
+        <div class="info-row">
+          <span class="info-label">Title:</span> ${articleTitle}
+        </div>
+        <div class="info-row">
+          <span class="info-label">Abstract:</span> ${articleAbstract}
+        </div>
+      </div>
+
+      <p>
+        An account has been provisioned for you on the C5K Platform to access this manuscript.
+      </p>
+
+      <div class="info-box">
+        <h3>Your Login Credentials</h3>
+        <div class="info-row">
+          <span class="info-label">Login URL:</span> <a href="${EMAIL_CONFIG.appUrl}/login">${EMAIL_CONFIG.appUrl}/login</a>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Name:</span> <strong>${name}</strong>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Email:</span> <strong>${email}</strong>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Temporary Password:</span> <strong>${tempPassword}</strong>
+        </div>
+      </div>
+
+      <p>
+        Please click the button below to view the full details and securely <strong>Accept</strong> or <strong>Decline</strong> this invitation.
+      </p>
+
+      <p>
+        <a href="${inviteLink}" class="button">Respond to Invitation</a>
+      </p>
+
+      <p>
+        Or copy and paste this link:<br>
+        <a href="${inviteLink}" style="color: #1e40af; word-break: break-all;">${inviteLink}</a>
+      </p>
+
+      <p>
+        For security purposes, you will be required to change your temporary password immediately upon your first login after accepting the assignment.
+      </p>
+
+      <p>Best regards,<br><strong>The C5K Editorial Team</strong></p>
+    </div>
+  `;
+
+  return emailLayout(content, `Invitation to Review & Account Credentials: ${articleTitle}`);
+}
+
+// 18. Reviewer Response Notification (To Editor)
+export function reviewerResponseNotificationEmail(
+  editorName: string,
+  reviewerName: string,
+  articleTitle: string,
+  journalName: string,
+  decision: 'accepted' | 'declined',
+  articleLink: string
+): string {
+  const isAccepted = decision === 'accepted';
+  const colorHex = isAccepted ? '#16a34a' : '#dc2626'; // Green vs Red
+  const actionText = isAccepted ? 'has Accepted' : 'has Declined';
+
+  const content = `
+    <div class="content">
+      <h2>Reviewer Response Notification 📬</h2>
+      <p>Dear ${editorName},</p>
+      <p>
+        The reviewer <strong>${reviewerName}</strong> <strong style="color: ${colorHex}">${actionText}</strong> your invitation to review a manuscript for <strong>${journalName}</strong>.
+      </p>
+
+      <div class="info-box">
+        <h3>Manuscript Details</h3>
+        <div class="info-row">
+          <span class="info-label">Title:</span> ${articleTitle}
+        </div>
+        <div class="info-row">
+          <span class="info-label">Reviewer:</span> ${reviewerName}
+        </div>
+        <div class="info-row">
+          <span class="info-label">Status:</span> <strong style="color: ${colorHex}">${decision.toUpperCase()}</strong>
+        </div>
+      </div>
+
+      <p>
+        Please click the button below to view the manuscript details and assign alternative reviewers if necessary.
+      </p>
+
+      <p>
+        <a href="${articleLink}" class="button">View Article Dashboard</a>
+      </p>
+
+      <p>
+        Or copy and paste this link:<br>
+        <a href="${articleLink}" style="color: #1e40af; word-break: break-all;">${articleLink}</a>
+      </p>
+
+      <p>Best regards,<br><strong>The C5K Platform System</strong></p>
+    </div>
+  `;
+
+  return emailLayout(content, `Reviewer ${decision.toUpperCase()}: ${articleTitle}`);
 }

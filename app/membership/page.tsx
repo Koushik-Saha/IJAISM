@@ -53,6 +53,7 @@ export default function MembershipPage() {
       period: "forever",
       description: "Perfect for getting started with C5K",
       features: [
+        "3 Free PDF downloads/month",
         "Access to all published articles",
         "Browse journals and conferences",
         "Submit papers for review",
@@ -70,6 +71,7 @@ export default function MembershipPage() {
       period: "per year",
       description: "For active researchers and authors",
       features: [
+        "10 PDF downloads/month",
         "All Free features",
         "Submit up to 5 papers/year",
         "Priority paper review",
@@ -88,6 +90,7 @@ export default function MembershipPage() {
       period: "per year",
       description: "For prolific researchers and academics",
       features: [
+        "Unlimited PDF downloads",
         "All Basic features",
         "Unlimited submissions",
         "Enhanced author dashboard",
@@ -108,6 +111,7 @@ export default function MembershipPage() {
       period: "per year",
       description: "For universities and research organizations",
       features: [
+        "Unlimited PDF downloads for whole team",
         "All Author features",
         "Multiple user accounts (up to 50)",
         "Institutional branding",

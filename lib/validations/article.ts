@@ -20,6 +20,7 @@ export const articleSubmissionSchema = z.object({
     submissionType: z.enum(['article', 'research', 'review', 'case-study', 'technical-note']).or(z.string()).optional(),
     manuscriptUrl: z.string().min(1, 'Invalid manuscript URL').optional().nullable(),
     coverLetterUrl: z.string().min(1, 'Invalid cover letter URL').optional().nullable(),
+    supplementaryFiles: z.array(z.string()).optional().default([]),
     coAuthors: z.array(z.object({
         name: z.string().min(1, 'Name is required'),
         email: z.string().email('Invalid email').optional().or(z.literal('')),

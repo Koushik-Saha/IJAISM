@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 
 interface Review {
   id: string;
@@ -42,6 +43,30 @@ export default function ReviewerDashboardPage() {
   const [stats, setStats] = useState<Stats>({ pending: 0, inProgress: 0, completed: 0, total: 0 });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  const handleAction = async (reviewId: string, action: 'accept' | 'decline') => {
+    setActionLoading(`${reviewId}-${action}`);
+    try {
+      const response = await fetch(`/api/invitations/${reviewId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action })
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || `Failed to ${action} review`);
+      }
+
+      // Refresh the page data
+      window.location.reload();
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setActionLoading(null);
+    }
+  };
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -269,13 +294,32 @@ export default function ReviewerDashboardPage() {
                         </div>
                       </div>
 
-                      <div className="ml-4">
-                        <Link
-                          href={`/dashboard/reviews/${review.id}`}
-                          className="inline-block bg-primary text-white px-6 py-2 rounded-lg font-bold hover:bg-primary/90 transition-colors whitespace-nowrap"
-                        >
-                          Review Article
-                        </Link>
+                      <div className="ml-4 flex flex-col gap-3 min-w-[140px]">
+                        {review.status === 'invited' ? (
+                          <>
+                            <button
+                              onClick={() => handleAction(review.id, 'accept')}
+                              disabled={!!actionLoading}
+                              className="w-full flex justify-center items-center bg-green-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-green-700 transition-colors whitespace-nowrap text-sm disabled:opacity-50"
+                            >
+                              {actionLoading === `${review.id}-accept` ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Accept Review'}
+                            </button>
+                            <button
+                              onClick={() => handleAction(review.id, 'decline')}
+                              disabled={!!actionLoading}
+                              className="w-full flex justify-center items-center bg-white text-gray-700 border border-gray-300 px-4 py-2 rounded-lg font-bold hover:bg-gray-50 transition-colors whitespace-nowrap text-sm disabled:opacity-50"
+                            >
+                              {actionLoading === `${review.id}-decline` ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Decline'}
+                            </button>
+                          </>
+                        ) : (
+                          <Link
+                            href={`/dashboard/reviews/${review.id}`}
+                            className="w-full flex justify-center items-center bg-primary text-white px-4 py-2 rounded-lg font-bold hover:bg-primary/90 transition-colors whitespace-nowrap text-sm"
+                          >
+                            Review Article
+                          </Link>
+                        )}
                       </div>
                     </div>
                   </div>

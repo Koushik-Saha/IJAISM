@@ -4,7 +4,7 @@ import { sendArticleStatusUpdateEmail, sendReviewerAssignmentEmail } from "@/lib
 
 // Review status types
 export type ReviewStatus = 'pending' | 'in_progress' | 'completed' | 'declined';
-export type ReviewDecision = 'accept' | 'reject' | 'revision_requested';
+export type ReviewDecision = 'accept' | 'reject' | 'minor_revision' | 'major_revision' | 'no_recommendation';
 
 // Get reviews assigned to a reviewer
 export async function getReviewerAssignments(reviewerId: string) {
@@ -127,7 +127,8 @@ export async function submitReviewDecision(
   reviewerId: string,
   decision: ReviewDecision,
   commentsToAuthor: string,
-  commentsToEditor?: string
+  commentsToEditor?: string,
+  reviewerFiles?: string[]
 ) {
   // Verify reviewer owns this review
   const review = await prisma.review.findFirst({
@@ -167,6 +168,7 @@ export async function submitReviewDecision(
       commentsToAuthor,
       commentsToEditor: commentsToEditor || null,
       submittedAt: new Date(),
+      ...(reviewerFiles && reviewerFiles.length > 0 ? { reviewerFiles } : {})
     },
   });
 
@@ -269,10 +271,11 @@ export async function assignReviewersToArticle(
   const dueDate = new Date();
   dueDate.setDate(dueDate.getDate() + dueInDays);
 
-  // Get current reviewer count for correct numbering
-  const currentReviewCount = await prisma.review.count({
-    where: { articleId }
-  });
+  // Get current reviewer count for correct numbering AND current article status
+  const [currentReviewCount, currentArticle] = await Promise.all([
+    prisma.review.count({ where: { articleId } }),
+    prisma.article.findUnique({ where: { id: articleId }, select: { status: true } }),
+  ]);
 
   // Create review assignments
   const reviews = await Promise.all(
@@ -282,18 +285,21 @@ export async function assignReviewersToArticle(
           articleId,
           reviewerId,
           reviewerNumber: currentReviewCount + index + 1,
-          status: 'invited', // Changed from pending to invited
+          status: 'invited',
           dueDate,
         },
       })
     )
   );
 
-  // Update article status to "under review"
-  await prisma.article.update({
-    where: { id: articleId },
-    data: { status: 'under_review' }, // Ensure snake_case matches enum
-  });
+  // Only update status to under_review if not already accepted/published/rejected
+  const lockedStatuses = ['accepted', 'published', 'rejected'];
+  if (currentArticle && !lockedStatuses.includes(currentArticle.status)) {
+    await prisma.article.update({
+      where: { id: articleId },
+      data: { status: 'under_review' },
+    });
+  }
 
   // Send notification emails to reviewers
   const article = await prisma.article.findUnique({
@@ -311,6 +317,7 @@ export async function assignReviewersToArticle(
             reviewer.email,
             reviewer.name,
             article.title,
+            article.abstract,
             article.journal.fullName,
             dueDate,
             review.id
@@ -424,7 +431,7 @@ export async function startReview(reviewId: string, reviewerId: string) {
 }
 
 // Auto-assign reviewers based on keywords and workload
-export async function autoAssignReviewers(articleId: string, count: number = 3) {
+export async function autoAssignReviewers(articleId: string, count: number = 4) {
   // 1. Fetch article details
   const article = await prisma.article.findUnique({
     where: { id: articleId },
@@ -452,9 +459,7 @@ export async function autoAssignReviewers(articleId: string, count: number = 3) 
     },
     include: {
       reviews: {
-        where: {
-          status: { in: ['pending', 'in_progress', 'invited', 'accepted'] },
-        },
+        select: { status: true },
       },
     },
   });
@@ -471,7 +476,8 @@ export async function autoAssignReviewers(articleId: string, count: number = 3) 
     }
 
     // Workload Check: Max 5 active reviews (configurable?)
-    if (reviewer.reviews.length >= 5) {
+    const activeReviewsCount = reviewer.reviews.filter(r => ['pending', 'in_progress', 'invited', 'accepted'].includes(r.status)).length;
+    if (activeReviewsCount >= 5) {
       return false;
     }
 
@@ -487,25 +493,36 @@ export async function autoAssignReviewers(articleId: string, count: number = 3) 
     throw new Error('No eligible reviewers found');
   }
 
-  // Calculate Scores (Keyword matching)
+  // Calculate Scores (Keyword matching + Success Rate)
   const scoredReviewers = eligibleReviewers.map((reviewer) => {
-    let score = 0;
+    let keywordScore = 0;
     const bio = (reviewer.bio || '').toLowerCase();
 
     // Keyword matching
     article.keywords.forEach((keyword) => {
       if (bio.includes(keyword.toLowerCase())) {
-        score += 1;
+        keywordScore += 1;
       }
     });
 
-    // Bonus for lower workload (balance load)
-    const workloadScore = (5 - reviewer.reviews.length) * 0.5;
+    const activeReviewsCount = reviewer.reviews.filter(r => ['pending', 'in_progress', 'invited', 'accepted'].includes(r.status)).length;
+    
+    // Successful rate calculation:
+    const completedCount = reviewer.reviews.filter(r => r.status === 'completed').length;
+    const totalCount = reviewer.reviews.length;
+    
+    // Base success rate from 0.0 to 1.0 (Multiply by 10 to give it heavy weight)
+    const successRate = totalCount > 0 ? (completedCount / totalCount) : 0;
+    const successScore = successRate * 10; 
+
+    // Bonus for lower workload (balance load, max 2.5 pts)
+    const workloadScore = (5 - activeReviewsCount) * 0.5;
 
     return {
       reviewer,
-      score: score + workloadScore,
-      keywordMatch: score,
+      score: successScore + keywordScore + workloadScore,
+      successRate,
+      workload: activeReviewsCount,
     };
   });
 
@@ -528,7 +545,8 @@ export async function autoAssignReviewers(articleId: string, count: number = 3) 
     details: selectedReviewers.map(s => ({
       name: s.reviewer.name,
       score: s.score,
-      workload: s.reviewer.reviews.length
+      successRate: s.successRate,
+      workload: s.workload
     }))
   };
 }

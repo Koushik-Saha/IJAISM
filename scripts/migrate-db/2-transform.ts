@@ -176,7 +176,7 @@ function processArticles() {
             articleType: 'Research Article', // Default
             doi: article.doi,
             status: status,
-            pdfUrl: article.file_path,
+            pdfUrl: article.file_path ? `https://c5k.com/public/backend/articles/${article.file_path}` : null,
             submissionDate: parseDate(article.submited_date),
             acceptanceDate: parseDate(article.accepted_date),
             publicationDate: parseDate(article.online_first),

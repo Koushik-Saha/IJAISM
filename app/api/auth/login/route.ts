@@ -44,6 +44,7 @@ export async function POST(req: NextRequest) {
         role: true,
         isActive: true,
         isEmailVerified: true,
+        forcePasswordChange: true,
       },
     });
 
@@ -79,6 +80,7 @@ export async function POST(req: NextRequest) {
       userId: user.id,
       email: user.email,
       role: user.role,
+      forcePasswordChange: user.forcePasswordChange,
     });
 
     return apiSuccess(

@@ -1,16 +1,16 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
+import LayoutWrapper from "@/components/layout/LayoutWrapper";
 import CookieConsent from "@/components/CookieConsent";
 import { Analytics } from "@vercel/analytics/react";
 import PWARegister from "@/components/PWARegister";
 import { Toaster } from "sonner";
+import ForcePasswordChangeModal from "@/components/auth/ForcePasswordChangeModal";
 
 
 
 export const metadata: Metadata = {
-  title: "C5K - International Journal of Advanced Information Systems and Management",
+  title: "C5K - Academic Publishing Platform",
   description: "Dedicated to publishing groundbreaking research in information technology, business management, and related disciplines",
   manifest: "/manifest.json",
   appleWebApp: {
@@ -55,14 +55,13 @@ export default function RootLayout({
         <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192x192.svg" />
       </head>
       <body className="min-h-screen flex flex-col overflow-x-hidden max-w-full" suppressHydrationWarning>
-        <Header />
-        <main className="flex-grow w-full overflow-x-hidden">
+        <LayoutWrapper>
           {children}
-        </main>
-        <Footer />
+        </LayoutWrapper>
         <CookieConsent />
         <Analytics />
         <PWARegister />
+        <ForcePasswordChangeModal />
         <Toaster position="top-right" richColors closeButton />
       </body>
     </html>

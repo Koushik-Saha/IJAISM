@@ -16,8 +16,8 @@ export default async function CurrentIssuePage({
     const { issueId } = await searchParams;
 
     // Fetch journal details for sidebar
-    const journal = await prisma.journal.findUnique({
-        where: { code: code.toUpperCase() },
+    const journal = await prisma.journal.findFirst({
+        where: { code: { equals: code, mode: 'insensitive' } },
     });
 
     if (!journal) {

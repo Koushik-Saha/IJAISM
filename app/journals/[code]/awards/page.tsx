@@ -10,8 +10,8 @@ export default async function BestPapersPage({ params }: { params: Promise<{ cod
     const { code } = await params;
 
     // Fetch journal details
-    const journal = await prisma.journal.findUnique({
-        where: { code: code.toUpperCase() },
+    const journal = await prisma.journal.findFirst({
+        where: { code: { equals: code, mode: 'insensitive' } },
     });
 
     if (!journal) {

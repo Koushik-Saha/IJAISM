@@ -13,8 +13,8 @@ export default async function JournalLayout({
     const { code } = await params;
 
     // Fetch journal details needed for the header and navigation
-    const journal = await prisma.journal.findUnique({
-        where: { code: code.toUpperCase() },
+    const journal = await prisma.journal.findFirst({
+        where: { code: { equals: code, mode: 'insensitive' } },
         select: {
             id: true,
             code: true,

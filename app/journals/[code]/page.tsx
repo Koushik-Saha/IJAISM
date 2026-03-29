@@ -27,8 +27,8 @@ export default async function JournalDetailPage({ params }: { params: Promise<{ 
   const { code } = await params;
 
   // Fetch journal and its articles
-  const journal = await prisma.journal.findUnique({
-    where: { code: code.toUpperCase() },
+  const journal = await prisma.journal.findFirst({
+    where: { code: { equals: code, mode: 'insensitive' } },
     include: {
       articles: {
         where: { status: "published" },

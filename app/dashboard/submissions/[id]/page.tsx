@@ -15,6 +15,7 @@ interface Article {
   submissionDate: string;
   pdfUrl: string | null;
   coverLetterUrl: string | null;
+  supplementaryFiles: string[];
   fullText?: string | null;
   journal: {
     fullName: string;
@@ -156,165 +157,199 @@ export default function SubmissionDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Breadcrumb */}
-        <div className="mb-6">
-          <Link
-            href="/dashboard/submissions"
-            className="text-primary hover:text-primary/80 font-semibold flex items-center"
-          >
-            <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to Submissions
-          </Link>
-        </div>
-
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold text-primary mb-2">{article.title}</h1>
-              <p className="text-gray-600">Submission ID: {article.id}</p>
-            </div>
-            <div className="flex flex-col items-end gap-4">
-              <span className={`px-4 py-2 text-sm font-semibold rounded-full ${getStatusColor(article.status)} whitespace-nowrap capitalize`}>
-                {article.status.replace(/_/g, ' ')}
-              </span>
-
-              <div className="flex gap-2">
-                <ArticleAccessButtons
-                  articleId={article.id}
-                  pdfUrl={article.pdfUrl}
-                  fullTextAvailable={!!article.fullText || true} // Force true if we suspect data issue, or rely on logic
-                  variant="compact"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-4 mt-6">
-            <div>
-              <h3 className="text-sm font-bold text-gray-700 mb-2">Journal</h3>
-              <p className="text-gray-900">{article.journal.fullName}</p>
-              <p className="text-sm text-gray-600">
-                {article.journal.code} • ISSN: {article.journal.issn}
-              </p>
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-gray-700 mb-2">Submission Date</h3>
-              <p className="text-gray-900">{formatDate(article.submissionDate)}</p>
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-gray-700 mb-2">Article Type</h3>
-              <p className="text-gray-900 capitalize">{article.articleType}</p>
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-gray-700 mb-2">Author</h3>
-              <p className="text-gray-900">{article.author.name}</p>
-              <p className="text-sm text-gray-600">{article.author.email}</p>
-            </div>
+    <div className="min-h-screen bg-gray-50">
+      <div className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div>
+            <Link href="/dashboard/submissions" className="text-primary hover:text-primary/80 font-semibold mb-4 inline-block">
+              ← Back to Submissions
+            </Link>
+            <h1 className="text-3xl font-bold text-primary">{article.title}</h1>
           </div>
         </div>
+      </div>
 
-        {/* Abstract */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-xl font-bold text-primary mb-4">Abstract</h2>
-          <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{article.abstract}</p>
-        </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          {/* Main Content Area */}
+          <div className="lg:col-span-2 space-y-6">
+            
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-xl font-bold mb-4">Article Information</h2>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-sm text-gray-600">Journal</p>
+                  <p className="font-semibold">{article.journal.fullName}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Author</p>
+                  <p className="font-semibold">{article.author.name}</p>
+                  <p className="text-sm text-gray-600">{article.author.email}</p>
+                  <div>
+                    <p className="text-sm text-gray-600">Status</p>
+                    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${getStatusColor(article.status)}`}>
+                      {article.status.replace(/_/g, ' ')}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-        {/* Keywords */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-xl font-bold text-primary mb-4">Keywords</h2>
-          <div className="flex flex-wrap gap-2">
-            {article.keywords.map((keyword, index) => (
-              <span
-                key={index}
-                className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium"
-              >
-                {keyword}
-              </span>
-            ))}
+            {/* Plagiarism Check */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                <span>🛡️</span> Academic Integrity
+              </h2>
+              {(article as any).similarityScore !== undefined ? (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-600 mb-1">Similarity Score</p>
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full rounded-full ${(article as any).similarityScore < 15 ? 'bg-green-500' :
+                              (article as any).similarityScore < 30 ? 'bg-yellow-500' : 'bg-red-500'
+                              }`}
+                            style={{ width: `${Math.min((article as any).similarityScore, 100)}%` }}
+                          ></div>
+                        </div>
+                        <span className={`font-bold text-lg ${(article as any).similarityScore < 15 ? 'text-green-600' :
+                          (article as any).similarityScore < 30 ? 'text-yellow-600' : 'text-red-600'
+                          }`}>
+                          {(article as any).similarityScore}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="text-sm text-gray-700">
+                    {(article as any).similarityScore < 15 ? "This article has a low similarity score. It appears original." :
+                      (article as any).similarityScore < 30 ? "Moderate similarity detected. Please review the report carefully." :
+                        "High similarity detected. Potential plagiarism concern."}
+                  </p>
+
+                  {(article as any).plagiarismReportUrl && (
+                    <a
+                      href={(article as any).plagiarismReportUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline text-sm font-semibold flex items-center gap-1"
+                    >
+                      📄 View Full Plagiarism Report
+                    </a>
+                  )}
+                </div>
+              ) : (
+                <div className="p-4 bg-gray-50 rounded border border-gray-100 text-center">
+                  <p className="text-gray-500">No plagiarism check data available.</p>
+                  <p className="text-xs text-gray-400 mt-1">This feature is active for new submissions.</p>
+                </div>
+              )}
+            </div>
+
+            {/* Abstract */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-xl font-bold mb-4">Abstract</h2>
+              <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{article.abstract}</p>
+            </div>
+
+             {/* Keywords */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-xl font-bold mb-4">Keywords</h2>
+              <div className="flex flex-wrap gap-2">
+                {article.keywords.map((keyword, index) => (
+                  <span key={index} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
+                    {keyword}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Peer Review Feedback */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-xl font-bold mb-4">Reviews</h2>
+              {(article as any).reviews && (article as any).reviews.length > 0 ? (
+                <div className="space-y-4">
+                  {(article as any).reviews.map((review: any, index: number) => {
+                    if (review.status !== 'completed') return null;
+                    
+                    const hasSharedComments = review.isSharedWithAuthor && review.commentsToAuthor;
+                    const hasSharedFiles = review.sharedFiles && review.sharedFiles.length > 0;
+                    
+                    if (!hasSharedComments && !hasSharedFiles) {
+                       if (!review.commentsToAuthor && (!review.reviewerFiles || review.reviewerFiles.length === 0)) return null;
+                       return null;
+                    }
+
+                    return (
+                      <div key={index} className="border border-green-200 bg-green-50 rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <p className="font-semibold text-gray-800 text-lg">Reviewer #{review.reviewerNumber || index + 1}</p>
+                            <span className="text-sm px-3 py-1 rounded-full bg-green-200 text-green-800 font-bold">
+                              Completed
+                            </span>
+                          </div>
+                        </div>
+
+                        {hasSharedComments && (
+                          <div className="mt-4 pt-4 border-t border-green-200">
+                            <div className="bg-white p-4 rounded border border-gray-100 shadow-sm">
+                              <p className="text-sm font-bold text-gray-700 uppercase mb-2">Comments to Author</p>
+                              <div className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed">{review.commentsToAuthor}</div>
+                            </div>
+                          </div>
+                        )}
+
+                        {hasSharedFiles && (
+                          <div className="bg-gray-50 p-4 rounded border border-gray-200 shadow-sm mt-4">
+                            <p className="text-sm font-bold text-gray-700 uppercase mb-2 flex items-center gap-2">
+                              <span>📎</span> Uploaded Files
+                            </p>
+                            <div className="flex flex-col gap-2 mt-2">
+                              {review.sharedFiles.map((fileUrl: string, fIdx: number) => {
+                                const fileName = fileUrl.split('/').pop() || `Attachment ${fIdx + 1}`;
+                                return (
+                                  <button
+                                    key={fIdx}
+                                    onClick={() => window.open(fileUrl, '_blank')}
+                                    className="text-left w-full bg-white border border-gray-200 hover:border-primary hover:bg-blue-50 px-3 py-2 rounded text-sm text-gray-700 transition-colors flex items-center gap-2"
+                                  >
+                                    <svg className="w-4 h-4 text-primary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                    </svg>
+                                    <span className="truncate">{fileName}</span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-gray-500 text-sm">No peer reviews available yet.</p>
+              )}
+            </div>
+            
           </div>
-        </div>
+          
+          {/* Right Sidebar */}
+          <div className="lg:col-span-1 space-y-6">
 
-
-
-        {/* Review Status */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-bold text-primary mb-4">Review Status</h2>
-
-          {article.status.toLowerCase().replace(' ', '_') === 'submitted' && (
-            <div className="bg-blue-50 border-l-4 border-blue-500 p-4">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm text-blue-700">
-                    Your submission is currently being processed. We will assign reviewers shortly and notify you of any updates.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {article.status.toLowerCase().replace(' ', '_') === 'under_review' && (
-            <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-yellow-500" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm text-yellow-700">
-                    Your article is currently under peer review. We will notify you once the review process is complete.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {article.status.toLowerCase().replace(' ', '_') === 'waiting_for_editor' && (
-            <div className="bg-purple-50 border-l-4 border-purple-500 p-4">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-purple-500" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm text-purple-700">
-                    Review process complete. The editor is now making a final decision on your article.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {(article.status.toLowerCase().replace(' ', '_') === 'accepted' || article.status.toLowerCase().replace(' ', '_') === 'published') && (
-            <div className="bg-green-50 border-l-4 border-green-500 p-4">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div className="ml-3 flex-1">
-                  <p className="text-sm text-green-700 font-semibold">
-                    {article.status === 'published' ? 'Congratulations! Your article has been published.' : 'Congratulations! Your article has been accepted for publication.'}
-                  </p>
-
-                  {article.status === 'accepted' && !article.isApcPaid && (
-                    <div className="mt-4 border-t border-green-200 pt-3">
-                      <p className="text-sm text-green-800 mb-2">
-                        To complete the publication process, please settle the Article Processing Charge (APC).
-                      </p>
-                      <button
+            {/* Author Action Notices */}
+            {(article.status === 'proof_requested' || article.status === 'revision_requested' || article.status === 'accepted' || article.status === 'rejected') && (
+              <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-l-primary">
+                <h3 className="font-bold text-gray-800 text-lg mb-4">Required Action</h3>
+                
+                {article.status === 'accepted' && !article.isApcPaid && (
+                   <div className="mb-4">
+                     <p className="text-sm text-gray-700 mb-3">Your article has been accepted! Please pay the Article Processing Charge (APC) to complete the publication process.</p>
+                     <button
                         onClick={async () => {
                           try {
                             const token = localStorage.getItem('token');
@@ -334,115 +369,138 @@ export default function SubmissionDetailPage() {
                             alert('Payment initialization failed');
                           }
                         }}
-                        className="bg-green-600 text-white px-4 py-2 rounded text-sm font-bold hover:bg-green-700 transition"
+                        className="w-full bg-green-600 text-white px-4 py-3 rounded-lg font-bold hover:bg-green-700 transition shadow-sm"
                       >
                         Pay APC Fee
                       </button>
-                    </div>
-                  )}
+                   </div>
+                )}
+                {article.status === 'accepted' && article.isApcPaid && (
+                  <p className="text-sm text-green-700 font-bold bg-green-50 p-3 rounded">✓ APC Fee Paid. Pending final publication.</p>
+                )}
 
-                  {article.isApcPaid && (
-                    <div className="mt-4 border-t border-green-200 pt-3">
-                      <p className="text-sm text-green-800 font-bold">
-                        ✓ APC Fee Paid. Pending final publication by the Editor.
-                      </p>
-                    </div>
-                  )}
-                </div>
+                {article.editorComments && (
+                   <div className="mb-4 mt-2">
+                    <strong className="text-sm text-gray-800">Editor Comments:</strong>
+                    <p className="mt-1 text-sm text-gray-700 whitespace-pre-wrap">{article.editorComments}</p>
+                   </div>
+                )}
+                {article.rejectionReason && article.status === 'rejected' && (
+                   <div className="mb-4 bg-red-50 p-3 rounded border border-red-100">
+                    <strong className="text-sm text-red-800">Reason for rejection:</strong>
+                    <p className="mt-1 text-sm text-red-700 whitespace-pre-wrap">{article.rejectionReason}</p>
+                   </div>
+                )}
+                
+                {article.status === 'proof_requested' && (
+                  <Link href={`/dashboard/submissions/${article.id}/proof`} className="block text-center w-full bg-purple-600 text-white px-4 py-3 rounded-lg font-bold hover:bg-purple-700 transition">
+                    Update Final Proof
+                  </Link>
+                )}
+                {article.status === 'revision_requested' && (
+                  <Link href={`/dashboard/submissions/${article.id}/edit`} className="block text-center w-full bg-orange-500 text-white px-4 py-3 rounded-lg font-bold hover:bg-orange-600 transition">
+                    Submit Revision
+                  </Link>
+                )}
               </div>
-            </div>
-          )}
+            )}
 
-          {article.status.toLowerCase().replace(' ', '_') === 'rejected' && (
-            <div className="bg-red-50 border-l-4 border-red-500 p-4">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm text-red-700 font-semibold mb-1">
-                    Unfortunately, your submission was not accepted.
-                  </p>
-                  {(article.rejectionReason || article.editorComments) && (
-                    <div className="text-sm text-red-700 mt-2 bg-red-100 p-2 rounded">
-                      <strong>Reason:</strong> {article.rejectionReason || article.editorComments}
-                    </div>
+            {/* Access Full Text Card */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h3 className="font-bold text-gray-800 mb-4 text-lg">Access Full Text</h3>
+              <ArticleAccessButtons
+                articleId={article.id}
+                pdfUrl={article.pdfUrl}
+                fullTextAvailable={['accepted', 'published', 'proof_requested', 'proof_resubmitted'].includes(article.status.toLowerCase().replace(' ', '_'))}
+              />
+              {(article.coverLetterUrl || (article.supplementaryFiles && article.supplementaryFiles.length > 0)) && (
+                <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col gap-2">
+                  <p className="text-sm font-semibold text-gray-700 mb-1">Additional Files:</p>
+                  {article.coverLetterUrl && (
+                    <button
+                      onClick={() => {
+                        const token = localStorage.getItem("token");
+                        window.open(`/api/articles/${article.id}/pdf?type=coverLetter&token=${token || ''}`, '_blank');
+                      }}
+                      className="w-full text-center py-2 flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded font-medium transition-colors border border-gray-200 text-sm"
+                    >
+                      <span>📎</span> View Cover Letter
+                    </button>
                   )}
+                  {article.supplementaryFiles && article.supplementaryFiles.map((fileUrl, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        const token = localStorage.getItem("token");
+                        window.open(`/api/articles/${article.id}/pdf?type=supplementary&index=${index}&token=${token || ''}`, '_blank');
+                      }}
+                      className="w-full text-center py-2 flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded font-medium transition-colors border border-gray-200 text-sm"
+                    >
+                      <span>📁</span> View Supplementary File {index + 1}
+                    </button>
+                  ))}
                 </div>
-              </div>
+              )}
             </div>
-          )}
 
-          {article.status.toLowerCase().replace(' ', '_') === 'revision_requested' && (
-            <div className="bg-orange-50 border-l-4 border-orange-500 p-4">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-orange-500" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm text-orange-700 font-semibold mb-1">
-                    Revisions have been requested for your article.
-                  </p>
-                  {article.editorComments && (
-                    <div className="text-sm text-orange-800 mt-2 bg-orange-100 p-3 rounded border border-orange-200">
-                      <strong>Editor Comments:</strong>
-                      <p className="mt-1 whitespace-pre-wrap">{article.editorComments}</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Anonymized Reviews (For Author) */}
-          {(article as any).reviews && (article as any).reviews.length > 0 && (
-            <div className="mt-6">
-              <h3 className="text-lg font-bold text-gray-800 mb-4">Peer Review Feedback</h3>
-              <div className="space-y-4">
-                {(article as any).reviews.map((review: any, index: number) => (
-                  review.status === 'completed' && (
-                    <div key={index} className="bg-white border rounded-lg p-4 shadow-sm">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-bold text-gray-700">{review.reviewer?.name || `Reviewer ${index + 1}`}</span>
-                        <span className={`text-xs px-2 py-1 rounded font-semibold capitalize ${review.decision === 'accept' ? 'bg-green-100 text-green-800' :
-                          review.decision === 'reject' ? 'bg-red-100 text-red-800' :
-                            review.decision === 'revision_requested' ? 'bg-yellow-100 text-yellow-800' :
-                              'bg-gray-100 text-gray-600'
-                          }`}>
-                          {review.decision?.replace(/_/g, ' ') || 'Completed'}
-                        </span>
+            {/* Status Timeline */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+                <h3 className="font-bold text-gray-800 mb-4 text-lg">Submission Status</h3>
+                <div className="relative mt-2">
+                  <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200" style={{ height: 'calc(100% - 20px)' }}></div>
+                  <div className="space-y-6">
+                    <div className="relative flex items-start pl-10">
+                      <div className={`absolute left-2 w-4 h-4 rounded-full border-2 border-white 
+                            ${new Date(article.submissionDate) <= new Date() ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                      <div>
+                        <h4 className="font-bold text-gray-900 text-sm">Submitted</h4>
+                        <p className="text-xs text-gray-500">{formatDate(article.submissionDate)}</p>
                       </div>
-
-                      {review.commentsToAuthor ? (
-                        <div className="text-sm text-gray-700 whitespace-pre-wrap bg-gray-50 p-3 rounded">
-                          {review.commentsToAuthor}
-                        </div>
-                      ) : (
-                        <p className="text-sm text-gray-500 italic">No comments provided.</p>
-                      )}
                     </div>
-                  )
-                ))}
-              </div>
+                    <div className="relative flex items-start pl-10">
+                      <div className={`absolute left-2 w-4 h-4 rounded-full border-2 border-white 
+                            ${['under_review', 'revision_requested', 'resubmitted', 'waiting_for_editor', 'waiting_for_final_decision', 'accepted', 'published', 'rejected', 'proof_requested', 'proof_resubmitted'].includes(article.status.toLowerCase().replace(' ', '_')) ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                      <div>
+                        <h4 className="font-bold text-gray-900 text-sm">Under Review</h4>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          {['under_review', 'revision_requested', 'resubmitted'].includes(article.status.toLowerCase().replace(' ', '_'))
+                            ? "Reviewers are assessing."
+                            : "Process initiated."}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="relative flex items-start pl-10">
+                      <div className={`absolute left-2 w-4 h-4 rounded-full border-2 border-white 
+                            ${['accepted', 'published', 'rejected'].includes(article.status.toLowerCase().replace(' ', '_')) ? (article.status.toLowerCase().replace(' ', '_') === 'rejected' ? 'bg-red-500' : 'bg-green-500') :
+                          (article.status.toLowerCase().replace(' ', '_') === 'revision_requested' ? 'bg-orange-500' : 'bg-gray-300')}`}></div>
+                      <div>
+                        <h4 className="font-bold text-gray-900 text-sm">Decision</h4>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          {article.status.toLowerCase().replace(' ', '_') === 'revision_requested' ? "Revisions required." :
+                            article.status.toLowerCase().replace(' ', '_') === 'rejected' ? "Manuscript not accepted." :
+                              article.status.toLowerCase().replace(' ', '_') === 'accepted' ? "Accepted for publication." :
+                                "Pending."}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="relative flex items-start pl-10">
+                      <div className={`absolute left-2 w-4 h-4 rounded-full border-2 border-white 
+                            ${article.status.toLowerCase().replace(' ', '_') === 'published' ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                      <div>
+                        <h4 className="font-bold text-gray-900 text-sm">Published</h4>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          {article.status.toLowerCase().replace(' ', '_') === 'published'
+                            ? "Available online."
+                            : "Final production."}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
             </div>
-          )}
 
-          {/* Review Timeline */}
-          <div className="mt-6">
-            <h3 className="text-sm font-bold text-gray-700 mb-2">Review Timeline</h3>
-            <div className="border-l-2 border-gray-300 pl-4 space-y-4">
-              <div className="relative">
-                <div className="absolute -left-[22px] w-4 h-4 rounded-full bg-primary"></div>
-                <p className="text-sm text-gray-700 font-semibold">Submitted</p>
-                <p className="text-xs text-gray-600">{formatDate(article.submissionDate)}</p>
-              </div>
-              {/* Future: Add more timeline events as they happen */}
-            </div>
           </div>
+          
         </div>
       </div>
     </div>

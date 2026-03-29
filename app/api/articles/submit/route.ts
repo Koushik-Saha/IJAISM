@@ -48,6 +48,7 @@ export async function POST(req: NextRequest) {
       keywords,
       manuscriptUrl,
       coverLetterUrl,
+      supplementaryFiles,
       resubmissionId,
     } = validation.data;
 
@@ -128,6 +129,7 @@ export async function POST(req: NextRequest) {
           journalId: journalRecord.id,
           ...(manuscriptUrl && { pdfUrl: manuscriptUrl }),
           ...(coverLetterUrl && { coverLetterUrl: coverLetterUrl }),
+          supplementaryFiles: supplementaryFiles || [],
           submissionDate: new Date(),
           // Re-run plagiarism check on resubmission
           ...(await checkPlagiarism(title + '\n\n' + abstract).then(res => ({
@@ -199,6 +201,7 @@ export async function POST(req: NextRequest) {
           journalId: journalRecord.id,
           pdfUrl: manuscriptUrl || null,
           coverLetterUrl: coverLetterUrl || null,
+          supplementaryFiles: supplementaryFiles || [],
           submissionDate: new Date(),
           // Run initial plagiarism check
           ...(await checkPlagiarism(title + '\n\n' + abstract).then(res => ({

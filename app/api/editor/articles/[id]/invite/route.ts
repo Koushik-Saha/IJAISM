@@ -1,9 +1,9 @@
-
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyToken } from "@/lib/auth";
-import { sendEmail, sendReviewerInvitationEmail } from "@/lib/email/send";
+import { sendEmail, sendReviewerInvitationEmail, sendReviewerTempPasswordEmail } from "@/lib/email/send";
 import crypto from 'crypto';
+import bcrypt from 'bcryptjs';
 
 export async function POST(
     request: Request,
@@ -23,10 +23,20 @@ export async function POST(
         }
 
         const body = await request.json();
-        const { email, name } = body;
+        const { email, name, tempPassword } = body;
 
         if (!email || !name) {
             return NextResponse.json({ error: "Name and Email are required" }, { status: 400 });
+        }
+
+        // Fetch article details early for emails
+        const article = await prisma.article.findUnique({
+            where: { id: articleId },
+            include: { journal: true }
+        });
+
+        if (!article) {
+            return NextResponse.json({ error: "Article not found" }, { status: 404 });
         }
 
         // 1. Check if user already exists
@@ -35,7 +45,6 @@ export async function POST(
         });
 
         if (existingUser) {
-            // If user exists, assign them directly
             // First check if already assigned
             const existingReview = await prisma.review.findFirst({
                 where: {
@@ -51,7 +60,7 @@ export async function POST(
             // Assign
             const nextReviewerNumber = await prisma.review.count({ where: { articleId } }) + 1;
 
-            await prisma.review.create({
+            const newReview = await prisma.review.create({
                 data: {
                     articleId,
                     reviewerId: existingUser.id,
@@ -61,62 +70,67 @@ export async function POST(
                 }
             });
 
-            // Ensure they have reviewer role?
+            // Ensure they have reviewer role
             if (existingUser.role === 'user' || existingUser.role === 'author') {
-                // Upgrade to reviewer
                 await prisma.user.update({
                     where: { id: existingUser.id },
                     data: { role: 'reviewer' }
                 });
             }
 
-            // Send Notification Email (Standard Assignment)
-            await sendReviewerInvitationEmail(email, name, `Article #${articleId.substring(0, 8)}`, 'C5K Platform', 'EXISTING_USER_LOGIN');
-
-            return NextResponse.json({ success: true, message: "User existed. Assigned as reviewer directly." });
-        }
-
-        // 2. If User does NOT exist -> Create Invitation
-        // Check existing pending invitation
-        const existingInv = await prisma.reviewerInvitation.findFirst({
-            where: { email, articleId, status: 'pending' }
-        });
-
-        if (existingInv) {
-            return NextResponse.json({ error: "Invitation already sent to this email." }, { status: 400 });
-        }
-
-        const token = crypto.randomBytes(32).toString('hex');
-        const expiresAt = new Date();
-        expiresAt.setDate(expiresAt.getDate() + 7); // 7 days expiry
-
-        const invitation = await prisma.reviewerInvitation.create({
-            data: {
-                articleId,
+            // Send Notification Email (Standard Assignment with Accept/Decline Link)
+            await sendReviewerInvitationEmail(
                 email,
                 name,
-                token,
-                status: 'pending',
-                expiresAt
-            }
-        });
+                article.title,
+                article.abstract,
+                article.journal.fullName,
+                newReview.id
+            );
 
-        // 3. Send Invitation Email with Registration Link
-        // Fetch article details for email
-        const article = await prisma.article.findUnique({
-            where: { id: articleId },
-            include: { journal: true }
-        });
+            return NextResponse.json({ success: true, message: "User existed. Assigned as reviewer and invitation portal link sent." });
+        }
 
-        await sendReviewerInvitationEmail(
-            email,
-            name,
-            article?.title || 'Unknown Title',
-            article?.journal?.fullName || 'C5K Journal',
-            token
-        );
+        // 2. If User does NOT exist -> Create Account instantly with tempPassword
+        if (tempPassword) {
+            const passwordHash = await bcrypt.hash(tempPassword, 10);
+            const newUser = await prisma.user.create({
+                data: {
+                    email,
+                    name,
+                    passwordHash,
+                    university: 'Pending',
+                    role: 'reviewer',
+                    forcePasswordChange: true,
+                }
+            });
 
-        return NextResponse.json({ success: true, message: "Invitation sent successfully", invitation });
+            const nextReviewerNumber = await prisma.review.count({ where: { articleId } }) + 1;
+
+            const newReview = await prisma.review.create({
+                data: {
+                    articleId,
+                    reviewerId: newUser.id,
+                    reviewerNumber: nextReviewerNumber,
+                    status: 'invited',
+                    dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
+                }
+            });
+
+            await sendReviewerTempPasswordEmail(
+                email,
+                name,
+                article.title,
+                article.abstract,
+                article.journal.fullName,
+                tempPassword,
+                newReview.id
+            );
+
+            return NextResponse.json({ success: true, message: "Reviewer account created and invitation portal link sent with temporary credentials." });
+        }
+
+        return NextResponse.json({ error: "A temporary password must be provided for new reviewers." }, { status: 400 });
 
     } catch (error: any) {
         console.error("Invite Error:", error);

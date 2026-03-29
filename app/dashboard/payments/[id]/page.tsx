@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { loadStripe } from '@stripe/stripe-js';
 import { toast } from "sonner";
+import { track } from "@vercel/analytics";
 import Card from '@/components/ui/Card';
 
 // Initialize Stripe
@@ -18,7 +19,9 @@ export default function PaymentPage() {
     const [loading, setLoading] = useState(true);
     const [article, setArticle] = useState<any>(null);
     const [apcFee, setApcFee] = useState<number>(500);
-    const [paymentMethod, setPaymentMethod] = useState<'card' | 'paypal' | null>(null);
+    const [paymentMethod, setPaymentMethod] = useState<'card' | 'paypal' | 'mock' | null>(null);
+
+    const allowMock = process.env.NEXT_PUBLIC_MOCK_PAYMENT === 'true';
 
     useEffect(() => {
         if (articleId) {
@@ -128,6 +131,7 @@ export default function PaymentPage() {
 
             const result = await response.json();
             if (result.status === 'COMPLETED') {
+                track('Successful Payment', { method: 'paypal', articleId });
                 toast.success("Payment Successful!");
                 router.push('/dashboard/submissions?success=true');
             } else {
@@ -136,6 +140,31 @@ export default function PaymentPage() {
         } catch (err) {
             console.error(err);
             toast.error("Failed to capture payment");
+        }
+    };
+
+    const handleMockCheckout = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('/api/payments/mock', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ articleId })
+            });
+
+            const data = await res.json();
+            if (res.ok && data.success) {
+                toast.success('Mock Payment Successful!');
+                router.push('/dashboard/submissions?success=true');
+            } else {
+                toast.error(data.error || 'Failed to process mock payment');
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error('An error occurred');
         }
     };
 
@@ -169,8 +198,8 @@ export default function PaymentPage() {
                             <button
                                 onClick={() => setPaymentMethod('card')}
                                 className={`p-3 border rounded-lg flex flex-col items-center justify-center gap-2 transition-all ${paymentMethod === 'card'
-                                        ? 'border-blue-500 bg-blue-50 text-blue-700 ring-1 ring-blue-500'
-                                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                                    ? 'border-blue-500 bg-blue-50 text-blue-700 ring-1 ring-blue-500'
+                                    : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                                     }`}
                             >
                                 <span className="font-bold">Credit Card</span>
@@ -180,13 +209,26 @@ export default function PaymentPage() {
                             <button
                                 onClick={() => setPaymentMethod('paypal')}
                                 className={`p-3 border rounded-lg flex flex-col items-center justify-center gap-2 transition-all ${paymentMethod === 'paypal'
-                                        ? 'border-blue-500 bg-blue-50 text-blue-700 ring-1 ring-blue-500'
-                                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                                    ? 'border-blue-500 bg-blue-50 text-blue-700 ring-1 ring-blue-500'
+                                    : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                                     }`}
                             >
                                 <span className="font-bold">PayPal</span>
                                 <span className="text-xs text-gray-500">Fast Checkout</span>
                             </button>
+                            
+                            {allowMock && (
+                                <button
+                                    onClick={() => setPaymentMethod('mock')}
+                                    className={`p-3 border rounded-lg flex flex-col items-center justify-center gap-2 transition-all col-span-2 ${paymentMethod === 'mock'
+                                        ? 'border-green-500 bg-green-50 text-green-700 ring-1 ring-green-500'
+                                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                                        }`}
+                                >
+                                    <span className="font-bold">Mock Payment</span>
+                                    <span className="text-xs text-gray-500">Test Server Bypass</span>
+                                </button>
+                            )}
                         </div>
 
                         <div className="mt-6">
@@ -218,6 +260,15 @@ export default function PaymentPage() {
                                         />
                                     </PayPalScriptProvider>
                                 </div>
+                            )}
+
+                            {paymentMethod === 'mock' && allowMock && (
+                                <button
+                                    onClick={handleMockCheckout}
+                                    className="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-bold hover:bg-green-700 transition-colors shadow-lg"
+                                >
+                                    Simulate Payment Success
+                                </button>
                             )}
 
                             {!paymentMethod && (

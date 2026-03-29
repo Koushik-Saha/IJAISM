@@ -54,9 +54,12 @@ export async function GET(
             }
         }
 
-        // 4. Verify Completion
+        // 4. Verify Completion & Certification
         if (review.status !== 'completed') {
             return NextResponse.json({ error: 'Certificate is only available for completed reviews' }, { status: 400 });
+        }
+        if (!(review as any).isCertified) {
+            return NextResponse.json({ error: 'This certificate is pending editor approval' }, { status: 403 });
         }
 
         // 5. Generate PDF

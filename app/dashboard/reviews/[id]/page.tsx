@@ -14,6 +14,7 @@ interface Review {
   decision: string | null;
   commentsToAuthor: string | null;
   commentsToEditor: string | null;
+  reviewerFiles?: string[];
   article: {
     id: string;
     title: string;
@@ -21,7 +22,10 @@ interface Review {
     keywords: string[];
     articleType: string;
     submissionDate: string;
+    status: string;
     pdfUrl: string | null;
+    coverLetterUrl: string | null;
+    supplementaryFiles: string[];
     author: {
       name: string;
       email: string;
@@ -41,15 +45,35 @@ export default function ReviewSubmissionPage() {
   const params = useParams();
   const id = params?.id as string;
 
+  const formatArticleStatus = (status: string) => {
+    switch (status) {
+      case 'submitted': return 'Submitted';
+      case 'under_review': return 'Under Review';
+      case 'revision_requested': return 'Revision Requested';
+      case 'resubmitted': return 'Resubmitted';
+      case 'waiting_for_final_decision': return 'Decision Pending';
+      case 'accepted': return 'Accepted';
+      case 'published': return 'Published';
+      case 'rejected': return 'Rejected';
+      default: return status.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    }
+  };
+
   const [review, setReview] = useState<Review | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    decision: string;
+    commentsToAuthor: string;
+    commentsToEditor: string;
+    reviewerFiles: File[];
+  }>({
     decision: '',
     commentsToAuthor: '',
     commentsToEditor: '',
+    reviewerFiles: [],
   });
 
   useEffect(() => {
@@ -81,6 +105,12 @@ export default function ReviewSubmissionPage() {
         }
 
         const data = await response.json();
+
+        if (['invited', 'declined'].includes(data.review.status)) {
+          setError('You must accept this review invitation before accessing the manuscript.');
+          return;
+        }
+
         setReview(data.review);
 
         // If already completed, populate form with previous data
@@ -89,6 +119,7 @@ export default function ReviewSubmissionPage() {
             decision: data.review.decision || '',
             commentsToAuthor: data.review.commentsToAuthor || '',
             commentsToEditor: data.review.commentsToEditor || '',
+            reviewerFiles: data.review.reviewerFiles || [], 
           });
         }
       } catch (err: any) {
@@ -130,7 +161,7 @@ export default function ReviewSubmissionPage() {
     }
 
     // Validation based on decision
-    if (formData.decision === 'revision_requested') {
+    if (['minor_revision', 'major_revision'].includes(formData.decision)) {
       if (formData.commentsToAuthor.trim().length < 50) {
         alert('For revision requests, detailed comments to the author are required (min 50 chars).');
         return;
@@ -154,13 +185,46 @@ export default function ReviewSubmissionPage() {
 
     try {
       const token = localStorage.getItem('token');
+
+      let reviewerFileUrls: string[] = [];
+
+      if (formData.reviewerFiles.length > 0) {
+        for (const file of formData.reviewerFiles) {
+          const fileFormData = new FormData();
+          fileFormData.append('file', file);
+          fileFormData.append('fileType', 'reviewerFile');
+
+          const uploadResponse = await fetch('/api/upload', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+            body: fileFormData,
+          });
+
+          if (uploadResponse.ok) {
+            const uploadData = await uploadResponse.json();
+            reviewerFileUrls.push(uploadData.data.url);
+          } else {
+            throw new Error(`Failed to upload file: ${file.name}`);
+          }
+        }
+      }
+
+      const payload = {
+        decision: formData.decision,
+        commentsToAuthor: formData.commentsToAuthor,
+        commentsToEditor: formData.commentsToEditor,
+        reviewerFiles: reviewerFileUrls
+      };
+
       const response = await fetch(`/api/reviews/${id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
@@ -234,6 +298,10 @@ export default function ReviewSubmissionPage() {
                     'bg-green-100 text-green-800'
                   } capitalize`}>
                   {review.status.replace(/_/g, ' ')}
+                </span>
+                
+                <span className="px-3 py-1 text-xs font-semibold rounded-full border border-gray-200 bg-gray-50 text-gray-700 capitalize flex items-center gap-1">
+                  Article Status: {formatArticleStatus(review.article.status)}
                 </span>
               </div>
             </div>
@@ -322,8 +390,39 @@ export default function ReviewSubmissionPage() {
                 View PDF
               </button>
             </div>
+
+            {/* Additional Files for Reviewer */}
+            {(review.article.coverLetterUrl || (review.article.supplementaryFiles && review.article.supplementaryFiles.length > 0)) && (
+              <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col gap-2">
+                <p className="text-sm font-semibold text-gray-700 mb-1">Additional Files:</p>
+                {review.article.coverLetterUrl && (
+                  <button
+                    onClick={() => {
+                      const token = localStorage.getItem("token");
+                      window.open(`/api/articles/${review.article.id}/pdf?type=coverLetter&token=${token || ''}`, '_blank');
+                    }}
+                    className="w-full text-center py-2 flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded font-medium transition-colors border border-gray-200 text-sm"
+                  >
+                    <span>📎</span> View Cover Letter
+                  </button>
+                )}
+                {review.article.supplementaryFiles && review.article.supplementaryFiles.map((fileUrl, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      const token = localStorage.getItem("token");
+                      window.open(`/api/articles/${review.article.id}/pdf?type=supplementary&index=${index}&token=${token || ''}`, '_blank');
+                    }}
+                    className="w-full text-center py-2 flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded font-medium transition-colors border border-gray-200 text-sm"
+                  >
+                    <span>📁</span> View Supplementary File {index + 1}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
-        )}
+        )
+        }
 
         {/* Review Form */}
         <div className="bg-white rounded-lg shadow-md p-6">
@@ -332,22 +431,30 @@ export default function ReviewSubmissionPage() {
           </h2>
 
           {isCompleted && (
-            <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-6 flex justify-between items-center">
+            <div className={`border-l-4 p-4 mb-6 flex justify-between items-center ${(review as any).isCertified ? 'bg-green-50 border-green-500' : 'bg-blue-50 border-blue-500'}`}>
               <div>
-                <p className="text-sm text-green-700 font-semibold">
+                <p className={`text-sm font-semibold ${(review as any).isCertified ? 'text-green-700' : 'text-blue-700'}`}>
                   ✓ Review completed and submitted
                 </p>
-                <p className="text-xs text-green-600 mt-1">Thank you for your contribution.</p>
+                <p className={`text-xs mt-1 ${(review as any).isCertified ? 'text-green-600' : 'text-blue-600'}`}>
+                  Thank you for your contribution.
+                </p>
               </div>
-              <button
-                onClick={() => {
-                  const token = localStorage.getItem('token');
-                  window.open(`/api/reviews/${review.id}/certificate?token=${token}`, '_blank');
-                }}
-                className="bg-green-600 text-white px-4 py-2 rounded text-sm font-bold hover:bg-green-700 transition flex items-center gap-2"
-              >
-                <span>📜</span> Download Certificate
-              </button>
+              {(review as any).isCertified ? (
+                <button
+                  onClick={() => {
+                    const token = localStorage.getItem('token');
+                    window.open(`/api/reviews/${review.id}/certificate?token=${token}`, '_blank');
+                  }}
+                  className="bg-green-600 text-white px-4 py-2 rounded text-sm font-bold hover:bg-green-700 transition flex items-center gap-2 shrink-0 ml-4"
+                >
+                  <span>📜</span> Download Certificate
+                </button>
+              ) : (
+                <div className="bg-white/60 text-blue-800 px-3 py-1.5 rounded text-xs font-semibold border border-blue-200 shrink-0 ml-4">
+                  Pending Editor Approval
+                </div>
+              )}
             </div>
           )}
 
@@ -356,6 +463,38 @@ export default function ReviewSubmissionPage() {
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-3">Decision *</label>
               <div className="space-y-3">
+                <label className="flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                  <input
+                    type="radio"
+                    name="decision"
+                    value="minor_revision"
+                    checked={formData.decision === 'minor_revision'}
+                    onChange={(e) => setFormData({ ...formData, decision: e.target.value })}
+                    disabled={isCompleted}
+                    className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                  />
+                  <div className="ml-3">
+                    <p className="font-semibold text-blue-700">Minor Revision</p>
+                    <p className="text-sm text-gray-600">Requires small adjustments before acceptance</p>
+                  </div>
+                </label>
+
+                <label className="flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                  <input
+                    type="radio"
+                    name="decision"
+                    value="no_recommendation"
+                    checked={formData.decision === 'no_recommendation'}
+                    onChange={(e) => setFormData({ ...formData, decision: e.target.value })}
+                    disabled={isCompleted}
+                    className="w-4 h-4 text-gray-600 border-gray-300 focus:ring-gray-500"
+                  />
+                  <div className="ml-3">
+                    <p className="font-semibold text-gray-700">No Recommendation</p>
+                    <p className="text-sm text-gray-600">Decline to provide a distinct publication decision</p>
+                  </div>
+                </label>
+
                 <label className="flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
                   <input
                     type="radio"
@@ -376,22 +515,6 @@ export default function ReviewSubmissionPage() {
                   <input
                     type="radio"
                     name="decision"
-                    value="revision_requested"
-                    checked={formData.decision === 'revision_requested'}
-                    onChange={(e) => setFormData({ ...formData, decision: e.target.value })}
-                    disabled={isCompleted}
-                    className="w-4 h-4 text-yellow-600 border-gray-300 focus:ring-yellow-500"
-                  />
-                  <div className="ml-3">
-                    <p className="font-semibold text-yellow-700">Request Revision</p>
-                    <p className="text-sm text-gray-600">Article has potential but requires changes</p>
-                  </div>
-                </label>
-
-                <label className="flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                  <input
-                    type="radio"
-                    name="decision"
                     value="reject"
                     checked={formData.decision === 'reject'}
                     onChange={(e) => setFormData({ ...formData, decision: e.target.value })}
@@ -403,13 +526,29 @@ export default function ReviewSubmissionPage() {
                     <p className="text-sm text-gray-600">Article does not meet publication standards</p>
                   </div>
                 </label>
+
+                <label className="flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                  <input
+                    type="radio"
+                    name="decision"
+                    value="major_revision"
+                    checked={formData.decision === 'major_revision'}
+                    onChange={(e) => setFormData({ ...formData, decision: e.target.value })}
+                    disabled={isCompleted}
+                    className="w-4 h-4 text-orange-600 border-gray-300 focus:ring-orange-500"
+                  />
+                  <div className="ml-3">
+                    <p className="font-semibold text-orange-700">Major Revision</p>
+                    <p className="text-sm text-gray-600">Requires significant foundational changes</p>
+                  </div>
+                </label>
               </div>
             </div>
 
             {/* Comments to Author */}
             <div>
               <label htmlFor="commentsToAuthor" className="block text-sm font-bold text-gray-700 mb-2">
-                Comments to Author {formData.decision === 'revision_requested' ? '* (Minimum 50 characters)' : '(Optional)'}
+                Comments to Author {['minor_revision', 'major_revision'].includes(formData.decision) ? '* (Minimum 50 characters)' : '(Optional)'}
               </label>
               <textarea
                 id="commentsToAuthor"
@@ -429,7 +568,7 @@ export default function ReviewSubmissionPage() {
             {/* Comments to Editor (Optional) */}
             <div>
               <label htmlFor="commentsToEditor" className="block text-sm font-bold text-gray-700 mb-2">
-                Confidential Comments to Editor {formData.decision === 'revision_requested' ? '*' : '(Optional)'}
+                Confidential Comments to Editor {['minor_revision', 'major_revision'].includes(formData.decision) ? '*' : '(Optional)'}
               </label>
               <textarea
                 id="commentsToEditor"
@@ -441,6 +580,104 @@ export default function ReviewSubmissionPage() {
                 placeholder="Add any confidential comments for the editor (not shared with the author)..."
               />
             </div>
+
+            {/* Reviewer Supplementary Files Upload */}
+            {!isCompleted && (
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  Attach Files (Optional)
+                </label>
+                <p className="text-xs text-gray-500 mb-2">Upload marked-up manuscripts, datasets, or supplementary notes for the author and editor.</p>
+                <input
+                  type="file"
+                  multiple
+                  disabled={isCompleted || isSubmitting}
+                  accept=".pdf,.doc,.docx,.jpg,.png,.jpeg,.csv,.xlsx"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 transition-all cursor-pointer"
+                  onChange={(e) => {
+                    if (e.target.files) {
+                      const newFiles = Array.from(e.target.files);
+                      setFormData(prev => {
+                        // Avoid exact duplicates by name and size
+                        const currentFiles = prev.reviewerFiles;
+                        const filteredNew = newFiles.filter(nf => 
+                          !currentFiles.some(cf => cf instanceof File && cf.name === nf.name && cf.size === nf.size)
+                        );
+                        return {
+                          ...prev,
+                          reviewerFiles: [...prev.reviewerFiles, ...filteredNew]
+                        };
+                      });
+                      // Reset input value so the same file can be selected again if removed
+                      e.target.value = '';
+                    }
+                  }}
+                />
+
+                {formData.reviewerFiles.length > 0 && (
+                  <div className="mt-4 flex flex-col gap-2">
+                    <p className="text-xs font-semibold text-gray-700">Selected Files:</p>
+                    {formData.reviewerFiles.map((file, idx) => (
+                      <div key={idx} className="flex items-center justify-between bg-gray-50 border px-3 py-2 rounded">
+                        <span className="text-sm text-gray-800 truncate pr-4">{file.name}</span>
+                        <button
+                          type="button"
+                          className="text-red-500 hover:text-red-700 text-xs font-bold shrink-0"
+                          onClick={() => {
+                            const newFiles = [...formData.reviewerFiles];
+                            newFiles.splice(idx, 1);
+                            setFormData({ ...formData, reviewerFiles: newFiles });
+                          }}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Display Read-Only Supplementary Files if Completed */}
+            {isCompleted && formData.reviewerFiles && formData.reviewerFiles.length > 0 && (
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  Attached Files
+                </label>
+                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 flex flex-col gap-3 mt-2">
+                  {(formData.reviewerFiles as any[]).map((fileUrl: any, idx) => {
+                    const urlString = typeof fileUrl === 'string' ? fileUrl : (fileUrl.url || fileUrl.name || 'File');
+                    let fileName = 'Attached File';
+                    if (typeof urlString === 'string' && urlString.includes('/')) {
+                      fileName = urlString.split('/').pop() || 'File';
+                    } else if (typeof urlString === 'string') {
+                      fileName = urlString;
+                    }
+                    
+                    return (
+                      <div key={idx} className="flex items-center justify-between bg-white border border-gray-200 p-3 rounded shadow-sm">
+                        <div className="flex items-center gap-2 overflow-hidden">
+                          <svg className="w-5 h-5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                          </svg>
+                          <span className="text-sm font-medium text-gray-700 truncate">{fileName}</span>
+                        </div>
+                        {typeof urlString === 'string' && urlString.startsWith('http') && (
+                          <a 
+                            href={urlString} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="bg-blue-50 text-primary hover:bg-blue-100 flex items-center gap-1 font-semibold border-primary border px-3 py-1.5 rounded text-xs transition-colors shrink-0"
+                          >
+                            Download <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                          </a>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Error Message */}
             {error && (
@@ -461,7 +698,7 @@ export default function ReviewSubmissionPage() {
             )}
           </form>
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }

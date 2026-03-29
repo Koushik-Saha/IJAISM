@@ -19,6 +19,7 @@ export interface TokenPayload {
   userId: string;
   email: string;
   role: string; // Should be UserRole, but keeping string for loose compatibility
+  forcePasswordChange?: boolean;
 }
 
 export function generateToken(payload: TokenPayload): string {

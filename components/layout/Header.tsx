@@ -219,14 +219,14 @@ export default function Header() {
               <Link href="/journals" className="px-2 py-2 rounded-full text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors whitespace-nowrap">
                 Journals
               </Link>
+              <Link href="/articles" className="px-2 py-2 rounded-full text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors whitespace-nowrap">
+                Articles
+              </Link>
               <Link href="/dissertations" className="px-2 py-2 rounded-full text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors whitespace-nowrap">
                 Dissertation/Thesis
               </Link>
               <Link href="/books" className="px-2 py-2 rounded-full text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors whitespace-nowrap">
                 Books
-              </Link>
-              <Link href="/conferences" className="px-2 py-2 rounded-full text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors whitespace-nowrap">
-                Conferences
               </Link>
               <Link href="/announcements" className="px-2 py-2 rounded-full text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors whitespace-nowrap">
                 Announcements
@@ -314,6 +314,11 @@ export default function Header() {
                               </Link>
                             </MenuItem>
                             <MenuItem>
+                              <Link href="/articles" className="group flex items-center px-4 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors">
+                                Articles
+                              </Link>
+                            </MenuItem>
+                            <MenuItem>
                               <Link href="/dissertations" className="group flex items-center px-4 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors">
                                 Dissertation/Thesis
                               </Link>
@@ -321,11 +326,6 @@ export default function Header() {
                             <MenuItem>
                               <Link href="/books" className="group flex items-center px-4 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors">
                                 Books
-                              </Link>
-                            </MenuItem>
-                            <MenuItem>
-                              <Link href="/conferences" className="group flex items-center px-4 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors">
-                                Conferences
                               </Link>
                             </MenuItem>
                             <MenuItem>
@@ -386,6 +386,17 @@ export default function Header() {
                               >
                                 <CreditCardIcon className="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors" />
                                 Membership
+                              </Link>
+                            </MenuItem>
+                            <MenuItem>
+                              <Link
+                                href="/conferences"
+                                className="group flex items-center px-4 py-2.5 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors gap-3"
+                              >
+                                <svg className="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                Conferences
                               </Link>
                             </MenuItem>
                             <MenuItem>
@@ -470,6 +481,13 @@ export default function Header() {
                 Academic Journals
               </Link>
               <Link
+                href="/articles"
+                className="text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50 px-3 py-2 rounded transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Articles
+              </Link>
+              <Link
                 href="/dissertations"
                 className="text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50 px-3 py-2 rounded transition-colors"
                 onClick={() => setIsMenuOpen(false)}
@@ -482,13 +500,6 @@ export default function Header() {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Books
-              </Link>
-              <Link
-                href="/conferences"
-                className="text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50 px-3 py-2 rounded transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Conferences
               </Link>
               <Link
                 href="/announcements"

@@ -171,6 +171,65 @@ export default async function DissertationDetailPage({ params }: { params: Promi
                 )}
               </div>
 
+              {/* Pricing */}
+              {(dissertation.price || dissertation.hardCoverPrice || dissertation.paperBookPrice) && (
+                <div className="border-t border-gray-200 pt-4 space-y-2 mb-4">
+                  <h4 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-2">Pricing</h4>
+                  {dissertation.price && (
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-500">E-Book (PDF)</span>
+                      <span className="font-bold text-primary">${dissertation.price.toFixed(2)}</span>
+                    </div>
+                  )}
+                  {dissertation.hardCoverPrice && (
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-500">Hard Cover</span>
+                      <span className="font-semibold text-gray-800">${dissertation.hardCoverPrice.toFixed(2)}</span>
+                    </div>
+                  )}
+                  {dissertation.paperBookPrice && (
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-500">Paper Book</span>
+                      <span className="font-semibold text-gray-800">${dissertation.paperBookPrice.toFixed(2)}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Publication Info */}
+              <div className="border-t border-gray-200 pt-4 space-y-3 mb-4">
+                {dissertation.doi && (
+                  <div>
+                    <p className="text-sm text-gray-500">DOI</p>
+                    <a href={dissertation.doi} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline break-all font-semibold">{dissertation.doi}</a>
+                  </div>
+                )}
+                {dissertation.eIsbn && (
+                  <div>
+                    <p className="text-sm text-gray-500">E-ISBN</p>
+                    <p className="font-semibold text-gray-800 text-sm">{dissertation.eIsbn}</p>
+                  </div>
+                )}
+                {dissertation.printIsbn && (
+                  <div>
+                    <p className="text-sm text-gray-500">Print ISBN</p>
+                    <p className="font-semibold text-gray-800 text-sm">{dissertation.printIsbn}</p>
+                  </div>
+                )}
+                {dissertation.dimensions && (
+                  <div>
+                    <p className="text-sm text-gray-500">Dimensions</p>
+                    <p className="font-semibold text-gray-800 text-sm">{dissertation.dimensions}</p>
+                  </div>
+                )}
+                {dissertation.copyright && (
+                  <div>
+                    <p className="text-sm text-gray-500">Copyright</p>
+                    <p className="font-semibold text-gray-800 text-sm">{dissertation.copyright}</p>
+                  </div>
+                )}
+              </div>
+
               {/* Actions */}
               <DissertationActions pdfUrl={dissertation.pdfUrl} title={dissertation.title} />
             </div>

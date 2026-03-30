@@ -286,6 +286,14 @@ model Dissertation {
   deletedAt      DateTime?
   authorName     String?
   coverImageUrl  String?
+  price          Float?
+  hardCoverPrice Float?
+  paperBookPrice Float?
+  dimensions     String?
+  copyright      String?
+  doi            String?
+  eIsbn          String?
+  printIsbn      String?
   author         User                  @relation(fields: [authorId], references: [id])
   chapters       DissertationChapter[]
 
@@ -428,6 +436,12 @@ model Book {
   previewPages    Json?
   reviews         Json?
   relatedTopics   String[]
+  hardCoverPrice  String?
+  paperBookPrice  String?
+  dimensions      String?
+  weight          String?
+  doi             String?
+  keyFeatures     String[]
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
   chapters        BookChapter[]

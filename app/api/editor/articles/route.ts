@@ -76,6 +76,9 @@ export async function GET(req: NextRequest) {
           journal: {
             select: { id: true, fullName: true, code: true },
           },
+          coAuthors: {
+            orderBy: { order: 'asc' },
+          },
           reviews: {
             include: {
               reviewer: {

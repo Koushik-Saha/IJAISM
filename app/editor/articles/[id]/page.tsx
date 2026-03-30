@@ -12,6 +12,13 @@ interface Article {
   abstract: string;
   keywords: string[];
   status: string;
+  doi?: string | null;
+  articleType?: string | null;
+  publicationDate?: string | null;
+  submissionDate?: string | null;
+  acceptanceDate?: string | null;
+  language?: string | null;
+  isOpenAccess?: boolean;
   pdfUrl?: string | null;
   coverLetterUrl?: string | null;
   supplementaryFiles?: string[];
@@ -20,6 +27,13 @@ interface Article {
     email: string;
     university: string;
   };
+  coAuthors?: Array<{
+    id: string;
+    name: string;
+    university?: string | null;
+    isMain: boolean;
+    order: number;
+  }>;
   journalId: string;
   issueId?: string;
   volume?: number;
@@ -472,25 +486,99 @@ export default function AdminArticleDetailPage() {
             <div className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-xl font-bold mb-4">Article Information</h2>
               <div className="space-y-3">
-                <div>
-                  <p className="text-sm text-gray-600">Journal</p>
-                  <p className="font-semibold">{article.journal.fullName}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Author</p>
-                  <p className="font-semibold">{article.author.name}</p>
-                  <p className="text-sm text-gray-600">{article.author.email}</p>
+
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <p className="text-sm text-gray-600">Status</p>
-                    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${article.status === 'published' ? 'bg-green-100 text-green-800' :
+                    <p className="text-xs text-gray-500 uppercase font-semibold">Status</p>
+                    <span className={`mt-1 inline-block px-3 py-1 text-xs font-semibold rounded-full ${
+                      article.status === 'published' ? 'bg-green-100 text-green-800' :
                       article.status === 'under_review' ? 'bg-blue-100 text-blue-800' :
-                        article.status === 'resubmitted' ? 'bg-purple-100 text-purple-800' :
-                          'bg-yellow-100 text-yellow-800'
-                      }`}>
+                      article.status === 'resubmitted' ? 'bg-purple-100 text-purple-800' :
+                      'bg-yellow-100 text-yellow-800'
+                    }`}>
                       {formatStatus(article.status)}
                     </span>
                   </div>
+                  <div>
+                    <p className="text-xs text-gray-500 uppercase font-semibold">Article Type</p>
+                    <p className="text-sm font-medium text-gray-800 mt-1">{article.articleType || 'Research Article'}</p>
+                  </div>
                 </div>
+
+                <div>
+                  <p className="text-xs text-gray-500 uppercase font-semibold">Journal</p>
+                  <p className="font-semibold text-gray-800">{article.journal.fullName}</p>
+                  <p className="text-xs text-gray-500">{article.journal.code?.toUpperCase()}</p>
+                </div>
+
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <p className="text-xs text-gray-500 uppercase font-semibold">Volume</p>
+                    <p className="text-sm font-medium text-gray-800">{article.volume ?? '—'}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 uppercase font-semibold">Issue</p>
+                    <p className="text-sm font-medium text-gray-800">{article.issue ?? '—'}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 uppercase font-semibold">Open Access</p>
+                    <p className="text-sm font-medium text-gray-800">{article.isOpenAccess ? '✓ Yes' : 'No'}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-xs text-gray-500 uppercase font-semibold">Submitted</p>
+                    <p className="text-sm text-gray-800">
+                      {article.submissionDate ? new Date(article.submissionDate).toLocaleDateString() : '—'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 uppercase font-semibold">Accepted</p>
+                    <p className="text-sm text-gray-800">
+                      {article.acceptanceDate ? new Date(article.acceptanceDate).toLocaleDateString() : '—'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 uppercase font-semibold">Published</p>
+                    <p className="text-sm text-gray-800">
+                      {article.publicationDate ? new Date(article.publicationDate).toLocaleDateString() : '—'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 uppercase font-semibold">Language</p>
+                    <p className="text-sm text-gray-800">{article.language?.toUpperCase() || 'EN'}</p>
+                  </div>
+                </div>
+
+                <div className="border-t pt-3">
+                  <p className="text-xs text-gray-500 uppercase font-semibold mb-1">Main Author</p>
+                  <p className="font-semibold text-gray-800">{article.author.name}</p>
+                  <p className="text-sm text-gray-500">{article.author.email}</p>
+                  {article.author.university && (
+                    <p className="text-xs text-gray-400">{article.author.university}</p>
+                  )}
+                </div>
+
+                {article.coAuthors && article.coAuthors.length > 0 && (
+                  <div className="border-t pt-3">
+                    <p className="text-xs text-gray-500 uppercase font-semibold mb-2">Co-Authors ({article.coAuthors.length})</p>
+                    <div className="space-y-2">
+                      {article.coAuthors.map((ca, i) => (
+                        <div key={ca.id} className="flex items-start gap-2">
+                          <span className="text-xs text-gray-400 w-4 mt-0.5">{i + 1}.</span>
+                          <div>
+                            <p className="text-sm font-medium text-gray-800">
+                              {ca.name}
+                              {ca.isMain && <span className="ml-1 text-xs text-primary">(Main)</span>}
+                            </p>
+                            {ca.university && <p className="text-xs text-gray-400">{ca.university}</p>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -545,6 +633,34 @@ export default function AdminArticleDetailPage() {
                   <p className="text-xs text-gray-400 mt-1">This feature is active for new submissions.</p>
                 </div>
               )}
+            </div>
+
+            {/* Publication Identifiers */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-xl font-bold mb-4">Publication Identifiers</h2>
+              <div className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <span className="text-sm font-semibold text-gray-500 w-24 shrink-0 pt-0.5">Article ID</span>
+                  <span className="text-sm font-mono font-bold text-gray-900">
+                    {article.doi ? article.doi.replace('https://doi.org/10.63471/', '') : '—'}
+                  </span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="text-sm font-semibold text-gray-500 w-24 shrink-0 pt-0.5">DOI</span>
+                  {article.doi ? (
+                    <a
+                      href={article.doi}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-primary hover:underline break-all"
+                    >
+                      {article.doi}
+                    </a>
+                  ) : (
+                    <span className="text-sm text-gray-400">Not assigned</span>
+                  )}
+                </div>
+              </div>
             </div>
 
             <div className="bg-white rounded-lg shadow-md p-6">

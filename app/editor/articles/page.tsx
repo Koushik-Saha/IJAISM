@@ -9,6 +9,11 @@ interface Article {
   title: string;
   status: string;
   submissionDate: string;
+  publicationDate?: string;
+  doi?: string;
+  volume?: number;
+  issue?: number;
+  articleType?: string;
   author: {
     name: string;
     email: string;
@@ -178,26 +183,46 @@ export default function AdminArticlesPage() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Title</th>
+                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Article ID / DOI</th>
                   <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Author</th>
                   <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Journal</th>
+                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Vol / Issue</th>
                   <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Status</th>
                   <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Reviews</th>
                   <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {articles.map((article) => (
+                {articles.map((article) => {
+                  const articleId = article.doi ? article.doi.replace('https://doi.org/10.63471/', '') : null;
+                  return (
                   <tr key={article.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-gray-900">{article.title}</div>
-                      <div className="text-sm text-gray-500">
-                        {new Date(article.submissionDate).toLocaleDateString()}
+                    <td className="px-6 py-4 max-w-xs">
+                      <div className="text-sm font-medium text-gray-900 line-clamp-2">{article.title}</div>
+                      <div className="text-xs text-gray-400 mt-1">
+                        {article.publicationDate
+                          ? new Date(article.publicationDate).toLocaleDateString()
+                          : article.submissionDate
+                          ? new Date(article.submissionDate).toLocaleDateString()
+                          : '—'}
                       </div>
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      {articleId ? (
+                        <span className="font-mono text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded border border-blue-200">
+                          {articleId}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400 text-xs">No DOI</span>
+                      )}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900">
                       {article.author?.name || article.author?.email}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-900">{article.journal?.code}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900">{article.journal?.code?.toUpperCase()}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
+                      {article.volume && article.issue ? `Vol ${article.volume} · Iss ${article.issue}` : '—'}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-3 py-1 text-sm font-semibold rounded-full ${getStatusBadge(article.status)}`}>
                         {formatStatus(article.status)}
@@ -215,7 +240,8 @@ export default function AdminArticlesPage() {
                       </Link>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>

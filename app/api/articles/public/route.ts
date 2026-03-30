@@ -7,40 +7,47 @@ export async function GET(req: NextRequest) {
     const journal = searchParams.get('journal');
     const year = searchParams.get('year');
     const sortBy = searchParams.get('sortBy') || 'recent';
+    const search = searchParams.get('search') || '';
+    const articleType = searchParams.get('articleType') || '';
+    const openAccess = searchParams.get('openAccess') || '';
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
     const skip = (page - 1) * limit;
 
-    // Build where clause
-    const where: any = {
-      status: 'published',
-      deletedAt: null,
-    };
+    const where: any = { status: 'published', deletedAt: null };
 
     if (journal) {
-      where.journal = {
-        code: journal,
-      };
+      where.journal = { code: { equals: journal, mode: 'insensitive' } };
     }
 
     if (year) {
-      const yearStart = new Date(`${year}-01-01`);
-      const yearEnd = new Date(`${year}-12-31`);
       where.publicationDate = {
-        gte: yearStart,
-        lte: yearEnd,
+        gte: new Date(`${year}-01-01`),
+        lte: new Date(`${year}-12-31`),
       };
     }
 
-    // Build orderBy
-    let orderBy: any = { publicationDate: 'desc' };
-    if (sortBy === 'cited') {
-      orderBy = { citationCount: 'desc' };
-    } else if (sortBy === 'downloaded') {
-      orderBy = { downloadCount: 'desc' };
+    if (search) {
+      where.OR = [
+        { title: { contains: search, mode: 'insensitive' } },
+        { abstract: { contains: search, mode: 'insensitive' } },
+        { keywords: { has: search } },
+      ];
     }
 
-    // Fetch articles
+    if (articleType) {
+      where.articleType = { equals: articleType, mode: 'insensitive' };
+    }
+
+    if (openAccess === 'true') {
+      where.isOpenAccess = true;
+    }
+
+    let orderBy: any = { publicationDate: 'desc' };
+    if (sortBy === 'cited') orderBy = { citationCount: 'desc' };
+    else if (sortBy === 'downloaded') orderBy = { downloadCount: 'desc' };
+    else if (sortBy === 'oldest') orderBy = { publicationDate: 'asc' };
+
     const [articles, total] = await Promise.all([
       prisma.article.findMany({
         where,
@@ -48,57 +55,40 @@ export async function GET(req: NextRequest) {
         take: limit,
         orderBy,
         include: {
-          author: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
-          },
-          journal: {
-            select: {
-              id: true,
-              code: true,
-              fullName: true,
-            },
-          },
+          author: { select: { id: true, name: true } },
+          coAuthors: { select: { name: true }, orderBy: { order: 'asc' } },
+          journal: { select: { id: true, code: true, fullName: true } },
         },
       }),
       prisma.article.count({ where }),
     ]);
 
-    // Format articles
-    const formattedArticles = articles.map((article) => ({
-      id: article.id,
-      title: article.title,
-      authors: [article.author.name],
-      journal: {
-        code: article.journal.code,
-        name: article.journal.fullName,
-      },
-      publicationDate: article.publicationDate?.toISOString().split('T')[0] || '',
-      doi: article.doi || '',
-      abstract: article.abstract || '',
-      keywords: article.keywords || [],
-      citations: article.citationCount || 0,
-      downloads: article.downloadCount || 0,
-    }));
+    const formattedArticles = articles.map((article) => {
+      const allAuthors = [article.author.name, ...article.coAuthors.map(c => c.name)];
+      return {
+        id: article.id,
+        title: article.title,
+        authors: allAuthors,
+        journal: { code: article.journal.code, name: article.journal.fullName },
+        publicationDate: article.publicationDate?.toISOString().split('T')[0] || '',
+        doi: article.doi || '',
+        abstract: article.abstract || '',
+        keywords: article.keywords || [],
+        citations: article.citationCount || 0,
+        downloads: article.downloadCount || 0,
+        articleType: article.articleType || 'Research Article',
+        isOpenAccess: article.isOpenAccess ?? true,
+        pdfUrl: article.pdfUrl || null,
+      };
+    });
 
     return NextResponse.json({
       success: true,
       articles: formattedArticles,
-      pagination: {
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit),
-      },
+      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
     });
   } catch (error: any) {
     console.error('Error fetching articles:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch articles' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch articles' }, { status: 500 });
   }
 }

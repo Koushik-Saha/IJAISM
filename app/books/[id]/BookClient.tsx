@@ -33,6 +33,12 @@ interface BookClientProps {
         previewPages: any[];
         reviews: any[];
         relatedTopics: string[];
+        hardCoverPrice?: string | null;
+        paperBookPrice?: string | null;
+        dimensions?: string | null;
+        weight?: string | null;
+        doi?: string | null;
+        keyFeatures?: string[];
         createdAt: string;
         updatedAt: string;
     };
@@ -261,8 +267,23 @@ export default function BookClient({ book }: BookClientProps) {
                                 )}
 
                                 {/* Price */}
-                                <div className="text-center mb-6">
-                                    <p className="text-sm text-gray-600">{book.format}</p>
+                                <div className="mb-6 space-y-2">
+                                    <div className="flex justify-between items-center py-1.5 border-b border-gray-100">
+                                        <span className="text-sm text-gray-500">E-Book (PDF)</span>
+                                        <span className="font-bold text-primary text-lg">{book.price}</span>
+                                    </div>
+                                    {book.hardCoverPrice && (
+                                        <div className="flex justify-between items-center py-1.5 border-b border-gray-100">
+                                            <span className="text-sm text-gray-500">Hard Cover</span>
+                                            <span className="font-semibold text-gray-800">{book.hardCoverPrice}</span>
+                                        </div>
+                                    )}
+                                    {book.paperBookPrice && (
+                                        <div className="flex justify-between items-center py-1.5">
+                                            <span className="text-sm text-gray-500">Paper Book</span>
+                                            <span className="font-semibold text-gray-800">{book.paperBookPrice}</span>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {!isPurchased && (
@@ -367,6 +388,24 @@ export default function BookClient({ book }: BookClientProps) {
                                         <p className="text-sm text-gray-600">Edition</p>
                                         <p className="font-semibold text-gray-800">{book.edition}</p>
                                     </div>
+                                    {book.dimensions && (
+                                        <div>
+                                            <p className="text-sm text-gray-600">Dimensions</p>
+                                            <p className="font-semibold text-gray-800">{book.dimensions}</p>
+                                        </div>
+                                    )}
+                                    {book.weight && (
+                                        <div>
+                                            <p className="text-sm text-gray-600">Weight</p>
+                                            <p className="font-semibold text-gray-800">{book.weight}</p>
+                                        </div>
+                                    )}
+                                    {book.doi && (
+                                        <div>
+                                            <p className="text-sm text-gray-600">DOI</p>
+                                            <a href={book.doi} target="_blank" rel="noopener noreferrer" className="font-semibold text-primary hover:underline break-all text-sm">{book.doi}</a>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -396,6 +435,21 @@ export default function BookClient({ book }: BookClientProps) {
                                         ))}
                                     </div>
                                 </div>
+
+                                {/* Key Features */}
+                                {book.keyFeatures && book.keyFeatures.length > 0 && (
+                                    <div className="mb-8">
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">Key Features</h2>
+                                        <ul className="space-y-2">
+                                            {book.keyFeatures.map((feature: string, index: number) => (
+                                                <li key={index} className="flex items-start gap-2 text-gray-700">
+                                                    <span className="text-primary font-bold mt-0.5">•</span>
+                                                    <span>{feature}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
 
                                 {/* Table of Contents */}
                                 <div className="mb-8">

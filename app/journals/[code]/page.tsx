@@ -69,9 +69,11 @@ export default async function JournalDetailPage({ params }: { params: Promise<{ 
                       {article.title}
                     </h3>
                   </Link>
-                  <div className="text-sm text-gray-600 mb-2">
-                    <span className="font-medium text-gray-900">{article.author.name}</span>
-                  </div>
+                  {article.author.name !== 'The Mother Admin' && (
+                    <div className="text-sm text-gray-600 mb-2">
+                      By <span className="font-medium text-gray-900">{article.author.name}</span>
+                    </div>
+                  )}
                   <div className="text-xs text-gray-500 flex items-center gap-3">
                     <span>{article.publicationDate ? new Date(article.publicationDate).toLocaleDateString() : 'Just Accepted'}</span>
                     {article.volume && <span>• Vol {article.volume}</span>}

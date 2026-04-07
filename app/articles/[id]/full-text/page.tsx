@@ -50,7 +50,7 @@ export default async function ArticleFullTextPage({ params }: { params: Promise<
     const allAuthors = [
         { name: article.author.name || "Unknown", affiliation: article.author.affiliation || article.author.university },
         ...article.coAuthors.map((ca) => ({ name: ca.name, affiliation: ca.university })),
-    ];
+    ].filter(a => a.name !== 'The Mother Admin');
 
     const publicationDate = article.publicationDate
         ? new Date(article.publicationDate).toISOString().split("T")[0]
@@ -83,7 +83,7 @@ export default async function ArticleFullTextPage({ params }: { params: Promise<
                         </Link>
                     </div>
                     <div className="text-sm text-gray-500 hidden sm:block">
-                        {article.journal.code}
+                        {article.journal.code.toUpperCase()}
                     </div>
                 </div>
             </div>

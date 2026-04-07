@@ -57,7 +57,7 @@ export default async function ReadArticlePage({ params }: { params: Promise<{ id
     });
 
     // Aggregate authors
-    const allAuthors = [
+    let allAuthors = [
         {
             name: article.author.name || "Unknown",
             affiliation: article.author.affiliation || article.author.university || null,
@@ -71,6 +71,9 @@ export default async function ReadArticlePage({ params }: { params: Promise<{ id
             isMain: ca.isMain,
         })),
     ];
+
+    // Remove the migration admin from the authors list
+    allAuthors = allAuthors.filter(a => a.name !== 'The Mother Admin');
 
     const pubDate = article.publicationDate
         ? new Date(article.publicationDate).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })

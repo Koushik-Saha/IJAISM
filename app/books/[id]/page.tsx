@@ -9,6 +9,7 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
 
   const book = await prisma.book.findUnique({
     where: { id },
+    include: { chapters: true }
   });
 
   if (!book) {
@@ -29,6 +30,7 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
         tableOfContents,
         previewPages,
         reviews,
+        chapters: book.chapters // Passthrough
       }}
     />
   );

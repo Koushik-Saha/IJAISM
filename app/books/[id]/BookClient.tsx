@@ -41,6 +41,7 @@ interface BookClientProps {
         keyFeatures?: string[];
         createdAt: string;
         updatedAt: string;
+        chapters: any[];
     };
 }
 
@@ -222,10 +223,11 @@ export default function BookClient({ book }: BookClientProps) {
         }
     };
 
-    // Filter preview pages (Limit to 10 if not purchased)
-    const displayPages = isPurchased
-        ? book.previewPages // In real app, this would fetch full content
-        : book.previewPages.slice(0, 10);
+    // Find the first free chapter for the preview modal — serve via API route
+    const freeChapter = book.chapters?.find(c => c.pdfUrl != null);
+    const pdfToDisplay = freeChapter
+        ? `/api/books/pdf?chapterId=${freeChapter.id}`
+        : null;
 
     return (
         <PayPalScriptProvider options={{
@@ -455,16 +457,34 @@ export default function BookClient({ book }: BookClientProps) {
                                 <div className="mb-8">
                                     <h2 className="text-2xl font-bold text-gray-800 mb-4">Table of Contents</h2>
                                     <div className="bg-gray-50 rounded-lg p-6">
-                                        <div className="space-y-2">
-                                            {book.tableOfContents.map((item: any) => (
-                                                <div key={item.chapter} className="flex justify-between items-center py-2 border-b border-gray-200 last:border-0">
-                                                    <div className="flex items-center">
-                                                        <span className="text-primary font-bold mr-3">Chapter {item.chapter}</span>
-                                                        <span className="text-gray-800">{item.title}</span>
+                                        <div className="space-y-4">
+                                            {book.chapters && book.chapters.length > 0 ? (
+                                                book.chapters.map((chapter: any, idx: number) => (
+                                                    <div key={chapter.id} className="flex flex-col py-3 border-b border-gray-200 last:border-0">
+                                                        <div className="flex justify-between items-start mb-1">
+                                                            <div className="flex flex-col">
+                                                                <span className="text-primary font-bold uppercase text-sm mb-1">{chapter.title}</span>
+                                                            </div>
+                                                            {chapter.pdfUrl ? (
+                                                                <span className="text-green-600 font-bold text-[10px] bg-green-100 px-2 py-0.5 rounded shadow-sm">FREE</span>
+                                                            ) : (
+                                                                <span className="text-red-500 font-bold text-[10px] bg-red-100 px-2 py-0.5 rounded shadow-sm">PREMIUM</span>
+                                                            )}
+                                                        </div>
+                                                        
+                                                        {chapter.pdfUrl && (
+                                                            <div className="flex gap-4 mt-2">
+                                                                <a href={chapter.pdfUrl} target="_blank" className="text-blue-600 hover:text-blue-800 flex items-center text-sm font-semibold transition-colors">
+                                                                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                                                    View PDF (Sample)
+                                                                </a>
+                                                            </div>
+                                                        )}
                                                     </div>
-                                                    <span className="text-gray-600 text-sm">{item.pages}</span>
-                                                </div>
-                                            ))}
+                                                ))
+                                            ) : (
+                                                <div className="text-gray-500 italic">No chapters available.</div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -524,9 +544,9 @@ export default function BookClient({ book }: BookClientProps) {
                 {showPreview && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
                         <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-auto">
-                            <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex justify-between items-center">
-                                <h3 className="text-2xl font-bold text-gray-800">
-                                    {isPurchased ? "Full Book Reader" : "Book Preview (10 Pages)"}
+                            <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex justify-between items-center">
+                                <h3 className="text-xl font-bold text-gray-800">
+                                    {isPurchased ? "Full Book" : `Preview — ${freeChapter?.title ?? 'Chapter'} (10 pages)`}
                                 </h3>
                                 <button
                                     onClick={() => setShowPreview(false)}
@@ -535,37 +555,43 @@ export default function BookClient({ book }: BookClientProps) {
                                     ×
                                 </button>
                             </div>
-                            <div className="p-8">
-                                {displayPages.length > 0 ? (
-                                    displayPages.map((page: any, index: number) => (
-                                        <div key={index} className="mb-8">
-                                            <div className="bg-gray-50 rounded-lg p-8 shadow-inner min-h-[600px]">
-                                                <div className="prose max-w-none">
-                                                    <pre className="whitespace-pre-wrap font-serif text-gray-800 leading-relaxed">
-                                                        {page.content || "Page content not available."}
-                                                    </pre>
-                                                </div>
+                            <div className="p-0">
+                                {pdfToDisplay ? (
+                                    <div className="w-full" style={{height: '75vh'}}>
+                                        <object
+                                            data={pdfToDisplay}
+                                            type="application/pdf"
+                                            width="100%"
+                                            height="100%"
+                                            style={{display: 'block', border: 'none'}}
+                                        >
+                                            <div className="flex flex-col items-center justify-center h-full gap-4 text-gray-500 p-8">
+                                                <p>Your browser cannot display the PDF inline.</p>
+                                                <a
+                                                    href={pdfToDisplay}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="px-4 py-2 bg-primary text-white rounded-lg font-semibold hover:bg-primary/90"
+                                                >
+                                                    Open PDF in New Tab
+                                                </a>
                                             </div>
-                                            <p className="text-center text-sm text-gray-600 mt-4">
-                                                Page {page.pageNumber || index + 1} of {book.pages}
-                                            </p>
-                                        </div>
-                                    ))
+                                        </object>
+                                    </div>
                                 ) : (
                                     <div className="text-center py-12 text-gray-500">
-                                        No preview pages available.
+                                        No preview PDF available.
                                     </div>
                                 )}
 
-                                {!isPurchased && (
-                                    <div className="text-center mt-8 p-6 bg-blue-50 rounded-lg border border-blue-100">
-                                        <p className="text-gray-700 mb-4 font-medium">
-                                            This is a preview. Purchase the full book to read all {book.pages} pages.
-                                        </p>
-
-                                    </div>
-                                )}
                             </div>
+                            {!isPurchased && (
+                                <div className="border-t border-blue-100 bg-blue-50 px-6 py-4 text-center rounded-b-lg">
+                                    <p className="text-gray-700 text-sm font-medium">
+                                        📖 This is a sample preview. Purchase to access the full {book.pages}-page book.
+                                    </p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}

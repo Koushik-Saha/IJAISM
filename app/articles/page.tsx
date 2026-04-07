@@ -266,8 +266,8 @@ export default function ArticlesPage() {
                     <div className="flex flex-col sm:flex-row gap-4">
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-wrap items-center gap-2 mb-2">
-                          <span className="text-xs font-bold bg-primary text-white px-2 py-0.5 rounded uppercase">
-                            {article.journal.code}
+                          <span className="text-xs font-bold bg-primary text-white px-2 py-0.5 rounded">
+                            {article.journal.code.toUpperCase()}
                           </span>
                           {article.isOpenAccess && (
                             <span className="text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded">
@@ -287,9 +287,11 @@ export default function ArticlesPage() {
                           </h2>
                         </Link>
 
-                        <p className="text-sm text-gray-600 mb-2 font-medium">
-                          {article.authors.join(", ")}
-                        </p>
+                        {article.authors.length > 0 && (
+                          <p className="text-sm text-gray-600 mb-2 font-medium">
+                            By {article.authors.join(", ")}
+                          </p>
+                        )}
 
                         <p className="text-sm text-gray-600 mb-3 line-clamp-2 leading-relaxed">
                           {article.abstract}

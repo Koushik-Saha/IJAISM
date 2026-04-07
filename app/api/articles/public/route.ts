@@ -64,7 +64,8 @@ export async function GET(req: NextRequest) {
     ]);
 
     const formattedArticles = articles.map((article) => {
-      const allAuthors = [article.author.name, ...article.coAuthors.map(c => c.name)];
+      const allAuthors = [article.author.name, ...article.coAuthors.map(c => c.name)]
+        .filter(name => name !== 'The Mother Admin');
       return {
         id: article.id,
         title: article.title,

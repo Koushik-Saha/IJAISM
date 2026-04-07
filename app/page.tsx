@@ -232,11 +232,13 @@ export default async function HomePage() {
                     <Card key={article.id}>
                       <div className="mb-2">
                         <span className="text-xs bg-primary text-white px-2 py-1 rounded">
-                          {article.journal}
+                          {article.journal.toUpperCase()}
                         </span>
                       </div>
                       <h3 className="text-lg font-bold mb-2">{article.title}</h3>
-                      <p className="text-sm text-gray-600 mb-2">{article.authors}</p>
+                      {article.authors !== 'The Mother Admin' && (
+                        <p className="text-sm text-gray-600 mb-2">{article.authors}</p>
+                      )}
                       <p className="text-sm text-gray-700 mb-4 line-clamp-3">{article.abstract || 'No abstract available.'}</p>
                       <Link href={`/articles/${article.id}`} className="text-primary hover:text-primary-dark font-semibold">
                         Read More →
@@ -269,7 +271,7 @@ export default async function HomePage() {
                     <Card key={article.id}>
                       <div className="flex justify-between items-start mb-2">
                         <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded font-semibold">
-                          {article.journal.code}
+                          {article.journal.code.toUpperCase()}
                         </span>
                         <span className="text-xs text-gray-500">
                           👁️ {article.viewCount} views
@@ -280,7 +282,9 @@ export default async function HomePage() {
                           {article.title}
                         </Link>
                       </h3>
-                      <p className="text-sm text-gray-600 mb-2">By {article.author.name}</p>
+                      {article.author.name !== 'The Mother Admin' && (
+                        <p className="text-sm text-gray-600 mb-2">By {article.author.name}</p>
+                      )}
                       <p className="text-sm text-gray-700 mb-4 line-clamp-2">{article.abstract || 'No abstract available.'}</p>
                       <Link href={`/articles/${article.id}`} className="text-primary hover:text-primary-dark font-semibold">
                         Read More →

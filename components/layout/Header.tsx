@@ -170,14 +170,10 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center flex-shrink-0">
             <div className="flex items-center gap-3 mr-4 lg:mr-8">
-              <div className="w-10 h-10 md:w-12 md:h-12 relative flex-shrink-0">
+              <div className="w-14 h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 relative flex-shrink-0">
                 <Image src="/logo.png" alt="C5K Logo" fill className="object-contain" />
               </div>
-              <div className="hidden sm:block">
-                <div className="text-lg md:text-xl font-bold text-primary leading-tight mb-0.5">C5K</div>
-                <div className="text-xs text-gray-600 leading-tight">Advanced Info Systems</div>
-              </div>
-              <div className="sm:hidden text-xl font-bold text-primary">C5K</div>
+
             </div>
           </Link>
 

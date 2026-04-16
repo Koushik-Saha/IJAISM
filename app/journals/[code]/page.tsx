@@ -35,7 +35,8 @@ export default async function JournalDetailPage({ params }: { params: Promise<{ 
         orderBy: { publicationDate: "desc" },
         take: 5,
         include: {
-          author: { select: { name: true } }
+          author: { select: { name: true } },
+          coAuthors: { select: { name: true }, take: 1, orderBy: { order: "asc" } }
         }
       }
     }
@@ -69,11 +70,20 @@ export default async function JournalDetailPage({ params }: { params: Promise<{ 
                       {article.title}
                     </h3>
                   </Link>
-                  {article.author.name !== 'The Mother Admin' && (
-                    <div className="text-sm text-gray-600 mb-2">
-                      By <span className="font-medium text-gray-900">{article.author.name}</span>
-                    </div>
-                  )}
+                  {(() => {
+                    let displayName = article.author.name;
+                    if (displayName === 'The Mother Admin') {
+                        displayName = article.coAuthors?.[0]?.name || "Unknown";
+                    }
+                    if (displayName !== "Unknown") {
+                      return (
+                        <div className="text-sm text-gray-600 mb-2">
+                          By <span className="font-medium text-gray-900">{displayName}</span>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
                   <div className="text-xs text-gray-500 flex items-center gap-3">
                     <span>{article.publicationDate ? new Date(article.publicationDate).toLocaleDateString() : 'Just Accepted'}</span>
                     {article.volume && <span>• Vol {article.volume}</span>}

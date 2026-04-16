@@ -1,7 +1,7 @@
 
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import Image from "next/image";
+import SafeJournalCover from "@/components/journals/SafeJournalCover";
 
 export const dynamic = 'force-dynamic';
 
@@ -108,13 +108,13 @@ export default async function AboutPage() {
             {journals.map(journal => (
               <div key={journal.id} className="bg-white border rounded-lg shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-shadow">
                 <div className="h-48 bg-gray-200 relative">
-                  {journal.coverImageUrl ? (
-                    <img src={journal.coverImageUrl} alt={journal.fullName} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400 font-bold text-xl">
-                      {journal.code}
-                    </div>
-                  )}
+                  <SafeJournalCover
+                    code={journal.code}
+                    coverImageUrl={journal.coverImageUrl}
+                    className="w-full h-full object-cover"
+                    fallbackClassName="w-full h-full flex items-center justify-center bg-[#006d77] text-white font-bold text-3xl"
+                    themeColor="#006d77"
+                  />
                 </div>
                 <div className="p-6 flex-1 flex flex-col">
                   <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2">

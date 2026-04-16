@@ -5,6 +5,8 @@ import { Metadata } from "next";
 import { ChevronRight, Download, BookOpen, Calendar, Hash, Globe, FileText, BarChart2 } from "lucide-react";
 import ArticleContentViewer from "@/components/articles/ArticleContentViewer";
 import ArticleCiteShare from "@/components/articles/ArticleCiteShare";
+import AuthorListWithModal from "@/components/articles/AuthorListWithModal";
+import SafeJournalCover from "@/components/journals/SafeJournalCover";
 
 function journalCoverUrl(raw: string | null): string | null {
     if (!raw) return null;
@@ -43,7 +45,15 @@ export default async function ReadArticlePage({ params }: { params: Promise<{ id
         },
     });
 
-    if (!article) return notFound();
+    // Ensure we exist, then safely increment views on page load (background async)
+    if (!article) {
+        return notFound();
+    }
+
+    await prisma.article.update({
+        where: { id: article.id },
+        data: { viewCount: { increment: 1 } }
+    }).catch(console.error);
 
     const recommendedArticles = await prisma.article.findMany({
         where: { journalId: article.journalId, id: { not: article.id }, status: "published" },
@@ -167,16 +177,13 @@ export default async function ReadArticlePage({ params }: { params: Promise<{ id
                         <div className="mt-10 border-t border-[#cfd8dc] pt-6">
                             <p className="text-[11px] font-bold text-[#4d4d4d] uppercase tracking-widest mb-3">Journal</p>
                             <Link href={`/journal/${article.journal.code}`}>
-                                {journalCoverUrl(article.journal.coverImageUrl) ? (
-                                    // eslint-disable-next-line @next/next/no-img-element
-                                    <img src={journalCoverUrl(article.journal.coverImageUrl)!} alt={article.journal.code}
-                                        className="w-[80px] h-[107px] object-cover border border-[#cfd8dc] shadow-sm mb-2 hover:opacity-90 transition" />
-                                ) : (
-                                    <div className="w-[80px] h-[107px] flex items-center justify-center text-center p-2 border border-[#cfd8dc] shadow-sm mb-2 text-[10px] font-bold text-white rounded-sm"
-                                        style={{ background: themeColor }}>
-                                        {article.journal.code.toUpperCase()}
-                                    </div>
-                                )}
+                                <SafeJournalCover
+                                    code={article.journal.code}
+                                    coverImageUrl={article.journal.coverImageUrl}
+                                    themeColor={themeColor}
+                                    className="w-[80px] h-[107px] object-cover border border-[#cfd8dc] shadow-sm mb-2 hover:opacity-90 transition"
+                                    fallbackClassName="w-[80px] h-[107px] flex items-center justify-center text-center p-2 border border-[#cfd8dc] shadow-sm mb-2 text-[10px] font-bold text-white rounded-sm"
+                                />
                                 <p className="text-[11px] text-[#007398] hover:underline leading-snug">{article.journal.fullName}</p>
                             </Link>
                         </div>
@@ -193,16 +200,13 @@ export default async function ReadArticlePage({ params }: { params: Promise<{ id
                             {/* Journal + volume info row */}
                             <div className="flex items-start gap-4 mb-6">
                                 <Link href={`/journal/${article.journal.code}`} className="shrink-0">
-                                    {journalCoverUrl(article.journal.coverImageUrl) ? (
-                                        // eslint-disable-next-line @next/next/no-img-element
-                                        <img src={journalCoverUrl(article.journal.coverImageUrl)!} alt={article.journal.code}
-                                            className="w-[72px] h-[96px] object-cover border border-[#cfd8dc] shadow hover:opacity-90 transition" />
-                                    ) : (
-                                        <div className="w-[72px] h-[96px] flex items-center justify-center text-center p-1.5 border border-[#cfd8dc] shadow text-[9px] font-bold text-white rounded-sm leading-tight"
-                                            style={{ background: themeColor }}>
-                                            {article.journal.code.toUpperCase()}
-                                        </div>
-                                    )}
+                                    <SafeJournalCover
+                                        code={article.journal.code}
+                                        coverImageUrl={article.journal.coverImageUrl}
+                                        themeColor={themeColor}
+                                        className="w-[72px] h-[96px] object-cover border border-[#cfd8dc] shadow hover:opacity-90 transition"
+                                        fallbackClassName="w-[72px] h-[96px] flex items-center justify-center text-center p-1.5 border border-[#cfd8dc] shadow text-[9px] font-bold text-white rounded-sm leading-tight"
+                                    />
                                 </Link>
                                 <div className="pt-1">
                                     {article.articleType && (
@@ -237,16 +241,7 @@ export default async function ReadArticlePage({ params }: { params: Promise<{ id
 
                             {/* Authors */}
                             <div className="mb-2">
-                                <div className="flex flex-wrap gap-x-1 gap-y-1 text-[15px] leading-relaxed">
-                                    {allAuthors.map((author, idx) => (
-                                        <span key={idx} className="inline-flex items-center">
-                                            <span className="text-[#007398] hover:underline cursor-pointer decoration-1 underline-offset-2">
-                                                {author.name}
-                                            </span>
-                                            {idx < allAuthors.length - 1 && <span className="text-gray-400 mr-1">,</span>}
-                                        </span>
-                                    ))}
-                                </div>
+                                <AuthorListWithModal authors={allAuthors} />
                             </div>
 
                             {/* Affiliations */}
@@ -402,11 +397,11 @@ export default async function ReadArticlePage({ params }: { params: Promise<{ id
                     {pdfUrl && (
                         <div className="mb-8">
                             <h4 className="text-[12px] font-bold text-[#4d4d4d] uppercase tracking-widest mb-3">Access</h4>
-                            <a href={pdfUrl} target="_blank" rel="noopener noreferrer"
+                            <a href={`/api/articles/${article.id}/track-download`} target="_blank" rel="noopener noreferrer"
                                 className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-[#007398] text-white text-[14px] font-bold rounded hover:bg-[#005f7c] transition mb-2">
                                 <Download size={16} /> Download PDF
                             </a>
-                            <a href={pdfUrl} target="_blank" rel="noopener noreferrer"
+                            <a href={`/api/articles/${article.id}/track-download`} target="_blank" rel="noopener noreferrer"
                                 className="flex items-center justify-center gap-2 w-full px-4 py-2.5 border border-[#007398] text-[#007398] text-[14px] font-semibold rounded hover:bg-[#f0f7fa] transition">
                                 <FileText size={16} /> View PDF
                             </a>
@@ -441,7 +436,10 @@ export default async function ReadArticlePage({ params }: { params: Promise<{ id
                             <h4 className="text-[12px] font-bold text-[#4d4d4d] uppercase tracking-widest mb-4">Related Articles</h4>
                             <div className="flex flex-col gap-5">
                                 {recommendedArticles.map((rec) => {
-                                    const recAuthor = rec.author?.name || rec.coAuthors?.[0]?.name || "Unknown";
+                                    let recAuthor = rec.author?.name || rec.coAuthors?.[0]?.name || "Unknown";
+                                    if (recAuthor === 'The Mother Admin') {
+                                        recAuthor = rec.coAuthors?.[0]?.name || "Unknown";
+                                    }
                                     return (
                                         <Link key={rec.id} href={`/articles/${rec.id}/read`}
                                             className="group border-b border-[#cfd8dc] pb-5 last:border-0 block">

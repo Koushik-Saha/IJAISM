@@ -53,9 +53,10 @@ export default function JournalInsights({
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 py-4">
                     <div className="font-bold text-lg text-gray-900">Aims & Scope</div>
                     <div className="md:col-span-3">
-                        <p className="mb-2 text-gray-800 line-clamp-2">
-                            {aimsAndScope || "No aims and scope available."}
-                        </p>
+                        <div 
+                            className="mb-2 text-gray-800 line-clamp-2" 
+                            dangerouslySetInnerHTML={{ __html: aimsAndScope || "No aims and scope available." }} 
+                        />
                         <Link
                             href={`/journals/${journalCode}/overview`}
                             className="text-blue-700 hover:underline font-semibold text-sm"
@@ -114,23 +115,23 @@ export default function JournalInsights({
                     <div className="md:col-span-3">
                         <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
                             <div>
-                                <div className="text-2xl font-bold font-serif">{timeToFirstDecision || "N/A"}</div>
+                                <div className="text-2xl font-bold font-serif">{timeToFirstDecision || "-"}</div>
                                 <div className="text-xs text-gray-600 mt-1">Time to first decision</div>
                             </div>
                             <div>
-                                <div className="text-2xl font-bold font-serif">{reviewTime || "N/A"}</div>
+                                <div className="text-2xl font-bold font-serif">{reviewTime || "-"}</div>
                                 <div className="text-xs text-gray-600 mt-1">Review time</div>
                             </div>
                             <div>
-                                <div className="text-2xl font-bold font-serif">{revisionTime || "N/A"}</div>
+                                <div className="text-2xl font-bold font-serif">{revisionTime || "-"}</div>
                                 <div className="text-xs text-gray-600 mt-1">Revision time</div>
                             </div>
                             <div>
-                                <div className="text-2xl font-bold font-serif">{submissionToAcceptance || "N/A"}</div>
+                                <div className="text-2xl font-bold font-serif">{submissionToAcceptance || "-"}</div>
                                 <div className="text-xs text-gray-600 mt-1">Submission to Acceptance</div>
                             </div>
                             <div>
-                                <div className="text-2xl font-bold font-serif">{acceptanceToPublication || "N/A"}</div>
+                                <div className="text-2xl font-bold font-serif">{acceptanceToPublication || "-"}</div>
                                 <div className="text-xs text-gray-600 mt-1">Acceptance to publication</div>
                             </div>
                         </div>

@@ -26,9 +26,10 @@ export default function JournalAboutSection({
                     About the journal
                 </h2>
                 <div className="text-gray-800 leading-relaxed text-lg">
-                    <p className="mb-4 line-clamp-3">
-                        {description || `The ${journalName} is a premier platform dedicated to advancing knowledge...`}
-                    </p>
+                    <div 
+                        className="mb-4 line-clamp-3"
+                        dangerouslySetInnerHTML={{ __html: description || `The ${journalName} is a premier platform dedicated to advancing knowledge...` }}
+                    />
                     <button
                         onClick={() => setIsModalOpen(true)}
                         className="text-blue-700 hover:underline font-semibold bg-transparent border-0 p-0 cursor-pointer"
@@ -60,13 +61,10 @@ export default function JournalAboutSection({
                             <h2 className="text-4xl font-bold mb-8 font-serif text-gray-900">
                                 Aim and Scope
                             </h2>
-                            <div className="prose prose-lg max-w-none text-gray-800 leading-relaxed whitespace-pre-wrap font-serif">
-                                {modalContent.split('\n').map((paragraph, index) => (
-                                    <p key={index} className="mb-4">
-                                        {paragraph}
-                                    </p>
-                                ))}
-                            </div>
+                            <div 
+                                className="prose prose-lg max-w-none text-gray-800 leading-relaxed font-serif"
+                                dangerouslySetInnerHTML={{ __html: modalContent }}
+                            />
                         </div>
                     </div>
                 </div>

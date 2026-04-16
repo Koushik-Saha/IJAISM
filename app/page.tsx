@@ -145,12 +145,21 @@ async function getHomepageSections() {
 
 export default async function HomePage() {
   const { announcements, journals, articles, mostViewedArticles, heroSlides, stats } = await getHomepageData();
+  
+  // Safely fix any broken Unsplash images coming from DB mock data to prevent next/image 404 errors
+  const safeHeroSlides = heroSlides.map(slide => ({
+    ...slide,
+    imageUrl: slide.imageUrl?.includes('1532094349884') 
+        ? 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&q=80&w=1920' 
+        : slide.imageUrl
+  }));
+
   const sections = await getHomepageSections();
 
   const renderSection = (section: { id: string; type: string; title?: string | null; content?: any }) => {
     switch (section.type) {
       case 'hero_carousel':
-        return <HeroCarousel key={section.id} slides={heroSlides} />;
+        return <HeroCarousel key={section.id} slides={safeHeroSlides} />;
 
       case 'announcements':
         return (

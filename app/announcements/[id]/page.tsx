@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import InteractiveSidebar from "@/components/blog/InteractiveSidebar";
 
 export const dynamic = "force-dynamic";
 
@@ -49,137 +50,112 @@ export default async function AnnouncementDetailPage({ params }: { params: Promi
   const ann = announcement as any;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Breadcrumb */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center text-sm text-gray-600">
-            <Link href="/" className="hover:text-primary">
-              Home
-            </Link>
-            <span className="mx-2">/</span>
-            <Link href="/announcements" className="hover:text-primary">
-              Announcements
-            </Link>
-            <span className="mx-2">/</span>
-            <span className="text-gray-900 truncate max-w-[200px]">
-              {ann.title}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <article className="bg-white rounded-lg shadow-md p-8 md:p-12">
-          {/* Header */}
-          <div className="mb-8">
-            <div className="flex flex-wrap items-center gap-3 mb-4">
-              {ann.priority >= 2 && (
-                <span className="inline-block bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-bold uppercase">
-                  Important
-                </span>
+    <div className="bg-[#f0f2f5] min-h-screen py-10 font-sans text-[#333]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <div className="flex flex-col lg:flex-row gap-8">
+          
+          {/* Main Content Pane */}
+          <div className="w-full lg:w-2/3 space-y-6">
+            
+            {/* Article Box */}
+            <article className="bg-white px-8 py-10 border border-gray-200">
+              <h1 className="text-[28px] font-bold text-[#1b1c1d] uppercase tracking-wide leading-tight mb-8">
+                {ann.title}
+              </h1>
+              
+              {ann.thumbnailUrl && (
+                 <div className="mb-8 w-full max-h-[500px] overflow-hidden rounded relative">
+                   <img src={ann.thumbnailUrl} alt={ann.title} className="w-full object-cover"/>
+                 </div>
               )}
-              {ann.category && (
-                <span className="inline-block bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium">
-                  {ann.category}
-                </span>
-              )}
-              <span className="text-sm text-gray-600">
-                {new Date(ann.publishedAt || ann.createdAt).toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </span>
-            </div>
 
-            <h1 className="text-4xl md:text-5xl font-bold text-primary mb-4 leading-tight">
-              {ann.title}
-            </h1>
-
-            <div className="flex items-center text-gray-600">
-              <span className="font-medium">Posted by {ann.author || "C5K Admin"}</span>
-            </div>
-          </div>
-
-          {/* Featured Image */}
-          {ann.thumbnailUrl && (
-            <div className="mb-10">
-              <img
-                src={ann.thumbnailUrl}
-                alt={ann.title}
-                className="w-full h-auto max-h-[500px] object-cover rounded-lg shadow-sm"
+              <div 
+                className="prose max-w-none prose-img:rounded-md prose-img:max-w-full prose-headings:font-bold prose-headings:text-[#1b1c1d] prose-h2:text-[22px] prose-h3:text-[18px] prose-p:text-[#4d4d4d] prose-p:leading-relaxed prose-a:text-[#007398]"
+                dangerouslySetInnerHTML={{ __html: ann.content }}
               />
+            </article>
+
+            {/* Author Box */}
+            <div className="bg-white p-6 border-l-4 border-l-[#007398] border-y border-y-gray-200 border-r border-r-gray-200">
+              <div className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Author Details</div>
+              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+                <div className="shrink-0 text-center">
+                  <div className="w-24 h-24 rounded-full bg-primary flex items-center justify-center text-white text-3xl font-bold mb-2">
+                      E
+                  </div>
+                  <a href="#" className="text-xs text-blue-600 hover:underline">http://c5k.com</a>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold text-gray-900">Editorial Team</h3>
+                  <p className="italic text-gray-600 text-sm mb-3">Administrator</p>
+                  <p className="text-sm text-gray-700 leading-relaxed">
+                    Hello! Welcome to the announcements board. We share the latest updates, policies, and news regarding C5K Platform and journal publishing here.
+                  </p>
+                </div>
+              </div>
             </div>
-          )}
 
-          {/* Content */}
-          <div
-            className="prose prose-lg max-w-none text-gray-700 leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: ann.content }}
-          />
-
-          {/* Actions */}
-          <div className="mt-12 pt-8 border-t border-gray-200">
-            <div className="flex flex-wrap gap-4">
-              <Link
-                href="/submit"
-                className="bg-accent hover:bg-accent-dark text-white px-8 py-3 rounded-lg font-bold transition-colors"
-              >
-                Submit Your Paper
-              </Link>
-              <Link
-                href="/author-guidelines"
-                className="border border-primary text-primary hover:bg-primary/10 px-8 py-3 rounded-lg font-bold transition-colors"
-              >
-                View Author Guidelines
-              </Link>
-            </div>
-          </div>
-
-          {/* Back Link */}
-          <div className="mt-8">
-            <Link
-              href="/announcements"
-              className="inline-flex items-center text-primary hover:text-accent font-semibold"
-            >
-              ← Back to All Announcements
-            </Link>
-          </div>
-        </article>
-
-        {/* Related Announcements */}
-        {relatedAnnouncements.length > 0 && (
-          <div className="mt-12">
-            <h2 className="text-2xl font-bold text-primary mb-6">Related Announcements</h2>
-            <div className="grid md:grid-cols-2 gap-6">
-              {relatedAnnouncements.map((related) => (
-                <Link key={related.id} href={`/announcements/${related.id}`} className="block h-full">
-                  <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 border-l-4 border-accent h-full flex flex-col">
-                    <div className="mb-auto">
-                      {related.category && (
-                        <span className="inline-block bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium mb-2">
-                          {related.category}
-                        </span>
-                      )}
-                      <h3 className="text-lg font-bold text-primary mb-2 hover:text-accent transition-colors line-clamp-2">
-                        {related.title}
-                      </h3>
+            {/* Related Posts */}
+            <div className="bg-white p-6 border border-gray-200">
+              <div className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-6">Related Announcements</div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {relatedAnnouncements.map(post => (
+                  <div key={post.id} className="group">
+                    <div className="h-32 bg-gray-100 mb-3 overflow-hidden">
+                       {post.thumbnailUrl && <img src={post.thumbnailUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform"/>}
                     </div>
-                    <p className="text-sm text-gray-600 mt-2">
-                      {new Date(related.publishedAt || related.createdAt).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
+                    <h4 className="font-bold text-sm text-gray-900 group-hover:text-[#007398]">
+                      <Link href={`/announcements/${post.id}`}>{post.title}</Link>
+                    </h4>
+                    <p className="text-xs text-gray-600 mt-2 line-clamp-3">
+                       {post.excerpt || post.content.replace(/<[^>]*>?/gm, '').substring(0, 80) + '...'}
                     </p>
                   </div>
-                </Link>
-              ))}
+                ))}
+              </div>
             </div>
+
+            {/* Leave a Reply */}
+            <div className="bg-white p-8 border border-gray-200">
+               <div className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-6">Leave a Reply</div>
+               <p className="text-sm text-gray-600 mb-6">Your email address will not be published. Required fields are marked *</p>
+               <form className="space-y-4">
+                 <textarea placeholder="Your reply..." rows={5} className="w-full bg-[#f8f9fa] border border-gray-200 p-3 text-sm focus:ring-1 focus:ring-[#007398] focus:outline-none"></textarea>
+                 
+                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 mb-1">Name *</label>
+                      <input type="text" className="w-full bg-[#f8f9fa] border border-gray-200 p-2 text-sm focus:ring-1 focus:ring-[#007398] focus:outline-none"/>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 mb-1">Email *</label>
+                      <input type="email" className="w-full bg-[#f8f9fa] border border-gray-200 p-2 text-sm focus:ring-1 focus:ring-[#007398] focus:outline-none"/>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 mb-1">Website</label>
+                      <input type="url" className="w-full bg-[#f8f9fa] border border-gray-200 p-2 text-sm focus:ring-1 focus:ring-[#007398] focus:outline-none"/>
+                    </div>
+                 </div>
+
+                 <div className="flex items-center gap-2 pt-2">
+                   <input type="checkbox" id="saveInfo" className="rounded-sm"/>
+                   <label htmlFor="saveInfo" className="text-xs text-gray-700">Save my name, email, and website in this browser for the next time I comment.</label>
+                 </div>
+
+                 <button type="button" className="bg-[#007398] hover:bg-[#005a78] text-white text-xs font-bold px-6 py-3 uppercase tracking-wider transition-colors mt-4">
+                    Post Comment
+                 </button>
+               </form>
+            </div>
+            
           </div>
-        )}
+          
+          {/* Right Sidebar */}
+          <div className="w-full lg:w-1/3 space-y-6">
+            <InteractiveSidebar />
+          </div>
+        </div>
       </div>
     </div>
   );

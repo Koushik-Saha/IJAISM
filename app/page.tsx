@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 
 async function getHomepageData() {
   try {
-    const [announcements, journals, articles, mostViewedArticles, heroSlides] = await Promise.all([
+    const [announcements, journals, articles, mostViewedArticles, heroSlides, latestBlogs] = await Promise.all([
       prisma.announcement.findMany({
         where: {
           publishedAt: { not: null },
@@ -69,6 +69,13 @@ async function getHomepageData() {
         where: { isActive: true },
         orderBy: { displayOrder: "asc" },
       }),
+
+      prisma.blog.findMany({
+        where: { status: "published", deletedAt: null },
+        orderBy: { publishedAt: "desc" },
+        take: 6,
+        include: { author: true }
+      }),
     ]);
 
     const [journalsCount, articlesCount, usersCount] = await Promise.all([
@@ -89,6 +96,7 @@ async function getHomepageData() {
       })),
       mostViewedArticles,
       heroSlides,
+      latestBlogs,
       stats: { journals: journalsCount, articles: articlesCount, users: usersCount },
 
     };
@@ -99,6 +107,7 @@ async function getHomepageData() {
       journals: [],
       articles: [],
       heroSlides: [],
+      latestBlogs: [],
       stats: { journals: 12, articles: 0, users: 0 },
     };
   }
@@ -123,6 +132,7 @@ async function getHomepageSections() {
         { type: 'journals', id: 'default-journals' },
         { type: 'latest_articles', id: 'default-articles' },
         { type: 'most_viewed', id: 'default-viewed' },
+        { type: 'latest_blogs', id: 'default-blogs' },
         { type: 'newsletter', id: 'default-newsletter' },
         { type: 'stats', id: 'default-stats' },
       ];
@@ -137,6 +147,7 @@ async function getHomepageSections() {
       { type: 'journals', id: 'default-journals' },
       { type: 'latest_articles', id: 'default-articles' },
       { type: 'most_viewed', id: 'default-viewed' },
+      { type: 'latest_blogs', id: 'default-blogs' },
       { type: 'newsletter', id: 'default-newsletter' },
       { type: 'stats', id: 'default-stats' },
     ];
@@ -144,7 +155,7 @@ async function getHomepageSections() {
 }
 
 export default async function HomePage() {
-  const { announcements, journals, articles, mostViewedArticles, heroSlides, stats } = await getHomepageData();
+  const { announcements, journals, articles, mostViewedArticles, heroSlides, latestBlogs, stats } = await getHomepageData();
   
   // Safely fix any broken Unsplash images coming from DB mock data to prevent next/image 404 errors
   const safeHeroSlides = heroSlides.map(slide => ({
@@ -305,6 +316,48 @@ export default async function HomePage() {
                     No articles to display.
                   </div>
                 )}
+              </div>
+            </div>
+          </section>
+        );
+
+      case 'latest_blogs':
+        return (
+          <section key={section.id} className="py-16 bg-gray-50 border-t border-gray-200">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <h2 className="text-3xl font-bold mb-8 text-center">{section.title || 'Latest from Our Blog'}</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {latestBlogs && latestBlogs.length > 0 ? (
+                  latestBlogs.map((blog: any) => (
+                    <Card key={blog.id}>
+                      {blog.featuredImageUrl ? (
+                        <img src={blog.featuredImageUrl} alt={blog.title} className="h-40 w-full object-cover rounded mb-4" />
+                      ) : (
+                        <div className="h-40 bg-gray-200 rounded mb-4 flex items-center justify-center">
+                          <span className="text-gray-400">Image Placeholder</span>
+                        </div>
+                      )}
+                      
+                      <h3 className="text-lg font-bold mb-2">{blog.title}</h3>
+                      <p className="text-gray-600 mb-4 line-clamp-3">
+                        {blog.excerpt || blog.content.replace(/<[^>]*>?/gm, '').substring(0, 120) + '...'}
+                      </p>
+                      
+                      <Link href={`/blogs/${blog.slug}`} className="text-primary hover:text-primary-dark font-semibold">
+                        Read More →
+                      </Link>
+                    </Card>
+                  ))
+                ) : (
+                  <div className="col-span-3 text-center text-gray-500 py-8">
+                    No articles published yet.
+                  </div>
+                )}
+              </div>
+              <div className="text-center mt-10">
+                <Link href="/blogs" className="btn-secondary border-gray-300 text-gray-700 font-semibold px-8 py-3">
+                  Browse All Blogs
+                </Link>
               </div>
             </div>
           </section>

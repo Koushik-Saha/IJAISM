@@ -67,8 +67,8 @@ export default function DissertationsPage() {
                 headers: { Authorization: `Bearer ${token}` }
             });
             const data = await res.json();
-            setDissertations(data.dissertations || []);
-            setTotalPages(data.pagination?.pages || 1);
+            setDissertations(data.data?.dissertations || []);
+            setTotalPages(data.data?.pagination?.pages || 1);
         } catch (e) {
             toast.error("Failed to load dissertations");
         } finally {

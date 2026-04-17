@@ -297,8 +297,8 @@ export default function AdminDashboard() {
                   href="/editor/dissertations"
                   className="border-2 border-gray-200 rounded-lg p-4 hover:border-primary transition-colors"
                 >
-                  <h3 className="font-bold text-gray-900 mb-2">🎓 Dissertations</h3>
-                  <p className="text-sm text-gray-600">Manage dissertations</p>
+                  <h3 className="font-bold text-gray-900 mb-2">🎓 Thesis</h3>
+                  <p className="text-sm text-gray-600">Manage thesis submissions</p>
                 </Link>
                 <Link
                   href="/editor/books"

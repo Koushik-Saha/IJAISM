@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import RichTextEditor from '@/components/ui/RichTextEditor';
 
 export default function NewBlogPage() {
     const router = useRouter();
@@ -105,13 +106,10 @@ export default function NewBlogPage() {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Content (Markdown supported)</label>
-                        <textarea
-                            rows={15}
-                            required
+                        <label className="block text-sm font-medium text-gray-700">Content</label>
+                        <RichTextEditor 
                             value={formData.content}
-                            onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary p-3 border font-mono"
+                            onChange={(value) => setFormData({ ...formData, content: value })}
                         />
                     </div>
 

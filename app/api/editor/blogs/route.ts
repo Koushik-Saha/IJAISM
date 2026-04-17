@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
             select: { role: true },
         });
 
-        if (!user || !['admin', 'editor', 'super_admin'].includes(user.role)) {
+        if (!user || !['admin', 'editor', 'super_admin', 'mother_admin'].includes(user.role)) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
             select: { role: true },
         });
 
-        if (!user || !['admin', 'editor', 'super_admin'].includes(user.role)) {
+        if (!user || !['admin', 'editor', 'super_admin', 'mother_admin'].includes(user.role)) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 

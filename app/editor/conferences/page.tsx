@@ -55,8 +55,8 @@ export default function ConferencesPage() {
             const token = localStorage.getItem('token');
             const res = await fetch(`/api/editor/conferences?page=${page}&limit=10`, { headers: { Authorization: `Bearer ${token}` } });
             const data = await res.json();
-            setConferences(data.conferences || []);
-            setTotalPages(data.pagination?.pages || 1);
+            setConferences(data.data?.conferences || []);
+            setTotalPages(data.data?.pagination?.pages || 1);
         } catch (e) { toast.error("Failed to load conferences"); }
         finally { setIsLoading(false); }
     };

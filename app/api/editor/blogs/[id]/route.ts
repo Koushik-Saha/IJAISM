@@ -25,7 +25,7 @@ export async function GET(
             select: { role: true },
         });
 
-        if (!user || !['admin', 'editor', 'super_admin'].includes(user.role)) {
+        if (!user || !['admin', 'editor', 'super_admin', 'mother_admin'].includes(user.role)) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
@@ -78,7 +78,7 @@ export async function PATCH(
             select: { role: true },
         });
 
-        if (!user || !['admin', 'editor', 'super_admin'].includes(user.role)) {
+        if (!user || !['admin', 'editor', 'super_admin', 'mother_admin'].includes(user.role)) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
@@ -157,7 +157,7 @@ export async function DELETE(
             select: { role: true },
         });
 
-        if (!user || !['admin', 'editor', 'super_admin'].includes(user.role)) {
+        if (!user || !['admin', 'editor', 'super_admin', 'mother_admin'].includes(user.role)) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 

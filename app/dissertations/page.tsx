@@ -36,7 +36,7 @@ export default async function DissertationsPage(props: {
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-primary to-blue-800 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Dissertation/Thesis</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">Thesis</h1>
           <p className="text-xl md:text-2xl text-gray-100 max-w-3xl">
             Explore groundbreaking doctoral research from leading universities worldwide
           </p>

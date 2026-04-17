@@ -219,13 +219,16 @@ export default function Header() {
                 Articles
               </Link>
               <Link href="/dissertations" className="px-2 py-2 rounded-full text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors whitespace-nowrap">
-                Dissertation/Thesis
+                Thesis
               </Link>
               <Link href="/books" className="px-2 py-2 rounded-full text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors whitespace-nowrap">
                 Books
               </Link>
               <Link href="/announcements" className="px-2 py-2 rounded-full text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors whitespace-nowrap">
                 Announcements
+              </Link>
+              <Link href="/blogs" className="px-2 py-2 rounded-full text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors whitespace-nowrap">
+                Blog
               </Link>
               <Link href="/submit" onClick={handleSubmitClick} className="px-2 py-2 rounded-full text-sm font-medium text-primary hover:bg-primary/5 transition-colors whitespace-nowrap">
                 Submit
@@ -316,7 +319,7 @@ export default function Header() {
                             </MenuItem>
                             <MenuItem>
                               <Link href="/dissertations" className="group flex items-center px-4 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors">
-                                Dissertation/Thesis
+                                Thesis
                               </Link>
                             </MenuItem>
                             <MenuItem>
@@ -327,6 +330,11 @@ export default function Header() {
                             <MenuItem>
                               <Link href="/announcements" className="group flex items-center px-4 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors">
                                 Announcements
+                              </Link>
+                            </MenuItem>
+                            <MenuItem>
+                              <Link href="/blogs" className="group flex items-center px-4 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors">
+                                Blog
                               </Link>
                             </MenuItem>
                             <MenuItem>
@@ -488,7 +496,7 @@ export default function Header() {
                 className="text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50 px-3 py-2 rounded transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Dissertation/Thesis
+                Thesis
               </Link>
               <Link
                 href="/books"
@@ -503,6 +511,13 @@ export default function Header() {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Announcements
+              </Link>
+              <Link
+                href="/blogs"
+                className="text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50 px-3 py-2 rounded transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Blog
               </Link>
 
               {/* Divider */}

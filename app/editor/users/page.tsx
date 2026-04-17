@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Link from "next/link";
+import { ExternalLink } from "lucide-react";
 
 interface User {
   id: string;
@@ -343,6 +344,13 @@ export default function AdminUsersPage() {
                       >
                         {user.isActive ? 'Deactivate' : 'Activate'}
                       </button>
+                      <Link
+                        href={`/author/${user.id}`}
+                        target="_blank"
+                        className="inline-flex items-center gap-1 text-sm px-3 py-1 rounded bg-blue-50 text-blue-700 hover:bg-blue-100 ml-2 transition-colors"
+                      >
+                        <ExternalLink size={14} /> Profile
+                      </Link>
                     </td>
                   </tr>
                 ))}

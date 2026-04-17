@@ -3,6 +3,7 @@
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import RichTextEditor from '@/components/ui/RichTextEditor';
 
 export default function EditBlogPage({ params }: { params: Promise<{ id: string }> }) {
     // Unwrap params using safe method - React.use() or await in useEffect is tricky with rules of hooks.
@@ -136,13 +137,10 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Content (Markdown supported)</label>
-                        <textarea
-                            rows={15}
-                            required
+                        <label className="block text-sm font-medium text-gray-700">Content</label>
+                        <RichTextEditor 
                             value={formData.content}
-                            onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary p-3 border font-mono"
+                            onChange={(value) => setFormData({ ...formData, content: value })}
                         />
                     </div>
 

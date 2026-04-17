@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Link from "next/link";
+import RichTextEditor from "@/components/ui/RichTextEditor";
 
 interface Announcement {
   id: string;
@@ -207,12 +208,9 @@ export default function AdminAnnouncementsPage() {
               </div>
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">Content *</label>
-                <textarea
-                  required
-                  rows={8}
+                <RichTextEditor 
                   value={formData.content}
-                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  onChange={(value) => setFormData({ ...formData, content: value })}
                 />
               </div>
               <div>

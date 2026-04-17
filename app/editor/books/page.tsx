@@ -56,8 +56,8 @@ export default function BooksPage() {
             const token = localStorage.getItem('token');
             const res = await fetch(`/api/editor/books?page=${page}&limit=10`, { headers: { Authorization: `Bearer ${token}` } });
             const data = await res.json();
-            setBooks(data.books || []);
-            setTotalPages(data.pagination?.pages || 1);
+            setBooks(data.data?.books || []);
+            setTotalPages(data.data?.pagination?.pages || 1);
         } catch (e) { toast.error("Failed to load books"); }
         finally { setIsLoading(false); }
     };

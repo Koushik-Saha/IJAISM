@@ -39,9 +39,9 @@ export default async function ReadArticlePage({ params }: { params: Promise<{ id
                 },
             },
             author: {
-                select: { name: true, university: true, affiliation: true, email: true },
+                select: { id: true, name: true, university: true, affiliation: true, email: true },
             },
-            coAuthors: { orderBy: { order: "asc" } },
+            coAuthors: { select: { id: true, name: true, university: true, email: true, isMain: true, userId: true }, orderBy: { order: "asc" } },
         },
     });
 
@@ -69,15 +69,17 @@ export default async function ReadArticlePage({ params }: { params: Promise<{ id
     // Aggregate authors
     let allAuthors = [
         {
+            id: article.author.id,
             name: article.author.name || "Unknown",
             affiliation: article.author.affiliation || article.author.university || null,
             email: article.author.email,
             isMain: true,
         },
         ...article.coAuthors.map((ca) => ({
+            id: ca.userId || null,
             name: ca.name,
-            affiliation: (ca as any).university || null,
-            email: (ca as any).email || null,
+            affiliation: ca.university || null,
+            email: ca.email || null,
             isMain: ca.isMain,
         })),
     ];

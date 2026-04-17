@@ -36,7 +36,7 @@ export default async function DissertationDetailPage({ params }: { params: Promi
           <div className="flex items-center text-sm text-gray-600">
             <Link href="/" className="hover:text-primary">Home</Link>
             <span className="mx-2">/</span>
-            <Link href="/dissertations" className="hover:text-primary">Dissertation/Thesis</Link>
+            <Link href="/dissertations" className="hover:text-primary">Thesis</Link>
             <span className="mx-2">/</span>
             <span className="text-gray-900 truncate">{dissertation.title}</span>
           </div>

@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
       select: { role: true },
     });
 
-    if (!user || !['admin', 'editor', 'super_admin'].includes(user.role)) {
+    if (!user || !['admin', 'editor', 'super_admin', 'mother_admin'].includes(user.role)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
       select: { role: true },
     });
 
-    if (!user || !['admin', 'editor', 'super_admin'].includes(user.role)) {
+    if (!user || !['admin', 'editor', 'super_admin', 'mother_admin'].includes(user.role)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
       data: {
         title,
         content,
-        excerpt: excerpt || content.substring(0, 200),
+        excerpt: excerpt || content.replace(/<[^>]*>?/gm, '').substring(0, 200),
         thumbnailUrl,
         category: category || 'news',
         priority: priority || 0,
@@ -125,7 +125,7 @@ export async function PATCH(req: NextRequest) {
       select: { role: true },
     });
 
-    if (!user || !['admin', 'editor', 'super_admin'].includes(user.role)) {
+    if (!user || !['admin', 'editor', 'super_admin', 'mother_admin'].includes(user.role)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
@@ -185,7 +185,7 @@ export async function DELETE(req: NextRequest) {
       select: { role: true },
     });
 
-    if (!user || !['admin', 'editor', 'super_admin'].includes(user.role)) {
+    if (!user || !['admin', 'editor', 'super_admin', 'mother_admin'].includes(user.role)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 

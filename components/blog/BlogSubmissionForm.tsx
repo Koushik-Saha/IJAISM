@@ -29,8 +29,10 @@ export default function BlogSubmissionForm() {
   } = useForm<BlogSubmissionInput>({
     resolver: zodResolver(blogSubmissionSchema),
     defaultValues: {
+      title: '',
       content: '',
-      status: 'submitted',
+      category: '',
+      excerpt: '',
     },
   });
 

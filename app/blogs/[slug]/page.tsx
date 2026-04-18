@@ -21,6 +21,8 @@ export default async function BlogDetailsPage({ params }: { params: Promise<{ sl
     }
   });
 
+  if (!blog) return notFound();
+
   // Handle preview for admins or restrict to published for public
   if (blog.status !== 'published') {
       // In a real app we might check if the user is an admin/author for preview

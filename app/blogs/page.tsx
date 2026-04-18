@@ -29,11 +29,24 @@ export default async function BlogsPage({ searchParams }: { searchParams: Promis
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-primary to-blue-800 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">C5K Blog</h1>
-          <p className="text-xl md:text-2xl text-gray-100 max-w-3xl">
-            {q ? `Search Results for "${q}"` : 'Explore insights, research, and thought leadership from our community'}
-          </p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-8">
+          <div className="flex-1">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">C5K Blog</h1>
+            <p className="text-xl md:text-2xl text-gray-100 max-w-3xl">
+              {q ? `Search Results for "${q}"` : 'Explore insights, research, and thought leadership from our community'}
+            </p>
+          </div>
+          <div className="flex-shrink-0">
+            <Link
+              href="/blogs/submit"
+              className="inline-flex items-center px-8 py-4 bg-accent text-white font-bold rounded-xl shadow-lg border-2 border-accent hover:bg-transparent hover:border-white transition-all transform hover:-translate-y-1 active:scale-95 group"
+            >
+              <span>Submit Your Blog</span>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+            </Link>
+          </div>
         </div>
       </div>
 

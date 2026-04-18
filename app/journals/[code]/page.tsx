@@ -72,7 +72,7 @@ export default async function JournalDetailPage({ params }: { params: Promise<{ 
                   </Link>
                   {(() => {
                     let displayName = article.author.name;
-                    if (displayName === 'The Mother Admin') {
+                    if (displayName === 'C5K Executive Administrator') {
                         displayName = article.coAuthors?.[0]?.name || "Unknown";
                     }
                     if (displayName !== "Unknown") {

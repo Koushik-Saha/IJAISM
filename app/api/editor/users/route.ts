@@ -186,7 +186,7 @@ export async function PATCH(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { userId, role, isActive } = body;
+    const { userId, role, isActive, name, email, university, bio, profileImageUrl } = body;
 
     // Target User Check
     const targetUser = await prisma.user.findUnique({ where: { id: userId } });
@@ -201,17 +201,15 @@ export async function PATCH(req: NextRequest) {
     }
 
     if (requester.role === ROLES.SUPER_ADMIN) {
-      // Super Admin cannot modify Mother Admin
+      // Super Admin cannot modify Executive Board Admin
       if (targetUser.role === ROLES.MOTHER_ADMIN) {
-        return NextResponse.json({ error: 'Cannot modify Mother Admin' }, { status: 403 });
-      }
-      // NEW: Super Admin cannot modify other Super Admins
-      if (targetUser.role === ROLES.SUPER_ADMIN && targetUser.id !== requester.id) {
-        return NextResponse.json({ error: 'Cannot modify other Super Admins' }, { status: 403 });
+        return NextResponse.json({ error: 'Cannot modify Executive Board Admin' }, { status: 403 });
       }
     }
 
-    // NEW: Prevent changing own role (Self-Demotion/Promotion Protection)
+    // Executive Board Admin can modify anyone.
+
+    // Prevent changing own role (Self-Demotion/Promotion Protection)
     if (targetUser.id === requester.id && role !== undefined && role !== requester.role) {
       return NextResponse.json({ error: 'Cannot change your own admin role' }, { status: 400 });
     }
@@ -225,6 +223,20 @@ export async function PATCH(req: NextRequest) {
       updateData.role = role;
     }
     if (isActive !== undefined) updateData.isActive = isActive;
+    
+    // Additional fields for admins to edit
+    if (name !== undefined) updateData.name = name;
+    if (email !== undefined) {
+      // Check if email already exists
+      if (email !== targetUser.email) {
+        const existing = await prisma.user.findUnique({ where: { email } });
+        if (existing) return NextResponse.json({ error: 'Email already in use' }, { status: 409 });
+        updateData.email = email;
+      }
+    }
+    if (university !== undefined) updateData.university = university;
+    if (bio !== undefined) updateData.bio = bio;
+    if (profileImageUrl !== undefined) updateData.profileImageUrl = profileImageUrl;
 
     const updatedUser = await prisma.user.update({
       where: { id: userId },

@@ -48,6 +48,7 @@ model User {
   notifications           Notification[]
   passwordResetTokens     PasswordResetToken[]
   reviews                 Review[]
+  blogReviews             BlogReview[]
   managedBy               User?                    @relation("UserHierarchy", fields: [managedById], references: [id])
   subordinates            User[]                   @relation("UserHierarchy")
   newsletterSubscription  NewsletterSubscriber?
@@ -368,8 +369,10 @@ model Blog {
   content          String
   excerpt          String?
   featuredImageUrl String?
+  category         String?
   authorId         String
-  status           String    @default("draft")
+  status           String    @default("draft") // draft, submitted, under_review, revision, accepted, published, rejected
+  reviewerComments String?
   publishedAt      DateTime?
   viewCount        Int       @default(0)
   createdAt        DateTime  @default(now())
@@ -377,10 +380,49 @@ model Blog {
   deletedAt        DateTime?
   author           User      @relation(fields: [authorId], references: [id])
   comments         Comment[]
+  reviews          BlogReview[]
+  reviewerInvitations BlogReviewerInvitation[]
 
   @@index([slug])
   @@index([status])
   @@index([publishedAt])
+}
+
+model BlogReview {
+  id                 String    @id @default(uuid())
+  blogId             String
+  reviewerId         String
+  reviewerNumber     Int
+  status             String    @default("pending") // pending, completed
+  decision           String?   // accept, revise, reject
+  commentsToAdmin    String?
+  commentsToAuthor   String?
+  submittedAt        DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  blog               Blog      @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  reviewer           User      @relation(fields: [reviewerId], references: [id])
+
+  @@unique([blogId, reviewerNumber])
+  @@index([blogId])
+  @@index([reviewerId])
+  @@index([status])
+}
+
+model BlogReviewerInvitation {
+  id        String   @id @default(uuid())
+  email     String
+  name      String
+  blogId    String
+  token     String   @unique
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  blog      Blog     @relation(fields: [blogId], references: [id], onDelete: Cascade)
+
+  @@index([email])
+  @@index([token])
+  @@index([blogId])
 }
 
 model Announcement {

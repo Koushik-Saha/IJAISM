@@ -50,8 +50,15 @@ export default async function CurrentIssuePage({
                         <div>
                             <div className="flex flex-col md:flex-row gap-8 mb-8">
                                 {currentIssue.coverUrl && (
-                                    <div className="w-48 flex-shrink-0 shadow-lg border">
-                                        <img src={currentIssue.coverUrl} alt={`Cover for Vol ${currentIssue.volume}`} className="w-full" />
+                                    <div className="w-48 flex-shrink-0 shadow-lg border bg-gray-50 flex items-center justify-center">
+                                        <img 
+                                            src={currentIssue.coverUrl} 
+                                            alt={`Cover for Vol ${currentIssue.volume}`} 
+                                            className="w-full" 
+                                            onError={(e) => {
+                                                (e.target as HTMLImageElement).parentElement?.remove();
+                                            }}
+                                        />
                                     </div>
                                 )}
                                 <div>

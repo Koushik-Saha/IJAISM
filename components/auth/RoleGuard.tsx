@@ -34,7 +34,7 @@ export default function RoleGuard({ children, allowedRoles }: RoleGuardProps) {
             let isAllowed = allowedRoles.includes(userRole);
 
             // Inherit permissions
-            if (userRole === 'mother_admin') isAllowed = true; // Mother Admin can access everything
+            if (userRole === 'mother_admin') isAllowed = true; // Executive Board Admin can access everything
             if (userRole === 'super_admin' && allowedRoles.includes('editor')) isAllowed = true; // Super Admin can access Editor pages
 
             if (isAllowed) {

@@ -29,6 +29,10 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.s3.us-east-2.amazonaws.com',
       }
     ],
   },
@@ -74,7 +78,7 @@ const nextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com https://va.vercel-scripts.com https://vercel.live https://*.paypal.com https://*.paypalobjects.com; style-src 'self' 'unsafe-inline' https://*.paypal.com; img-src 'self' blob: data: https://*.public.blob.vercel-storage.com https://placehold.co https://c5k.com https://www.c5k.com https://picsum.photos https://fastly.picsum.photos https://images.unsplash.com https://*.paypal.com https://*.paypalobjects.com; font-src 'self' data: https://*.paypalobjects.com; connect-src 'self' https://api.stripe.com https://*.sentry.io https://*.vercel-storage.com https://*.paypal.com https://*.paypalobjects.com; frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://*.paypal.com https://*.paypalobjects.com; worker-src 'self' blob:; object-src 'self'; base-uri 'self';"
+            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com https://va.vercel-scripts.com https://vercel.live https://*.paypal.com https://*.paypalobjects.com; style-src 'self' 'unsafe-inline' https://*.paypal.com; img-src 'self' blob: data: https://*.public.blob.vercel-storage.com https://placehold.co https://c5k.com https://www.c5k.com https://picsum.photos https://fastly.picsum.photos https://images.unsplash.com https://*.s3.us-east-2.amazonaws.com https://*.paypal.com https://*.paypalobjects.com; font-src 'self' data: https://*.paypalobjects.com; connect-src 'self' https://api.stripe.com https://*.sentry.io https://*.vercel-storage.com https://*.paypal.com https://*.paypalobjects.com; frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://*.paypal.com https://*.paypalobjects.com; worker-src 'self' blob:; object-src 'self'; base-uri 'self';"
           }
         ],
       },

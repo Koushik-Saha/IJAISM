@@ -42,7 +42,7 @@ export default function AnalyticsPage() {
 
             if (!response.ok) {
                 if (response.status === 403) {
-                    setError("Access Denied: Super Admin or Mother Admin only.");
+                    setError("Access Denied: Super Admin or Executive Board Admin only.");
                     return;
                 }
                 throw new Error("Failed to fetch analytics");

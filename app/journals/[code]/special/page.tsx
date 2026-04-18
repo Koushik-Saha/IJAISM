@@ -57,7 +57,21 @@ export default async function SpecialIssuesPage({ params }: { params: Promise<{ 
                                     {/* Visual Thumb */}
                                     <div className="w-full md:w-48 flex-shrink-0 bg-gray-100 aspect-[3/4] flex items-center justify-center border text-gray-400 font-bold relative overflow-hidden shadow-sm">
                                         {issue.coverUrl ? (
-                                            <img src={issue.coverUrl} alt={issue.title || "Special Issue"} className="w-full h-full object-cover" />
+                                            <img 
+                                                src={issue.coverUrl} 
+                                                alt={issue.title || "Special Issue"} 
+                                                className="w-full h-full object-cover" 
+                                                onError={(e) => {
+                                                    (e.target as HTMLImageElement).style.display = 'none';
+                                                    const parent = (e.target as HTMLImageElement).parentElement;
+                                                    if (parent) {
+                                                        const fallback = document.createElement('div');
+                                                        fallback.className = 'text-center p-2';
+                                                        fallback.innerHTML = '<span class="block text-2xl mb-1">SI</span><span class="text-xs uppercase">Special Issue</span>';
+                                                        parent.appendChild(fallback);
+                                                    }
+                                                }}
+                                            />
                                         ) : (
                                             <div className="text-center p-2">
                                                 <span className="block text-2xl mb-1">SI</span>

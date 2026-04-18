@@ -14,14 +14,14 @@ async function main() {
     const password = 'Password123!';
     const hashedPassword = await hashPassword(password);
 
-    // 1. Create Mother Admin
-    const motherEmail = 'mother.admin@c5k.com';
+    // 1. Create Executive Administrator
+    const motherEmail = 'admin.central@c5k.com';
     let motherAdmin = await prisma.user.findUnique({ where: { email: motherEmail } });
 
     if (!motherAdmin) {
         motherAdmin = await prisma.user.create({
             data: {
-                name: 'The Mother Admin',
+                name: 'C5K Executive Administrator',
                 email: motherEmail,
                 passwordHash: hashedPassword,
                 role: 'mother_admin',
@@ -29,14 +29,14 @@ async function main() {
                 isEmailVerified: true
             }
         });
-        console.log(`✅ Created Mother Admin: ${motherEmail} / ${password}`);
+        console.log(`✅ Created Executive Administrator: ${motherEmail} / ${password}`);
     } else {
         // Ensure role is correct if existing
         if (motherAdmin.role !== 'mother_admin') {
             await prisma.user.update({ where: { id: motherAdmin.id }, data: { role: 'mother_admin' } });
-            console.log(`🔄 Updated existing user to Mother Admin: ${motherEmail}`);
+            console.log(`🔄 Updated existing user to Executive Administrator: ${motherEmail}`);
         } else {
-            console.log(`ℹ️ Mother Admin already exists: ${motherEmail}`);
+            console.log(`ℹ️ Executive Administrator already exists: ${motherEmail}`);
         }
     }
 
@@ -66,7 +66,7 @@ async function main() {
                     role: 'editor',
                     university: 'C5K Academic Body',
                     isEmailVerified: true,
-                    managedById: motherAdmin.id // Managed by Mother Admin
+                    managedById: motherAdmin.id // Managed by Executive Administrator
                 }
             });
             console.log(`   ✅ Created Editor: ${editorEmail}`);
@@ -88,7 +88,7 @@ async function main() {
     }
 
     console.log('\n\n================ CHECKERBOARD ================');
-    console.log(`🔑 Mother Admin: ${motherEmail}`);
+    console.log(`🔑 Executive Administrator: ${motherEmail}`);
     console.log(`🔑 Password: ${password}`);
     console.log('----------------------------------------------');
     if (credentials.length > 0) {

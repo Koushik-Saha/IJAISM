@@ -256,7 +256,7 @@ export default async function HomePage() {
                         </span>
                       </div>
                       <h3 className="text-lg font-bold mb-2">{article.title}</h3>
-                      {article.authors !== 'The Mother Admin' && (
+                      {article.authors !== 'C5K Executive Administrator' && (
                         <p className="text-sm text-gray-600 mb-2">{article.authors}</p>
                       )}
                       <p className="text-sm text-gray-700 mb-4 line-clamp-3">{article.abstract || 'No abstract available.'}</p>
@@ -302,7 +302,7 @@ export default async function HomePage() {
                           {article.title}
                         </Link>
                       </h3>
-                      {article.author.name !== 'The Mother Admin' && (
+                      {article.author.name !== 'C5K Executive Administrator' && (
                         <p className="text-sm text-gray-600 mb-2">By {article.author.name}</p>
                       )}
                       <p className="text-sm text-gray-700 mb-4 line-clamp-2">{article.abstract || 'No abstract available.'}</p>

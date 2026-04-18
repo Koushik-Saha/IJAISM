@@ -255,7 +255,7 @@ export default function AdminDashboard() {
               <p className="text-sm text-gray-600">Volumes and issues</p>
             </Link>
 
-            {/* Super Admin / Mother Admin Only Actions */}
+            {/* Super Admin / Executive Board Admin Only Actions */}
             {currentUser && ['super_admin', 'mother_admin'].includes(currentUser.role) && (
               <>
                 <Link

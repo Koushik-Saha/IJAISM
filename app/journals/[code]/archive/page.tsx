@@ -58,10 +58,23 @@ export default async function ArchivePage({ params }: { params: Promise<{ code: 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         {issuesByYear[year].map(issue => (
                                             <div key={issue.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow bg-gray-50 flex gap-4">
-                                                {/* Tiny Thumb */}
-                                                <div className="w-16 h-20 bg-gray-200 flex-shrink-0 flex items-center justify-center text-xs text-gray-400 font-bold border">
+                                                {/* Issue Cover with Fallback */}
+                                                <div className="w-16 h-20 bg-gray-200 flex-shrink-0 flex items-center justify-center text-xs text-gray-400 font-bold border overflow-hidden relative group">
                                                     {issue.coverUrl ? (
-                                                        <img src={issue.coverUrl} className="w-full h-full object-cover" alt="" />
+                                                        <img 
+                                                            src={issue.coverUrl} 
+                                                            className="w-full h-full object-cover" 
+                                                            alt={`Cover for Vol ${issue.volume}, Issue ${issue.issue}`}
+                                                            onError={(e) => {
+                                                                (e.target as HTMLImageElement).style.display = 'none';
+                                                                const parent = (e.target as HTMLImageElement).parentElement;
+                                                                if (parent) {
+                                                                    const fallback = document.createElement('span');
+                                                                    fallback.textContent = `VOL ${issue.volume}`;
+                                                                    parent.appendChild(fallback);
+                                                                }
+                                                            }}
+                                                        />
                                                     ) : (
                                                         <span>VOL {issue.volume}</span>
                                                     )}
@@ -72,7 +85,7 @@ export default async function ArchivePage({ params }: { params: Promise<{ code: 
                                                     </Link>
                                                     {issue.title && <div className="text-sm font-medium text-gray-600 mt-1">{issue.title}</div>}
                                                     <div className="text-xs text-gray-500 mt-2">
-                                                        {issue._count.articles} Articles • {new Date(issue.publishedAt).toLocaleDateString(undefined, { month: 'long' })}
+                                                        {issue._count.articles} Articles • {new Date(issue.publishedAt).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
                                                     </div>
                                                 </div>
                                             </div>

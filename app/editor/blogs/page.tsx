@@ -9,23 +9,28 @@ interface Blog {
     id: string;
     title: string;
     status: string;
+    createdAt: string;
     publishedAt: string | null;
     author: {
         name: string;
+        email: string;
     };
     viewCount: number;
+    category?: string;
 }
 
 export default function BlogsPage() {
     const router = useRouter();
     const [blogs, setBlogs] = useState<Blog[]>([]);
     const [loading, setLoading] = useState(true);
+    const [filter, setFilter] = useState('all');
 
     useEffect(() => {
         fetchBlogs();
-    }, []);
+    }, [filter]);
 
     const fetchBlogs = async () => {
+        setLoading(true);
         try {
             const token = localStorage.getItem('token');
             if (!token) {
@@ -33,7 +38,8 @@ export default function BlogsPage() {
                 return;
             }
 
-            const response = await fetch('/api/editor/blogs', {
+            const url = filter === 'all' ? '/api/editor/blogs' : `/api/editor/blogs?status=${filter}`;
+            const response = await fetch(url, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -50,7 +56,7 @@ export default function BlogsPage() {
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this post?')) return;
+        if (!confirm('Are you sure you want to delete this post? This action cannot be undone.')) return;
 
         try {
             const token = localStorage.getItem('token');
@@ -74,101 +80,160 @@ export default function BlogsPage() {
         }
     };
 
-    if (loading) {
-        return <div className="p-8 text-center">Loading blogs...</div>;
-    }
+    const getStatusBadge = (status: string) => {
+        const badges: Record<string, string> = {
+            draft: 'bg-gray-100 text-gray-800 border-gray-200',
+            submitted: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+            under_review: 'bg-blue-100 text-blue-800 border-blue-200',
+            accepted: 'bg-green-100 text-green-800 border-green-200',
+            published: 'bg-green-500 text-white border-green-600',
+            rejected: 'bg-red-100 text-red-800 border-red-200',
+            revision_requested: 'bg-orange-100 text-orange-800 border-orange-200',
+        };
+        return badges[status] || 'bg-gray-100 text-gray-800 border-gray-200';
+    };
+
+    const formatStatus = (status: string) => {
+        return status.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    };
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="flex justify-between items-center mb-8">
-                <h1 className="text-3xl font-bold text-gray-900">Blog Management</h1>
-                <Link
-                    href="/editor/blogs/new"
-                    className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
-                >
-                    Create New Post
-                </Link>
+        <div className="min-h-screen bg-gray-50 pb-12">
+            <div className="bg-white border-b sticky top-0 z-10">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                    <div className="flex flex-col md:flex-row justify-between items-md-center gap-4">
+                        <div>
+                            <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Blog Management</h1>
+                            <p className="text-gray-500 mt-1">Review, assign, and publish community insights.</p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <Link
+                                href="/editor/blogs/new"
+                                className="bg-primary text-white px-6 py-2.5 rounded-xl font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all transform hover:-translate-y-0.5 active:scale-95 flex items-center gap-2"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                </svg>
+                                <span>Create Post</span>
+                            </Link>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div className="bg-white shadow rounded-lg overflow-hidden">
-                <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                        <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Title
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Status
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Author
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Views
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Date
-                            </th>
-                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Actions
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                        {blogs.length === 0 ? (
-                            <tr>
-                                <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
-                                    No blog posts found. Create your first one!
-                                </td>
-                            </tr>
-                        ) : (
-                            blogs.map((blog) => (
-                                <tr key={blog.id}>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm font-medium text-gray-900">
-                                            {blog.title}
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <span
-                                            className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${blog.status === 'published'
-                                                    ? 'bg-green-100 text-green-800'
-                                                    : 'bg-yellow-100 text-yellow-800'
-                                                }`}
-                                        >
-                                            {blog.status}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {blog.author.name}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {blog.viewCount}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {blog.publishedAt
-                                            ? new Date(blog.publishedAt).toLocaleDateString()
-                                            : '-'}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <Link
-                                            href={`/editor/blogs/${blog.id}`}
-                                            className="text-primary hover:text-primary/80 mr-4"
-                                        >
-                                            Edit
-                                        </Link>
-                                        <button
-                                            onClick={() => handleDelete(blog.id)}
-                                            className="text-red-600 hover:text-red-900"
-                                        >
-                                            Delete
-                                        </button>
-                                    </td>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {/* Filters */}
+                <div className="flex flex-wrap gap-2 mb-8 bg-white p-2 rounded-2xl shadow-sm border border-gray-100 w-fit">
+                    {['all', 'submitted', 'under_review', 'accepted', 'published', 'rejected'].map((s) => (
+                        <button
+                            key={s}
+                            onClick={() => setFilter(s)}
+                            className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                                filter === s
+                                    ? 'bg-primary text-white shadow-md'
+                                    : 'text-gray-600 hover:bg-gray-50'
+                            }`}
+                        >
+                            {formatStatus(s)}
+                        </button>
+                    ))}
+                </div>
+
+                <div className="bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100">
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-widest">Blog Post</th>
+                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-widest">Status</th>
+                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-widest">Author</th>
+                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-widest">Metrics</th>
+                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-widest">Submitted</th>
+                                    <th className="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-widest">Actions</th>
                                 </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                                {loading ? (
+                                    <tr>
+                                        <td colSpan={6} className="px-6 py-20 text-center">
+                                            <div className="flex flex-col items-center gap-3">
+                                                <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                                                <p className="text-gray-500 font-medium">Loading submissions...</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ) : blogs.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={6} className="px-6 py-20 text-center">
+                                            <div className="flex flex-col items-center gap-3">
+                                                <div className="text-4xl">📄</div>
+                                                <h3 className="text-lg font-bold text-gray-900">No blog posts found</h3>
+                                                <p className="text-gray-500">There are no submissions matching the current filter.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    blogs.map((blog) => (
+                                        <tr key={blog.id} className="hover:bg-gray-50 transition-colors">
+                                            <td className="px-6 py-5">
+                                                <div className="flex flex-col">
+                                                    <span className="text-sm font-bold text-gray-900 line-clamp-1">{blog.title}</span>
+                                                    <span className="text-xs text-gray-400 mt-0.5">{blog.category || 'General'}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-5 whitespace-nowrap">
+                                                <span className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full border ${getStatusBadge(blog.status)}`}>
+                                                    {formatStatus(blog.status)}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-5 whitespace-nowrap">
+                                                <div className="flex flex-col">
+                                                    <span className="text-sm font-semibold text-gray-700">{blog.author.name}</span>
+                                                    <span className="text-xs text-gray-400">{blog.author.email}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-5 whitespace-nowrap">
+                                                <div className="flex items-center gap-2 text-gray-600">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.644C3.391 9.851 5.513 8.125 8.17 8.125s4.778 1.726 6.136 3.553a1.125 1.125 0 010 1.123C12.949 14.502 10.827 16.273 8.17 16.273s-4.778-1.727-6.136-3.553z" />
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    </svg>
+                                                    <span className="text-xs font-bold">{blog.viewCount} views</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-5 whitespace-nowrap text-xs text-gray-500 font-medium">
+                                                {new Date(blog.createdAt).toLocaleDateString(undefined, {
+                                                    month: 'short',
+                                                    day: 'numeric',
+                                                    year: 'numeric'
+                                                })}
+                                            </td>
+                                            <td className="px-6 py-5 whitespace-nowrap text-right text-sm">
+                                                <div className="flex justify-end gap-2">
+                                                    <Link
+                                                        href={`/editor/blogs/${blog.id}`}
+                                                        className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-xs font-bold hover:bg-primary hover:text-white transition-all"
+                                                    >
+                                                        Review
+                                                    </Link>
+                                                    <button
+                                                        onClick={() => handleDelete(blog.id)}
+                                                        className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                                                        title="Delete Post"
+                                                    >
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.177H8.072a2.25 2.25 0 0 1-2.244-2.177L6.32 5.79m14.505 0a67.361 67.361 0 0 0-3.142-.191m-4.722-.192-1.294-1.815A2.25 2.25 0 0 0 7.375 2.5h2.25c-.2 0-.397.04-.58.114l-.382.114m.933-.114h1.022c.288 0 .546.134.712.333l1.294 1.815a67.362 67.362 0 0 1 3.142.191l-1.04 14.286A.75.75 0 0 1 14.5 19.5h-5a.75.75 0 0 1-.74-.833l1.04-14.286c.036-.502.433-.913.931-.974Z" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     );

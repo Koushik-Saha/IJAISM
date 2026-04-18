@@ -85,7 +85,7 @@ export default async function ReadArticlePage({ params }: { params: Promise<{ id
     ];
 
     // Remove the migration admin from the authors list
-    allAuthors = allAuthors.filter(a => a.name !== 'The Mother Admin');
+    allAuthors = allAuthors.filter(a => a.name !== 'C5K Executive Administrator');
 
     const pubDate = article.publicationDate
         ? new Date(article.publicationDate).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
@@ -439,7 +439,7 @@ export default async function ReadArticlePage({ params }: { params: Promise<{ id
                             <div className="flex flex-col gap-5">
                                 {recommendedArticles.map((rec) => {
                                     let recAuthor = rec.author?.name || rec.coAuthors?.[0]?.name || "Unknown";
-                                    if (recAuthor === 'The Mother Admin') {
+                                    if (recAuthor === 'C5K Executive Administrator') {
                                         recAuthor = rec.coAuthors?.[0]?.name || "Unknown";
                                     }
                                     return (

@@ -128,7 +128,7 @@ export default function CreateUserModal({ isOpen, onClose, onSuccess, currentUse
                                     <option value="admin">Admin</option>
                                 </>
                             )}
-                            {/* Mother Admin can verify Super Admin creation via backend, but usually restricted? 
+                            {/* Executive Board Admin can verify Super Admin creation via backend, but usually restricted? 
                    Assuming backend handles strict "canCreateRole" checks. 
                    Frontend simplified list.
                */}

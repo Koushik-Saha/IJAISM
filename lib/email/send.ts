@@ -493,3 +493,77 @@ export async function sendReviewerResponseNotification(
     html
   );
 }
+
+// 20. Send blog submission confirmation
+export async function sendBlogSubmissionEmail(
+  userEmail: string,
+  userName: string,
+  blogTitle: string,
+  blogId: string,
+  submissionDate: Date
+): Promise<EmailResult> {
+  const formattedDate = submissionDate.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
+  const html = templates.blogSubmissionEmail(
+    userName,
+    blogTitle,
+    blogId,
+    formattedDate
+  );
+
+  return sendEmail(
+    userEmail,
+    `Blog Submission Received: ${blogTitle}`,
+    html
+  );
+}
+
+// 21. Send blog review assignment
+export async function sendBlogReviewAssignmentEmail(
+  reviewerEmail: string,
+  reviewerName: string,
+  blogTitle: string,
+  blogExcerpt: string,
+  reviewId: string
+): Promise<EmailResult> {
+  const html = templates.blogReviewAssignmentEmail(
+    reviewerName,
+    blogTitle,
+    blogExcerpt,
+    reviewId
+  );
+
+  return sendEmail(
+    reviewerEmail,
+    `New Blog Review Assignment: ${blogTitle}`,
+    html
+  );
+}
+
+// 22. Send blog status update
+export async function sendBlogStatusUpdateEmail(
+  userEmail: string,
+  userName: string,
+  blogTitle: string,
+  newStatus: string,
+  message?: string
+): Promise<EmailResult> {
+  const html = templates.blogStatusUpdateEmail(
+    userName,
+    blogTitle,
+    newStatus,
+    message
+  );
+
+  return sendEmail(
+    userEmail,
+    `Status Update: Your blog "${blogTitle}"`,
+    html
+  );
+}

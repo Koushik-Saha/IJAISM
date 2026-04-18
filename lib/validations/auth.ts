@@ -18,6 +18,7 @@ export const profileUpdateSchema = z.object({
     affiliation: z.string().optional(),
     orcid: z.string().optional(),
     bio: z.string().optional(),
+    profileImageUrl: z.string().optional().or(z.literal('')),
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;

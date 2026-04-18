@@ -1153,3 +1153,149 @@ export function reviewerResponseNotificationEmail(
 
   return emailLayout(content, `Reviewer ${decision.toUpperCase()}: ${articleTitle}`);
 }
+// 14. Blog Submission Confirmation
+export function blogSubmissionEmail(
+  authorName: string,
+  blogTitle: string,
+  blogId: string,
+  submissionDate: string
+): string {
+  const content = `
+    <div class="content">
+      <h2>Blog Submission Received ✅</h2>
+      <p>Dear ${authorName},</p>
+      <p>
+        Thank you for sharing your insights with our community. We have successfully received your blog submission: <strong>${blogTitle}</strong>.
+      </p>
+
+      <div class="info-box">
+        <h3>Submission Details</h3>
+        <div class="info-row">
+          <span class="info-label">Title:</span> ${blogTitle}
+        </div>
+        <div class="info-row">
+          <span class="info-label">Submission ID:</span> ${blogId}
+        </div>
+        <div class="info-row">
+          <span class="info-label">Date:</span> ${submissionDate}
+        </div>
+      </div>
+
+      <p>
+        Your submission is now with our editorial team for initial review. Once approved, it may be sent for peer feedback or moved directly to publication.
+      </p>
+
+      <p>
+        <a href="${EMAIL_CONFIG.appUrl}/dashboard/blogs" class="button">View My Blogs</a>
+      </p>
+
+      <p>Best regards,<br><strong>The C5K Community Team</strong></p>
+    </div>
+  `;
+
+  return emailLayout(content, `Submission received: ${blogTitle}`);
+}
+
+// 15. Blog Reviewer Assignment
+export function blogReviewAssignmentEmail(
+  reviewerName: string,
+  blogTitle: string,
+  blogExcerpt: string,
+  reviewId: string
+): string {
+  const inviteLink = `${EMAIL_CONFIG.appUrl}/dashboard/reviews/blogs/${reviewId}`;
+
+  const content = `
+    <div class="content">
+      <h2>Invitation to Review Blog Post 📝</h2>
+      <p>Dear ${reviewerName},</p>
+      <p>
+        You have been assigned to provide feedback on a new community blog submission:
+      </p>
+
+      <div class="info-box">
+        <h3>Blog Post Details</h3>
+        <div class="info-row">
+          <span class="info-label">Title:</span> ${blogTitle}
+        </div>
+        <div class="info-row">
+          <span class="info-label">Excerpt:</span> ${blogExcerpt}
+        </div>
+      </div>
+
+      <p>
+        Your expertise will help ensure the quality and accuracy of our community content. Please click the button below to review the full content and provide your feedback.
+      </p>
+
+      <p>
+        <a href="${inviteLink}" class="button">Start Review</a>
+      </p>
+
+      <p>Best regards,<br><strong>The C5K Editorial Team</strong></p>
+    </div>
+  `;
+
+  return emailLayout(content, `Blog Review Assignment: ${blogTitle}`);
+}
+
+// 16. Blog Status Update
+export function blogStatusUpdateEmail(
+  authorName: string,
+  blogTitle: string,
+  newStatus: string,
+  message?: string
+): string {
+  const statusMessages: Record<string, { emoji: string; text: string }> = {
+    'accepted': {
+      emoji: '✅',
+      text: 'Great news! Your blog post has been accepted by our editorial team.',
+    },
+    'rejected': {
+      emoji: '❌',
+      text: 'After careful consideration, we have decided not to move forward with your blog submission at this time.',
+    },
+    'revision_requested': {
+      emoji: '📝',
+      text: 'Our editors have requested some revisions to your blog post. Please check the feedback and update your submission.',
+    },
+    'published': {
+      emoji: '🎉',
+      text: 'Congratulations! Your blog post has been published and is now live on the platform.',
+    },
+  };
+
+  const statusInfo = statusMessages[newStatus.toLowerCase()] || {
+    emoji: '📄',
+    text: `Your blog submission status has been updated to: ${newStatus.replace('_', ' ')}`
+  };
+
+  const content = `
+    <div class="content">
+      <h2>Blog Status Update ${statusInfo.emoji}</h2>
+      <p>Dear ${authorName},</p>
+      <p>
+        There is an update regarding your blog submission: <strong>${blogTitle}</strong>
+      </p>
+
+      <div class="info-box">
+        <h3>New Status: ${newStatus.replace('_', ' ').toUpperCase()}</h3>
+        <p>${statusInfo.text}</p>
+      </div>
+
+      ${message ? `
+      <div class="info-box">
+        <h3>Editor Feedback</h3>
+        <p>${message}</p>
+      </div>
+      ` : ''}
+
+      <p>
+        <a href="${EMAIL_CONFIG.appUrl}/dashboard/blogs" class="button">Go to Dashboard</a>
+      </p>
+
+      <p>Best regards,<br><strong>The C5K Community Team</strong></p>
+    </div>
+  `;
+
+  return emailLayout(content, `Status update: ${blogTitle}`);
+}

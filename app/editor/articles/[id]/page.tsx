@@ -104,6 +104,9 @@ export default function AdminArticleDetailPage() {
   const [reviewerSearch, setReviewerSearch] = useState('');
   const [showAllReviewers, setShowAllReviewers] = useState(false);
   const [sharedReviews, setSharedReviews] = useState<{ reviewId: string; shareComments: boolean; sharedFiles: string[] }[]>([]);
+  const [isEditingDOI, setIsEditingDOI] = useState(false);
+  const [editedDOI, setEditedDOI] = useState('');
+  const [isUpdatingDOI, setIsUpdatingDOI] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -149,6 +152,39 @@ export default function AdminArticleDetailPage() {
       toast.error(err.message);
     } finally {
       setCreateIssueLoading(false);
+    }
+  };
+
+  const handleUpdateDOI = async () => {
+    if (!editedDOI.trim()) {
+      toast.error("DOI cannot be empty");
+      return;
+    }
+
+    setIsUpdatingDOI(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/editor/articles/${id}/doi`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ doi: editedDOI })
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to update DOI");
+      }
+
+      toast.success("DOI updated successfully");
+      setIsEditingDOI(false);
+      fetchArticle();
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setIsUpdatingDOI(false);
     }
   };
 
@@ -645,20 +681,67 @@ export default function AdminArticleDetailPage() {
                     {article.doi ? article.doi.replace('https://doi.org/10.63471/', '') : '—'}
                   </span>
                 </div>
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-3 group relative">
                   <span className="text-sm font-semibold text-gray-500 w-24 shrink-0 pt-0.5">DOI</span>
-                  {article.doi ? (
-                    <a
-                      href={article.doi}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-primary hover:underline break-all"
-                    >
-                      {article.doi}
-                    </a>
-                  ) : (
-                    <span className="text-sm text-gray-400">Not assigned</span>
-                  )}
+                  <div className="flex-1">
+                    {isEditingDOI ? (
+                      <div className="flex flex-col gap-2">
+                        <input
+                          type="text"
+                          className="w-full text-sm border rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-primary"
+                          value={editedDOI}
+                          onChange={(e) => setEditedDOI(e.target.value)}
+                          placeholder="e.g., https://doi.org/10.xxxx/xxxx"
+                          autoFocus
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            onClick={handleUpdateDOI}
+                            disabled={isUpdatingDOI}
+                            className="text-xs bg-primary text-white px-3 py-1 rounded hover:bg-primary/90 disabled:opacity-50"
+                          >
+                            {isUpdatingDOI ? 'Saving...' : 'Save'}
+                          </button>
+                          <button
+                            onClick={() => setIsEditingDOI(false)}
+                            className="text-xs bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        {article.doi ? (
+                          <a
+                            href={article.doi}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-primary hover:underline break-all"
+                          >
+                            {article.doi}
+                          </a>
+                        ) : (
+                          <span className="text-sm text-gray-400">Not assigned</span>
+                        )}
+                        
+                        {['mother_admin', 'super_admin'].includes(currentUser?.role) && (
+                          <button
+                            onClick={() => {
+                              setEditedDOI(article.doi || '');
+                              setIsEditingDOI(true);
+                            }}
+                            className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-primary transition-all rounded transition-opacity"
+                            title="Edit DOI"
+                          >
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

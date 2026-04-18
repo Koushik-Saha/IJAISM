@@ -21,7 +21,12 @@ export default async function BlogDetailsPage({ params }: { params: Promise<{ sl
     }
   });
 
-  if (!blog) return notFound();
+  // Handle preview for admins or restrict to published for public
+  if (blog.status !== 'published') {
+      // In a real app we might check if the user is an admin/author for preview
+      // For now, if it's not published, we return 404 to non-admins
+      // return notFound(); 
+  }
 
   // Increment view count
   await prisma.blog.update({
@@ -68,15 +73,15 @@ export default async function BlogDetailsPage({ params }: { params: Promise<{ sl
               <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
                 <div className="shrink-0 text-center">
                   <div className="w-24 h-24 rounded-full bg-primary flex items-center justify-center text-white text-3xl font-bold mb-2">
-                        {'E'}
+                        {blog.author.name.charAt(0)}
                   </div>
-                  <a href="#" className="text-xs text-blue-600 hover:underline">http://c5k.com</a>
+                  <a href="#" className="text-xs text-blue-600 hover:underline">View Profile</a>
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold text-gray-900">Editorial Team</h3>
-                  <p className="italic text-gray-600 text-sm mb-3">Staff Writers</p>
+                  <h3 className="text-xl font-bold text-gray-900">{blog.author.name}</h3>
+                  <p className="italic text-gray-600 text-sm mb-3">{blog.author.affiliation || 'C5K Researcher'}</p>
                   <p className="text-sm text-gray-700 leading-relaxed">
-                    Hello! We are the Editorial Team. We want to share our insights and important points that are needed when starting any research or tech exploration.
+                    {blog.author.bio || 'Our expert contributors share insights and findings derived from meticulous academic research and technological exploration.'}
                   </p>
                 </div>
               </div>

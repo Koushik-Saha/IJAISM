@@ -26,6 +26,7 @@ export default function ManageIssuesPage() {
     const [issues, setIssues] = useState<JournalIssue[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
 
     // Modal State
     const [showModal, setShowModal] = useState(false);
@@ -88,6 +89,45 @@ export default function ManageIssuesPage() {
             coverUrl: issue.coverUrl || ''
         });
         setShowModal(true);
+    };
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+            toast.error("Please upload an image file");
+            return;
+        }
+
+        setIsUploading(true);
+        const toastId = toast.loading("Uploading cover image...");
+
+        try {
+            const token = localStorage.getItem('token');
+            const data = new FormData();
+            data.append('file', file);
+            data.append('fileType', 'issue-covers');
+
+            const res = await fetch('/api/upload', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: data
+            });
+
+            if (!res.ok) {
+                const error = await res.json();
+                throw new Error(error.error || "Upload failed");
+            }
+
+            const result = await res.json();
+            setFormData(prev => ({ ...prev, coverUrl: result.data.url }));
+            toast.success("Cover image uploaded successfully!", { id: toastId });
+        } catch (err: any) {
+            toast.error(err.message || "Upload failed", { id: toastId });
+        } finally {
+            setIsUploading(false);
+        }
     };
 
     const handleDelete = async (id: string) => {
@@ -286,6 +326,48 @@ export default function ManageIssuesPage() {
                                     value={formData.title}
                                     onChange={e => setFormData({ ...formData, title: e.target.value })}
                                 />
+                            </div>
+
+                            {/* Cover Image Upload */}
+                            <div className="space-y-2">
+                                <label className="block text-sm font-medium text-gray-700">Cover Image</label>
+                                <div className="flex items-start gap-4 p-3 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                                    <div className="w-16 h-20 bg-gray-200 rounded border flex-shrink-0 overflow-hidden flex items-center justify-center">
+                                        {formData.coverUrl ? (
+                                            <img src={formData.coverUrl} alt="Cover" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <span className="text-[10px] text-gray-400 font-bold uppercase px-1 text-center">No Cover</span>
+                                        )}
+                                    </div>
+                                    <div className="flex-1 space-y-2">
+                                        <div className="relative">
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                className="hidden"
+                                                id="issue-cover-upload"
+                                                onChange={handleImageUpload}
+                                                disabled={isUploading}
+                                            />
+                                            <label
+                                                htmlFor="issue-cover-upload"
+                                                className={`inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none cursor-pointer ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                            >
+                                                {formData.coverUrl ? 'Change Image' : 'Upload Image'}
+                                            </label>
+                                        </div>
+                                        <p className="text-[10px] text-gray-500">Recommended: Portrait aspect ratio (3:4 or A4). Max 10MB.</p>
+                                        {formData.coverUrl && (
+                                            <button
+                                                type="button"
+                                                onClick={() => setFormData(prev => ({ ...prev, coverUrl: '' }))}
+                                                className="block text-[10px] text-red-600 hover:text-red-700"
+                                            >
+                                                Remove Image
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
 
                             <div className="flex flex-col gap-2">

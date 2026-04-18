@@ -22,6 +22,8 @@ export async function GET(request: Request) {
                 name: true,
                 email: true,
                 role: true,
+                profileImageUrl: true,
+                bio: true,
                 forcePasswordChange: true,
             }
         });

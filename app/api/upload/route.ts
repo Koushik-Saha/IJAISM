@@ -44,10 +44,17 @@ export async function POST(req: NextRequest) {
       return apiError('File size exceeds 10MB limit', 400, undefined, 'FILE_TOO_LARGE');
     }
 
-    const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+    const allowedTypes = [
+      'application/pdf', 
+      'application/msword', 
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'image/jpeg',
+      'image/png',
+      'image/webp'
+    ];
 
     if (!allowedTypes.includes(file.type)) {
-      return apiError('Invalid file type. Only PDF, DOC, and DOCX are allowed', 400, undefined, 'INVALID_FILE_TYPE');
+      return apiError('Invalid file type. Only PDF, DOC, DOCX, and Images (JPG, PNG, WEBP) are allowed', 400, undefined, 'INVALID_FILE_TYPE');
     }
 
     // Virus Scan
@@ -74,7 +81,7 @@ export async function POST(req: NextRequest) {
 
       await s3Client.send(command);
 
-      const s3Url = `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION || 'us-east-2'}.amazonaws.com/${fileName}`;
+      const s3Url = `/api/media/${fileName}`;
 
       logger.info('File uploaded successfully to S3', {
         fileType,

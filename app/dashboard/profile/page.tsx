@@ -41,6 +41,7 @@ export default function ProfilePage() {
     affiliation: '',
     orcid: '',
     bio: '',
+    profileImageUrl: '',
   });
 
   // Password form state

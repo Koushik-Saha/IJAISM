@@ -33,13 +33,14 @@ export default function AdminArticlesPage() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [noDoiFilter, setNoDoiFilter] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const limit = 10;
 
   useEffect(() => {
     fetchArticles();
-  }, [statusFilter, page, journalId]);
+  }, [statusFilter, noDoiFilter, page, journalId]);
 
   const fetchArticles = async () => {
     try {
@@ -55,6 +56,9 @@ export default function AdminArticlesPage() {
       }
       if (journalId) {
         url += `&journalId=${journalId}`;
+      }
+      if (noDoiFilter) {
+        url += `&noDoi=true`;
       }
 
       const response = await fetch(url, {
@@ -143,7 +147,7 @@ export default function AdminArticlesPage() {
                 key={status.value}
                 onClick={() => {
                   setStatusFilter(status.value);
-                  setPage(1); // Reset to page 1 on filter change
+                  setPage(1);
                 }}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${statusFilter === status.value
                   ? 'bg-primary text-white shadow-md'
@@ -153,6 +157,18 @@ export default function AdminArticlesPage() {
                 {status.label}
               </button>
             ))}
+            <button
+              onClick={() => {
+                setNoDoiFilter(prev => !prev);
+                setPage(1);
+              }}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border ${noDoiFilter
+                ? 'bg-orange-500 text-white border-orange-500 shadow-md'
+                : 'bg-white text-orange-600 border-orange-400 hover:bg-orange-50'
+                }`}
+            >
+              No DOI
+            </button>
           </div>
 
           {journalId && (

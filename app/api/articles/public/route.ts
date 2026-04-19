@@ -64,8 +64,9 @@ export async function GET(req: NextRequest) {
     ]);
 
     const formattedArticles = articles.map((article) => {
+      const ADMIN_NAMES = ['C5K Executive Administrator', 'The Mother Admin'];
       const allAuthors = [article.author.name, ...article.coAuthors.map(c => c.name)]
-        .filter(name => name !== 'C5K Executive Administrator');
+        .filter(name => !ADMIN_NAMES.includes(name));
       return {
         id: article.id,
         title: article.title,

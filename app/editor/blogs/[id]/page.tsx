@@ -12,7 +12,7 @@ interface BlogReview {
     decision?: string;
     commentsToAuthor?: string;
     commentsToEditor?: string;
-    reviewer: {
+    reviewer?: {
         name: string;
         email: string;
     };
@@ -287,20 +287,20 @@ export default function BlogReviewPage() {
                                 Reviewer Feedback
                             </h3>
                             
-                            {blog.reviews.length === 0 ? (
+                            {blog.reviews?.length === 0 ? (
                                 <div className="text-center py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
                                     <p className="text-gray-500 font-medium">No reviews have been assigned or submitted yet.</p>
                                 </div>
                             ) : (
                                 <div className="space-y-6">
-                                    {blog.reviews.map((review) => (
+                                    {blog.reviews?.map((review) => (
                                         <div key={review.id} className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
                                             <div className="flex justify-between items-start mb-4">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-10 h-10 bg-primary/10 text-primary rounded-full flex items-center justify-center font-bold">R{review.reviewerNumber}</div>
                                                     <div>
-                                                        <h4 className="font-bold text-gray-900">{review.reviewer.name}</h4>
-                                                        <p className="text-xs text-gray-400">{review.reviewer.email}</p>
+                                                        <h4 className="font-bold text-gray-900">{review.reviewer?.name}</h4>
+                                                        <p className="text-xs text-gray-400">{review.reviewer?.email}</p>
                                                     </div>
                                                 </div>
                                                 <span className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full border ${

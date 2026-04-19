@@ -92,7 +92,7 @@ async function getHomepageData() {
         title: a.title,
         abstract: a.abstract,
         journal: a.journal.code,
-        authors: a.author.name,
+        authors: ['C5K Executive Administrator', 'The Mother Admin'].includes(a.author.name || '') ? '' : (a.author.name || ''),
       })),
       mostViewedArticles,
       heroSlides,
@@ -256,7 +256,7 @@ export default async function HomePage() {
                         </span>
                       </div>
                       <h3 className="text-lg font-bold mb-2">{article.title}</h3>
-                      {article.authors !== 'C5K Executive Administrator' && (
+                      {article.authors && (
                         <p className="text-sm text-gray-600 mb-2">{article.authors}</p>
                       )}
                       <p className="text-sm text-gray-700 mb-4 line-clamp-3">{article.abstract || 'No abstract available.'}</p>
@@ -302,7 +302,7 @@ export default async function HomePage() {
                           {article.title}
                         </Link>
                       </h3>
-                      {article.author.name !== 'C5K Executive Administrator' && (
+                      {article.author.name && !['C5K Executive Administrator', 'The Mother Admin'].includes(article.author.name) && (
                         <p className="text-sm text-gray-600 mb-2">By {article.author.name}</p>
                       )}
                       <p className="text-sm text-gray-700 mb-4 line-clamp-2">{article.abstract || 'No abstract available.'}</p>

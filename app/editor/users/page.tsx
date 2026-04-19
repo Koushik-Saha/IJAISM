@@ -14,7 +14,8 @@ import {
   ChevronDown,
   Search,
   Users as UsersIcon,
-  Filter
+  Filter,
+  Pencil
 } from "lucide-react";
 import { Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
@@ -293,17 +294,17 @@ export default function AdminUsersPage() {
             <p className="text-gray-500 mt-2 max-w-xs mx-auto text-sm">Try adjusting your filters or search keywords to find what you're looking for.</p>
           </div>
         ) : (
-          <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="overflow-x-auto">
+          <div className="bg-white rounded-3xl shadow-sm border border-gray-100">
+            <div className="overflow-x-auto overflow-y-visible">
               <table className="min-w-full divide-y divide-gray-100">
                 <thead className="bg-[#F8FAFC]">
                   <tr>
-                    <th className="px-6 py-4 text-left text-[10px] font-black tracking-widest text-gray-500 uppercase">User Detail</th>
-                    <th className="px-6 py-4 text-left text-[10px] font-black tracking-widest text-gray-500 uppercase">Access Role</th>
-                    <th className="px-6 py-4 text-left text-[10px] font-black tracking-widest text-gray-500 uppercase">Status</th>
-                    <th className="px-6 py-4 text-center text-[10px] font-black tracking-widest text-gray-500 uppercase">Articles</th>
-                    <th className="px-6 py-4 text-center text-[10px] font-black tracking-widest text-gray-500 uppercase">Reviews</th>
-                    <th className="px-6 py-4 text-right text-[10px] font-black tracking-widest text-gray-500 uppercase pr-8">Actions</th>
+                    <th className="px-4 py-4 text-left text-[10px] font-black tracking-widest text-gray-500 uppercase">User Detail</th>
+                    <th className="px-4 py-4 text-left text-[10px] font-black tracking-widest text-gray-500 uppercase">Access Role</th>
+                    <th className="px-4 py-4 text-left text-[10px] font-black tracking-widest text-gray-500 uppercase">Status</th>
+                    <th className="px-2 py-4 text-center text-[10px] font-black tracking-widest text-gray-500 uppercase">Articles</th>
+                    <th className="px-2 py-4 text-center text-[10px] font-black tracking-widest text-gray-500 uppercase">Reviews</th>
+                    <th className="px-4 py-4 text-right text-[10px] font-black tracking-widest text-gray-500 uppercase">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-100">
@@ -311,24 +312,24 @@ export default function AdminUsersPage() {
                     const badge = getRoleBadge(user.role);
                     return (
                       <tr key={user.id} className="hover:bg-gray-50/50 transition-colors group">
-                        <td className="px-6 py-5 whitespace-nowrap">
+                        <td className="px-4 py-5 whitespace-nowrap">
                           <div className="flex items-center">
                             <div className="h-10 w-10 flex-shrink-0 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center text-white font-bold shadow-sm">
                                {user.name?.charAt(0) || user.email.charAt(0).toUpperCase()}
                             </div>
-                            <div className="ml-4">
+                            <div className="ml-3">
                               <div className="text-sm font-bold text-gray-900">{user.name || "Unnamed User"}</div>
                               <div className="text-xs text-gray-500 font-medium">{user.email}</div>
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-5 whitespace-nowrap">
+                        <td className="px-4 py-5 whitespace-nowrap">
                           <span className={`inline-flex items-center gap-1.5 px-3 py-1 text-[11px] font-bold rounded-lg border shadow-sm ${badge.bg} ${badge.text} border-current/10`}>
                              <span className={`w-1.5 h-1.5 rounded-full ${badge.dot}`}></span>
                              {formatRole(user.role)}
                           </span>
                         </td>
-                        <td className="px-6 py-5 whitespace-nowrap">
+                        <td className="px-4 py-5 whitespace-nowrap">
                           <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-bold rounded-lg border shadow-sm transition-all ${
                             user.isActive 
                               ? 'bg-emerald-50 text-emerald-700 border-emerald-100' 
@@ -338,115 +339,80 @@ export default function AdminUsersPage() {
                             {user.isActive ? 'Active' : 'Inactive'}
                           </span>
                         </td>
-                        <td className="px-6 py-5 whitespace-nowrap text-center">
+                        <td className="px-2 py-5 whitespace-nowrap text-center">
                            <span className="text-sm font-bold text-gray-900 bg-gray-50 px-2 py-1 rounded-md">{user._count.articles}</span>
                         </td>
-                        <td className="px-6 py-5 whitespace-nowrap text-center">
+                        <td className="px-2 py-5 whitespace-nowrap text-center">
                            <span className="text-sm font-bold text-gray-900 bg-gray-50 px-2 py-1 rounded-md">{user._count.reviews}</span>
                         </td>
-                        <td className="px-6 py-5 whitespace-nowrap text-right pr-8">
-                          <Menu as="div" className="relative inline-block text-left">
-                            <Menu.Button 
+                        <td className="px-4 py-5 whitespace-nowrap text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                            {/* 1. Edit Details */}
+                            <button
+                              onClick={() => handleEditClick(user)}
                               disabled={!canManageUser(user)}
-                              className="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-xl disabled:opacity-30 disabled:hover:bg-transparent transition-all"
+                              title="Edit User"
+                              className="p-1.5 bg-primary/5 text-primary border border-primary/10 rounded-lg hover:bg-primary hover:text-white transition-all active:scale-95 disabled:opacity-30"
                             >
-                              <MoreVertical size={20} />
-                            </Menu.Button>
-                            
-                            <Transition
-                              as={Fragment}
-                              enter="transition ease-out duration-100"
-                              enterFrom="transform opacity-0 scale-95"
-                              enterTo="transform opacity-100 scale-100"
-                              leave="transition ease-in duration-75"
-                              leaveFrom="transform opacity-100 scale-100"
-                              leaveTo="transform opacity-0 scale-95"
+                              <Pencil size={14} />
+                            </button>
+
+                            {/* 2. Role Assignment */}
+                            <div className="relative group">
+                              <select
+                                value={user.role}
+                                onChange={(e) => handleUpdateUser(user.id, { role: e.target.value })}
+                                className="block w-28 pl-2 pr-6 py-1.5 bg-gray-50 border border-gray-100 rounded-lg text-[10px] font-black uppercase tracking-wider text-gray-700 focus:ring-1 focus:ring-primary appearance-none cursor-pointer hover:bg-white transition-colors"
+                                disabled={!canManageUser(user)}
+                              >
+                                <option value="author">Author</option>
+                                <option value="reviewer">Reviewer</option>
+                                {currentUser?.role === 'mother_admin' && (
+                                  <>
+                                    <option value="super_admin">Head Admin</option>
+                                    <option value="editor">Editor</option>
+                                    <option value="sub_editor">Sub Editor</option>
+                                    <option value="admin">System Admin</option>
+                                  </>
+                                )}
+                                {currentUser?.role === 'super_admin' && (
+                                  <>
+                                    <option value="editor">Editor</option>
+                                    <option value="sub_editor">Sub Editor</option>
+                                    <option value="admin">System Admin</option>
+                                  </>
+                                )}
+                                {currentUser?.role === 'editor' && (
+                                  <option value="sub_editor">Sub Editor</option>
+                                )}
+                              </select>
+                              <ChevronDown className="absolute right-1.5 top-2 h-3 w-3 text-gray-400 pointer-events-none" />
+                            </div>
+
+                            {/* 3. Public Profile */}
+                            <Link
+                              href={`/author/${user.id}`}
+                              target="_blank"
+                              title="Public Profile"
+                              className="p-1.5 bg-blue-50 text-blue-600 border border-blue-100 rounded-lg hover:bg-blue-600 hover:text-white transition-all active:scale-95"
                             >
-                              <Menu.Items className="absolute right-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-2xl bg-white shadow-2xl ring-1 ring-black/5 focus:outline-none z-20">
-                                <div className="px-1 py-1">
-                                  <Menu.Item>
-                                    {({ active }) => (
-                                      <button
-                                        onClick={() => handleEditClick(user)}
-                                        className={`${active ? 'bg-primary text-white' : 'text-gray-700'} group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all`}
-                                      >
-                                        <Shield className={`${active ? 'text-white' : 'text-primary'} h-4 w-4`} />
-                                        Update Details
-                                      </button>
-                                    )}
-                                  </Menu.Item>
-                                  <Menu.Item>
-                                    {({ active }) => (
-                                      <div className="px-3 py-2">
-                                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 px-1">Assignment</p>
-                                        <div className="relative group">
-                                          <select
-                                            value={user.role}
-                                            onChange={(e) => handleUpdateUser(user.id, { role: e.target.value })}
-                                            className={`${active ? 'ring-1 ring-white/20' : ''} block w-full pl-3 pr-8 py-2 bg-gray-50 border-none rounded-xl text-xs font-bold text-gray-700 focus:ring-1 focus:ring-primary appearance-none cursor-pointer`}
-                                            disabled={!canManageUser(user)}
-                                          >
-                                            <option value="author">Author Role</option>
-                                            <option value="reviewer">Reviewer Role</option>
-                                            {currentUser?.role === 'mother_admin' && (
-                                              <>
-                                                <option value="super_admin">Head Admin</option>
-                                                <option value="editor">Editor Role</option>
-                                                <option value="sub_editor">Assistant Editor</option>
-                                                <option value="admin">System Admin</option>
-                                              </>
-                                            )}
-                                            {currentUser?.role === 'super_admin' && (
-                                              <>
-                                                <option value="editor">Editor Role</option>
-                                                <option value="sub_editor">Assistant Editor</option>
-                                                <option value="admin">System Admin</option>
-                                              </>
-                                            )}
-                                            {currentUser?.role === 'editor' && (
-                                              <option value="sub_editor">Assistant Editor</option>
-                                            )}
-                                          </select>
-                                          <ChevronDown className="absolute right-2.5 top-2.5 h-3.3 w-3.5 text-gray-400 pointer-events-none" />
-                                        </div>
-                                      </div>
-                                    )}
-                                  </Menu.Item>
-                                </div>
-                                <div className="px-1 py-1">
-                                  <Menu.Item>
-                                    {({ active }) => (
-                                      <Link
-                                        href={`/author/${user.id}`}
-                                        target="_blank"
-                                        className={`${active ? 'bg-blue-600 text-white' : 'text-gray-700'} group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all`}
-                                      >
-                                        <ExternalLink className={`${active ? 'text-white' : 'text-blue-600'} h-4 w-4`} />
-                                        Public Profile
-                                      </Link>
-                                    )}
-                                  </Menu.Item>
-                                </div>
-                                <div className="px-1 py-1">
-                                  <Menu.Item>
-                                    {({ active }) => (
-                                      <button
-                                        onClick={() => handleUpdateUser(user.id, { isActive: !user.isActive })}
-                                        className={`${
-                                          active 
-                                            ? user.isActive ? 'bg-rose-600 text-white' : 'bg-emerald-600 text-white'
-                                            : user.isActive ? 'text-rose-600' : 'text-emerald-700'
-                                        } group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all`}
-                                      >
-                                        {user.isActive ? <XCircle size={16} /> : <CheckCircle size={16} />}
-                                        {user.isActive ? 'Deactivate Account' : 'Reactivate User'}
-                                      </button>
-                                    )}
-                                  </Menu.Item>
-                                </div>
-                              </Menu.Items>
-                            </Transition>
-                          </Menu>
+                              <ExternalLink size={14} />
+                            </Link>
+
+                            {/* 4. Status Toggle */}
+                            <button
+                              onClick={() => handleUpdateUser(user.id, { isActive: !user.isActive })}
+                              disabled={!canManageUser(user)}
+                              title={user.isActive ? 'Deactivate User' : 'Reactivate User'}
+                              className={`p-1.5 border rounded-lg transition-all active:scale-95 disabled:opacity-30 ${
+                                user.isActive 
+                                  ? 'bg-rose-50 text-rose-600 border-rose-100 hover:bg-rose-600 hover:text-white' 
+                                  : 'bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-600 hover:text-white'
+                              }`}
+                            >
+                              {user.isActive ? <XCircle size={14} /> : <CheckCircle size={14} />}
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );

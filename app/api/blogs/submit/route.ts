@@ -21,6 +21,21 @@ export async function POST(req: NextRequest) {
     }
 
     const userId = decoded.userId;
+
+    // Verify user exists and is active
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { isActive: true }
+    });
+
+    if (!user) {
+      return apiError('Unauthorized - User not found', 401, undefined, 'USER_NOT_FOUND');
+    }
+
+    if (!user.isActive) {
+      return apiError('Unauthorized - Account deactivated', 403, undefined, 'ACCOUNT_DEACTIVATED');
+    }
+
     const body = await req.json();
 
     const validation = blogSubmissionSchema.safeParse(body);

@@ -75,12 +75,12 @@ export default async function BlogDetailsPage({ params }: { params: Promise<{ sl
               <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
                 <div className="shrink-0 text-center">
                   <div className="w-24 h-24 rounded-full bg-primary flex items-center justify-center text-white text-3xl font-bold mb-2">
-                        {blog.author.name.charAt(0)}
+                        {(['C5K Executive Administrator', 'The Mother Admin'].includes(blog.author.name) ? 'C' : blog.author.name.charAt(0))}
                   </div>
                   <a href="#" className="text-xs text-blue-600 hover:underline">View Profile</a>
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold text-gray-900">{blog.author.name}</h3>
+                  <h3 className="text-xl font-bold text-gray-900">{['C5K Executive Administrator', 'The Mother Admin'].includes(blog.author.name) ? 'C5K Editorial Team' : blog.author.name}</h3>
                   <p className="italic text-gray-600 text-sm mb-3">{blog.author.affiliation || 'C5K Researcher'}</p>
                   <p className="text-sm text-gray-700 leading-relaxed">
                     {blog.author.bio || 'Our expert contributors share insights and findings derived from meticulous academic research and technological exploration.'}

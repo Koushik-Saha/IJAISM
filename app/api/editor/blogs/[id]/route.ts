@@ -38,6 +38,19 @@ export async function GET(
                         email: true,
                     },
                 },
+                reviews: {
+                    include: {
+                        reviewer: {
+                            select: {
+                                name: true,
+                                email: true,
+                            },
+                        },
+                    },
+                    orderBy: {
+                        reviewerNumber: 'asc',
+                    },
+                },
             },
         });
 

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import SubmitBlogCTA from "@/components/blog/SubmitBlogCTA";
 
 export const dynamic = "force-dynamic";
 
@@ -37,15 +38,7 @@ export default async function BlogsPage({ searchParams }: { searchParams: Promis
             </p>
           </div>
           <div className="flex-shrink-0">
-            <Link
-              href="/blogs/submit"
-              className="inline-flex items-center px-8 py-4 bg-accent text-white font-bold rounded-xl shadow-lg border-2 border-accent hover:bg-transparent hover:border-white transition-all transform hover:-translate-y-1 active:scale-95 group"
-            >
-              <span>Submit Your Blog</span>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-              </svg>
-            </Link>
+            <SubmitBlogCTA />
           </div>
         </div>
       </div>
@@ -92,7 +85,7 @@ export default async function BlogsPage({ searchParams }: { searchParams: Promis
                     {blog.excerpt || blog.content.replace(/<[^>]*>?/gm, '').substring(0, 150) + '...'}
                   </p>
                   <div className="mt-auto border-t border-gray-100 pt-4 flex justify-between items-center">
-                    <span className="text-sm text-gray-500 font-medium">By {blog.author?.name || 'Administrator'}</span>
+                    <span className="text-sm text-gray-500 font-medium">By {['C5K Executive Administrator', 'The Mother Admin'].includes(blog.author?.name || '') ? 'C5K Editorial Team' : (blog.author?.name || 'Administrator')}</span>
                     <Link href={`/blogs/${blog.slug}`} className="text-primary font-semibold text-sm hover:text-primary-dark transition-colors">
                       Read More →
                     </Link>

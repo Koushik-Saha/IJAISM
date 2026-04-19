@@ -38,7 +38,10 @@ export default async function OverviewPage({ params }: { params: Promise<{ code:
                         {journal.aimsAndScope && (
                             <div>
                                 <h3 className="text-xl font-bold text-gray-900 mb-2">Aims and Scope</h3>
-                                <p className="leading-relaxed whitespace-pre-wrap">{journal.aimsAndScope}</p>
+                                <div
+                                    className="prose prose-sm max-w-none leading-relaxed text-gray-700"
+                                    dangerouslySetInnerHTML={{ __html: journal.aimsAndScope }}
+                                />
                             </div>
                         )}
 

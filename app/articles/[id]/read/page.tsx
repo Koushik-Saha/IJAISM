@@ -84,19 +84,19 @@ export default async function ReadArticlePage({ params }: { params: Promise<{ id
         })),
     ];
 
-    // Remove the migration admin from the authors list
-    allAuthors = allAuthors.filter(a => a.name !== 'C5K Executive Administrator');
+    const ADMIN_NAMES = ['C5K Executive Administrator', 'The Mother Admin'];
+    allAuthors = allAuthors.filter(a => !ADMIN_NAMES.includes(a.name));
 
     const pubDate = article.publicationDate
-        ? new Date(article.publicationDate).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
+        ? new Date(article.publicationDate).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" })
         : null;
-    const pubYear = article.publicationDate ? new Date(article.publicationDate).getFullYear().toString() : null;
+    const pubYear = article.publicationDate ? new Date(article.publicationDate).toLocaleDateString("en-GB", { year: "numeric", timeZone: "UTC" }) : null;
 
     const subDate = article.submissionDate
-        ? new Date(article.submissionDate).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
+        ? new Date(article.submissionDate).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" })
         : null;
     const accDate = article.acceptanceDate
-        ? new Date(article.acceptanceDate).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
+        ? new Date(article.acceptanceDate).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" })
         : null;
 
     // DOI — stored as full URL or just suffix
@@ -438,8 +438,9 @@ export default async function ReadArticlePage({ params }: { params: Promise<{ id
                             <h4 className="text-[12px] font-bold text-[#4d4d4d] uppercase tracking-widest mb-4">Related Articles</h4>
                             <div className="flex flex-col gap-5">
                                 {recommendedArticles.map((rec) => {
-                                    let recAuthor = rec.author?.name || rec.coAuthors?.[0]?.name || "Unknown";
-                                    if (recAuthor === 'C5K Executive Administrator') {
+                                    const ADMIN_NAMES = ['C5K Executive Administrator', 'The Mother Admin'];
+                                    let recAuthor = rec.author?.name || "Unknown";
+                                    if (ADMIN_NAMES.includes(recAuthor)) {
                                         recAuthor = rec.coAuthors?.[0]?.name || "Unknown";
                                     }
                                     return (

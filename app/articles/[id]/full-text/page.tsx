@@ -47,10 +47,11 @@ export default async function ArticleFullTextPage({ params }: { params: Promise<
         notFound();
     }
 
+    const ADMIN_NAMES = ['C5K Executive Administrator', 'The Mother Admin'];
     const allAuthors = [
         { name: article.author.name || "Unknown", affiliation: article.author.affiliation || article.author.university },
         ...article.coAuthors.map((ca) => ({ name: ca.name, affiliation: ca.university })),
-    ].filter(a => a.name !== 'C5K Executive Administrator');
+    ].filter(a => !ADMIN_NAMES.includes(a.name));
 
     const publicationDate = article.publicationDate
         ? new Date(article.publicationDate).toISOString().split("T")[0]

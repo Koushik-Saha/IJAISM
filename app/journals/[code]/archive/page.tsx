@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import JournalSidebar from "@/components/journals/JournalSidebar";
+import IssueCoverImage from "@/components/journals/IssueCoverImage";
 import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
@@ -61,19 +62,10 @@ export default async function ArchivePage({ params }: { params: Promise<{ code: 
                                                 {/* Issue Cover with Fallback */}
                                                 <div className="w-16 h-20 bg-gray-200 flex-shrink-0 flex items-center justify-center text-xs text-gray-400 font-bold border overflow-hidden relative group">
                                                     {issue.coverUrl ? (
-                                                        <img 
-                                                            src={issue.coverUrl} 
-                                                            className="w-full h-full object-cover" 
-                                                            alt={`Cover for Vol ${issue.volume}, Issue ${issue.issue}`}
-                                                            onError={(e) => {
-                                                                (e.target as HTMLImageElement).style.display = 'none';
-                                                                const parent = (e.target as HTMLImageElement).parentElement;
-                                                                if (parent) {
-                                                                    const fallback = document.createElement('span');
-                                                                    fallback.textContent = `VOL ${issue.volume}`;
-                                                                    parent.appendChild(fallback);
-                                                                }
-                                                            }}
+                                                        <IssueCoverImage
+                                                            src={issue.coverUrl}
+                                                            volume={issue.volume}
+                                                            issue={issue.issue}
                                                         />
                                                     ) : (
                                                         <span>VOL {issue.volume}</span>

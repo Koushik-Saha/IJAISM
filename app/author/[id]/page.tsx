@@ -4,6 +4,8 @@ import Link from "next/link";
 import { Metadata } from "next";
 import { User, Mail, GraduationCap, Building2, BookOpen, Download, BarChart2 } from "lucide-react";
 import SafeJournalCover from "@/components/journals/SafeJournalCover";
+ 
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
     const { id } = await params;

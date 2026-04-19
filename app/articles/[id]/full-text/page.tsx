@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { Metadata } from "next";
 import { sanitizeContent } from "@/lib/security/sanitizer";
 
+export const dynamic = "force-dynamic";
 export const revalidate = 3600;
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {

@@ -164,14 +164,9 @@ export default function ArticlesPage() {
                 <select className={selectCls} value={journal} onChange={e => setJournal(e.target.value)}>
                   <option value="">All Journals</option>
                   {JOURNALS.map(j => (
-                    <option key={j.code} value={j.code}>{j.code.toUpperCase()}</option>
+                    <option key={j.code} value={j.code}>{j.name}</option>
                   ))}
                 </select>
-                {journal && (
-                  <p className="text-xs text-gray-500 mt-1 truncate">
-                    {JOURNALS.find(j => j.code === journal)?.name}
-                  </p>
-                )}
               </div>
 
               {/* Year */}

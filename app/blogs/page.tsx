@@ -85,7 +85,7 @@ export default async function BlogsPage({ searchParams }: { searchParams: Promis
                     {blog.excerpt || blog.content.replace(/<[^>]*>?/gm, '').substring(0, 150) + '...'}
                   </p>
                   <div className="mt-auto border-t border-gray-100 pt-4 flex justify-between items-center">
-                    <span className="text-sm text-gray-500 font-medium">By {['C5K Executive Administrator', 'The Mother Admin'].includes(blog.author?.name || '') ? 'C5K Editorial Team' : (blog.author?.name || 'Administrator')}</span>
+                    <span className="text-sm text-gray-500 font-medium">By {['C5K Executive Administrator', 'The Mother Admin', 'Super Admin'].includes(blog.author?.name || '') ? 'C5K Editorial Team' : (blog.author?.name || 'C5K Editorial Team')}</span>
                     <Link href={`/blogs/${blog.slug}`} className="text-primary font-semibold text-sm hover:text-primary-dark transition-colors">
                       Read More →
                     </Link>

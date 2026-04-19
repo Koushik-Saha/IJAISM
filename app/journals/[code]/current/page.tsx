@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import JournalSidebar from "@/components/journals/JournalSidebar";
-import IssueCoverImage from "@/components/journals/IssueCoverImage";
+import IssueCoverImage, { IssueCoverPlaceholder } from "@/components/journals/IssueCoverImage";
 import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
@@ -50,15 +50,17 @@ export default async function CurrentIssuePage({
                     {currentIssue ? (
                         <div>
                             <div className="flex flex-col md:flex-row gap-8 mb-8">
-                                {currentIssue.coverUrl && (
-                                    <div className="w-48 flex-shrink-0 shadow-lg border bg-gray-50 flex items-center justify-center">
+                                <div className="w-48 h-64 flex-shrink-0 shadow-lg border overflow-hidden">
+                                    {currentIssue.coverUrl ? (
                                         <IssueCoverImage
                                             src={currentIssue.coverUrl}
                                             volume={currentIssue.volume}
                                             issue={currentIssue.issue}
                                         />
-                                    </div>
-                                )}
+                                    ) : (
+                                        <IssueCoverPlaceholder volume={currentIssue.volume} />
+                                    )}
+                                </div>
                                 <div>
                                     <h3 className="text-xl font-bold text-gray-800 mb-2">
                                         Volume {currentIssue.volume}, Issue {currentIssue.issue} ({currentIssue.year})

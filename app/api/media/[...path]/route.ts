@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 import { logger } from '@/lib/logger';
+import { readFile } from 'fs/promises';
+import { join } from 'path';
+import { cwd } from 'process';
 
 const s3Client = new S3Client({
   region: process.env.AWS_REGION || 'us-east-2',
@@ -24,38 +27,61 @@ export async function GET(
       return NextResponse.json({ error: 'Missing file path' }, { status: 400 });
     }
 
-    const command = new GetObjectCommand({
-      Bucket: BUCKET_NAME,
-      Key: key,
-    });
+    // Try S3 first
+    try {
+      const command = new GetObjectCommand({
+        Bucket: BUCKET_NAME,
+        Key: key,
+      });
 
-    const response = await s3Client.send(command);
+      const response = await s3Client.send(command);
 
-    if (!response.Body) {
-      return NextResponse.json({ error: 'File body is empty' }, { status: 404 });
+      if (!response.Body) {
+        throw new Error('Empty body from S3');
+      }
+
+      const bytes = await (response.Body as any).transformToByteArray();
+
+      return new NextResponse(bytes, {
+        headers: {
+          'Content-Type': response.ContentType || 'application/octet-stream',
+          'Cache-Control': 'public, max-age=31536000, immutable',
+        },
+      });
+    } catch (s3Error: any) {
+      if (s3Error.name === 'NoSuchKey') {
+        return NextResponse.json({ error: 'File not found' }, { status: 404 });
+      }
+
+      logger.warn('S3 fetch failed, falling back to local storage', {
+        error: s3Error.message,
+        key,
+      });
+
+      // Fallback: try reading from local public/uploads directory
+      const localPath = join(cwd(), 'public', 'uploads', key);
+      const fileBuffer = await readFile(localPath);
+      const ext = key.split('.').pop()?.toLowerCase() || '';
+      const mimeMap: Record<string, string> = {
+        jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png',
+        webp: 'image/webp', gif: 'image/gif', pdf: 'application/pdf',
+      };
+      const mimeType = mimeMap[ext] || 'application/octet-stream';
+
+      return new NextResponse(fileBuffer, {
+        headers: {
+          'Content-Type': mimeType,
+          'Content-Length': fileBuffer.length.toString(),
+          'Cache-Control': 'public, max-age=3600',
+        },
+      });
     }
-
-    // Convert the stream to a buffer or use direct stream response
-    // Next.js Response can take a ReadableStream
-    const stream = response.Body as ReadableStream;
-
-    return new NextResponse(stream, {
-      headers: {
-        'Content-Type': response.ContentType || 'application/octet-stream',
-        'Content-Length': response.ContentLength?.toString() || '',
-        'Cache-Control': 'public, max-age=31536000, immutable', // Cache for 1 year
-      },
-    });
   } catch (error: any) {
-    if (error.name === 'NoSuchKey') {
-      return NextResponse.json({ error: 'File not found' }, { status: 404 });
-    }
-
-    logger.error('Error serving media from S3', {
+    logger.error('Error serving media file', {
       error: error.message,
-      path: req.nextUrl.pathname
+      path: req.nextUrl.pathname,
     });
 
-    return NextResponse.json({ error: 'Failed to fetch media' }, { status: 500 });
+    return NextResponse.json({ error: 'File not found' }, { status: 404 });
   }
 }

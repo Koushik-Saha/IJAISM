@@ -89,6 +89,8 @@ export default function AdminArticleDetailPage() {
 
   // Issue Assignment State
   const [availableIssues, setAvailableIssues] = useState<any[]>([]);
+  const [allJournals, setAllJournals] = useState<any[]>([]);
+  const [filterJournalId, setFilterJournalId] = useState<string>('');
   const [selectedIssue, setSelectedIssue] = useState<string>('');
   const [isAssigningIssue, setIsAssigningIssue] = useState(false);
   const [showCreateIssueModal, setShowCreateIssueModal] = useState(false);
@@ -107,6 +109,9 @@ export default function AdminArticleDetailPage() {
   const [isEditingDOI, setIsEditingDOI] = useState(false);
   const [editedDOI, setEditedDOI] = useState('');
   const [isUpdatingDOI, setIsUpdatingDOI] = useState(false);
+  const [isEditingArticleId, setIsEditingArticleId] = useState(false);
+  const [editedArticleId, setEditedArticleId] = useState('');
+  const [isUpdatingArticleId, setIsUpdatingArticleId] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -152,6 +157,42 @@ export default function AdminArticleDetailPage() {
       toast.error(err.message);
     } finally {
       setCreateIssueLoading(false);
+    }
+  };
+
+  const DOI_PREFIX = 'https://doi.org/10.63471/';
+
+  const handleUpdateArticleId = async () => {
+    const trimmed = editedArticleId.trim();
+    if (!trimmed) {
+      toast.error("Article ID cannot be empty");
+      return;
+    }
+    setIsUpdatingArticleId(true);
+    try {
+      const token = localStorage.getItem('token');
+      const newDoi = `${DOI_PREFIX}${trimmed}`;
+      const response = await fetch(`/api/editor/articles/${id}/doi`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ doi: newDoi })
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to update Article ID");
+      }
+
+      toast.success("Article ID updated successfully");
+      setIsEditingArticleId(false);
+      fetchArticle();
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setIsUpdatingArticleId(false);
     }
   };
 
@@ -206,25 +247,38 @@ export default function AdminArticleDetailPage() {
 
   useEffect(() => {
     if (article?.journalId) {
-      fetchIssues();
+      fetchAllJournals();
+      setFilterJournalId(article.journalId);
     }
   }, [article?.journalId]);
 
-  const fetchIssues = async () => {
+  useEffect(() => {
+    fetchIssues(filterJournalId);
+  }, [filterJournalId]);
+
+  const fetchAllJournals = async () => {
     try {
       const token = localStorage.getItem('token');
-      const journalId = article?.journalId;
-      if (!journalId) return;
+      const res = await fetch('/api/editor/journals', { headers: { 'Authorization': `Bearer ${token}` } });
+      if (res.ok) {
+        const data = await res.json();
+        setAllJournals(data.journals || []);
+      }
+    } catch (e) { console.error("Failed to fetch journals", e); }
+  };
 
-      const response = await fetch(`/api/editor/journals/${journalId}/issues`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+  const fetchIssues = async (journalId?: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      const url = journalId
+        ? `/api/editor/issues?journalId=${journalId}&limit=100`
+        : `/api/editor/issues?limit=100`;
+      const response = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
       if (response.ok) {
         const data = await response.json();
-        setAvailableIssues(data.issues || []);
-        if (article?.issueId) {
-          setSelectedIssue(article.issueId);
-        }
+        const issues = data.data?.issues || data.issues || [];
+        setAvailableIssues(issues);
+        if (article?.issueId) setSelectedIssue(article.issueId);
       }
     } catch (e) {
       console.error("Failed to fetch issues", e);
@@ -675,11 +729,58 @@ export default function AdminArticleDetailPage() {
             <div className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-xl font-bold mb-4">Publication Identifiers</h2>
               <div className="space-y-3">
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-3 group relative">
                   <span className="text-sm font-semibold text-gray-500 w-24 shrink-0 pt-0.5">Article ID</span>
-                  <span className="text-sm font-mono font-bold text-gray-900">
-                    {article.doi ? article.doi.replace('https://doi.org/10.63471/', '') : '—'}
-                  </span>
+                  <div className="flex-1">
+                    {isEditingArticleId ? (
+                      <div className="flex flex-col gap-2">
+                        <input
+                          type="text"
+                          className="w-full text-sm border rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-primary font-mono"
+                          value={editedArticleId}
+                          onChange={(e) => setEditedArticleId(e.target.value)}
+                          placeholder="e.g., jitmb_25003"
+                          autoFocus
+                        />
+                        <p className="text-xs text-gray-400">This will set DOI to: https://doi.org/10.63471/{editedArticleId || '…'}</p>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={handleUpdateArticleId}
+                            disabled={isUpdatingArticleId}
+                            className="text-xs bg-primary text-white px-3 py-1 rounded hover:bg-primary/90 disabled:opacity-50"
+                          >
+                            {isUpdatingArticleId ? 'Saving...' : 'Save'}
+                          </button>
+                          <button
+                            onClick={() => setIsEditingArticleId(false)}
+                            className="text-xs bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-mono font-bold text-gray-900">
+                          {article.doi ? article.doi.replace('https://doi.org/10.63471/', '') : '—'}
+                        </span>
+                        {['mother_admin', 'super_admin'].includes(currentUser?.role) && (
+                          <button
+                            onClick={() => {
+                              setEditedArticleId(article.doi ? article.doi.replace('https://doi.org/10.63471/', '') : '');
+                              setIsEditingArticleId(true);
+                            }}
+                            className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-primary transition-all rounded"
+                            title="Edit Article ID"
+                          >
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-start gap-3 group relative">
                   <span className="text-sm font-semibold text-gray-500 w-24 shrink-0 pt-0.5">DOI</span>
@@ -862,57 +963,62 @@ export default function AdminArticleDetailPage() {
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="font-bold text-gray-800 mb-4 text-lg">Assign to Issue</h3>
 
-              {availableIssues.length > 0 ? (
-                <div className="space-y-3">
-                  <div className="space-y-1">
-                    <label className="text-sm font-medium text-gray-700">Select Issue</label>
-                    <select
-                      className="w-full border rounded-md p-2 text-sm disabled:bg-gray-100 disabled:text-gray-500"
-                      value={selectedIssue}
-                      onChange={(e) => setSelectedIssue(e.target.value)}
-                    >
-                      <option value="">-- Unassigned --</option>
-                      {availableIssues.map(issue => (
-                        <option key={issue.id} value={issue.id}>
-                          Vol {issue.volume}, Issue {issue.issue} ({issue.year}) {issue.isSpecial ? '(Special)' : ''}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <button
-                    onClick={handleAssignIssue}
-                    disabled={isAssigningIssue || !selectedIssue}
-                    className="w-full bg-[#006d77] text-white py-2 rounded-lg font-semibold hover:bg-[#00555d] disabled:opacity-50 text-sm"
+              <div className="space-y-3">
+                {/* Journal filter */}
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Filter by Journal</label>
+                  <select
+                    className="w-full border rounded-md p-2 text-sm bg-gray-50"
+                    value={filterJournalId}
+                    onChange={(e) => { setFilterJournalId(e.target.value); setSelectedIssue(''); }}
                   >
-                    {isAssigningIssue ? 'Saving...' : 'Save Assignment'}
-                  </button>
-
-                  {(article as any).issueId && (
-                    <p className="text-xs text-green-600 font-medium text-center">
-                      Currently assigned to Vol {(article as any).volume}, Issue {(article as any).issue}
-                    </p>
-                  )}
-                  <div className="pt-2 border-t border-gray-100">
-                    <button
-                      onClick={() => setShowCreateIssueModal(true)}
-                      className="text-xs font-semibold text-primary hover:underline flex items-center gap-1 w-full justify-center"
-                    >
-                      + Or Create New Issue
-                    </button>
-                  </div>
+                    <option value="">All Journals</option>
+                    {allJournals.map((j: any) => (
+                      <option key={j.id} value={j.id}>{j.code?.toUpperCase()} — {j.fullName?.substring(0, 35)}</option>
+                    ))}
+                  </select>
                 </div>
-              ) : (
-                <div className="text-center">
-                  <p className="text-sm text-gray-500 italic mb-2">No issues created yet.</p>
+
+                {/* Issue select */}
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Select Issue</label>
+                  <select
+                    className="w-full border rounded-md p-2 text-sm disabled:bg-gray-100"
+                    value={selectedIssue}
+                    onChange={(e) => setSelectedIssue(e.target.value)}
+                  >
+                    <option value="">-- Unassigned --</option>
+                    {availableIssues.map((issue: any) => (
+                      <option key={issue.id} value={issue.id}>
+                        {issue.journal ? `[${issue.journal.code?.toUpperCase()}] ` : ''}
+                        Vol {issue.volume}, Issue {issue.issue} ({issue.year}){issue.isSpecial ? ' ★' : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <button
+                  onClick={handleAssignIssue}
+                  disabled={isAssigningIssue || !selectedIssue}
+                  className="w-full bg-[#006d77] text-white py-2 rounded-lg font-semibold hover:bg-[#00555d] disabled:opacity-50 text-sm"
+                >
+                  {isAssigningIssue ? 'Saving...' : 'Save Assignment'}
+                </button>
+
+                {(article as any).issueId && (
+                  <p className="text-xs text-green-600 font-medium text-center">
+                    ✓ Assigned to Vol {(article as any).volume}, Issue {(article as any).issue}
+                  </p>
+                )}
+                <div className="pt-2 border-t border-gray-100">
                   <button
                     onClick={() => setShowCreateIssueModal(true)}
-                    className="text-xs font-semibold text-primary hover:underline"
+                    className="text-xs font-semibold text-primary hover:underline flex items-center gap-1 w-full justify-center"
                   >
-                    + Create First Issue
+                    + Create New Issue
                   </button>
                 </div>
-              )}
+              </div>
             </div>
 
             <div className="bg-white rounded-lg shadow-md p-6">

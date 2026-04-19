@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import JournalSidebar from "@/components/journals/JournalSidebar";
-import IssueCoverImage from "@/components/journals/IssueCoverImage";
+import IssueCoverImage, { IssueCoverPlaceholder } from "@/components/journals/IssueCoverImage";
 import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
@@ -68,7 +68,7 @@ export default async function ArchivePage({ params }: { params: Promise<{ code: 
                                                             issue={issue.issue}
                                                         />
                                                     ) : (
-                                                        <span>VOL {issue.volume}</span>
+                                                        <IssueCoverPlaceholder volume={issue.volume} />
                                                     )}
                                                 </div>
                                                 <div>

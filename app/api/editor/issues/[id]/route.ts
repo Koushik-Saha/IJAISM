@@ -79,6 +79,69 @@ export async function GET(
     }
 }
 
+export async function PUT(
+    req: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    try {
+        const { id: issueId } = await params;
+        const authHeader = req.headers.get('authorization');
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return apiError('Unauthorized', 401, undefined, 'UNAUTHORIZED');
+        }
+
+        const token = authHeader.split(' ')[1];
+        const decoded = verifyToken(token);
+        if (!decoded) {
+            return apiError('Invalid token', 401, undefined, 'INVALID_TOKEN');
+        }
+
+        const user = await prisma.user.findUnique({
+            where: { id: decoded.userId },
+            include: { managedJournals: true }
+        });
+
+        if (!user || !['super_admin', 'mother_admin', 'editor'].includes(user.role)) {
+            return apiError('Forbidden', 403);
+        }
+
+        const issue = await prisma.journalIssue.findUnique({
+            where: { id: issueId },
+            include: { journal: true }
+        });
+
+        if (!issue) return apiError('Issue not found', 404);
+
+        if (user.role === 'editor') {
+            const isOwner = user.managedJournals.some(j => j.id === issue.journalId);
+            if (!isOwner) return apiError('Forbidden: Not your journal', 403);
+        }
+
+        const body = await req.json();
+        const { title, volume, issue: issueNum, year, isSpecial, isCurrent, coverUrl } = body;
+
+        const updated = await prisma.journalIssue.update({
+            where: { id: issueId },
+            data: {
+                ...(title !== undefined && { title: title?.trim() || null }),
+                ...(volume !== undefined && { volume: parseInt(volume) }),
+                ...(issueNum !== undefined && { issue: parseInt(issueNum) }),
+                ...(year !== undefined && { year: parseInt(year) }),
+                ...(isSpecial !== undefined && { isSpecial }),
+                ...(isCurrent !== undefined && { isCurrent }),
+                ...(coverUrl !== undefined && { coverUrl: coverUrl || null }),
+            },
+            include: {
+                journal: { select: { id: true, code: true, fullName: true } }
+            }
+        });
+
+        return apiSuccess({ issue: updated }, 'Issue updated successfully');
+    } catch (err: any) {
+        return apiError(err.message, 500);
+    }
+}
+
 export async function DELETE(
     req: NextRequest,
     { params }: { params: Promise<{ id: string }> }

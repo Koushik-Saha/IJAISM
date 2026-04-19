@@ -239,7 +239,7 @@ export default function IssuesPage() {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="text-sm text-gray-900 font-bold">Vol {issue.volume}, Issue {issue.issue}</div>
-                                            {issue.title && <div className="text-xs text-gray-500 italic">{issue.title}</div>}
+                                            {issue.title && <div className="text-xs text-gray-500 italic">{issue.title.replace(/[\r\n]+/g, ' ').trim()}</div>}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {issue.year}

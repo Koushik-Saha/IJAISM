@@ -116,6 +116,11 @@ export async function GET(req: NextRequest) {
       where.journalId = journalId;
     }
 
+    const noDoi = searchParams.get('noDoi');
+    if (noDoi === 'true') {
+      where.doi = null;
+    }
+
     // Get articles
     const [articles, total] = await Promise.all([
       prisma.article.findMany({

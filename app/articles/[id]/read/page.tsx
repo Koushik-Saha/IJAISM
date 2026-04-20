@@ -145,7 +145,7 @@ export default async function ReadArticlePage({ params }: { params: Promise<{ id
                     <ChevronRight size={12} className="text-gray-400" />
                     <Link href="/journals" className="hover:text-[#007398] hover:underline">Journals</Link>
                     <ChevronRight size={12} className="text-gray-400" />
-                    <Link href={`/journal/${article.journal.code}`} className="hover:text-[#007398] hover:underline">
+                    <Link href={`/journals/${article.journal.code}`} className="hover:text-[#007398] hover:underline">
                         {article.journal.code.toUpperCase()}
                     </Link>
                     {article.volume && (
@@ -180,7 +180,7 @@ export default async function ReadArticlePage({ params }: { params: Promise<{ id
                         {/* Journal mini card */}
                         <div className="mt-10 border-t border-[#cfd8dc] pt-6">
                             <p className="text-[11px] font-bold text-[#4d4d4d] uppercase tracking-widest mb-3">Journal</p>
-                            <Link href={`/journal/${article.journal.code}`}>
+                            <Link href={`/journals/${article.journal.code}`}>
                                 <SafeJournalCover
                                     code={article.journal.code}
                                     coverImageUrl={article.journal.coverImageUrl}
@@ -203,7 +203,7 @@ export default async function ReadArticlePage({ params }: { params: Promise<{ id
 
                             {/* Journal + volume info row */}
                             <div className="flex items-start gap-4 mb-6">
-                                <Link href={`/journal/${article.journal.code}`} className="shrink-0">
+                                <Link href={`/journals/${article.journal.code}`} className="shrink-0">
                                     <SafeJournalCover
                                         code={article.journal.code}
                                         coverImageUrl={article.journal.coverImageUrl}
@@ -219,7 +219,7 @@ export default async function ReadArticlePage({ params }: { params: Promise<{ id
                                             {article.articleType}
                                         </span>
                                     )}
-                                    <Link href={`/journal/${article.journal.code}`}
+                                    <Link href={`/journals/${article.journal.code}`}
                                         className="block text-[17px] font-semibold text-[#4d4d4d] hover:text-[#007398] leading-tight mb-1 transition-colors">
                                         {article.journal.fullName}
                                     </Link>

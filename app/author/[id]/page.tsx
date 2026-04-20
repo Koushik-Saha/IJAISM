@@ -98,6 +98,14 @@ export default async function AuthorProfilePage({ params }: { params: Promise<{ 
                                     </div>
                                 )}
                             </div>
+
+                            {author.bio && (
+                                <div className="mt-5 pt-5 border-t border-white/10">
+                                    <p className="text-blue-50/90 text-[15px] leading-relaxed max-w-4xl whitespace-pre-wrap font-serif italic">
+                                        {author.bio}
+                                    </p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -151,6 +159,7 @@ export default async function AuthorProfilePage({ params }: { params: Promise<{ 
 
                     {/* Right Side: Publications List */}
                     <div className="lg:col-span-3 space-y-6">
+
                         <div className="flex items-center justify-between mb-2">
                             <h2 className="text-2xl font-serif font-bold text-gray-900">Publications</h2>
                             <span className="text-sm text-gray-500 font-medium">{sortedArticles.length} results</span>

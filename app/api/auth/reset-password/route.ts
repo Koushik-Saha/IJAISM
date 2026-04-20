@@ -1,3 +1,7 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { hashPassword } from '@/lib/auth';
+import { sendPasswordResetConfirmationEmail } from '@/lib/email/send';
 import rateLimit from '@/lib/rate-limit';
 
 const limiter = rateLimit({

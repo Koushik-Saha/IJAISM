@@ -1,4 +1,8 @@
+"use client";
+
 import { useSettings } from "@/context/SettingsContext";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export default function ContactPage() {
     const { settings } = useSettings();

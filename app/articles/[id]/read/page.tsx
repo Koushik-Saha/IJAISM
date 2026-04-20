@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Metadata } from "next";
-import { ChevronRight, Download, BookOpen, Calendar, Hash, Globe, FileText, BarChart2 } from "lucide-react";
+import { ChevronRight, Download, BookOpen, Calendar, Hash, Globe, FileText, BarChart2, ExternalLink } from "lucide-react";
 import ArticleContentViewer from "@/components/articles/ArticleContentViewer";
 import ArticleCiteShare from "@/components/articles/ArticleCiteShare";
 import AuthorListWithModal from "@/components/articles/AuthorListWithModal";
@@ -406,8 +406,12 @@ export default async function ReadArticlePage({ params }: { params: Promise<{ id
                                 <Download size={16} /> Download PDF
                             </a>
                             <a href={`/api/articles/${article.id}/track-download`} target="_blank" rel="noopener noreferrer"
-                                className="flex items-center justify-center gap-2 w-full px-4 py-2.5 border border-[#007398] text-[#007398] text-[14px] font-semibold rounded hover:bg-[#f0f7fa] transition">
+                                className="flex items-center justify-center gap-2 w-full px-4 py-2.5 border border-[#007398] text-[#007398] text-[14px] font-semibold rounded hover:bg-[#f0f7fa] transition mb-2">
                                 <FileText size={16} /> View PDF
+                            </a>
+                            <a href={`/articles/${article.id}/html`} target="_blank" rel="noopener noreferrer"
+                                className="flex items-center justify-center gap-2 w-full px-4 py-2.5 border border-[#e8701a] text-[#e8701a] text-[14px] font-semibold rounded hover:bg-[#fff5ee] transition">
+                                <ExternalLink size={16} /> View Full Article
                             </a>
                         </div>
                     )}

@@ -23,9 +23,7 @@ interface Props {
 
 export default function ArticleContentViewer({ articleId, pdfUrl, fullText, abstract, keywords }: Props) {
     // If a PDF is available, default to the full-text (PDF canvas) view; else abstract
-    const [activeTab, setActiveTab] = useState<"abstract" | "fulltext" | "pdf">(
-        pdfUrl ? "fulltext" : "abstract"
-    );
+    const [activeTab, setActiveTab] = useState<"abstract" | "fulltext" | "pdf">("abstract");
 
     const pdfSrc = pdfUrl || null;
 
@@ -76,7 +74,7 @@ export default function ArticleContentViewer({ articleId, pdfUrl, fullText, abst
                     )}
 
                     {pdfSrc && (
-                        <div className="flex gap-3 mt-6">
+                        <div className="flex flex-wrap gap-3 mt-6">
                             <button
                                 onClick={() => setActiveTab("fulltext")}
                                 className="flex items-center gap-2 px-5 py-2.5 bg-[#007398] text-white text-[14px] font-semibold rounded hover:bg-[#005f7c] transition"
@@ -89,6 +87,14 @@ export default function ArticleContentViewer({ articleId, pdfUrl, fullText, abst
                             >
                                 <FileText size={16} /> View PDF
                             </button>
+                            <a
+                                href={`/articles/${articleId}/html`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 px-5 py-2.5 border border-[#e8701a] text-[#e8701a] text-[14px] font-semibold rounded hover:bg-[#fff5ee] transition"
+                            >
+                                <ExternalLink size={16} /> View Full Article
+                            </a>
                         </div>
                     )}
                 </div>

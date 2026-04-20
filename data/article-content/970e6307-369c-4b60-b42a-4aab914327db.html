@@ -1,0 +1,605 @@
+<p> 
+ 
+ 
+ 
+ 
+ 
+*Corresponding author:  mohammad.moniruzzaman35@gmail.com (Mohammad Moniruzzaman)  
+All rights are reserved @ 2024 https://www.c5k.com , https://doi.org/10.63471/praihi24003 
+Cite: Mohammad Moniruzzaman, Rayhan Khan, Romana Nourin Nipa, Md Redwan Hussain, Jarin Tias Meraj (2024). AI-Driven Early 
+Detection of Autism Spectrum Disorder in American Children. Periodic Reviews on Artificial Intelligence in Health Informatics, 1(1), pp. 
+9-14.  
+                                                                                                                                                                                                                    9 
+ 
+Research Article 
+AI-Driven Early Detection of Autism Spectrum Disorder in American 
+Children 
+Mohammad Moniruzzaman1,*, Rayhan Khan2, Romana Nourin Nipa3, Md Redwan Hussain4, Jarin Tias Meraj4  
+1Department of Computer Science, Maharishi International University, 1000 North Fourth St., Fairfield, Iowa 52557, USA 
+2Department of Special Education and Counseling, California State University Los Angeles ,State University Drive Los Angeles, CA 
+90032, USA 
+3Department of Information and Communication Technology, Islamic University, Kushtia-7003, Bangladesh 
+4Department of Computer Science and Engineering, Daffodil International University, Birulia, Savar, Dhaka-1216, Bangladesh 
+*Corresponding Author: mohammad.moniruzzaman35@gmail.com  
+ 
+ 
+A R T I C LE   I N F O 
+  
+A B S T R A C T 
+Article history:  
+02 Jul 2024 (Received) 
+11 Aug 2024 (Accepted) 
+19 Aug 2024 (Published Online) 
+Autism Spectrum Disorder (ASD) is a neurodevelopment disorder that impacts 1 in 36 
+children in the United States. Therefore, early identification plays a pivotal role. 
+Nonetheless, such populations mentioned may take late and wrong screenings, thus 
+further amplifying disparities. This study aims to create a screening model based on AI 
+with multisource data: EHR, developmental diagnostic checklists, and wearing device 
+behavioural data to improve the early diagnosis of ASD. Based on a cohort of more 
+than 20,000 children, this work showcases how AI can enhance the diagnostics of 
+conditions and lessen the time to diagnosis and bias in children’s care (Alzakari et 
+al.,2024). By integrating both sources, the overall accuracy was 91%, thus making the 
+model better than single -source models, and there are encouraging prospects for the 
+large-scale deployment of the proposed system in developing/least developed 
+countries. Potential solutions and recommendations regarding AI applications in 
+pediatric healthcare, as well as several ethical considerations and upcoming issues 
+concerning scalability, are also examined. 
+ 
+DOI: https://doi.org/10.63471/praihi24003  @ 2024  Periodic Reviews on Artificial 
+Intelligence in Health Informatics (PRAIHI) , C5K Research Publication  
+Keywords:  
+AI in Healthcare, Autism Detection, 
+Early Diagnosis, Autism, Pediatric 
+Screening 
+ 
+1. Introduction 
+1.1. Background 
+ASD is a complex developmental disorder in which 
+people have difficulties in social interaction, 
+communication, and play or behavioural rigidity. ASD 
+is on the rise, especially in the developed world, and 
+according to the CDC, approximately one in every 
+thirty-six children is impacted (Hodges et al., 2020) . 
+Timely detection is vital in offering proper solutions that 
+enable children to attain developmental milestones like 
+oral and motor development, interaction skills, and 
+educational performance. However, the diagnosis of 
+ASD is still cumbersome, especially  in the under -
+resourced areas where access to services speciality 
+within ASD is a challenge. ASD affects every person 
+differently, from mild to severe, thus the different 
+symptoms. Currently, the diagnostic approaches 
+typically include observing the child’ s behaviour and 
+using tests scored per the existing checklists, which are 
+the Modified Checklist for Autism in Toddlers (M -
+CHAT) and the Autism Diagnostic Observation 
+Schedule (ADOS) (Zheng et al., 2024) . These tools, as 
+much as they are helpful in ideal environments, are very 
+tedious to use, are very time -consuming, and need 
+professionals to administer them. The symptoms of the 
+condition are diverse, and affected individuals may not 
+receive accurate diag noses from doctors due to 
+differences in experience and approach; this is because 
+children in ethnic minority and low-income families are 
+likely to be diagnosed late because of other barriers to 
+access to care. 
+1.2. Challenges in Traditional ASD Screening 
+The current state of ASD diagnosis presents several 
+systemic and procedural challenges: 
+i. Subjectivity and Variability: Assessment 
+commonly relies on clinical decision -making, 
+which differs considerably depending on a 
+clinician’s experience and knowledge of ASD. 
+Periodic Reviews on Artificial Intelligence in Health 
+Informatics  
+"Volume 1, Issue 1, Year 2024" 
+website: https://www.c5k.com </p><p>Moniruzzaman et al. (2024)                                                                                                                        PRAIHI, 1(1), pp. 9-14.  
+ 
+10 
+ 
+Mild symptoms of ASD may not be observed, 
+particularly in female children or in children 
+with comorbid disorders like ADHD or anxiety 
+(Okoye et al., 2023). 
+ii. Limited Resources in Underserved 
+Communities: In rural regions and limited -
+income urban environments, there are few or 
+no pediatric neurologists or developmental 
+psychologists to refer clients to. This lack of 
+access also means that developmental 
+disorders go undiagnosed and untreated, 
+widening disparities.  
+iii. Delayed Diagnosis: The study established that 
+kids in underprivileged areas are given an ASD 
+diagnosis about 12–24 months later than those 
+in better -off areas. This delay minimizes the 
+time that a child has for early childhood 
+interventions, which are most  effective before 
+the child is five years of age (Woolfenden et al., 
+2012). 
+iv. Underutilization of Available Data: Standard 
+approaches are not particularly designed to 
+incorporate multiple sources of information, 
+including electronic health records (EHRs), 
+behaviour observations, and physiological data, 
+in real-time. Such an approach neglects cross -
+information that can help improve the 
+diagnosis in the case (Lenart &amp; Pasternak, 
+2023). 
+1.3. Potential of Artificial Intelligence in ASD 
+Screening 
+The use of Artificial Intelligence (AI) provides a novel 
+approach to the problems encountered in conventional 
+ASD screeners. Big data analysis using AI is best suited 
+to compare it with other data sets and make predictions 
+for diagnostic purposes, which ca n complement 
+traditional diagnostic models (Shahamiri &amp; Thabtah, 
+2020). Then, the development of AI tools that can better 
+capture a child’s IDP can be improved through the use 
+of a range of data sources, leading to earlier 
+identification of ASD (Wankhede et al., 2024). 
+1.4. Addressing Healthcare Disparities 
+Perhaps one of the biggest strengths of using AI -driven 
+ASD screening tools is that they can help fill these 
+existing gaps in access to healthcare services. Children 
+from rural areas, low -income families, and children 
+from minority groups have insufficient  access to 
+diagnosis and care (Song et al., 2019) . Geographical 
+access, financial barriers, and cultural attitudes about 
+neurodevelopmental disorders are such barriers. AI 
+tools can mitigate these challenges through: 
+i. Remote Accessibility : Tracking such 
+behavioural and physiological parameters does 
+not require frequent face -to-face assessments, 
+and it can be done on a mobile app or wearable 
+device. 
+ii. Scalability: Children can receive AI models in 
+primary care offices, schools, or community 
+health clinics, where they might not otherwise 
+have access to a specialist. 
+iii. Cost-Effectiveness: Employing technical 
+solutions such as data analysis and automatic 
+case identification for high -risk cases helps to 
+save money for both healthcare systems and 
+families. 
+1.5. Research Objectives 
+The main aim of this current study is to design and test 
+an AI-based screening tool for early diagnosis of ASD 
+while promoting equity. This involves: 
+i. Designing a multiple input multiple output AI 
+model that can incorporate EHRs, behavioural 
+assessment data from the devices and 
+wearables. 
+ii. Measuring the accuracy of the diagnostic 
+model, sensitivity and specificity of the model. 
+iii. The study also aims to assess the potential of 
+the model for implementation within low-
+resource and hard-to-reach populations. 
+1.6. Contributions of This Study 
+Importantly, this study yields findings that have 
+implications for the increasing application of artificial 
+intelligence (AI) in the diagnosis of Autism Spectrum 
+Disorder (ASD). This is why the study demonstrates 
+how combining information from EHRs, behavioural 
+metrics data, and data from wearable devices makes for 
+better AI models. Such developments are critical in 
+capturing the heterogeneity of ASD, which can present 
+in very different ways in different people. Furthermore, 
+the study is meant to satisfy the demands of the present 
+and future generations, as well as of the underserved 
+population, by filling the gap with cheap and effective 
+screening instruments. Some children from low -
+resource backgrounds face many challenges to early and 
+accurate ASD (Alzakari et al., 2025). As we explore the 
+power of AI in the diagnostic process in this research, 
+we see that it also offers a path to rectify such disparities 
+so that early intervention is available to all. The work 
+also proposes guidelines for the development of ethical 
+artificial intelligence (AI), including openness, de -bias, 
+and data protection. This shows the need to make sure 
+that the AI models being utilized do not contain any 
+built-in biases that will effectively negate the minority. 
+The study of algorithmic fairness an d strong data 
+protection measures opens the way to safe AI 
+applications that will be trusted by clinicians, families, 
+and the community. 
+ 
+Moniruzzaman et al. (2024)                                                                                                                        PRAIHI, 1(1), pp. 9-14.  
+ 
+11 
+ 
+2. Materials and Methods 
+2.1. Data Collection 
+2.1.1. Data Sources 
+The study also adhered to national regulations, such as 
+the Health Insurance Portability and Accountability Act 
+(HIPPA) in the USA and the General Data Protection 
+Regulation (GDPR) in the EU, beyond these privacy 
+measures. However, these frameworks provide d the 
+legal and ethical requirements for processing this type 
+of health data sensitively.  
+The research team wanted to make sure that the training 
+data set was balanced by gender, socioeconomic status, 
+ethnicity, and geographic location because they 
+understood that algorithms themselves could also be 
+unfair to some groups of children. They did this to 
+prevent the model from predicting that some people are 
+less capable than others because the model has yet to see 
+many samples of this type of person. Furthermore, 
+small-scale fairness checks were performed at regular 
+intervals during the study to assess the model’s 
+effectiveness and to monitor bias that could arise in real-
+life scenarios. The focus of the st udy is building an 
+ethically designed and inclusive AI diagnostic tool, 
+which this approach demonstrates. 
+Finally, the study was based on Wearable Devices, 
+which allowed the collection of behavioural and 
+physiological indices in real-time. These were sleep, 
+social engagement, and movement, and all of them were 
+monitored through smartwatches and other wearable 
+technologies. Wearable devices enabled the collection 
+of data on the child’s daily activities and physiological 
+changes in the child  to indicate that there was an ASD 
+before it could be diagnosed in a clinical setting. 
+2.1.2. Data Integration 
+To harmonize the diverse data sources, the pre -
+processing steps included: 
+1. Data Cleaning: Deletion of records which are 
+unrealized, redundant, or conflicting.  
+2. Normalization: This involves making the 
+features from the various datasets have the 
+same dimensions so that the results of the 
+different datasets can be compared.  
+3. Imputation: Using regression-based methods 
+to impute the values that have been left blank. 
+4. Annotation: Using the clinical ASD diagnoses, 
+risk categories can be identified as low, 
+medium or high.  
+2.2. Algorithm Development 
+2.2.1 Single-Source Models 
+• For the structured EHR data, the frequently 
+used Gradient Boosting Machines (GBMs) are 
+adopted, which are effective in tabular data. 
+• Convolutional Neural Networks (CNNs) for 
+the analysis of the behavioural assessment data 
+since CNNs are good at pattern identification. 
+2.2.2. Integrated Model 
+A multiple model integrated the results of each single -
+source model with wearable device data to achieve the 
+best prediction. This approach adopted stacking as the 
+ensemble learning strategy to aggregate the decisions 
+from multiple models into one decision-making system. 
+2.2.3 . Model Training and Validation 
+The dataset was divided into a training set (70%), a 
+validation set (15%), and a test set (15%). Cross -
+validation made the model valid for other cohorts as 
+well. 
+2.3 Performance Evaluation 
+2.3.1. Metrics 
+Model performance was assessed using the following 
+metrics: 
+• Accuracy: Percentage of accurately diagnosed 
+patients. 
+• Precision: The ratio of the true positive cases to 
+all the positive cases predicted by the model. 
+• Recall (Sensitivity): A true positive rate is a 
+ratio of several true positives to a total number 
+of true positives and false negatives. 
+• F1-Score: A single value of precision for every 
+tenth document as well as the value of recall for 
+the same set of documents: The harmonic mean 
+of the two values provides a balanced measure. 
+• AUC-ROC: Assesses the model’s accuracy in 
+differentiating individuals with ASD from those 
+without ASD cases. 
+2.3.2. Comparative Evaluation 
+The single -source models (EHR, behavioural, 
+wearable) were compared to the integrated model to 
+determine whether data fusion provides any benefit. 
+2.4. Ethical Considerations 
+This research was conducted with a strict emphasis on 
+ethical considerations, specifically data privacy, equity, 
+and fairness in algorithms. To prevent the exposure of 
+patients’ health information, all data collected in the 
+present study were de -identified to eliminate the 
+possibility of re-identification of patients. Access to the 
+data was restricted to only personnel who were allowed 
+to work on it, and the records were encrypted at all times. 
+Moniruzzaman et al. (2024)                                                                                                                        PRAIHI, 1(1), pp. 9-14.  
+ 
+12 
+ 
+The study also adhered to national regulations such as 
+the Health Insurance Portability and Accountability Act 
+(HIPPA) in the USA and the General Data Protection 
+Regulation (GDPR) in the EU, beyond these privacy 
+measures. However, these frameworks provided  the 
+legal and ethical requirements for processing this type 
+of health data sensitively. The research team wanted to 
+make sure that the training data set was balanced by 
+gender, socioeconomic status, ethnicity, and geographic 
+location because they understo od that algorithms 
+themselves could also be unfair to some groups of 
+children. They did this to prevent the model from 
+predicting that some people are less capable than others 
+because the model has yet to see many samples of this 
+type of people. Furthermore, small-scale fairness checks 
+were performed at regular intervals during the study to 
+assess the model’s effectiveness and to monitor bias that 
+could arise in real-life scenarios. The focus of the study 
+is building an ethically designed and inclusive AI 
+diagnostic tool, which this approach demonstrates. 
+3. Results and Discussion 
+3.1. Model Performance 
+The integrated model was found to have better results in 
+identifying ASD than the single -source models. 
+Performance metrics across all models are summarized 
+below in Table 1. 
+Table 1. A comparison of the performance of single-
+source and integrated models. 
+Metric EHR 
+Model 
+Behavioral 
+Model 
+Integrated 
+Model 
+Accuracy 82% 86% 91% 
+Recall 78% 84% 90% 
+Precision 80% 85% 89% 
+F1-Score 79% 84.5% 89.5% 
+AUC-
+ROC 
+0.84 0.88 0.93 
+The integrated model gave the highest accuracy of 91% 
+and the AUC-ROC of 0.93, which is the best indication 
+of the model’s capacity to detect genuine ASDs with few 
+false positives.  Fig. 1. shows a c omparison of model 
+performance metrics. 
+ 
+Fig. 2. A Comparison of Model Performance Metrics. 
+A line chart showing the AUC -ROC values for each 
+model is represented in Fig. 2.  
+ 
+Fig. 3.  AUC-ROC Across Models. 
+3.2. Feature Importance 
+The integrated model used various modes of data which 
+gave a broad view of ASD risk factors. Table 2 Shows a 
+comparison of the performance of single -source and 
+wearable data. 
+Table 2. A comparison of the performance of single-
+source and wearable data. 
+Feature EHR 
+Data 
+Behavi
+oural 
+Assess
+ments 
+Weara
+ble 
+Data 
+Prenatal 
+Complications 
+0.8 0 0 
+Family History 0.7 0 0 
+M-CHAT Scores 0 0.9 0 
+Delayed Speech 0 0.85 0 
+Reduced Social 
+Interaction 
+0 0 0.8 
+Irregular Sleep 
+Patterns 
+0 0 0.75 
+ 
+A heatmap (Fig. 4) of feature importance highlights the 
+top contributors across data types as shown in Fig.  3 
+below.  </p><p>Moniruzzaman et al. (2024)                                                                                                                        PRAIHI, 1(1), pp. 9-14.  
+ 
+13 
+ 
+ 
+Fig. 4.  Heat Map showing Feature Importance. 
+Key observations include: 
+• EHR Data: Family history and complications 
+during pregnancy were established as relevant 
+predictors. 
+• Behavioral Assessments: Similarly, the M -
+CHAT results showed that parents of children 
+with ASD had high scores and their children 
+exhibited delayed speech milestones. 
+• Wearable Data: Limited contact with others 
+and disrupted, unpredictable sleep schedules 
+were considered key real-time variables. 
+3.3. Comparative Insights 
+3.3.1. EHR-Only Model 
+The EHR model was relatively accurate (82% accuracy, 
+0.84 AUC -ROC) using demographic and medical 
+history data. However, it was not able to track behaviour 
+in detail due to the absence of real-time tracking. 
+3.3.2. Behavioral Model 
+The behavioural model was somewhat better than the 
+EHR model, obtaining an accuracy of 86 percent and 
+0.88 AUC -ROC. Informative tools such as M -CHAT 
+proved useful for determining social and 
+communication difficulties but were not linked to 
+physiological or previous data. 
+3.3.3. Integrated Model 
+The proposed integrated model incorporated EHR, 
+behavioural, and wearable data to create a holistic 
+diagnostic model. Researchers found that its capacity to 
+identify temporal structures (e.g.,  daily social 
+interactions) and cross -sectional characteristics (e.g., 
+developmental history) boosted predictive efficacy. 
+3.4. Equity and Accessibility 
+The integrated model also highlighted the possibility of 
+deploying the model to underserved communities. By 
+leveraging wearable devices and accessible behavioural 
+assessments, the model addressed key barriers to care, 
+including: 
+•  Limited Access to Specialists: The tool might 
+be useful for primary care providers to 
+recognize children at high risk and then advise 
+them to see specialists. 
+• Reduced Diagnostic Delays: Real -time data 
+analysis reduced the time taken to identify 
+candidates who may have ASD. 
+However, the key question is that to implement these 
+solutions, several technological challenges must be 
+solved, including the availability of affordable wearable 
+devices and the ability of local healthcare providers to 
+interpret AI outputs. 
+3.5. Scalability 
+The use of the AI model in low-resource settings comes 
+with some issues of deployment that need to be 
+considered. One of the main challenges is that of the 
+infrastructure demands that are made by such systems. 
+The model, which could be complex and 
+computationally intensive to implement, must be 
+adapted to be implemented in primary care clinics or 
+CHCs, where resources may be limited. This implies 
+that the technology has to be developed to run on lower-
+end machines, and at the same time, the system should 
+still be efficient in producing the right results. Also, 
+capacity building is a very important activity. 
+Specialists implementing AI in less developed 
+healthcare facilities may lack sufficient experience to 
+analyze AI’s elaborate results. Hence, meaningful 
+clinician and healthcare worker training on how to use 
+and integrate these AI tools into practice is critical for 
+the model. Two more aspects influence scalability: 
+explainability. Though the integrated model had the best 
+predictive accuracy, its high dimen sionality may limit 
+its clinical use since clinicians may not have a good 
+background in AI. In such cases, clinicians may not be 
+willing to put their trust in a model that they cannot 
+understand how it arrived at a decision. XAI techniques 
+should be embedded into the model. Such methods, for 
+example, feature attribution tools, can assist clinicians 
+in understanding how the model reaches such 
+conclusions and gain confidence in the AI’s advice. 
+Explaining the reasoning of the AI would not only 
+improve the understandability of the model but also the 
+adoption of the model among physicians, which in turn 
+would improve the implementation of the model into 
+clinical practice. 
+3.6. Limitations  
+However, the study also has some drawbacks that need 
+to be taken into account. The first major limitation is 
+that the dataset is mainly derived from urban healthcare </p><p>Moniruzzaman et al. (2024)                                                                                                                        PRAIHI, 1(1), pp. 9-14.  
+ 
+14 
+ 
+centers. This shift may reduce the effectiveness of the 
+generalization of the model to rural or low -resource 
+areas where the population may be different in health 
+care access, demography, and socio-economic status. As 
+to the generalizability, it is propose d, in the subsequent 
+research, to include data from as many environments as 
+possible to ensure that the model works for everyone. In 
+addition, getting real -time data from wearable devices 
+to integrate into the system was also a concern. On 
+several occasion s, these devices generated partial or 
+inconsistent data, and the imputation of missing data 
+was essential to maintain the model’s accuracy. The 
+issue of data quality and consistency in real -time 
+monitoring is another important direction for further 
+development, as these devices are critical to the success 
+of the model, which monitors the child’s behaviour at 
+any given time. 
+4. Conclusion 
+ASD continues to be a major public health concern in 
+the United States is still present, and early identification 
+is crucial. This study showed how AI tools could 
+revolutionize the screening of ASD and reduce 
+healthcare inequalities. The proposed AI model that 
+combines the EHR data and behavioural assessment and 
+data from the wearable device showed high diagnostic 
+accuracy (91%) and AUC -ROC (0.93) and 
+outperformed the models that used a single data source. 
+The integrated model offers a cost -efficient model of 
+service delivery in underserved settings, where there is 
+often a scarcity of specialized diagnostic services. Using 
+the real-time behaviour and physiological data from the 
+wearable devices, the model ensures early detection of 
+high-risk cases to ensure that the children receive early 
+interventions that improve their development. However, 
+to enhance implementation success, some challenges 
+need to be considered. Data privacy and algorithm 
+fairness issues can be mitigated only by strong 
+regulation, diverse data, and fairness checks. Scalability 
+also presents many challenges that are especially 
+difficult in LMICs because infrastructure and 
+technology constraints need to be addressed. To 
+stimulate the uptake of the concept across the board, 
+simpler models and capacity-building projects are vital. 
+Further studies should aim at refining the model for 
+particular populations to decrease the gap in the 
+diagnostic even more, at improving the methods of real-
+time data feed integration to enable constant risk 
+assessment, and at increasing the model interpr etability 
+with the help of Explainable AI (XAI). About these 
+aspects, it is possible to improve the use of AI 
+techniques in the identification of ASD and the 
+provision of equal opportunities for children’s 
+healthcare for all communities. The present work i s a 
+valuable discussion of the opportunities for improving 
+public health with the help of AI, especially in cases of 
+neurodevelopmental disorders such as ASD. Therefore, 
+leveraging gaps in diagnostic access and equity, AI is 
+leading the future of healthcare and its efficient 
+execution. 
+References 
+Alzakari, S. A., Allinjawi, A., Aldrees, A., Zamzami, N., 
+Umer, M., Innab, N., &amp; Ashraf, I. (2025). Early 
+detection of autism spectrum disorder using 
+explainable AI and optimized teaching strategies. 
+Journal of Neuroscience Methods , 413, 110315. 
+https://doi.org/https://doi.org/10.1016/j.jneumeth.2
+024.110315  
+Hodges, H., Fealko, C., &amp; Soares, N. (2020). Autism 
+spectrum disorder: definition, epidemiology, causes, 
+and clinical evaluation. Transl Pediatr, 9(Suppl 1), 
+S55-s65. https://doi.org/10.21037/tp.2019.09.09  
+Lenart, A., &amp; Pasternak, J. (2023). Resources, Problems 
+and Challenges of Autism Spectrum Disorder 
+Diagnosis and Support System in Poland. J Autism 
+Dev Disord , 53(4), 1629 -1641. 
+https://doi.org/10.1007/s10803-021-05142-1  
+Okoye, C., Obialo -Ibeawuchi, C. M., Obajeun, O. A., 
+Sarwar, S., Tawfik, C., Waleed, M. S., Wasim, A. 
+U., Mohamoud, I., Afolayan, A. Y ., &amp; Mbaezue, R. 
+N. (2023). Early Diagnosis of Autism Spectrum 
+Disorder: A Review and Analysis of the Risks and 
+Benefits. Cureus, 15(8), e43226. 
+https://doi.org/10.7759/cureus.43226  
+Shahamiri, S. R., &amp; Thabtah, F. (2020). Autism AI: a 
+New Autism Screening System Based on Artificial 
+Intelligence. Cognitive Computation , 12(4), 766 -
+777. https://doi.org/10.1007/s12559-020-09743-3  
+Song, D. Y ., Kim, S. Y ., Bong, G., Kim, J. M., &amp; Yoo, 
+H. J. (2019). The Use of Artificial Intelligence in 
+Screening and Diagnosis of Autism Spectrum 
+Disorder: A Literature Review. Soa Chongsonyon 
+Chongsin Uihak , 30(4), 145 -152. 
+https://doi.org/10.5765/jkacap.190027  
+Wankhede, N., Kale, M., Shukla, M., Nathiya, D., R, R., 
+Kaur, P., Goyanka, B., Rahangdale, S., Taksande, 
+B., Upaganlawar, A., Khalid, M., Chigurupati, S., 
+Umekar, M., Kopalli, S. R., &amp; Koppula, S. (2024). 
+Leveraging AI for the diagnosis and treatment of 
+autism spectrum disorder: Current trends and future 
+prospects. Asian J Psychiatr , 101, 104241. 
+https://doi.org/10.1016/j.ajp.2024.104241  
+Woolfenden, S., Sarkozy, V ., Ridley, G., &amp; Williams, K. 
+(2012). A systematic review of the diagnostic 
+stability of Autism Spectrum Disorder. Research in 
+Autism Spectrum Disorders , 6(1), 345 -354. 
+https://doi.org/https://doi.org/10.1016/j.rasd.2011.
+06.008  
+Zheng, R. M., Chan, S. P., Law, E. C., Chong, S. C., &amp; 
+Aishworiya, R. (2024). Validity and feasibility of 
+using the Modified Checklist for Autism in 
+Toddlers, Revised with Follow-Up (M-CHAT-R/F) 
+in primary care clinics in Singapore. Autism, 28(7), 
+1758-1771. 
+https://doi.org/10.1177/13623613231205748  
+ </p>

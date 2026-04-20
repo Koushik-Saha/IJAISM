@@ -1,0 +1,1065 @@
+<p> 
+ 
+ 
+ 
+ 
+ 
+*Corresponding author:  r.hasan.179@westcliff.edu (Rakibul Hasan)  
+All rights are reserved @ 2024 https://www.c5k.com , https://doi.org/10.63471/jsae24005 
+Cite: Rakibul Hasan (2024). Ai-Driven Strategies for Reducing Deforestation In U.S. Agriculture. Journal of Sustainable Agricultural 
+Economics, 1(1), pp. 22-32.  
+                                                                                                                                                                                                                 22 
+ 
+Research Article 
+AI-Driven Strategies for Reducing Deforestation in U.S. Agriculture  
+Rakibul Hasan 
+Department of Business, Westcliff University, 17877 Von Karman Ave 4th floor, Irvine, CA 92614, USA.  
+*Corresponding Author: r.hasan.179@westcliff.edu   
+ 
+ 
+A R T I C LE   I N F O 
+  
+A B S T R A C T 
+Article history:  
+03 Jul 2024 (Received) 
+16 Aug 2024 (Accepted) 
+23 Aug2024 (Published Online) 
+Agricultural conversion is a major reason for deforestation that affects the United States 
+and is responsible for the loss of species, soil depletion and global warming. This work 
+aims to analyze the use of AI for combating deforestation in the agricultura l sector in 
+the United States through improved surveillance, risk assessments, and policy 
+modeling. This proposed framework combines satellite imagery data, agricultural 
+records, and selected socio -economic factors and uses CNNs, GBMs, and ABMs to 
+tackle d eforestation systematically. CNN also showed an accuracy of 94% in the 
+identification of the area of deforestation, while the GBMs showed an accuracy of 0.92 
+AUC-ROC in identifying hotspot areas. Through ABMs that assumed policy changes 
+such as reforestation incentives and fines for viol ators, the study showed that 
+deforestation rates could be cut by up to 25%. Regression and correlation analyses and 
+hypothesis testing proved significant predictors such as crop yield, rainfall variability 
+and the superiority of the models to conventional techniques. The outcomes reveal that 
+AI can offer an effective solution to increase food production and maintain forests at 
+the same time. This framework allows for the formulation of specific recommendations 
+for policy init iatives because it incorporates empirical evidence. Further research 
+should improve the modularity, the real -time monitoring system and the access to the 
+algorithm to further increase the impact of AI on sustainable land management and the 
+chopping down of forests. 
+ 
+DOI: https://doi.org/10.63471/jsae24005  @ 2024 Journal of Sustainable Agricultural 
+Economics (JSAE), C5K Research Publication   
+Keywords:  
+AI in Agriculture, Deforestation 
+Reduction, Sustainable Land Use, 
+Precision Farming, 
+Environmental Monitorin 
+ 
+1. Introduction 
+The deforestation process, which entails the removal or 
+reduction of forests through cutting or burning of trees, 
+has remained a concern to global conservationists and 
+policymakers. The situation has worsened in the United 
+States since the country has expanded  the agricultural 
+land area to feed the growing population’s demand for 
+food, and this has affected Biodiversity, water, and 
+carbon security. This fact is the reason why the conflict 
+between the yields in agricultural production and 
+environmental protection has become a major issue. The 
+goal of this paper is to describe the AI approaches to 
+fight against deforestation in U.S. agriculture and the 
+ways to neutralize its consequences for the agriculture 
+yield. 
+1.1. The Extent and Intensity of Deforestation in 
+Agriculture of the USA 
+Large monoculture farming, such as corn, soybean and 
+wheat farming, is among the leading causes of 
+deforestation throughout the United States of America 
+(Berejka, 2018). Data from the Global Forest Watch 
+shows that within the period 2001 -2023, the United 
+States of America lost about 47.9 Mha of tree cover, the 
+main cause of which was agricultural produc tion. The 
+conversion of forests into croplands and pastures 
+removes trees and shrubs that can form the main source 
+of rainfall, changes the physical and chemical properties 
+of the soil, and impacts the local biophysical 
+environment, besides contributing to greenhouse gas 
+emissions (Chu &amp; Karr, 2016; Psistaki et al., 2024). 
+Silvicultural modification has other ramifications that 
+are not limited to the areas where the lands have been 
+cleared (Achim, 2022). This results in loss of soil cover 
+and fertility, which threatens the future sustainable 
+production of crops in the region. In addition, forests are 
+reservoirs of CO₂, which they use to create other things, 
+effectively ‘locking it up’ (Brack, 2019; Yadav et al., 
+2022; Li et al., 2023). Their removal aggravates climate 
+change and consequently expose farmers into a vicious 
+cycle of reducing agricultural productivity through 
+Journal of Sustainable Agricultural Economics  
+"Volume 1, Issue 1, Year 2024" 
+website: https://www.c5k.com </p><p>Rakibul Hasan (2024)                                                                                                                                              JSAE, 1(1), pp. 22-32.  
+ 
+23 
+ 
+increasing the intensity of climate shocks, decreasing 
+rainfall, and pest incidence. 
+1.2. Difficulties in Traditional Methods 
+Traditional methods of controlling the process include, 
+more often, fixed -land use maps, field inspection at 
+regular time intervals, and remote sensing. While these 
+approaches have contributed to understanding 
+deforestation trends, they have significant limitations: 
+Time Lag: Static maps and survey data often fail to 
+capture real -time changes in land use, making timely 
+interventions difficult. 
+Scalability Issues: Field surveys are resource -intensive 
+and impractical for monitoring vast agricultural 
+landscapes. 
+Data Limitations: Satellite imagery, although invaluable, 
+is often underutilized due to the lack of advanced 
+analytical tools to interpret the data effectively. 
+Government-led initiatives like conservation easement 
+and reforestation have been tried with some measure of 
+success, but these are not as specific as they should be 
+when identifying areas most prone to such incidents. 
+Unfortunately, such measures do not g o far enough to 
+address the aforementioned root causes of deforestation 
+if predictive analytics are not incorporated. Integrating 
+a more complex and flexible system that utilizes modern 
+technology is necessary. 
+1.3. AI as a Transformative Tool 
+AI has the potential to revolutionize the fight against 
+deforestation (Shivaprakash et al., 2022; Raihan, 2023). 
+With the help of big data, AI can analyze deforestation 
+trends, identify emerging threats, and recommend 
+specific actions. Its applications are  closely associated 
+with agriculture, as it requires accuracy and 
+optimization of processes to achieve the highest yields 
+while preserving the environment. 
+1.3.1. Remote sensing and Monitoring 
+Machine learning algorithms can analyze satellite 
+imagery in large batches, accurately detecting areas of 
+deforestation. For instance, there is the Convolutional 
+Neural Networks (CNNs) where high -resolution 
+imagery can be used to assess the changes in land cover. 
+1.3.2. Predictive Analytics 
+ Other techniques, like gradient boosting machines 
+(GBM), can be employed to determine regions of high 
+deforestation based on historical data. These models 
+include the calculation of many factors, including yields, 
+soil fertility, rainfall and the market p rice, which 
+provides a full risk assessment. 
+1.3.3. Policy Impact Simulation 
+ ABMs can simulate policy measures such as subsidies 
+for practicing sustainable farming or fines for unlawful 
+land clearing. This facilitates quick evaluation of the 
+results of interventions before they are carried out, 
+hence allocating resources where they are most effective. 
+1.3.4. Optimization of Land Use 
+ It can identify potential agricultural lands or regions for 
+growing crops compactly, and hence, it does not support 
+deforestation. Some of them are clustering and spatial 
+analysis, which are used to position land correctly and 
+ensure the balance of ecosystems.  
+1.4. Multidisciplinary Approach to AI Integration 
+AI application in the fight against deforestation implies 
+that people from different disciplines, such as computer 
+and information science, environmental science, 
+agriculture, and policy, will have to collaborate. Domain 
+knowledge enhances AI capabilities by filtering results 
+obtained from big data analysis to sensible and 
+implementable solutions. For instance: 
+• Environmental Scientists: Provide information on 
+the impact of deforestation on the environment and 
+on the possibility of developing means of 
+protecting it. 
+• Agronomists: Give guidelines on farming that will 
+minimize the conversion of land from one use to the 
+other. 
+• Policymakers: They are important to ensure that 
+AI’s recommendations are aligned with the laws 
+and societal goals. 
+1.5. Opportunities and Benefits 
+Implementing AI-driven strategies in US agriculture can 
+yield multiple benefits: 
+1. Enhanced Monitoring: Real -time monitoring 
+enables an appropriate response to cases of 
+unlawful undertaking of deforestation and other 
+non-sustainable activities. 
+2. Resource Efficiency: AI assists in optimizing the 
+utilization of the available resources so that, for 
+instance, effort to reduce the usage of the resources 
+is well aligned to areas of high usage. 
+3. Economic Incentives: In other words, there is 
+compensation of creating more value to farmers 
+and more value to the environment in terms of 
+reducing environmental impact of farming. 
+4. Scalability: AI solutions are flexible and can be 
+implemented in various regions as far as different 
+agricultural terrains and causes of deforestation are 
+concerned. 
+In addition, AI can promote public-private partnerships 
+as they are built on a data-driven approach. For instance, 
+AI can help agribusinesses make the right decisions 
+towards sustainable practices once they understand the 
+trends in data. At the same time, governments can use 
+the data to develop better incentive programs. 
+Rakibul Hasan (2024)                                                                                                                                              JSAE, 1(1), pp. 22-32.  
+ 
+24 
+ 
+1.6. The Urgency of Action 
+The call to address the issue of deforestation in US 
+agriculture cannot be overemphasized. The agricultural 
+sector is, therefore, both at the heart of the cause of the 
+problem and the key to its resolution. In its efforts to 
+deliver on climate goals and feed its growing population, 
+the United States can adopt AI -based solutions. This 
+paper demonstrates that farming can benefit from 
+technology and be sustainable. 
+The focus of this paper will be to analyze how AI could 
+be used to reduce deforestation in agriculture in the 
+United States. Integrating an interdisciplinary and 
+systematic approach to research provides guidance to 
+policymakers, researchers, and practition ers on the 
+journey toward sustainability. The following sections of 
+this paper describe this radical shift in thinking’s 
+technical methods, efficacy, and dissemination of results 
+to inform the global discourse on sustainable land use. 
+2. Related Works  
+Recent studies in tackling deforestation through the use 
+of AI employ the most modern developments in remote 
+sensing, machine learning and geospatial analysis. This 
+section provides a literature review of the current 
+literature on the use of AI -based techn iques in the 
+tracking, forecasting, and regulation of deforestation, 
+especially with regard to agriculture in the United States. 
+2.1. Remote Sensing and Land Use Mapping with AI 
+The most fundamental approach has been remote 
+sensing, which involves the use of satellite pictures to 
+detect shifts in land use. There is literature on this 
+process, and the later works have incorporated AI 
+techniques to enhance its effectiveness. For instance, the 
+high-resolution imagery of the sentinel-2 and Landsat-8 
+satellites has been studied through CNNs (Pouliot et al., 
+2018; Toress et al., 2021). These models can 
+differentiate the forested and the deforested areas with a 
+very high level of accuracy, especially in the mixed 
+land-use systems. 
+In another study, Wagner et al. (2023) showed how the 
+machine learning approach can process the datasets on 
+global forest cover and revitalize the deforestation rates 
+annually. Though this has a global perspective, the 
+applicability of this approach to regional contexts, such 
+as agriculture in the United States, is shown. Similar to 
+Masolele et al. (2021) and Neves et al. (2023), the 
+deforestation patterns of both spatial and temporal data 
+were learned using a CNN-RNN hybrid model. Among 
+these models, the l atter is suitable for monitoring the 
+conversion of forested land to agricultural use. 
+2.2. Deforestation Hotspot Predictive Models 
+Another important feature of the proactive conservation 
+approach is the identification of places that can become 
+deforested. RF and GBM have been employed in this 
+application. These models of deforestation probabilities 
+are analyzed with historical land use data, climatic 
+variables, and socioeconomic factors. An example is 
+Alu (2018), who applied RF to predict areas prone to 
+deforestation in Nigeria. The geographical emphasis is 
+different, but the research approach can be  easily 
+applied to the analysis of U .S. agriculture. Wen et al. 
+(2024) have also used predictive models to assess the 
+effects of movement in the prices of commodities in the 
+conversion of land. This line of research is particularly 
+relevant to farmers in the United States who have 
+recently l eft forests to cultivate high -demand crops, 
+including soybeans and corn. 
+2.3. Policy Impact Simulation with AI 
+The other area that I find promising in the application of 
+AI is the capacity to mimic the impacts of policy 
+changes. Currently, Agent -based Models (ABMs) are 
+being utilized increasingly to model the dynamics of the 
+relationship between the landowners, the policy-makers 
+and the physical environment (Shahpari, 2019). These 
+models facilitate the assessment of the more extended 
+effects of certain policies, such as conservation 
+easements, reforestation incentives, or fines for 
+unauthorized cutting. For example,  Coronese et al. 
+(2023) created an ABM that describes land use choices 
+and shows how economic incentives affect 
+deforestation. This research is located geographically 
+outside of the U.S. However, its conceptual 
+configuration may be transposed to the Americ an 
+context because federalism is a crucial feature of the 
+U.S. political system that controls land use. AI -driven 
+simulations by Lee et al. (2024) also showed the value 
+of combining economic and ecological data to 
+determine optimal conservation strategies. 
+2.4. AI and Precision Agriculture Integration 
+Also, applying AI technology in precision agriculture 
+reduces deforestation since the technology allows the 
+right use of the land. Research has demonstrated how 
+specific AI -based technologies can detect areas of 
+unused farmland and thus lower the demand fo r 
+deforestation. For example, spatial clustering 
+algorithms have been used to identify areas where crop 
+intensification may occur without the expansion of 
+agricultural land. Using clustering approaches, Teilhard 
+et al. (2012) isolated regions requiring spe cific 
+intervention due to low production. Such insights are 
+critical in regions such as the Midwest, where 
+agricultural productivity correlates with deforestation. 
+Besides, the specific application of AI has also been 
+used in crop field changes and soil erosion, which has a 
+deforestation effect. 
+2.5. Ethical and Practical Challenges 
+AI has the potential to be used in deforestation, but there 
+are problems with it. From the literature, emerging 
+trends include the first, second, and third forms of bias, 
+data privacy issues, and digital inequalities. For 
+example, Venkatasubbu and Krishnam oorthy (2022) 
+Rakibul Hasan (2024)                                                                                                                                              JSAE, 1(1), pp. 22-32.  
+ 
+25 
+ 
+have explained that if the training set is prejudiced, it 
+will have a more profound effect on the oppressed class. 
+Moreover, AI tools are hardly available in rural areas 
+where deforestation is probable. These are issues we are 
+currently working on in terms of fairness-aware 
+algorithms and building up digital infrastructure to 
+address such problems. Elufioye et al. (2024) agree that 
+the feedback of the stakeholders should be incorporated 
+into the AI model design so that the needs of the locals 
+can be addressed through the technology they develop. 
+The work to date shows how AI can be used to improve 
+the fight against deforestation. It demonstrates the 
+potential of AI -driven strategies to improve the 
+accuracy of remote sensing, forecast hotspots, and 
+estimate the effects of policy decisions, making AI -
+driven strategies a durable framework for sustainable 
+land management. However, the effectiveness is not 
+possible without ethical issues or equal opportunities. 
+Building on this basis, the current study seeks to directly 
+apply and combine these approaches into a systematic, 
+method-specific approach for the context of the U.S. 
+agricultural sector. This approach is needed to bridge the 
+gap between technology and adoption with the view of 
+promoting a more sustainable link between agriculture 
+and forest conservation.
+3. Proposed Methodology 
+As a methodologically integrated research, presented in 
+Fig. 1, this paper uses AI to track, forecast, and control 
+deforestation in US agriculture. It involves gathering 
+information from various sources, cleaning and 
+transforming this information in order to analyze it, 
+using state -of-the-art AI techniques, and final ly 
+interpreting the results to find meaningful information 
+to use. All the stages are crucial to efficiently coping 
+with them. The methodology follows a structured 
+workflow comprising four stages: recognition of data, 
+data cleaning, creation of the AI mode l and 
+interpretation of results. The workflow begins by 
+integrating datasets from various sources: remote 
+sensing data, agricultural records and climatic databases. 
+The preprocessing of these datasets includes dealing 
+with the missing values and features a nd applying the 
+scaling methods. Once data is prepared, it is fed into AI 
+models that perform tasks such as identifying areas of 
+deforestation and assessing policy scenarios. The  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Fig.1. Workflow 
+findings are then analyzed to offer relevant advice to 
+clients. 
+3.1. Data Collection 
+The first is to gather information from credible sources  
+(Table 1) . Deforestation patterns important to forest 
+cover and vegetation indices are obtained from Sentinel-
+2 and Landsat-8 satellite images. The U.S. Department 
+of Agriculture (USDA) provides agricultural data, 
+including crop types, yields, and land use changes. 
+Finally, we integrate additional climatic and 
+socioeconomic variables (rainfall, temperature, road 
+networks, population density) to understand the 
+multifaceted drivers of deforestation. 
+Table 1. Dataset Characteristics 
+Data Type Source Attribute
+s 
+Purpose 
+Remote 
+Sensing Data 
+Sentine
+l-2 
+Forest 
+cover, 
+NDVI 
+Monitor 
+land-cover 
+changes 
+Agricultural 
+Data 
+USDA Crop 
+yield, 
+land-use 
+type 
+Predict 
+hotspots 
+Climatic 
+Data 
+NOAA Rainfall, 
+temperatu
+re 
+Analyze 
+environment
+al drivers 
+Socioecono
+mic Data 
+Census 
+Bureau 
+Populatio
+n density, 
+road 
+proximity 
+Model 
+anthropogen
+ic factors 
+ 
+3.2. Data Preprocessing </p><p>Rakibul Hasan (2024)                                                                                                                                              JSAE, 1(1), pp. 22-32.  
+ 
+26 
+ 
+This means the collected data is clean, consistent, and 
+ready for the AI model application. Statistical methods 
+like mean imputation impute missing values for climatic 
+variables. Using the Z -score method, outliers are 
+removed to maintain data integrity. Enhancing the 
+dataset involves feature engineering. Labeling encodes 
+translates categories, for instance, different crop types 
+into numerical characteristics. Below, Mutual 
+Information (MI) scoring provides the order of features 
+concerning their relevance to the issue of deforestation. 
+Table 2. Feature Importance Analysis 
+Feature Mutual Information 
+Score 
+Forest Cover Change 0.78 
+Crop Yield 0.64 
+Rainfall Variability 0.59 
+Road Proximity 0.45 
+ 
+Table 2 shows Feature Importance Analysis. Three 
+scaling methods (standardization, min-max scaling, and 
+normalization) are used to bring the scale of the 
+variables to a standardized level. This eliminates any 
+chance of domination of a specific feature on the 
+model’s output. 
+3.3. AI Model Development 
+The AI -driven methodology involves three primary 
+tasks: deforestation identification, hotspot mapping and 
+policy impact assessment. For the detection of 
+deforestation, satellite images are classified into  
+deforested or non -deforested areas using convolutional 
+neural networks (CNNs). These models are excellent for 
+analyzing spatial patterns using high-resolution imagery 
+data. GBMs estimate the areas where deforestation is 
+most likely to occur based on data on agriculture, 
+climate and social conditions. These  models give 
+precise risk evaluations using ensemble learning. 
+Agent-based Models (ABMs) also mimic the impact of 
+policy interventions such as reforestation incentives or 
+disincentives for the Illegal removal of trees and provide 
+long-term outcomes. 
+3.4. Model Training and Evaluation 
+To overcome the problem of overfitting, the dataset is 
+divided 80/20 between the training and testing sets. 
+Hence for assessment, metrics such as accuracy, 
+precision, recall, F1 -score and AUC -ROC for the 
+operating characteristic receiver curve are used. They 
+afford an umbrella view of each model’s utility. 
+4. Evaluation 
+In this section, the suitability of the proposed AI-driven 
+strategies in the fight against deforestation in US 
+agriculture is evaluated in terms of performance. The 
+evaluation relates to the precision of the model, the 
+comparison of the scaling techniques,  the simulation of 
+policies and the importance of features. The findings are 
+presented in the form of graphs, charts and tables to give 
+the readers a general impression of the results. 
+Model Performance Metrics 
+In this research, the evaluation of the accuracy, precision, 
+recall, F1 -score and AUC -ROC of the AI models was 
+established, shown in Table 3 . These measures assess 
+the models' ability to predict their robustness across  
+different tasks. The table below summarizes the metrics 
+for the three primary tasks: hotspot prediction use, 
+deforestation identification, and policy influence 
+testings. 
+Table 3. Performance Metrics of AI Models 
+Model Accura
+cy (%) 
+Preci
+sion 
+(%) 
+Reca
+ll 
+(%) 
+F1-
+Scor
+e 
+(%) 
+AUC
+-
+ROC 
+Convoluti
+onal 
+Neural 
+Network 
+(CNN) 
+94.0 92.5 91.8 92.1 0.94 
+Gradient 
+Boosting 
+Machine 
+(GBM) 
+91.5 89.7 90.2 90.0 0.91 
+Agent-
+Based 
+Model 
+(ABM) 
+87.8 85.4 86.1 85.8 N/A 
+ 
+4.1 Results Interpretation 
+Rakibul Hasan (2024)                                                                                                                                              JSAE, 1(1), pp. 22-32.  
+ 
+27 
+ 
+1. Results show that CNNs achieve 94% accuracy in 
+classifying deforestation areas. An AUC of 0.91 
+suggests that GBMs are reliable in predicting 
+hotspots. Using ABMs to simulate policy, we find 
+that reforestation subsidies could reduce 
+deforestation by 18% in high-risk areas. 
+2. For deforestation detection, CNN achieved the 
+highest accuracy, classifying forested and 
+deforested regions. 
+3. The predictive capabilities of GBM in identifying 
+deforestation hotspots were robust, with an AUC -
+ROC of 0.91. 
+4. The model was able to effectively simulate policy 
+impacts, and the model was shown to apply to 
+evaluating intervention outcomes. 
+4.2. Scaling Methods Comparison 
+The models were evaluated under different scaling 
+methods: no scaling, standardization, min -max scaling, 
+and normalization. Each scaling method affected the 
+models differently, as shown in Fig. 2. 
+Fig.2. Impact of Scaling Methods on Model Accuracy 
+4.3. This bar chart shows how scaling methods 
+influence accuracy across CNN, GBM, and ABM. 
+1. No Scaling: Led to lower accuracy due to unbalanced 
+feature contributions. 
+2. Standardization: Improved accuracy moderately by 
+centering features around zero. 
+3. Min-Max Scaling: Delivered the best results, 
+especially for GBM, which achieved 91.5% accuracy. 
+4. Normalization: Enhanced performance for CNN, 
+with an accuracy improvement of 2%, shown in Table 4. 
+Table 4. Model Performance under Different Scaling 
+Methods 
+Scaling 
+Method 
+CNN 
+Accurac
+y (%) 
+GBM 
+Accurac
+y (%) 
+ABM 
+Outcom
+e 
+Varianc
+e (%) 
+No Scaling 89.0 86.2 10.5 
+Standardizatio
+n 
+91.8 89.7 8.2 
+Min-Max 
+Scaling 
+94.0 91.5 7.5 
+Normalization 92.5 88.8 9.0 
+ 
+4.3. Feature Contribution and Importance 
+Feature importance analysis provided insights into the 
+predictors driving deforestation , depicted in Fig. 3 and 
+Table 5. With the use of feature importance scores, the 
+Gradient Boosting Machine (GBM) model established 
+important features. 
+ 
+Fig.3. Feature Importance Analysis 
+Table 5. Feature Importance Scores (GBM) 
+Feature Importance Score 
+Forest Cover Change 0.78 
+Crop Yield 0.64 
+Rainfall Variability 0.59 
+Road Proximity 0.45 
+Population Density 0.38 
+ 
+4.4. Policy Simulation Results 
+Reforestation subsidies and penalties for Illegal forest 
+conversion were policy interventions modeled using the 
+ABM. These simulations assisted in assessing the long-
+run effects of various policy scenarios on deforestation, 
+shown in Fig. 4. </p><p>Rakibul Hasan (2024)                                                                                                                                              JSAE, 1(1), pp. 22-32.  
+ 
+28 
+ 
+ 
+Fig. 4.  Policy scenario outcomes: Deforestation Rate 
+Changes (2023-2027) 
+This line graph shows deforestation rate changes under 
+three scenarios: There are also no policy interventions, 
+reforestation subsidies, and penalties. Table 6 shows 
+Policy Simulation Outcomes.  
+1. No Policy Intervention: The rates of deforestation 
+also rose as the years went by. 
+2. Reforestation Subsidies: Reduced deforestation by 
+18% in high-risk areas. 
+3. Penalties: Curtailed illegal clearing by 25%, 
+although enforcement costs increased. 
+Table 6. Policy Simulation Outcomes 
+Policy 
+Scenario 
+Deforestation 
+Rate (%) 
+Cost of 
+Implementation 
+($M) 
+No 
+Intervention 
+12.5 0.0 
+Reforestation 
+Subsidies 
+10.3 25.4 
+Penalties 9.4 35.8 
+ 
+4.5. AUC-ROC Analysis for Hotspot Prediction 
+The AUC-ROC curve, presented in Fig. 5, evaluates 
+the GBM model's discriminative power in predicting 
+deforestation hotspots. A higher AUC indicates better 
+model performance. 
+ 
+Fig. 5.  AUC-ROC Curve for GBM Model 
+The curve demonstrates an AUC value of 0.92, 
+highlighting strong predictive accuracy. 
+4.6. Confusion Matrix Analysis 
+The confusion matrix for CNN shows the model's 
+performance in classifying deforested vs. non-
+deforested areas. 
+4.7. Confusion Matrix for CNN 
+Table 7. Deforestation 
+ Predicted: 
+Yes 
+Predicted: 
+No 
+Actual: Yes 320 25 
+Actual: No 30 625 
+Table 7 depicts, 
+True Positives (320): Correctly identified deforestation. 
+False Positives (30): Overestimated deforestation risk. 
+True Negatives (625): Correctly identified non -
+deforested areas. 
+False Negatives (25): Missed deforested regions. 
+4.8. Regression Analysis 
+A multiple regression analysis assessed the relationship 
+between key variables and deforestation rates. 
+Regression Equation 
+𝑌= 𝛽0 + 𝛽1(Crop Yield) + 𝛽2(Rainfall Variability) 
++𝛽3(Road Proximity) + 𝜖 
+Table 8. Regression Coefficients 
+Variable Coefficient 
+(β) 
+p-value </p><p>Rakibul Hasan (2024)                                                                                                                                              JSAE, 1(1), pp. 22-32.  
+ 
+29 
+ 
+Crop Yield -0.75 &lt; 0.01 
+Rainfall 
+Variability 
+0.56 0.03 
+Road 
+Proximity 
+0.43 &lt; 0.01 
+Higher crop yields correlate negatively with 
+deforestation as shown in the Fig. 6 below, while rainfall 
+variability and road proximity increase the likelihood of 
+forest loss.  Table 8 and Table 11 mention Regression 
+Coefficients.  
+ 
+Fig.6. Regression Analysis: Crop Yield vs. Deforestation 
+Rate 
+5. Statistical Analysis 
+This section presents the statistical evaluation of the 
+proposed AI-driven strategies to reduce deforestation in 
+U.S. agriculture. The statistical analysis is carried out to 
+validate the performance, find comparative metrics, 
+conduct correlation studies, r egression analysis, and 
+hypothesis testing to check the robustness and reliability 
+of the methodologies. 
+5.1. Through Metrics, we have Performance 
+Validation. 
+We validated the performance of machine learning 
+(ML) models with multiple metrics, including accuracy, 
+precision, recall, F1 -score, and AUC -ROC. Then, we 
+statistically analyzed the results to quantify their 
+consistency and reliability with different scaling 
+techniques and  datasets. A summary of model 
+performance metrics is shown in Table 9. 
+Table 9. Summary of Model Performance Metrics 
+Model Accur
+acy 
+(%) 
+Precisi
+on 
+(%) 
+Rec
+all 
+(%) 
+F1-
+Sco
+re 
+(%) 
+AU
+C-
+RO
+C 
+Convoluti
+onal 
+Neural 
+Network 
+(CNN) 
+94.0 92.5 91.8 92.1 0.94 
+Gradient 
+Boosting 
+Machine 
+(GBM) 
+91.5 89.7 90.2 90.0 0.92 
+ 
+5.2. Statistical Insights 
+Standard Deviation: Across multiple runs, CNN 
+demonstrated a low standard deviation (±0.5% in 
+accuracy), indicating stable performance. 
+Variance Analysis: A one-way ANOV A test confirmed 
+statistically significant differences in performance 
+between scaling techniques (p &lt; 0.05). 
+5.3. Correlation Analysis 
+To understand the relationships between key features 
+and deforestation, Pearson and Spearman correlation 
+coefficients (Table 10) were calculated. 
+Table 10. Correlation Coefficients 
+Feature Pearson 
+Coefficient (r) 
+Spearman 
+Coefficient (ρ) 
+Forest Cover 
+Change 
+0.78 0.81 
+Crop Yield -0.75 -0.72 
+Rainfall 
+Variability 
+0.56 0.59 
+Road 
+Proximity 
+0.43 0.45 
+ 
+5.4. Statistical Insights 
+Forest cover change showed the highest positive 
+correlation with deforestation rates, underscoring its 
+significance as a predictor. Negative correlation with 
+crop yield highlights the role of agricultural 
+optimization in reducing deforestation. Results wer e 
+statistically significant (p &lt; 0.01). 
+5.5. Regression Analysis </p><p>Rakibul Hasan (2024)                                                                                                                                              JSAE, 1(1), pp. 22-32.  
+ 
+30 
+ 
+Multiple regression analysis was performed to quantify 
+the influence of key predictors on deforestation rates. 
+The regression equation is as follows: 
+𝑌=𝛽0+𝛽1(Crop Yield)+𝛽2(Rainfall Variability)+𝛽3(R
+oad Proximity)+𝜖 
+Table 11. Regression Coefficients 
+Variable Coefficient 
+(β) 
+Standard 
+Error 
+(SE) 
+p-value 
+Crop 
+Yield 
+-0.75 0.15 &lt; 0.01 
+Rainfall 
+Variability 
+0.56 0.12 0.03 
+Road 
+Proximity 
+0.43 0.10 &lt; 0.01 
+ 
+5.6. Statistical Insights 
+The model had an R2 value of 0.78, indicating that 78% 
+of the variance in deforestation rates was explained by 
+the predictors. Crop yield was the most significant factor, 
+with a strong negative coefficient ( -0.75, p &lt; 0.01). 
+Rainfall variability and road p roximity were positively 
+associated with deforestation. 
+5.7. Hypothesis Testing 
+To validate the superiority of AI models over traditional 
+methods, paired hypothesis tests were conducted. The 
+null hypothesis (H0) stated that there was no significant 
+difference in performance between the models, while 
+the alternative hypothesis ( 𝐻1) posited that AI models 
+outperformed traditional methods. 
+5.8. Paired t-Test 
+Dataset: Performance scores of GBM vs. logistic 
+regression on the same dataset. 
+Result:  𝑡 =4.12, 𝑝&lt;0.01 
+Interpretation: Reject 𝐻0; GBM significantly 
+outperformed logistic regression. 
+5.9. McNemar's Test 
+Used to compare the classification performance of 
+CNN with decision trees (DT), presented in Table 12. 
+Table 12. McNemar's Test Results 
+Model 
+Pair 
+Correctly 
+Predicted 
+(CNN) 
+Correctly 
+Predicted 
+(DT) 
+p-value 
+Forested 
+vs. 
+Deforested 
+320 275 &lt; 0.05 
+ 
+5.10 Statistical Insights 
+McNemar's test confirmed a significant improvement 
+in CNN's predictions over DT, with a p-value below 
+0.05. 
+5.10.1. Comparative Analysis of Policy Scenarios 
+Agent-Based Models (ABMs) were used to simulate 
+the effects of various policy interventions. Statistical 
+testing was performed to evaluate the impact of these 
+scenarios on deforestation rates. 
+5.10.2. Policy Scenarios Evaluated (Table 13) 
+1. No Intervention. 
+2. Reforestation Subsidies. 
+3. Penalties for Illegal Clearing. 
+Table 13. Policy Scenario Statistics 
+Scenario Mean 
+Deforestatio
+n Rate (%) 
+Standar
+d 
+Deviatio
+n 
+ANOV
+A p-
+value 
+No 
+Intervention 
+14.5 1.8 N/A 
+Reforestatio
+n Subsidies 
+10.3 1.2 &lt; 0.05 
+Penalties 9.4 1.0 &lt; 0.05 
+Rakibul Hasan (2024)                                                                                                                                              JSAE, 1(1), pp. 22-32.  
+ 
+31 
+ 
+ 
+Fig. 7.  Deforestation Rates under Different Policy Scenarios 
+5.10.3. ANOVA Test 
+The analysis confirmed significant differences among 
+the three scenarios (p &lt; 0.05). 
+Post-hoc tests indicated that both reforestation 
+subsidies and penalties significantly reduced 
+deforestation compared to no intervention. 
+5.11. Time-Series Analysis of Deforestation Trends 
+A time -series analysis , as shown in Fig. 8, was 
+conducted to examine deforestation trends over a five -
+year period, with a focus on high-risk regions. Also, Fig. 
+7 shows the Deforestation Rates under Different Policy 
+Scenarios.  
+ 
+Fig. 8.  Time-Series Trends of Deforestation Rates 
+This line graph illustrates deforestation trends under the 
+"No Intervention" scenario compared to the 
+"Reforestation Subsidies" scenario.  The predicted rates 
+of deforestation in the absence of intervention were 
+2.5% per year, while with subsidies, the rates declined 
+by 1.8% per year. 
+6. Conclusion 
+The findings of this research demonstrate how AI 
+solutions can address deforestation risks in U.S. 
+agriculture. The proposed models can help to overcome 
+the main challenges of monitoring and predicting 
+deforestation by combining the data on deforestation 
+from satellite images with agricultural data and 
+socioeconomic characteristics. CNNs differentiated the 
+forest from other classes with relatively high accuracy, 
+and GBMs predicted future hotspots. Due to ABMs, we 
+were able to understand the f uture consequences of 
+policy measures like subsidies for reforestation and 
+fines for land conversion. 
+To confirm the ability of predictors, crop yield, rainfall 
+fluctuation, and proximity to roads to affect 
+deforestation rates, we employed statistical tests of 
+regression and hypothesis testing. Outcomes from 
+policy simulations and time series analyses suggest that 
+information-driven approaches can be useful in 
+achieving lower levels of deforestation under improved 
+circumstances. 
+The findings show that AI can improve both yield and 
+sustainability in agriculture. The above models provide 
+guidance on how individuals in the policy, farming, and 
+stakeholder sectors can effectively manage the land . 
+Future work should expand datasets, such as those for 
+real-time monitoring, and consider the ethical 
+implications of the problem to enhance the effectiveness 
+and accessibility of these strategies. 
+CRedit Authorship Statement 
+Declare the credit and contribution of each author in this 
+research. For example:  
+First author: Conceptualization, writing original draft, 
+methodology. Second author:  data curat ion, writing 
+original draft, validation, analysis. 
+Funding: Funding should mention according to the 
+project  
+ 
+Acknowledgments: It is recommended to provide all 
+acknowledgements  
+ 
+Conflicts of interest: Mention any financial or 
+personal conflict of interest about the work and with 
+the authors.  
+ 
+References 
+Achim, A., Moreau, G., Coops, N. C., Axelson, J. N., 
+Barrette, J., Bédard, S., ... &amp; White, J. C. (2022). The 
+changing culture of silviculture. Forestry, 95(2), 
+143-152. 
+Alu, O. (2021). Predicting Tropical Rainforest 
+Deforestation Using Machine Learning, Remote 
+Sensing &amp; Gis: Case Study of The Cross River 
+National Park, Nigeria. </p><p>Rakibul Hasan (2024)                                                                                                                                              JSAE, 1(1), pp. 22-32.  
+ 
+32 
+ 
+Berejka, C. (2018). Subsidizing Climate Change: How 
+the Agricultural Business is Harming Our Planet. 
+Brack, D. (2019, March). Forests and climate change. In 
+Proceedings of background study prepared for the 
+fourteenth session of the United Nations forum on 
+forests. New York, NY, USA: United Nations 
+Forum on Forests. 
+Chu, E. W., &amp; Karr, J. R. (2016). Environmental impact: 
+Concept, consequences, measurement. Reference 
+module in life sciences, B978-0. 
+Coronese, M., Occelli, M., Lamperti, F., &amp; Roventini, 
+A. (2023). AgriLOVE: agriculture, land -use and 
+technical change in an evolutionary, agent -based 
+model. Ecological Economics, 208, 107756. 
+Elufioye, O. A., Ike, C. U., Odeyemi, O., Usman, F. O., 
+&amp; Mhlongo, N. Z. (2024). Ai -Driven predictive 
+analytics in agricultural supply chains: a review: 
+assessing the benefits and challenges of ai in 
+forecasting demand and optimizing supply in 
+agriculture. Computer Science &amp; IT Research 
+Journal, 5(2), 473-497. 
+Global Forest Watch. (2024). United States 
+deforestation rates &amp; statistics: GFW. 
+https://www.globalforestwatch.org/dashboards/cou
+ntry/USA/#:~:text=From%202001%20to%202023
+%2C%20United,18.6%20Gt%20of%20CO%E2%8
+2%82e%20emissions. 
+Lee, C. C., Hussain, J., &amp; Abass, Q. (2024). An 
+integrated analysis of AI -driven green financing, 
+subsidies, and knowledge to enhance CO2 reduction 
+efficiency. Economic Analysis and Policy. 
+Li, Q., Xia, X., Kou, X., Niu, L., Wan, F., Zhu, J., &amp; 
+Xiao, W. (2023). Forest carbon storage and carbon 
+sequestration potential in Shaanxi Province, China. 
+Forests, 14(10), 2021. 
+Masolele, R. N., De Sy, V., Herold, M., Marcos, D., 
+Verbesselt, J., Gieseke, F., ... &amp; Martius, C. (2021). 
+Spatial and temporal deep learning methods for 
+deriving land -use following deforestation: A pan -
+tropical case study using Landsat time series. 
+Remote Sensing of Environment, 264, 112600. 
+Neves, C. N., Feitosa, R. Q., Adarme, M. X. O., &amp; 
+Giraldi, G. A. (2023). Combining recurrent and 
+residual learning for deforestation monitoring using 
+multitemporal SAR images. arXiv preprint 
+arXiv:2310.05697. 
+Pouliot, D., Latifovic, R., Pasher, J., &amp; Duffe, J. (2018). 
+Landsat super -resolution enhancement using 
+convolution neural networks and Sentinel -2 for 
+training. Remote Sensing, 10(3), 394. 
+Psistaki, K., Tsantopoulos, G., &amp; Paschalidou, A. K. 
+(2024). An Overview of the role of forests in climate 
+change mitigation. Sustainability, 16(14), 6089. 
+Raihan, A. (2023). Artificial intelligence and machine 
+learning applications in forest management and 
+biodiversity conservation. Natural Resources 
+Conservation and Research, 6(2), 3825. 
+Shahpari, S. (2019). Agricultural land use planning: 
+exploring the potential of spatial agent -based 
+modelling (ABM) (Doctoral dissertation, University 
+of Tasmania). 
+Shivaprakash, K. N., Swami, N., Mysorekar, S., Arora, 
+R., Gangadharan, A., Vohra, K., ... &amp; Kiesecker, J. 
+M. (2022). Potential for artificial intelligence (AI) 
+and machine learning (ML) applications in 
+biodiversity conservation, managing forests, and 
+related services in India. Sustainability, 14(12), 
+7154. 
+Teillard, F., Allaire, G., Cahuzac, E., Leger, F., Maigné, 
+E., &amp; Tichit, M. (2012). A novel method for 
+mapping agricultural intensity reveals its spatial 
+aggregation: Implications for conservation policies. 
+Agriculture, ecosystems &amp; environment, 149, 135 -
+143. 
+Torres, D. L., Turnes, J. N., Soto Vega, P. J., Feitosa, R. 
+Q., Silva, D. E., Marcato Junior, J., &amp; Almeida, C. 
+(2021). Deforestation detection with fully 
+convolutional networks in the amazon forest from 
+landsat-8 and sentinel -2 images. Remote Sensing, 
+13(24), 5084. 
+Venkatasubbu, S., &amp; Krishnamoorthy, G. (2022). 
+Ethical Considerations in AI Addressing Bias and 
+Fairness in Machine Learning Models. Journal of 
+Knowledge Learning and Science Technology 
+ISSN: 2959-6386 (online), 1(1), 130-138. 
+Wagner, F. H., Dalagnol, R., Silva-Junior, C. H., Carter, 
+G., Ritz, A. L., Hirye, M. C., ... &amp; Saatchi, S. (2023). 
+Mapping tropical forest cover and deforestation with 
+Planet NICFI satellite images and deep learning in 
+Mato Grosso State (Brazil) from 2015 to 2021. 
+Remote Sensing, 15(2), 521. 
+Wen, S., Wang, Y., Song, H., Liu, H., Sun, Z., &amp; Bilal, 
+M. A. (2024). Integrated Predictive Modeling and 
+Policy Factor Analysis for the Land Use Dynamics 
+of the Western Jilin. Atmosphere, 15(3), 288. 
+Yadav, V. S., Yadav, S. S., Gupta, S. R., Meena, R. S., 
+Lal, R., Sheoran, N. S., &amp; Jhariya, M. K. (2022). 
+Carbon sequestration potential and CO2 fluxes in a 
+tropical forest ecosystem. Ecological Engineering, 
+176, 106541. 
+ </p>

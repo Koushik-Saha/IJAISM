@@ -89,15 +89,21 @@ export default function CreateUserModal({ isOpen, onClose, onSuccess, currentUse
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Temp Password</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1 flex justify-between">
+                            <span>Temp Password</span>
+                            <span className="text-[10px] text-amber-600 font-bold uppercase tracking-tight">Security Lock</span>
+                        </label>
                         <input
                             type="password"
                             required
                             minLength={6}
-                            className="w-full border rounded px-3 py-2"
+                            className="w-full border rounded px-3 py-2 focus:ring-1 focus:ring-primary outline-none"
                             value={formData.password}
                             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                         />
+                        <p className="text-[10px] text-gray-400 mt-1 italic">
+                            Note: For security, Admins cannot change this password after creation.
+                        </p>
                     </div>
 
                     <div>

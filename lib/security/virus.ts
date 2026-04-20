@@ -1,9 +1,12 @@
 
 /**
- * Virus Scanning Service (Mock)
+ * SECURITY WARNING: Virus Scanning Service (Mock Simulation)
  * 
- * In a production environment, this would integrate with ClamAV or a cloud scanning service.
- * For this implementation, we simulate scanning based on file metadata.
+ * IMPORTANT: This is currently a HEURISTIC-BASED SIMULATION for demonstration purposes.
+ * It does NOT provide robust protection against sophisticated malware.
+ * 
+ * In a production environment, you MUST integrate this with a professional
+ * scanning engine like ClamAV, AWS Inspector, or a cloud security provider.
  */
 
 import { logger } from '@/lib/logger';

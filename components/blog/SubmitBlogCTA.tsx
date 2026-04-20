@@ -4,8 +4,11 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AuthModal from '@/components/ui/AuthModal';
 
+import { useSettings } from '@/context/SettingsContext';
+
 export default function SubmitBlogCTA() {
   const router = useRouter();
+  const { settings } = useSettings();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -40,7 +43,7 @@ export default function SubmitBlogCTA() {
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
         title="Share Your Perspective"
-        description="To maintain the quality of the C5K insights blog, we require authors to sign in before submitting. This allows you to track your editorial reviews and manage your contributions seamlessly."
+        description={`To maintain the quality of the ${settings.site_name} insights blog, we require authors to sign in before submitting. This allows you to track your editorial reviews and manage your contributions seamlessly.`}
       />
     </>
   );

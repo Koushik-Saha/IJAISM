@@ -9,13 +9,20 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
     const { id } = await params;
-    const user = await prisma.user.findUnique({
-        where: { id },
-        select: { name: true, university: true },
-    });
+    const [user, siteNameSetting] = await Promise.all([
+        prisma.user.findUnique({
+            where: { id },
+            select: { name: true, university: true },
+        }),
+        prisma.globalSettings.findUnique({
+            where: { key: "site_name" }
+        })
+    ]);
+    const siteName = siteNameSetting?.value || "C5K";
+
     return {
-        title: `${user?.name || "Author Profile"} - C5K Platform`,
-        description: `View publications and academic profile of ${user?.name} at ${user?.university || "C5K"}.`,
+        title: `${user?.name || "Author Profile"} - ${siteName}`,
+        description: `View publications and academic profile of ${user?.name} at ${user?.university || siteName}.`,
     };
 }
 

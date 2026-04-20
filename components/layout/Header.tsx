@@ -17,6 +17,7 @@ import {
 } from "@heroicons/react/24/outline";
 import AuthModal from "@/components/ui/AuthModal";
 import NotificationBell from "@/components/ui/NotificationBell";
+import { useSettings } from "@/context/SettingsContext";
 
 interface UserInfo {
   userId: string;
@@ -28,6 +29,7 @@ interface UserInfo {
 
 export default function Header() {
   const router = useRouter();
+  const { settings } = useSettings();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [user, setUser] = useState<UserInfo | null>(null);
@@ -215,8 +217,16 @@ export default function Header() {
           <Link href="/" className="flex items-center flex-shrink-0">
             <div className="flex items-center gap-3 mr-4 lg:mr-8">
               <div className="w-14 h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 relative flex-shrink-0">
-                <Image src="/logo.png" alt="C5K Logo" fill className="object-contain" />
+                <Image 
+                  src={settings.site_logo_url || "/logo.png"} 
+                  alt={`${settings.site_name} Logo`} 
+                  fill 
+                  className="object-contain" 
+                />
               </div>
+              <span className="text-xl md:text-2xl font-black font-serif text-accent tracking-tight leading-none">
+                {settings.site_name}
+              </span>
 
             </div>
           </Link>
@@ -647,7 +657,7 @@ export default function Header() {
                         className="bg-accent text-white px-6 py-3 rounded font-bold hover:bg-accent-dark transition-colors text-center text-base"
                         onClick={() => setIsMenuOpen(false)}
                       >
-                        JOIN C5K
+                        JOIN {settings.site_name}
                       </Link>
                     </>
                   )}

@@ -34,11 +34,14 @@ export default async function CurrentIssuePage({
             articles: {
                 orderBy: { pageStart: "asc" },
                 include: {
-                    author: { select: { name: true } }
+                    author: { select: { name: true } },
+                    coAuthors: { select: { name: true, isMain: true }, orderBy: { order: "asc" } }
                 }
             }
         }
     });
+
+    const ADMIN_NAMES = ['C5K Executive Administrator', 'The Mother Admin'];
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -78,31 +81,50 @@ export default async function CurrentIssuePage({
                             <h3 className="text-lg font-bold text-gray-800 mb-4 uppercase tracking-wider">Table of Contents</h3>
                             <div className="divide-y divide-gray-100">
                                 {currentIssue.articles.length > 0 ? (
-                                    currentIssue.articles.map((article) => (
-                                        <div key={article.id} className="py-4">
-                                            <Link href={`/articles/${article.id}`} className="block group">
-                                                <h4 className="text-lg font-semibold text-[#006d77] group-hover:underline mb-1">
-                                                    {article.title}
-                                                </h4>
-                                            </Link>
-                                            <div className="text-sm text-gray-700 mb-1">
-                                                <span className="font-medium">{article.author.name}</span>
-                                            </div>
-                                            <div className="text-xs text-gray-500">
-                                                Pages {article.pageStart}-{article.pageEnd} • {article.articleType}
-                                            </div>
-                                            <div className="mt-2 flex gap-2">
-                                                <Link href={`/articles/${article.id}`} className="text-xs text-[#c05621] hover:underline font-semibold uppercase">
-                                                    Abstract
+                                    currentIssue.articles.map((article) => {
+                                        // Filter out admin names to find real authors
+                                        let displayAuthors = [];
+                                        if (!ADMIN_NAMES.includes(article.author.name)) {
+                                            displayAuthors.push(article.author.name);
+                                        }
+                                        article.coAuthors.forEach(ca => {
+                                            if (!ADMIN_NAMES.includes(ca.name)) {
+                                                displayAuthors.push(ca.name);
+                                            }
+                                        });
+
+                                        // De-duplicate in case main author is also in coAuthors
+                                        const uniqueAuthors = Array.from(new Set(displayAuthors));
+                                        const authorText = uniqueAuthors.length > 0 
+                                            ? uniqueAuthors.join(", ") 
+                                            : article.author.name; // Fallback to admin if absolutely no other name
+
+                                        return (
+                                            <div key={article.id} className="py-4">
+                                                <Link href={`/articles/${article.id}`} className="block group">
+                                                    <h4 className="text-lg font-semibold text-[#006d77] group-hover:underline mb-1">
+                                                        {article.title}
+                                                    </h4>
                                                 </Link>
-                                                {article.pdfUrl && (
-                                                    <a href={article.pdfUrl} className="text-xs text-[#006d77] hover:underline font-semibold uppercase">
-                                                        PDF
-                                                    </a>
-                                                )}
+                                                <div className="text-sm text-gray-700 mb-1">
+                                                    <span className="font-medium">{authorText}</span>
+                                                </div>
+                                                <div className="text-xs text-gray-500">
+                                                    Pages {article.pageStart}-{article.pageEnd} • {article.articleType}
+                                                </div>
+                                                <div className="mt-2 flex gap-2">
+                                                    <Link href={`/articles/${article.id}`} className="text-xs text-[#c05621] hover:underline font-semibold uppercase">
+                                                        Abstract
+                                                    </Link>
+                                                    {article.pdfUrl && (
+                                                        <a href={article.pdfUrl} className="text-xs text-[#006d77] hover:underline font-semibold uppercase">
+                                                            PDF
+                                                        </a>
+                                                    )}
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))
+                                        );
+                                    })
                                 ) : (
                                     <p className="text-gray-500 italic">No articles in this issue yet.</p>
                                 )}

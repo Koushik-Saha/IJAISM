@@ -22,6 +22,25 @@ export async function GET(req: NextRequest) {
     try {
         // Handle Remote URL (Vercel Blob / S3)
         if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
+            const urlObj = new URL(filePath);
+            
+            // SECURITY: SSRF Protection - Only allow trusted domains
+            const allowedDomains = [
+                's3.amazonaws.com',
+                '.s3.', // Matches region-specific buckets like bucket.s3.us-east-1.amazonaws.com
+                'public.blob.vercel-storage.com',
+                'c5k.com'
+            ];
+
+            const isAllowed = allowedDomains.some(domain => 
+                urlObj.hostname.endsWith(domain.startsWith('.') ? domain : `.${domain}`) || 
+                urlObj.hostname === domain
+            );
+
+            if (!isAllowed) {
+                logger.warn('SSRF Attempt blocked: Unauthorized remote file domain', { filePath });
+                return NextResponse.json({ error: 'Access Denied: Unauthorized file source' }, { status: 403 });
+            }
 
             // Generate S3 Pre-signed URL directly to solve AccessDenied for private buckets
             if (filePath.includes('.s3.') && filePath.includes('amazonaws.com')) {

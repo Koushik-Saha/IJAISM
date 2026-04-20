@@ -23,7 +23,10 @@ type HeroSlideProps = {
     secondaryButtonLink?: string | null;
 };
 
+import { useSettings } from '@/context/SettingsContext';
+
 export default function HeroCarousel({ slides }: { slides: HeroSlideProps[] }) {
+    const { settings } = useSettings();
     if (!slides || slides.length === 0) return null;
 
     return (
@@ -65,7 +68,7 @@ export default function HeroCarousel({ slides }: { slides: HeroSlideProps[] }) {
                             <div className="max-w-2xl">
                                 {/* Eyebrow tag */}
                                 <span className="inline-block text-xs font-bold tracking-widest uppercase text-amber-400 mb-4 bg-amber-400/10 px-3 py-1 rounded-full border border-amber-400/30">
-                                    C5K Academic Publishing
+                                    {settings.site_name} Academic Publishing
                                 </span>
 
                                 <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 leading-tight drop-shadow-lg">

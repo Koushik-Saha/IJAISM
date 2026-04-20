@@ -1,7 +1,11 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error('FATAL: JWT_SECRET environment variable is not defined. Authentication cannot proceed.');
+}
 
 // Role Definitions
 export const ROLES = {
@@ -23,12 +27,17 @@ export interface TokenPayload {
 }
 
 export function generateToken(payload: TokenPayload): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
+  return jwt.sign(payload, JWT_SECRET, { 
+    expiresIn: '7d',
+    algorithm: 'HS256'
+  });
 }
 
 export function verifyToken(token: string): TokenPayload | null {
   try {
-    return jwt.verify(token, JWT_SECRET) as TokenPayload;
+    return jwt.verify(token, JWT_SECRET, {
+      algorithms: ['HS256']
+    }) as TokenPayload;
   } catch (error) {
     return null;
   }

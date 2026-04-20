@@ -116,6 +116,12 @@ export default async function ReadArticlePage({ params }: { params: Promise<{ id
 
     const themeColor = article.journal.themeColor || "#007398";
 
+    const settings = await prisma.globalSettings.findMany({
+        where: { key: { in: ['site_name', 'site_logo_url'] } }
+    });
+    const siteName = settings.find(s => s.key === 'site_name')?.value || "C5K";
+    const siteLogo = settings.find(s => s.key === 'site_logo_url')?.value || "/logo.png";
+
     return (
         <div className="flex flex-col min-h-screen bg-white font-sans text-[#1b1c1d]">
 
@@ -124,8 +130,8 @@ export default async function ReadArticlePage({ params }: { params: Promise<{ id
                 <div className="flex items-center gap-6">
                     <Link href="/" className="flex items-center gap-2">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src="/logo.png" alt="C5K" className="h-8 w-auto object-contain opacity-90" />
-                        <span className="text-[#e8701a] font-serif text-xl font-bold tracking-tight hidden sm:block">C5K Platform</span>
+                        <img src={siteLogo} alt={siteName} className="h-8 w-auto object-contain opacity-90" />
+                        <span className="text-[#e8701a] font-serif text-xl font-bold tracking-tight hidden sm:block">{siteName}</span>
                     </Link>
                     <nav className="hidden lg:flex items-center gap-5 text-[14px] font-medium text-[#4d4d4d]">
                         <Link href="/journals" className="hover:text-[#007398] transition-colors">Journals</Link>
@@ -475,8 +481,8 @@ export default async function ReadArticlePage({ params }: { params: Promise<{ id
                 <div className="max-w-[1400px] mx-auto text-[12px] text-[#4d4d4d] flex flex-col md:flex-row items-center justify-between gap-4">
                     <div className="flex items-center gap-2 opacity-80">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src="/logo.png" alt="C5K" className="h-5 w-auto" />
-                        <span className="font-bold">C5K Platform © {new Date().getFullYear()}</span>
+                        <img src={siteLogo} alt={siteName} className="h-5 w-auto" />
+                        <span className="font-bold">{siteName} © {new Date().getFullYear()}</span>
                     </div>
                     <div className="flex items-center gap-5 flex-wrap justify-center">
                         <Link href="/about" className="hover:underline hover:text-[#007398]">About C5K</Link>

@@ -1,0 +1,1300 @@
+<p> 
+ 
+ 
+ 
+ 
+ 
+*Corresponding author: engineersamiun@gmail.com (Md Samiun)  
+All rights are reserved @ 2024 https://www.c5k.com , https://doi.org/10.63471/jamsai24003  
+Cite: Md Samiun, Md Azhad Hossain, Professor Sanaz Tehrani (2024). Deep Learning Models For Early Detection Of Alzheimer’s Diseas
+e Using Neuroimaging Data. Journal of Advances in Medical Sciences and Artificial Intelligence, 1(1), pp. 1-11.  
+                                                                                                                                                                                                                   1 
+ 
+Research Article 
+Deep Learning Models for Early Detection of Alzheimer’s Disease 
+Using Neuroimaging Data 
+Md Samiun1,*, Md Azhad Hossain1, Professor Sanaz Tehrani2  
+1Department of Business Administration, International American University, Los Angeles, CA 90010, USA 
+2Faculty Member of Westcliff University &amp; International, American University,  Los Angeles, CA 90010, USA 
+*Corresponding Author: engineersamiun@gmail.com   
+ 
+ 
+A R T I C LE   I N F O 
+  
+A B S T R A C T 
+Article history:  
+03 Jul 2024 (Received) 
+15 Aug 2024 (Accepted) 
+22 Aug2024 (Published Online) 
+Early identification is essential for successful intervention in Alzheimer's disease, a 
+progressive neurodegenerative disease that is a major contributor to cognitive loss in 
+older persons. Alzheimer's disease is difficult to detect in its early stages using 
+conventional diagnostic techniques like neuroimaging and cogni tive tests. This study 
+investigates the use of deep learning models  specifically, Convolutional Neural 
+Networks, or CNNs  to neuroimaging data to diagnose Alzheimer's disease early and 
+the prognostic ability of Alzheimer-signature MRI biomarkers in detecting the change 
+in cognitively normal persons into those with Alzheimer's disease (AD) dementia.  
+Based on secondary data taken from the literature, this study assesses the performance 
+of many deep learning architectures, such as Dense  Net models, Graph Convolutional 
+Networks (GCNs), and 3D CNNs as well as biomarkers. According to our research, 
+CNN-based models hold great potential for precise Alzheimer's disease identification, 
+particularly when they use three -dimensional imaging data. CNNs are the most 
+commonly used architecture, according to a comparative study of 22 reviewed 
+research; other models, such as GCNs and fine -tuned VGG19, exhibit noteworthy 
+performance. The clinical applicability of such deep learning techniques and their 
+capacity to improve patient outcomes and diagnostic precision in Alzheimer's care are 
+also covered in this research. The study ends with suggestions for additional research, 
+with an emphasis on addressing dataset variability limits and optimizing the model.  
+ 
+DOI: https://doi.org/10.63471/jamsai24003  @ 2024 Journal of Advances in Medical 
+Sciences and Artificial Intelligence (JAMSAI), C5K Research Publication   
+Keywords:  
+Deep Learning, Alzheimer’ s 
+Detection, Neuroimaging, Early 
+Diagnosis, AI in Healthcare 
+ 
+1. Introduction 
+Alzheimer's disease (AD) is a long -term, irreversible brain 
+illness for which there is now no effective treatment. Available 
+medications, however, can halt its progression. Thus, the 
+prevention and management of AD's progression depend 
+heavily on early det ection (Helaly et al., 2022) . Alzheimer's 
+disease (AD) is the most prevalent cause of dementia, 
+accounting for 60 –80% of cases (Jo et al., 2019; Singh et al., 
+2020). Mild cognitive impairment (MCI) is the initial symptom 
+of AD, a neurological kind of dementia, which progressively 
+worsens. It damages brain cells, impairs thinking and memory, 
+and makes it difficult to complete basic tasks (Altinkaya et al., 
+2020; Wen et al., 2020) . Consequently, AD is a neurological 
+brain illness that progresses and has many different aspects. AD 
+is more likely to develop in people with MCI than in others 
+(Better, 2023; Yang et al., 2020). Since AD starts two decades 
+or more before symptoms are noticed, people only notice its 
+consequences after years of brain changes. According to 
+Alzheimer's Disease International (ADI), dementia affects over 
+50 million individuals globally. This number is expected to rise 
+to 152 million by 2050, meaning that one in three individuals 
+will suffer from dementia (Helaly et al., 2022).  
+The biochemical process leading to AD may start over 20 years 
+before symptoms show up (López-Cuenca et al., 2023) . 
+Amyloid peptide deposition and tau protein accumulation and 
+phosphorylation surrounding neurons are the foundations of the 
+current understanding of AD etiology, which results in 
+neurodegeneration and ultimately brain atrophy (Hampel et al., 
+2018; Scheltens et al., 2016; V ogt et al., 2023) . Age, genetic 
+propensity (van der Lee et al., 2018) , Down syndrome (Fortea 
+et al., 2020), brain traumas (Brett et al., 2021), and 
+cardiorespiratory fitness (Letnes et al., 2023)  are among the 
+factors linked to AD.  
+By 2030, the estimated yearly expense associated with 
+dementia is likely to quadruple to $1 trillion (Adelina, 2019). 
+The percentage of individuals afflicted by AD varies by age. In 
+2020, there were around 5.8 million Americans 65 and older 
+Journal of Advances in Medical Sciences and 
+Artificial Intelligence  
+"Volume 1, Issue 1, Year 2024" 
+website: https://www.c5k.com </p><p>Samiun et al. (2024)                                                                                                                                                 AMSAI, 1(1), pp.1-11.  
+ 
+2 
+ 
+who had AD. Additionally, it is anticipated to reach 13.8 million 
+by 2050 (Better, 2023). 
+The most advanced machine learning technique is deep 
+learning. High hopes that deep learning, or artificial 
+intelligence (AI), will revolutionize healthcare have been raised 
+by the success of deep learning in numerous pattern recognition 
+applications (Bhatt et al., 2021) . Over the past few decades, 
+neuroimaging has provided an intriguing non -invasive view 
+into the human brain. Scientists from a variety of disciplines, 
+including medical, engineering, mathematics, physics, 
+statistics, computer science, and psychology, have been drawn 
+to this interdisciplinary topic. In recent years, there has been a 
+growing interest in the single -subject prediction of brain 
+illnesses using neuroimaging. To accurately classify patients 
+with a range of mental and neurodegenerative disorders, 
+including schizophrenia and Alzheimer's disease, hundreds of 
+studies have been conducted using machine learning techniques 
+in conjunction with a variety of neuroimaging modalities, 
+including structural, functional, and diffusion MRI 
+(Arbabshirani et al., 2017) . Non-invasively studying different 
+parts of the human brain with previously unheard -of accuracy 
+is now feasible because to imaging modalities like magnetic 
+resonance imaging (MRI) and magnetoencephalography 
+(MEG) as well as more conventional techniques li ke 
+electroencephalography (EEG). The advantages of MRI -
+related techniques including diffusion MRI (dMRI), functional 
+MRI (fMRI), and structural MRI (sMRI) include the provision 
+of comprehensive functional and structural links maps as well 
+as localized spatial data regarding the structure and function of 
+the brain.  
+Numerous machine learning techniques based on high 
+dimensional data taken from different neuroimaging 
+biomarkers, for as brain MRI and PET, have been proposed to 
+help with the diagnosis of AD. These machine learning 
+techniques must not only automatically distinguish AD subjects 
+from normal control (NC) subjects, but also forecast the 
+likelihood that MCI subjects will progress to AD. As a result, 
+MCI cases may be classified as either MCI converters (cMCI) 
+or MCI non -converters (ncMCI), contingent on the risk  of 
+progression. Consequently, it is possible to naturally model the 
+early diagnosis of AD as a multiclass classification problem 
+(Liu et al., 2014). 
+Alzheimer's disease (AD) is a slowly developing illness in 
+which pathophysiological changes that can be identified in vivo 
+by biomarkers occur years or even decades before overt clinical 
+symptoms appear. There are five AD biomarkers that are 
+widely utilize d in clinical trials and have been sufficiently 
+verified to be included in clinical diagnostic criteria. Amyloid-
+β plaque biomarkers and tau -related neurodegeneration 
+biomarkers are the two types of AD biomarkers that are 
+currently available. Two of the fi ve are analytes of 
+cerebrospinal fluid, and three are imaging measurements (Jack 
+&amp; Holtzman, 2013) . Cerebrospinal fluid (CSF) is currently 
+analyzed using recognized biomarkers such as tau protein, 
+amyloid beta protein, and phospho -tau expression levels to 
+confirm the existence of dementia. In addition to having close 
+association with the brain and spin al cord, CSF is recognized 
+to function as a good source of biomarkers since it offers a 
+comprehensive picture of the brain's diverse biochemical and 
+metabolic characteristics (Sharma &amp; Singh, 2016). 
+Researchers worldwide have unanimously determined the 
+following criteria for a potential powerful biomarker for 
+Alzheimer's disease (Blennow, 2005; Gu et al., 2012; 
+Sunderland et al., 2004)  those are: represent the aging of the 
+brain, explain the pathophysiological mechanisms in the brain, 
+any changes in pharmacology should be represented, extremely 
+particular and delicate, results that can be replicated over time, 
+cut-off levels that are obvious and have at least twofold changes.  
+Recent research has focused on employing time -to-event 
+analysis techniques to forecast when AD dementia will 
+progress over the follow -up period (Barnes et al., 2014) . 
+Predicting the progression of MCI individuals to AD dementia 
+has been done using clinical and imaging -based parameters at 
+baseline and their longitudinal change trajectory, with 
+encouraging results. Only particular clinical measures or basic 
+imaging characteristics, which may be less discriminative for 
+the prognosis, have been studied (Li et al., 2019) . The main 
+objective of this research is to evaluate and compare deep -
+learning models for their precision and accuracy in the early 
+detection of Alzheimer’s disease and efficiency of biomarkers 
+for early detection of Alzheimer’s Disease.  
+2. Literature Review 
+Kraepelin described a unique set of cases with extremely severe 
+cell transformations in the eighth edition of Clinical Psychiatry: 
+A Text-book for Students and Physicians in 1910. These cases 
+include an excessive number of plaques, the death of roughly 
+one-third of the cerebral cortex, which is replaced by particular 
+bursts of coloured neurofibrils, and the most severe kind of 
+malnutrition. The term "Alzheimer's disease" was originally 
+used by Kraepelin, who described the disorder at a period when 
+the clini cal definition was not yet apparent (Vatanabe et al., 
+2020).  
+The risk of Alzheimer's disease (AD), a neurodegenerative 
+condition characterized by memory loss and cognitive decline, 
+is expected to increase worldwide (Better, 2023). Since it offers 
+chances for treatment that can delay progression, early 
+recognition of AD is essential. The brains of those with AD and 
+those in good health are contrasted in Fig. 1. 
+ </p><p>Samiun et al. (2024)                                                                                                                                                 AMSAI, 1(1), pp.1-11.  
+ 
+3 
+ 
+Fig. 1.  Normal Brain Vs AD Brain. 
+In the United States, AD is currently the sixth most common 
+cause of death. According to recent estimates, the ailment may 
+perhaps be the third most common cause of mortality for older 
+adults, after cancer and heart disease (Jin et al., 2019) . 
+Undoubtedly, it is crucial to anticipate AD development in its 
+early phases and stop the disease from getting worse. Fig. 2 
+shows c urrent and projected numbers of new cases of Alzheimer's 
+disease in the US through 2050 . 
+ 
+Fig. 2. Current and projected numbers of new cases of Alzheimer's 
+disease in the US through 2050  (Hebert et al., 2001). 
+The financial impact of Alzheimer's disease is predicted to rise 
+in line with the disease's anticipated rise in prevalence. The 
+National Institute of Aging and the Alzheimer's Association 
+(2003) estimated that the present direct and indirect expenses 
+of pr oviding for the 4.5 million Americans who have 
+Alzheimer's disease are roughly $100 billion annually, 
+demonstrating the already significant financial toll that 
+Alzheimer's illness imposes on society. The Alzheimer's 
+Association commissioned a study that pr edicted Medicare 
+payments for people with Alzheimer's disease will rise by 75% 
+from $91 billion in 2005 to $160 billion in the year 2010. 
+Medicaid spending for residential dementia care was also 
+estimated to be $21 billion in 2005, projected to rise by 14% to 
+$24 billion in 2010 (Lives, 2004). The estimated expenditures 
+of Alzheimer's disease for Medicare and Medicaid in the 
+upcoming 50s are displayed in Fig. 2 (in USD millions). Fig. 3 
+shows the projected expenditures of Alzheimer's disease for 
+Medicare and Medicaid through 2050 . 
+ 
+Fig. 3.  The projected expenditures of Alzheimer's disease for 
+Medicare and Medicaid through 2050  (Al-Shoukry et al., 2020). 
+Neuroimaging especially positron emission tomography (PET) 
+and magnetic resonance imaging (MRI)  has become crucial to 
+detecting the structural and functional alterations in the brain 
+linked to AD. Tau deposition and cognitive deficiencies are 
+linked to brain atrophy, as shown by high -resolution MRI, 
+which is a reliable indicator of Alzheimer's diseas e (AD) and 
+its advancement (Frisoni et al., 2010). 
+A subset of machine learning called deep learning has 
+demonstrated great promise in analyzing medical pictures 
+because of its capacity to handle vast volumes of data and 
+identify intricate patterns (LeCun, Bengio, &amp; Hinton, 2015). 
+Numerous deep learning ar chitectures, each with distinct 
+advantages, have been used. Because they can automatically 
+extract important features from 2D MRI scans and achieve 
+remarkable classification accuracy across a variety of AD 
+diagnostic categories, Convolutional Neural Networks (CNNs) 
+have been used extensively. However, especially for volumetric 
+brain data, traditional CNNs may not be able to fully capture 
+the three-dimensional spatial correlations present in MRI scans 
+(Payan &amp; Montana, 2015; Sarraf &amp; Tofighi, 2016) . 3D 
+Convolutional Neural Networks (3D -CNNs) have been 
+developed to solve this problem. By examining volumetric data 
+and capturing the complex spatial interactions across three 
+dimensions, these models go beyond conventional CNN 
+frameworks and increase classification accuracy for binary and 
+multi-class classifications (Hosseini-Asl et al., 2016; Korolev 
+et al., 2017).  
+A deep learning model utilizing fluorine -18 
+fluorodeoxyglucose (18F -FDG) PET imaging showed 
+encouraging results in the early prediction of Alzheimer's 
+disease in the study by (Ding et al., 2019) . The algorithm 
+successfully identified patients an average of 75.8 months 
+before a final diagnosis, with an 82% specificity and 100% 
+sensitivity. This method demonstrates how PET imaging and 
+deep learning algorithms can improve the accuracy of early 
+diagnoses, which could lead to better patient outcomes by 
+facilitating earlier interventions. Recent developments in 
+computer-aided detection of mild cognitive impairment (MCI), 
+the precursor to Alzheimer's disease (AD), have showed 
+promise in improving diagnos tic precision. Conventional 
+techniques mostly depend on simple low -level characteristics, 
+like mean signal intensities from PET imaging or gray matter 
+volumes from MRI. To capture more intricate latent patterns, 
+such as non -linear patterns, that are hidden  within these low -
+level characteristics, Suk and Shen (2013)  paper suggests an 
+unusual deep learning -based method that makes use of a 
+stacked autoencoder.  
+Even with deep learning models' achievements, there are still 
+issues, like the possibility of overfitting because of the small 
+dataset size and the high processing overhead (Arbabshirani et 
+al., 2017). The lack of interpretability in these frequently over-
+parameterized and extremely complicated data -driven models 
+is a major obstacle when using deep learning in AD research. 
+Numerous studies have made an effort to enhance 
+interpretability from various angles. Simple techniques, such as 
+correlation analysis and grouping of neural network features or 
+predictions, can accomplish basic interpretation (Zhou et al., 
+2023). Lin et al. (2019)  confirmed the association between 
+0
+500
+1000
+1500
+Number of AD cases in 
+thousands
+Year
+Number of AD Cases 
+1995 2000 2010 2020 2030 2040 2050
+0
+500
+1000
+Costs
+Years
+Alzheimer's Cost to Medicare and Medicaid
+2019 2025 2030 2035
+Samiun et al. (2024)                                                                                                                                                 AMSAI, 1(1), pp.1-11.  
+ 
+4 
+ 
+APOE-e4 and brain aging by examining the link between 
+prediction error and individual attributes. Ding et al. (2019)  
+validated the model's comprehension of AD disease stages by 
+performing t -distributed stochastic neighbor embedding (t -
+SNE) on neural network-generated features. Here table 1 shows 
+the strengths and limitations of several deep learning models 
+used in AD detection, sourced from (Razzak et al., 2018).  
+Table 1. Summarization of different deep learning models. 
+Models Strength Limitation 
+AE Able to depict intricate 
+and highly nonlinear 
+patterns,  
+excellent for reducing 
+dimensions, simple to 
+put into practice, CNN 
+initialization is good. 
+learns to record as 
+much data as 
+possible instead of 
+as much pertinent 
+data. 
+RBM able to pick up excellent 
+generating models, able 
+to identify trends in the 
+absence of data 
+costly to compute 
+during the training 
+phase 
+DNN Excellent for vector -
+based issues, able to 
+manage datasets with a 
+high sample count, able 
+to identify intricate 
+nonlinear interactions 
+Not ideal for 
+images and has a 
+sluggish training 
+procedure, has 
+problems with 
+generalization 
+DPN Capable of efficiently 
+acquiring feature 
+representation from tiny 
+samples 
+performs poorly 
+because the 
+acquired 
+hierarchical 
+features from 
+various levels are 
+simply 
+concatenated. 
+RNN Excellent for successive 
+two-dimensional 
+images,  
+ideal for long -term 
+research 
+has problems with 
+the training 
+process because of 
+gradients that 
+disappear or 
+explode. 
+CNN 2D Excellent local 
+feature 
+performance 
+extraction from 
+pictures, simple 
+to train 
+Incapable of 
+encoding the 
+three-dimensional 
+images' spatial 
+information 
+3D Excellent results 
+when extracting 
+local features 
+from photos, able 
+to record 3D data 
+from a brain 
+scan's 3D volume 
+costly to compute 
+during the training 
+phase 
+ 
+By using a variety of deep learning models  CNN, 3D -CNN, 
+Multiscale Deep Convolutional Networks, and GCN  on a 
+standardized dataset obtained from (Helaly et al., 2022) , this 
+study seeks to close these gaps. We want to determine the best 
+strategy for early AD detection and offer insights into the 
+clinical application of these cutting -edge approaches by 
+comparing these models under comparable circumstances. 
+In light of earlier studies, three biomarkers for the diagnosis of 
+Alzheimer's disease have been developed globally and 
+published [Table/Fig-1] [17–19]. These biomarkers, which are 
+derived from CSF, boost the validity of diagnosis by providing 
+results that are &gt;95% sensitive and &gt;85% specific 20–23. Table 
+2 shows established biomarkers for Alzheimer’s disease. 
+Table 2. Established biomarkers for Alzheimer’s disease. 
+Amyloid beta Tau protein Phosphorylated 
+tau 
+Depositions of 
+Aβ plaque are 
+frequently 
+utilized to 
+describe AD. 
+These 42 amino 
+acid peptides 
+(Aβ1-42) are 
+produced by 
+processing 
+amyloidogenic 
+pathways after 
+secretases cleave 
+Aβ from big 
+APP. These 
+peptides then 
+accumulate in the 
+brain. AD 
+patients' CSF 
+analysis reveals a 
+dramatic 
+decrease in Aβ of 
+approximately 
+&lt;500 pg/ml as 
+compared to 
+controls, who 
+had 794±20 
+pg/ml of Aβ. 
+ 
+Another well-
+established 
+biomarker for AD 
+is the inclusion of 
+the microtubule-
+associated protein 
+tau in neurons. In 
+AD patients, tau 
+protein levels 
+significantly 
+increase 
+exponentially, 
+from around 
+&gt;450 to &gt;600 
+pg/ml (in patients 
+aged 51-70 years) 
+to &lt;300 pg/ml (in 
+those aged 21-50 
+years) to nearly 
+&lt;500 (in those 
+aged &gt;71 years). 
+Thus, it is 
+proving to be a 
+useful indicator 
+for prognosis. 
+ 
+Tau protein is 
+phosphorylated 
+in over 39 
+different 
+locations in AD. 
+In contrast to 
+controls, 
+position 181 
+functions as a 
+clear biomarker 
+in AD. Tau 
+protein 
+phosphorylation 
+causes neuronal 
+dysfunction in 
+addition to loss 
+of function. 
+Other 
+noteworthy tau 
+proteins that 
+have been 
+phosphorylated 
+are phosphor-
+tau-199, -231, -
+235, -396, and -
+400. 
+ 
+Ref: Pérez et al. 
+(2012) 
+Ref: Portelius et 
+al. (2010) 
+Ref: Pérez-
+Grijalba et al. 
+(2013) 
+ 
+3. Methodology 
+3.1. Comparison among Deep-learning Models 
+The study incorporates deep learning algorithms to categorize 
+Alzheimer's disease (AD), mild cognitive impairment (MCI), 
+and normal controls (NC) quantitatively. To evaluate each deep 
+learning model's performance in this classification job, a 
+comparison analysis was carried out, with a special emphasis 
+on the approaches described in the seminal publication by 
+Helaly et al. (2022), which focuses on the deep learning 
+strategy for early Alzheimer's disease detection. 
+Samiun et al. (2024)                                                                                                                                                 AMSAI, 1(1), pp.1-11.  
+ 
+5 
+ 
+The Alzheimer's Disease Neuroimaging Initiative (ADNI) and 
+other publicly accessible neuroimaging datasets served as the 
+primary source of secondary data. The dataset included 
+structural MRI scans of individuals with mild cognitive 
+impairment (MCI), Alzhei mer's disease (AD), and normal 
+controls (NC).  
+22 research publications in all, each offering a different 
+perspective on the issue, were examined and mentioned in the 
+study. The most common method among these was 
+Convolutional Neural Networks (CNNs), which were used in 
+14 studies, five of which used 3D CNNs specifically. Graph 
+Convolutional Networks (GCNs), Multi -Convolutional 
+Networks, CNN -El, the 3D Dense  Net model, the 2D -M2IC 
+model, the 3D-M2IC model, and a refined VGG19 model were 
+among the other models that were investigated. 
+Graph Convolutional Networks (GCN) were used to 
+comprehend the relationships between various brain regions 
+derived from neuroimaging data, Multiscale Deep 
+Convolutional Networks were used to improve classification 
+performance by evaluating features at diff erent scales, 
+Convolutional Neural Networks (CNN) were used to extract 
+features from MRI images, and 3D Convolutional Neural 
+Networks (3D-CNN) were used to analyze volumetric data and 
+capture spatial relationships. The goal of this all-encompassing 
+strategy was to increase the categorization accuracy of 
+Alzheimer's disease.  
+To preserve the subjects' privacy and confidentiality, all used 
+data was anonymized. The study's use of medical data 
+conformed with ethical standards. The study's step -by-step 
+procedure is depicted in the flow chart in Fig. 4.  
+ 
+Fig. 4. Workflow. 
+3.2. Early Detection of AD Using Biomarkers  
+This study used a retrospective methodology and secondary 
+data taken from (Dickerson et al., 2011) , which demonstrated 
+that MRI biomarkers are effective in predicting AD dementia. 
+The investigation will concentrate on finding important MRI 
+metrics linked to Alzheimer's disease in cognitively normal 
+people. The findings of (Dickerson et al., 2011), which offer a 
+comprehensive dataset comprising MRI scans, cognitive tests, 
+and demographic data from cognitively normal individuals who 
+were then followed for a period to track the development of AD 
+dementia, will serve as the primary source of data for this study. 
+The study included a subset of cognitively normal adults who 
+participated in the original study. The criteria for selection 
+were: a) Adults aged 60 years and older, b) Individuals 
+classified as cognitively normal (CN) based on baseline Mini -
+Mental State Ex amination (MMSE) scores and other 
+neuropsychological assessments, c) Participants with a history 
+of neurological disorders or psychiatric conditions that could 
+confound cognitive assessment results were excluded. Analysis 
+of variance with post hoc pairwise comparisons for continuous 
+variables or 2 for proportions was used for group statistical 
+comparisons (SPSS 16.0, Chicago, IL).  
+4. Result and Discussion 
+4.1. Comparative Study among Deep-learning Models 
+The results shown in Table 2 highlight important developments 
+in the use of deep learning models for the categorization of AD 
+and associated cognitive deficits. Convolutional Neural 
+Networks (CNNs), 3D CNNs, Graph Convolutional Networks 
+(GCNs), and Multiscale Deep Convolutional Networks are 
+among the models that show remarkable effectiveness; many of 
+them can distinguish between Alzheimer's patients and healthy 
+controls with classification accuracies of over 98%. The 
+widespread use of magnetic resonance imaging (MRI) as an 
+imaging modality illustrates the importance of structural 
+imaging in the evaluation of neurodegenerative diseases. Other 
+research uses  diffusion tensor imaging (DTI) and functional 
+MRI (fMRI) to improve diagnostic precision. 
+Notably, Sarraf and Tofighi (2016) found that the CNN model 
+distinguished between AD and healthy controls (HC) with an 
+astounding 98.84% accuracy rate. Similar to this, Ge et al. 
+(2019) found that Multiscale Deep Convolutional Networks 
+could distinguish AD from HC with a high accuracy of 98.80%. 
+Furthermore, the 3D CNN model created by (Basaia et al., 
+2019) achieved an exceptional 99.2% classification accuracy 
+for AD versus HC. With accuracy levels of 97.11% for AD vs. 
+NC and 96.32% for AD vs. EMCI, the 2D-M2IC Model, which 
+was first presented by Helaly et al. (2022), likewise showed 
+excellent performance. F inally, a multi-class accuracy of 97% 
+was achieved by the fine -tuned VGG19 Model in 
+differentiating between AD, EMCI, LMCI, and NC.  Table 2  
+shows the evaluation of the accuracy of various models for 
+Alzheimer's disease identification in Neuroimaging research.
+ 
+Table 2. Evaluation of the Accuracy of Various Models for Alzheimer's Disease Identification in Neuroimaging Research
+Approach Dataset Modality Type of 
+classification 
+Accuracy Reference 
+CNN 755 in each 
+class (AD, 
+ADNI MRI Binary, multi AD vs. EMC vs. HC: 89.47% 
+AD vs. HC: 95.39% 
+AD vs. MCI: 86.84% 
+Payan and 
+Montana 
+(2015) 
+Literat
+ure 
+Revie
+w and 
+Data 
+Source 
+Identifi
+cation
+Data 
+Extract
+ion and 
+Prepar
+ation
+Model 
+Selecti
+on
+Evalua
+tion 
+and 
+Compa
+re 
+Models
+Interpr
+etation
+Samiun et al. (2024)                                                                                                                                                 AMSAI, 1(1), pp.1-11.  
+ 
+6 
+ 
+MCI, and 
+HC) 
+HC vs. MCI: 92.11% 
+CNN 302 subjects 
+(211 AD, 91 
+NC) 
+ADNI MRI, 
+fMRI 
+Binary AD vs. HC: 98.84% Sarraf and 
+Tofighi 
+(2016) 
+3D-CNN 210 subjects 
+(70 AD, 70 
+NC, 70 
+MCI) 
+CAD-
+dementia 
+MRI Binary, multi AD vs. EMC vs. HC: 89.1% 
+AD + MCI/NC: 90.3% 
+AD/NC: 97.6% 
+AD/MCI: 95% 
+MCI/NC: 90.8% 
+Hosseini-
+Asl et al. 
+(2016) 
+3D-CNN 50 AD, 43 
+LMCI, 77 
+EMCI, 61 
+NC 
+ADNI MRI Binary AD vs. NC: 80% 
+AD vs. EMCI: 63% 
+AD vs. LMCI: 59% 
+LMCI vs. NC: 61% 
+LMCI vs. EMCI: 52% 
+EMCI vs. NC: 56% 
+Korolev et 
+al. (2017) 
+CNN 98 AD, 98 
+NC 
+Local 
+hospitals, 
+OASIS 
+MRI Binary AD/NC: 97.65% Wang et al. 
+(2018) 
+3D-CNN 53 AD, 228 
+MCI, 250 
+NC 
+ADNI sMRI 
+and DTI 
+  AD/MCI/NC: 68.9% 
+AD/NC: 93.3% 
+AD/MCI: 86.7% 
+MCI/ NC: 73.3% 
+Khvostikov 
+et al. (2018) 
+3D-CNN 530 subjects 
+(185 AD, 
+185 MCI, 
+160 HC) 
+ADNI MRI Multi AD/MCI/NC: 88.31% Sahumbaiev 
+et al. (2018) 
+CNN AD 192, 184 
+NC 
+ADNI MRI Binary AD/NC: 99% Spasov et 
+al. (2018) 
+CNN 35 AD, 30 
+aMCI, 40 
+NC 
+Beijing 
+Xuanwu 
+Hospital 
+DTI, 
+fMRI 
+Multi AD/aMCI/NC: 92.06% Wang et al. 
+(2018) 
+CNN 28 AD, 28 
+NC 
+OASIS MRI Binary AD/NC: 98.51% Khagi et al. 
+(2019) 
+CNN 150 subjects 
+(AD 50, NC 
+50, MCI 50) 
+ADNI sMRI Multi, binary AD/MCI/NC: 95.73% 
+AD vs CN: 99.14% 
+AD vs MCI: 99.30% 
+MCI vs. CN: 99.22% 
+Jin et al. 
+(2019) 
+GCNs AD 12, NC 
+12, EMCI 
+12, LMCI 12 
+ADNI DTI Multi AD/EMCI/LMCI/NC: 89% Song et al. 
+(2019) 
+Multiscale 
+deep 
+convolutional 
+networks 
+337 subjects 
+(198 AD, 
+139 NC) 
+ADNI MRI Binary AD/NC: 98.80% Ge et al. 
+(2019) 
+3D CNN 120 subjects, 
+30 for each 
+class (AD, 
+EMCI, 
+LMCI, NC) 
+ADNI 4D 
+FMRI 
+Multi-
+classification 
+AD/EMCI/LMCI/NC: 93% Parmar et 
+al. (2020) 
+CNN 407 HC, 418 
+AD, 280 c-
+MCI, 533 
+stable MCI 
+[s-MCI 
+ADNI 3D MRI Binary AD vs. HC: 99.2%, c-MCI vs 
+HC: 87.1%, s-MCI vs. 
+HC: 76.1%, AD vs. c-
+MCI: 75.4%, AD vs. s-
+MCI: 85.9%, c-MCI vs. s-
+MCI: 75.1% 
+Basaia et al. 
+(2019) 
+CNN-EL 787 subjects 
+for (AD, 
+MCIc, 
+ADNI 3D MRI Binary AD vs. HC: 84%, MCIc vs. 
+HC: 79%, MCIc vs. 
+MCInc: 62% 
+Pan et al. 
+(2020) 
+Samiun et al. (2024)                                                                                                                                                 AMSAI, 1(1), pp.1-11.  
+ 
+7 
+ 
+MCInc, HC) 
+classes 
+3D 
+DenseNets 
+models 
+600 brain 
+MRI images 
+ADNI 3D MRI Multi AD, EMCI, LMCI, 
+NC: 66.67% 
+Ruiz et al. 
+(2020) 
+2D-M2IC 
+model 
+300 subjects 
+(75 AD, 75 
+EMCI, 75 
+LMCI, 75 
+NC) 
+Total 
+size = 48,000 
+MRI images 
+ADNI 2D MRI Multi, binary AD vs. NC: 97.11% 
+AD vs. EMCI: 96.32% 
+AD vs. LMCI: 96.62% 
+LMCI vs. NC: 98.10% 
+LMCI vs. EMCI: 95.23% 
+EMCI vs. NC: 98.39% 
+AD/EMCI/LMCI/NC: 93.60% 
+Helaly et al. 
+(2022) 
+3D-M2IC 
+model 
+3D MRI Multi, binary AD vs. NC: 97.36% 
+AD vs. EMCI: 97.07% 
+AD vs. LMCI: 97.16% 
+LMCI vs. NC: 98.05% 
+LMCI vs. EMCI: 96.03% 
+EMCI vs. NC: 98.47% 
+AD/EMCI/LMCI/NC: 95.17% 
+ 
+fine-tuned 
+VGG19 
+model 
+2D MRI Multi AD/EMCI/LMCI/NC: 97%  
+The results are consistent with earlier studies showing deep 
+learning algorithms are becoming more and more successful at 
+classifying neuroimaging data. The study's high accuracy rates 
+are consistent with those of Sarraf and Tofighi (2016)  and 
+Payan and Montana (2015) , who also found that CNN 
+architectures significantly improved performance. Nonetheless, 
+some models like the refined VGG19  reported 97% accuracy 
+for multi -class classification, indicating that, with the right 
+optimization, sophisticated architectures may compete with 
+more straightforward models. This lends credence to the 
+current discussion about whether conventional CNNs or m ore 
+intricate designs are more effective at analyzing medical 
+images. 
+These findings have significant ramifications for Alzheimer's 
+disease detection research and clinical practice. For early 
+detection and treatment, which can drastically change the 
+course of the disease and management approaches, high 
+accuracy in distinguis hing among AD, MCI, and NC is 
+essential. Additionally, the capacity to accurately categorize 
+these stages with neuroimaging can help with patient 
+classification for clinical research and customized treatment 
+plans. 
+In conclusion, there is a lot of promise for correctly 
+categorizing Alzheimer's disease phases from neuroimaging 
+data through the use of methods based on deep learning, 
+especially CNNs and their derivatives.  
+4.2. AD Detection Using Biomarkers 
+There were relatively minor differences in the two samples' 
+demographics in terms of age, gender, and educational 
+attainment. Interestingly, compared to the CN -stable groups, 
+the CN-AD converter groups' participants were slightly more 
+male and older on average. All groups' educational 
+backgrounds were similar, preventing educational disparities 
+from confusing cognitive results. 
+The clinical features draw attention to the different paths taken 
+by the CN -stable and CN -AD converter groups. All groups' 
+baseline MMSE scores were near the ceiling, suggesting high 
+cognitive functioning at first. Table 3 shows clinical 
+characteristics and participants' demographics. 
+ 
+Table 3. Clinical Characteristics and Participant Demographics. 
+Characteristic MGH Rush 
+CN-stable 
+(n=25) 
+CN-AD Converter 
+(n=8) 
+CN-stable 
+(n=25) 
+CN-AD Converter 
+(n=7) 
+Age 71.2 (4.0) 71.5 (2.1) 76.4 (6.0) 77.7 (4.6) 
+Male 9 (36) 5 (63) 3 (12) 4 (57) 
+Education 14.9 (2.3) 14.4 (2.6) 15.6 (3.0) 15.3 (3.3) 
+APOE (% e4 carriers) 4 (16) 2 (25) 3 (12) 1 (14) 
+Baseline MMSE 29.3 (0.7) 28.9 (0.8) 29.1 (1.0) 28.0 (0.6) b 
+Baseline Episodic 
+Memory  
+0.29 (0.7) -0.28 (1.1) c 0.64 (0.5) 0.13 (0.5) d 
+Follow-up 10.4 (3.1) 11.1 (2.5) 8.3 (3.1) 7.1 (1.1) 
+Samiun et al. (2024)                                                                                                                                                 AMSAI, 1(1), pp.1-11.  
+ 
+8 
+ 
+Follow-up MMSE  29.4 (0.8) 26.0 (2.9) e 28.8 (2.1) 21.7 (2.7) e 
+Follow-up Episodic 
+Memory  
+0.12 (0.7) -2.3 (1.4) e 0.81 (0.5) -1.27 (0.9) e 
+Source Dickerson et al., (2011) 
+Abbreviations: AD: Alzheimer's Disease, CN: Cognitively 
+Normal, MGH: Massachusetts General Hospital, MMSE: 
+Mini-Mental State Examination 
+Over a ten -year follow -up period, however, the CN -AD 
+converters had significant drops in both their MMSE and 
+episodic memory scores, with statistically significant decreases 
+that indicated increasing cognitive impairment. This decrease 
+highlights the cognitive stability of the CN -stable groups, and 
+their scores stayed larg ely constant. Together with the 
+noticeable cognitive loss in the CN -AD converters, these 
+baseline similarities offer a useful starting point for 
+investigating predicting biomarkers and confirming the 
+effectiveness of deep learning models to facilitate earl y 
+Alzheimer's identification. 
+4.2.1. Subject Group Mean (SD) Measurements of Regions 
+of Interest (in mm) 
+Table 2 provides information on the mean (SD) measurements 
+of regional cortical thickness for subjects classified as 
+cognitively normal (CN) people who did not develop 
+Alzheimer's disease (AD) and those who did. Cortical thickness 
+in CN-AD converters is significantly reduced in both the Rush 
+and MGH (Massachusetts General Hospital) samples, 
+especially in crucial regions like the superior frontal gyrus, 
+temporal pole, and medial temporal lobe (MTL). Statistical 
+significance is shown at p ≤ 0.05. These result s highlight the 
+connection between neurodegenerative processes linked to the 
+advancement of Alzheimer's disease and cortical thinning. It's 
+interesting to note that the main visual cortex showed varied 
+thinning patterns, indicating that different parts of the brain are 
+more or less vulnerable in the initial phases of AD. 
+Additionally, the AD -signature summary score supports the 
+idea that particular cortical regions play a crucial role in the 
+shift between cognitive stability to dementia by validating the 
+thinning seen in CN -AD converters. These findings advance 
+our knowled ge of the neuroanatomical alterations linked to 
+Alzheimer's disease and demonstrate the potential value of 
+regional cortical thickness as a biomarker for early monitoring 
+and detection, which would enable more focused interventions 
+and improve diagnostic a ccuracy in clinical settings.  Table 4 
+shows a region of interest measurements by topic group mean. 
+ 
+Table 4. Region of interest measurements by topic group mean (SD) (in mm). 
+Region of 
+Interest 
+MGH Rush 
+CN-stable  
+(n=25) 
+CN-AD 
+Converter (n=8) 
+CN-stable  
+(n=25) 
+CN-AD 
+Converter (n=7) 
+MTL 3.28 (0.38) 2.94 (0.43) a 3.37 (0.23) 2.83 (0.39) b 
+Temporal pole 3.07 (0.20) 2.77 (0.30) c 3.02 (0.29) 2.73 (0.31) a 
+Inferior temporal 2.48 (0.20) 2.39 (0.30) 2.89 (0.26) 2.70 (0.28) 
+Angular gyrus 2.48 (0.22) 2.30 (0.25) a 2.50 (0.28) 2.41 (0.23) 
+Supramarginal 
+gyrus 2.54 (0.17) 2.38 (0.20) a 2.54 (0.26) 2.38 (0.13) 
+Superior parietal 2.17 (0.21) 2.04 (0.19) 2.05 (0.21) 2.09 (0.25) 
+Precuneus 2.41 (0.17) 2.25 (0.13) 2.46 (0.22) 2.38 (0.22) 
+Middle frontal 2.40 (0.16) 2.24 (0.11) a 2.30 (0.15) 2.20 (0.18) 
+Superior frontal 2.58 (0.23) 2.29 (0.19) c 2.68 (0.34) 2.40 (0.19) a 
+Primary visual 1.59 (0.12) 1.55 (0.08) 1.56 (0.17) 1.68 (0.25) 
+AD-signature 
+summary measure 2.49 (0.14) 2.35 (0.17) a 2.65 (0.19) 2.46 (0.12) a 
+Source Dickerson et al., (2011) 
+Abbreviations: AD: Alzheimer Disease, CN: 
+Cognitively Normal, MGH: Massachusetts General 
+Hospital, MTL: Medial Temporal Lobe  
+Significance: a p&lt;0.05, b p&lt;0.001, c p&lt;0.005 
+5. Conclusion 
+A neurological condition called Alzheimer's disease 
+(AD) causes memory loss. The need for early Alzheimer 
+disease identification is critical because there is no 
+approved remedy and it can't be changed. Several 
+important findings are shown by comparing different 
+deep learning models for the classification of 
+Alzheimer's disease (AD), mild cognitive impairment 
+(MCI), and normal controls (NC). First off, numerous 
+models with accuracy rates above 90% showed that 
+deep learning techniques, especially Convolutiona l 
+Neural Networks (CNNs) and 3D Convolutional 
+Networks (3D -CNNs), could classify neuroimaging 
+data with significant accuracy. This demonstrates the 
+models' potential for Alzheimer's disease early 
+Samiun et al. (2024)                                                                                                                                                 AMSAI, 1(1), pp.1-11.  
+ 
+9 
+ 
+diagnosis and detection. Crucially, these models' high 
+classification accuracy suggests that they may be useful 
+in clinical settings for the early detection of Alzheimer's 
+disease, which can have a big impact on patient 
+outcomes and treatment effectiveness.  
+Additionally, the study showed that the transition from 
+cognitively normal (CN) to Alzheimer's disease (AD) 
+dementia is linked to particular areas of cortical thinning. 
+In comparison to the CN -stable group, both samples 
+showed that the CN -AD converter grou p had notable 
+cortical thinning in areas such the superior frontal gyrus, 
+temporal pole, and medial temporal lobe (MTL). 
+Furthermore, the MGH sample revealed thinning in the 
+middle frontal gyrus and inferior parietal lobule, 
+indicating that these areas mig ht also play a role in the 
+development of AD. These results emphasize how 
+crucial it is to keep an eye on regional cortical thickness 
+as a possible biomarker for AD early identification and 
+treatment.  
+Finally, it can be suggested that the early identification 
+and diagnosis of Alzheimer's disease (AD) and other 
+neurodegenerative diseases may be greatly improved by 
+combining biomarkers with deep learning 
+algorithms.The findings highlight the need for futu re 
+study to improve these models, integrate more and more 
+varied datasets, and investigate hybrid strategies that 
+capitalize on the advantages of various architectures. In 
+the long run, this will help develop better diagnostic 
+instruments for Alzheimer's d isease and possibly other 
+neurodegenerative conditions. Overall, the work 
+highlights the potential of cutting -edge deep learning 
+approaches to improve diagnosis accuracy and enable 
+prompt therapies, reinforcing their important role in the 
+classification of Alzheimer's disease. 
+References 
+Al-Shoukry, S., Rassem, T. H., &amp; Makbol, N. M. (2020). 
+Alzheimer’s Diseases Detection by Using Deep 
+Learning Algorithms: A Mini-Review. IEEE Access, 
+8, 77131 -77141. 
+https://doi.org/10.1109/ACCESS.2020.2989396  
+Altinkaya, E., Polat, K., &amp; Barakli, B. (2020). Detection 
+of Alzheimer’s disease and dementia states based 
+on deep learning from MRI images: a 
+comprehensive review. Journal of the Institute of 
+Electronics and Computer, 1(1), 39-53.  
+Arbabshirani, M. R., Plis, S., Sui, J., &amp; Calhoun, V . D. 
+(2017). Single subject prediction of brain disorders 
+in neuroimaging: Promises and pitfalls. 
+Neuroimage, 145(Pt B), 137 -165. 
+https://doi.org/10.1016/j.neuroimage.2016.02.079  
+Barnes, D. E., Cenzer, I. S., Yaffe, K., Ritchie, C. S., &amp; 
+Lee, S. J. (2014). A point -based tool to predict 
+conversion from mild cognitive impairment to 
+probable Alzheimer's disease. Alzheimers Dement, 
+10(6), 646 -655. 
+https://doi.org/10.1016/j.jalz.2013.12.014  
+Basaia, S., Agosta, F., Wagner, L., Canu, E., Magnani, 
+G., Santangelo, R., &amp; Filippi, M. (2019). 
+Automated classification of Alzheimer's disease 
+and mild cognitive impairment using a single MRI 
+and deep neural networks. Neuroimage Clin , 21, 
+101645. https://doi.org/10.1016/j.nicl.2018.101645  
+Better, M. A. (2023). Alzheimer’s disease facts and 
+figures. Alzheimers Dement, 19(4), 1598-1695.  
+Bhatt, C., Kumar, I., Vijayakumar, V ., Singh, K. U., &amp; 
+Kumar, A. (2021). The state of the art of deep 
+learning models in medical science and their 
+challenges. Multimedia Systems , 27(4), 599 -613. 
+https://doi.org/10.1007/s00530-020-00694-1  
+Blennow, K. (2005). CSF biomarkers for Alzheimer's 
+disease: use in early diagnosis and evaluation of 
+drug treatment. Expert Rev Mol Diagn , 5(5), 661-
+672. https://doi.org/10.1586/14737159.5.5.661  
+Dickerson, B. C., Stoub, T. R., Shah, R. C., Sperling, R. 
+A., Killiany, R. J., Albert, M. S., Hyman, B. T., 
+Blacker, D., &amp; Detoledo -Morrell, L. (2011). 
+Alzheimer-signature MRI biomarker predicts AD 
+dementia in cognitively normal adults. Neurology, 
+76(16), 1395 -1402. 
+https://doi.org/10.1212/WNL.0b013e3182166e96  
+Ding, Y ., Sohn, J. H., Kawczynski, M. G., Trivedi, H., 
+Harnish, R., Jenkins, N. W., Lituiev, D., Copeland, 
+T. P., Aboian, M. S., Mari Aparici, C., Behr, S. C., 
+Flavell, R. R., Huang, S. Y ., Zalocusky, K. A., 
+Nardo, L., Seo, Y ., Hawkins, R. A., Hernandez 
+Pampaloni, M., Hadley, D., &amp; Franc, B. L. (2019). 
+A Deep Learning Model to Predict a Diagnosis of 
+Alzheimer Disease by Using (18)F-FDG PET of the 
+Brain. Radiology, 290(2), 456 -464. 
+https://doi.org/10.1148/radiol.2018180958  
+Frisoni, G. B., Fox, N. C., Jack, C. R., Jr., Scheltens, P., 
+&amp; Thompson, P. M. (2010). The clinical use of 
+structural MRI in Alzheimer disease. Nat Rev 
+Neurol, 6(2), 67 -77. 
+https://doi.org/10.1038/nrneurol.2009.215  
+Ge, C., Qu, Q., Gu, I. Y . -H., &amp; Jakola, A. S. (2019). 
+Multi-stream multi -scale deep convolutional 
+networks for Alzheimer’s disease detection using 
+MR images. Neurocomputing, 350, 60 -69. 
+https://doi.org/https://doi.org/10.1016/j.neucom.20
+19.04.023  
+Gu, Y ., Schupf, N., Cosentino, S. A., Luchsinger, J. A., 
+&amp; Scarmeas, N. (2012). Nutrient intake and plasma 
+β-amyloid. Neurology, 78(23), 1832 -1840. 
+https://doi.org/10.1212/WNL.0b013e318258f7c2  
+Hampel, H., Toschi, N., Baldacci, F., Zetterberg, H., 
+Blennow, K., Kilimann, I., Teipel, S. J., Cavedo, E., 
+Melo Dos Santos, A., Epelbaum, S., Lamari, F., 
+Genthon, R., Dubois, B., Floris, R., Garaci, F., &amp; 
+Lista, S. (2018). Alzheimer's disease biomarker -
+guided diagnostic workflow using the added value 
+of six combined cerebrospinal fluid candidates: 
+Aβ(1-42), total-tau, phosphorylated -tau, NFL, 
+neurogranin, and YKL -40. Alzheimers Dement , 
+14(4), 492 -501. 
+https://doi.org/10.1016/j.jalz.2017.11.015  
+Samiun et al. (2024)                                                                                                                                                 AMSAI, 1(1), pp.1-11.  
+ 
+10 
+ 
+Hebert, L. E., Beckett, L. A., Scherr, P. A., &amp; Evans, D. 
+A. (2001). Annual incidence of Alzheimer disease 
+in the United States projected to the years 2000 
+through 2050. Alzheimer Dis Assoc Disord , 15(4), 
+169-173. https://doi.org/10.1097/00002093-
+200110000-00002  
+Helaly, H. A., Badawy, M., &amp; Haikal, A. Y . (2022). Deep 
+Learning Approach for Early Detection of 
+Alzheimer’s Disease. Cognitive Computation , 
+14(5), 1711 -1727. https://doi.org/10.1007/s12559-
+021-09946-2  
+Hosseini-Asl, E., Keynton, R., &amp; El -Baz, A. (2016, 25-
+28 Sept. 2016). Alzheimer's disease diagnostics by 
+adaptation of 3D convolutional network. 2016 
+IEEE International Conference on Image 
+Processing (ICIP),  
+Jack, C. R., Jr., &amp; Holtzman, D. M. (2013). Biomarker 
+modeling of Alzheimer's disease. Neuron, 80(6), 
+1347-1358. 
+https://doi.org/10.1016/j.neuron.2013.12.003  
+Jin, D., Xu, J., Zhao, K., Hu, F., Yang, Z., Liu, B., Jiang, 
+T., &amp; Liu, Y . (2019, 8 -11 April 2019). Attention -
+based 3D Convolutional Network for Alzheimer’s 
+Disease Diagnosis and Biomarkers Exploration. 
+2019 IEEE 16th International Symposium on 
+Biomedical Imaging (ISBI 2019),  
+Jo, T., Nho, K., &amp; Saykin, A. J. (2019). Deep Learning 
+in Alzheimer's Disease: Diagnostic Classification 
+and Prognostic Prediction Using Neuroimaging 
+Data [Systematic Review]. Frontiers in Aging 
+Neuroscience, 11. 
+https://doi.org/10.3389/fnagi.2019.00220  
+Khagi, B., Lee, B., Pyun, J. Y ., &amp; Kwon, G. R. (2019, 
+22-25 Jan. 2019). CNN Models Performance 
+Analysis on MRI images of OASIS dataset for 
+distinction between Healthy and Alzheimer's 
+patient. 2019 International Conference on 
+Electronics, Information, and C ommunication 
+(ICEIC),  
+Khvostikov, A., Aderghal, K., Krylov, A., Catheline, G., 
+&amp; Benois -Pineau, J. (2018). 3D inception -based 
+CNN with sMRI and MD -DTI data fusion for 
+Alzheimer's disease diagnostics. arXiv preprint 
+arXiv:1809.03972.  
+Korolev, S., Safiullin, A., Belyaev, M., &amp; Dodonova, Y . 
+(2017, 18 -21 April 2017). Residual and plain 
+convolutional neural networks for 3D brain MRI 
+classification. 2017 IEEE 14th International 
+Symposium on Biomedical Imaging (ISBI 2017),  
+Letnes, J. M., Nes, B. M., &amp; Wisløff, U. (2023). Age -
+related decline in peak oxygen uptake: Cross -
+sectional vs. longitudinal findings. A review. Int J 
+Cardiol Cardiovasc Risk Prev , 16, 200171. 
+https://doi.org/10.1016/j.ijcrp.2023.200171  
+Li, H., Habes, M., Wolk, D. A., &amp; Fan, Y . (2019). A deep 
+learning model for early prediction of Alzheimer's 
+disease dementia based on hippocampal magnetic 
+resonance imaging data. Alzheimers Dement, 15(8), 
+1059-1070. 
+https://doi.org/10.1016/j.jalz.2019.02.007  
+Lin, L., Wu, Y ., Wu, X., &amp; Wu, S. (2019). APOE -ε4 
+allele load modifies the brain aging process in 
+cognitively normal late middle aged and older 
+adults. Proceedings of the International Conference 
+on Artificial Intelligence, Information Processing 
+and Cloud Computing,  
+López-Cuenca, I., Nebreda, A., García -Colomo, A., 
+Salobrar-García, E., de Frutos-Lucas, J., Bruña, R., 
+Ramírez, A. I., Ramirez -Toraño, F., Salazar, J. J., 
+Barabash, A., Gil, P., Maestú, F., Ramírez, J. M., &amp; 
+de Hoz, R. (2023). Early visual alterations in 
+individuals at -risk of Alzheimer's disease: a 
+multidisciplinary approach. Alzheimers Res Ther , 
+15(1), 19. https://doi.org/10.1186/s13195-023-
+01166-0  
+Pan, D., Zeng, A., Jia, L., Huang, Y ., Frizzell, T., &amp; Song, 
+X. (2020). Early Detection of Alzheimer’s Disease 
+Using Magnetic Resonance Imaging: A Novel 
+Approach Combining Convolutional Neural 
+Networks and Ensemble Learning [Original 
+Research]. Frontiers in Neuroscience , 14. 
+https://doi.org/10.3389/fnins.2020.00259  
+Parmar, H., Nutter, B., Long, R., Antani, S., &amp; Mitra, S. 
+(2020). Spatiotemporal feature extraction and 
+classification of Alzheimer's disease using deep 
+learning 3D -CNN for fMRI data. J Med Imaging 
+(Bellingham), 7(5), 056001. 
+https://doi.org/10.1117/1.Jmi.7.5.056001  
+Payan, A., &amp; Montana, G. (2015). Predicting 
+Alzheimer's disease: a neuroimaging study with 3D 
+convolutional neural networks. arXiv preprint 
+arXiv:1502.02506.  
+Razzak, M. I., Naz, S., &amp; Zaib, A. (2018). Deep 
+Learning for Medical Image Processing: Overview, 
+Challenges and the Future. In N. Dey, A. S. Ashour, 
+&amp; S. Borra (Eds.), Classification in BioApps: 
+Automation of Decision Making  (pp. 323 -350). 
+Springer International Publishing. 
+https://doi.org/10.1007/978-3-319-65981-7_12  
+Ruiz, J., Mahmud, M., Modasshir, M., Shamim Kaiser, 
+M., &amp; Alzheimer’s Disease Neuroimaging 
+Initiative, f. t. (2020, 2020//). 3D DenseNet 
+Ensemble in 4 -Way Classification of Alzheimer’s 
+Disease. Brain Informatics, Cham. 
+Sahumbaiev, I., Popov, A., Ramírez, J., Górriz, J. M., &amp; 
+Ortiz, A. (2018, 10 -17 Nov. 2018). 3D -CNN 
+HadNet classification of MRI for Alzheimer’s 
+Disease diagnosis. 2018 IEEE Nuclear Science 
+Symposium and Medical Imaging Conference 
+Proceedings (NSS/MIC),  
+Sarraf, S., &amp; Tofighi, G. (2016). Classification of 
+Alzheimer's disease structural MRI data by deep 
+learning convolutional neural networks. arXiv 
+preprint arXiv:1607.06583.  
+Scheltens, P., Blennow, K., Breteler, M. M., De Strooper, 
+B., Frisoni, G. B., Salloway, S., &amp; Van der Flier, W. 
+M. (2016). Alzheimer's disease. The Lancet , 
+388(10043), 505-517.  
+Sharma, N., &amp; Singh, A. N. (2016). Exploring 
+biomarkers for Alzheimer’s disease. Journal of 
+Samiun et al. (2024)                                                                                                                                                 AMSAI, 1(1), pp.1-11.  
+ 
+11 
+ 
+clinical and diagnostic research: JCDR , 10(7), 
+KE01.  
+Singh, S. P., Wang, L., Gupta, S., Goli, H., 
+Padmanabhan, P., &amp; Gulyás, B. (2020). 3D Deep 
+Learning on Medical Images: A Review. Sensors 
+(Basel), 20(18). https://doi.org/10.3390/s20185097  
+Song, T. A., Chowdhury, S. R., Yang, F., Jacobs, H., 
+Fakhri, G. E., Li, Q., Johnson, K., &amp; Dutta, J. (2019, 
+8-11 April 2019). Graph Convolutional Neural 
+Networks For Alzheimer’s Disease Classification. 
+2019 IEEE 16th International Symposium on 
+Biomedical Imaging (ISBI 2019),  
+Spasov, S. E., Passamonti, L., Duggento, A., Lio, P., &amp; 
+Toschi, N. (2018). A Multi -modal Convolutional 
+Neural Network Framework for the Prediction of 
+Alzheimer's Disease. Annu Int Conf IEEE Eng Med 
+Biol Soc , 2018, 1271 -1274. 
+https://doi.org/10.1109/embc.2018.8512468  
+Suk, H. I., &amp; Shen, D. (2013). Deep learning -based 
+feature representation for AD/MCI classification. 
+Med Image Comput Comput Assist Interv, 16(Pt 2), 
+583-590. https://doi.org/10.1007/978-3-642-
+40763-5_72  
+Sunderland, T., Mirza, N., Putnam, K. T., Linker, G., 
+Bhupali, D., Durham, R., Soares, H., Kimmel, L., 
+Friedman, D., Bergeson, J., Csako, G., Levy, J. A., 
+Bartko, J. J., &amp; Cohen, R. M. (2004). Cerebrospinal 
+fluid beta-amyloid1-42 and tau in control subject s 
+at risk for Alzheimer's disease: the effect of APOE 
+epsilon4 allele. Biol Psychiatry , 56(9), 670 -676. 
+https://doi.org/10.1016/j.biopsych.2004.07.021  
+van der Lee, S. J., Wolters, F. J., Ikram, M. K., Hofman, 
+A., Ikram, M. A., Amin, N., &amp; van Duijn, C. M. 
+(2018). The effect of APOE and other common 
+genetic variants on the onset of Alzheimer's disease 
+and dementia: a community -based cohort study. 
+Lancet Neurol , 17(5), 434 -444. 
+https://doi.org/10.1016/s1474-4422(18)30053-x  
+Vatanabe, I. P., Manzine, P. R., &amp; Cominetti, M. R. 
+(2020). Historic concepts of dementia and 
+Alzheimer's disease: From ancient times to the 
+present. Revue Neurologique , 176(3), 140 -147. 
+https://doi.org/https://doi.org/10.1016/j.neurol.201
+9.03.004  
+V ogt, A. S., Jennings, G. T., Mohsen, M. O., V ogel, M., 
+&amp; Bachmann, M. F. (2023). Alzheimer's Disease: A 
+Brief History of Immunotherapies Targeting 
+Amyloid β. Int J Mol Sci , 24(4). 
+https://doi.org/10.3390/ijms24043895  
+Wang, Y ., Yang, Y ., Guo, X., Ye, C., Gao, N., Fang, Y ., 
+&amp; Ma, H. T. (2018). A novel multimodal MRI 
+analysis for Alzheimer's disease based on 
+convolutional neural network. 2018 40th annual 
+international conference of the IEEE engineering in 
+medicine and biology society (EMBC),  
+Wen, J., Thibeau -Sutre, E., Diaz -Melo, M., Samper -
+González, J., Routier, A., Bottani, S., Dormont, D., 
+Durrleman, S., Burgos, N., &amp; Colliot, O. (2020). 
+Convolutional neural networks for classification of 
+Alzheimer's disease: Overview and reproducible 
+evaluation. Medical Image Analysis , 63, 101694. 
+https://doi.org/https://doi.org/10.1016/j.media.202
+0.101694  
+Yang, Y ., Li, X., Wang, P., Xia, Y ., &amp; Ye, Q. (2020). 
+Multi-Source Transfer Learning via Ensemble 
+Approach for Initial Diagnosis of Alzheimer's 
+Disease. IEEE J Transl Eng Health Med , 8, 
+1400310. 
+https://doi.org/10.1109/jtehm.2020.2984601  
+Zhou, Q., Wang, J., Yu, X., Wang, S., &amp; Zhang, Y . 
+(2023). A Survey of Deep Learning for Alzheimer’s 
+Disease. Machine Learning and Knowledge 
+Extraction, 5(2), 611-668.  
+ </p>

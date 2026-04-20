@@ -1,0 +1,856 @@
+<p> 
+ 
+ 
+ 
+ 
+ 
+*Corresponding author: Jakirhossainridoy80@gmail.com (Jakir Hossain Ridoy)  
+All rights are reserved @ 2025 https://www.c5k.com, https://doi.org/10.103/xxx 
+Cite: Rakibul Hasan, Jakir Hossain Ridoy, Adib Hossain (2025). Machine Learning Applications in U.S. Manufacturing: Predictive 
+Maintenance and Supply Chain Optimization. Journal of Information Technology Management and Business Horizons, 1(2), pp. 1-XY.  
+                                                                                                                                                                                                                   1 
+ 
+Research Article 
+Machine Learning Applications in U.S. Manufacturing: Predictive 
+Maintenance and Supply Chain Optimization 
+Rakibul Hasan1, Jakir Hossain Ridoy2,*, Adib Hossain3 
+1IEEE Senior Member, Institute of Electrical and Electronics Engineers, Los Angeles, California, USA; 
+2Department of Engineering Management, Trine University, Indiana, USA; 
+3Department of Business Analytics, Trine University, Indiana, USA; 
+*Corresponding Author: Jakirhossainridoy80@gmail.com  
+ 
+ 
+A R T I C LE   I N F O 
+  
+A B S T R A C T 
+Article history:  
+8 September, 2025 (Received) 
+19 October, 2025 (Accepted) 
+25 October, 2025 (Published Online) 
+Machine learning (ML) technologies are swiftly coming into the U.S. manufacturing industry to 
+solve the old issues of equipment upkeep and supply chain management. There is a 
+transformative research study about ML and its application to improve predictive maintenance 
+and plan inventory and logistics decisions. The study makes use of actual data and variable set 
+manufacturing data on a regional basis, and then uses tree -based ML techniques ( XGBoost, 
+random forest) to forecast the failure of equipment and sup ply blockades. The methodology 
+involves elaborate feature engineering as well as a breakdown of demand with model calibration 
+to account for lead-time variability and heterogeneity of operations. It is also observed that, 
+compared to conventional regression methods, XGBoost is better in predictive maintenance and 
+has higher adaptability to nonlinear trends in demand prediction. Additionally, th e paper 
+examines model robustness, distribution regional impact, as well as anomaly identification in 
+order to demo nstrate how ML is to be utilized to reduce operational downtime and enhance 
+inventory turnover. The most significant implementation issues are discussed, such as integrating 
+previous generation equipment, data imbalance , and cybersecurity. This paper ends with a 
+discussion of what can be expected in the future in terms of Edge AI and Federated Learning , 
+and the importance of those technologies in securing and sustainable smart manufacturing 
+systems. This study will provide practical results to manufacturers aiming to transform to smart 
+and resilient models and data-driven manufacturing. 
+ 
+DOI: https://doi.org/10.63471/jitmbh_25002 @ 2025 Journal of Information 
+Technology Management and Business Horizons (JITMBH) , C5K Research 
+Publication   
+Keywords:  
+Machine Learning (ML), Supply 
+Chain, Industrial IoT, Predictive 
+Maintenance. 
+ 
+1. Introduction 
+Machine learning (ML) has already become a revolutionary 
+technology in many industries (Gourisaria et al., 2021) , and its 
+application in manufacturing, particularly in the United States, 
+holds significant potential to enhance operational efficiency 
+and competitiveness (Wuest et al., 2016) . The American 
+manufacturing sector, with its sophistication and use of modern 
+equipment and complicated supply chains, is ready to absorb 
+the introduction of smart systems. The necessity of U.S. 
+manufacturers to adopt such technologies can be explained by  
+the growing global competition, the necessity to utilize our 
+resources better, and the tendency towards more resilient and 
+sustainable production processes (Camarinha-Matos et al., 
+2024; Porter, 2023; Swamidass &amp; Winch, 2002). 
+Generally, traditional maintenance approaches in  productive 
+systems have been based on reactive or time-based approaches. 
+In reactive maintenance, the equipment is not attended unless 
+it breaks down , causing production losses, downtime , and, in 
+particular, safety concerns (Zuashkiani et al., 2011) . Proactive 
+maintenance can lead to misdirected action when a component 
+is replaced too early or inaction when replacement is delayed. 
+Machine learning enabled predictive maintenance brings a 
+game-changing shift in the way equipment is inspected(Betz et 
+al., 2023), using real-time data from the sensors and operations 
+systems with the capability to anticipate and prevent equipment 
+failure and schedule maintenance activities(Hashemian, 2011). 
+The proactive strategy reduces unplanned downtime, 
+maximizes maintenance scheduling (Khawar et al., 2024) , 
+lengthens the life  of assets, and lowers overall operational 
+expenses. The impact on U.S. manufacturers' economic health 
+is significant because even small improvements in uptime can 
+provide completely new financing opportunities addition to 
+greater asset utilization(Robinson, 1995). 
+Outside the  factory floor, the United States’ manufacturing 
+sector is also intertwined with complex and sometimes tenuous 
+supply chains. Conventional supply chain management could 
+benefit from more accurate forecasting, better optimized 
+inventory, and being more responsive toward disruptions(Datta 
+et al., 2007). The coronavirus pandemic, for example, brought 
+Journal of Information Technology Management 
+and Business Horizons  
+"Volume 1, Issue 2, Year 2025" 
+website: https://www.c5k.com </p><p>Hasan et al. (2025)                                                                                                                                              JITMBH, 1(2), pp. 1-XY.  
+ 
+2 
+ 
+into relief the fragilities of global supply chains, revealing 
+shortcomings in  resiliency and flexibility (Musella, 2023) . 
+Machine learning provides compelling solutions to these for 
+challenges, such as increased visibility and advanced analytics 
+for demand forecasting, logistics optimization , and risk 
+assessment(Pasupuleti et al., 2024) . Through analysis of 
+mountains of data that include historical sales , market 
+movements, geopolitical events, and even social media “vibes,” 
+ML algorithms can provide more accurate demand predictions, 
+spot potential hiccups, and optimize inventory levels across the 
+supply network. It results in lower stockouts,   less 
+obsolescence, better on-time delivery, and greater supply chain 
+resilience overall. The US may not be an open -and-shut case 
+for the adoption  of machine learning in manufacturing. The 
+challenges toward ML adoption include a high cost of 
+investment to build data infrastructure, a laborious learning 
+curve, and a skilled worker to deploy and maintain the ML 
+system(Jha et al., 2021) ,  and organizational inertia. And of 
+course, there is the very real worry factor of data privacy and 
+cybersecurity issues when data involves proprietary 
+manufacturing processes (Prinsloo et al., 2019)  and sensitive 
+supply chain information. However, these obstacles aside, the 
+advantages of using ML-driven solutions are just too great to 
+ignore. Early adopters of AM in U.S. manufacturing are 
+realizing clear advantages with the process, including 
+accelerated time to market, reduced waste, and more. Reprinted 
+with permission. 
+Incorporating machine learning into U.S. manufacturing marks 
+a significant move  in the way industries are adapting to the 
+complexities of production and supply chain operations in an 
+increasingly competitive global economy. This paper provides 
+a systematic view of the transformative possibilities of ML and 
+the practical challenges in realizing this potential. We first set 
+the technological  groundwork and discuss the main ML 
+solutions and techniques that are currently fostering the 
+revolution of industrial processes. Predictive maintenance 
+systems and supply chain optimization are expl ored in later 
+sections, justified with  case study applications. We then 
+describe the significant challenges for organizations, including: 
+data infrastructure demands; skillset and workforce 
+development requirements; and ethical considerations. We also 
+investigate the future and discuss emerging techniques for 
+manufacturing intelligenc e, and discuss when these are likely 
+to be mature. Our finding provides useful strategic insights for 
+relevant stakeholders to cope with this technological change , 
+which calls for taking a combined technical and operational 
+analysis. The study findings emphasize that , while ML 
+adoption offers all -valuable opportunities to leverage 
+competitive advantage, successful implementation must 
+consider the technical and organizational dimensions. 
+2. Literature Review 
+Machine learning (ML) in manufacturing has acquired 
+significant momentum with industries trying to improve asset 
+reliability and operational efficiency. Zhang et al. (Zhang et al., 
+2019) offered a very detailed review of the predictive 
+maintenance techniques, highlighting the change from the rule-
+based system to the data-centered system in manufacturing 
+settings. According to their research, it is possible to detect 
+early stages of equipment failure with the help of ML and, 
+thereby, minimize time and expenses spent on equipment 
+maintenance. The paper explores how AI -powered decision -
+making could make U.S. supply chains  more sustainable by 
+reducing waste and carbon emissions without compromising 
+efficiency to operate. Authors also utilize a U.S. fashion/beauty 
+startup dataset (containing real sales, inventory, suppliers, and 
+lead ti mes) and preprocess the label and one -hot encoded 
+categorical features. The data is then split 80/20 with 10 -fold 
+cross-validation using this dataset.  They evaluate kNN, Naïve 
+Bayes, Random Forest  (RF), and NN classifiers. On test, RF 
+and NN yield the best results (about 0.786 accuracy), 
+outperforming kNN and Naïve Bayes (about 0.714) with higher 
+potential for predicting the supplier/consumer category  
+recommendation in terms of sustainable supply-chain planning. 
+The authors claim that improved forecasting a nd optimal 
+RF/NN can enable greener activities in terms of inventory 
+reduction, efficient transportation, and stronger supplier 
+collaboration documented with a Walmart case study, reducing 
+excess inventory, fuel/CO₂ emissions, stockout levels, and cost 
+savings. In general, the study provides an application -focused 
+ML comparison that finds RF and NN  useful tools for eco -
+friendly supply -chain optimization in the U.S., but such 
+evidence has only been provided on a small dataset from one 
+company, and some signs  of overfitting, making more 
+validation necessary (Hasan et al., 2024). 
+Khan and Yairi(Khan &amp; Yairi, 2018)   have studied the use of 
+deep learning methods in the field of system health monitoring 
+and have emphasized that it could be used to learn complex 
+patterns on high -dimensional sensor data without having to 
+engineer features manually. In the same way, Jard ine et al. 
+(Jardine et al., 2006) established condition -based maintenance 
+as a method of integrating diagnostic and prognostic modeling 
+into historical operational data. Hashemian (Hashemian, 2010) 
+devoted attention to wireless sensor networks in industrial 
+systems where it is possible to monitor them in real -time and 
+provide remote diagnosis. These developments have enabled 
+the shift in predictive maintenance to proactive with the help of 
+streaming data. Within the scope of the supply chain 
+optimization, Pasupuleti et al. (Pasupuleti et al., 2024) showed 
+that ML algorithms have been substantially beneficial during 
+the inventory management, logistics, and forecasting demand. 
+They discovered in their study that the ensemble techniques 
+(such as XGBoost and Random Forest) have better accuracy 
+and robus tness even in a volatile environment. Musella 
+(Musella, 2023) also addressed the frailties of the global supply 
+networks during the COVID crisis, calling to implement the 
+ML to boost responsiveness and flexibility. Syafrudin et al. 
+(Syafrudin et al., 2018) also discuss the convergence of IoT and 
+ML since they applied an IoT -based real -time monitoring 
+system to automotive production. The findings that they 
+provide verify the fact that the usage of ML analytics in 
+combination with sensor data increases operat ional efficiency 
+and predictive capabilities. Lee et al. (Lee et al., 2013)  
+addressed the emergence of predictive manufacturing systems 
+in big data environments and pointed out that the role of data -
+driven insight is becoming the core focus of process 
+optimization. Similarly, Wuest et al. (Wuest et al., 2016)  
+summarized advantages and challenges in implementing ML in 
+Hasan et al. (2025)                                                                                                                                              JITMBH, 1(2), pp. 1-XY.  
+ 
+3 
+ 
+the age of manufacturing, arguing that the effectiveness of such 
+a system depends on the convergence between the algorithm 
+and domain-relevant knowledge and workforce preparedness. 
+Cline et al. (Cline et al., 2017) shared effective points related to 
+ML applications in predictive maintenance in industrial 
+systems since supervised learning can help identify component 
+degradation and allow preventing failure across system 
+components. Their contribution contributes to t he possibility 
+and affordability of ML implementation of legacy 
+manufacturing environments. These studies altogether prove 
+the transformative power of ML in predictive maintenance and 
+supply chains systems, proving the necessity of the data-centric 
+infrastructure and organizational application. 
+3. Manufacturing Machine Learning 
+Machine learning (ML) has become an important disruptor in 
+terms of manufacturing operations in the Industry 4.0 era. With 
+the power to analyze huge amounts of structured and 
+unstructured data, ML algorithms have the potential to extract 
+previously unseen patterns and provide insights into the future 
+and recommend actionable information on the vast number of 
+production and logistics activities. The use of ML technologies 
+by manufacturing enterprises operating in the United States and 
+characterized by the complicated supply chains and capital -
+intensive internal processes can benefit greatly through the 
+implementation of the technologies related to the predictive 
+maintenance and supply chain planning. 
+3.1. Prediction maintenance Overview 
+Predictive maintenance uses the past data of equipment, sensor 
+data in real-time and smart algorithms to forecast failures that 
+may happen in a machine before they occur. Contrary to 
+traditional maintenance approaches, which either lack 
+responsiveness   or  are time -based PdM aims at minimizing 
+unplanned downtime and maximizing effective maintenance 
+planning by predicting the likelihood of a failure before it 
+happens (Zhang et al., 2019) . Contemporary PdM systems 
+adopt Internet of Things (IoT) sensors and ML modeling to 
+check the main parameters of vibration, temperature, pressure, 
+and sounds. Supervised learning algorithms are continually 
+operating on these streams of data to determine t he conditions 
+of machines which are categorized into risk levels of failure or 
+can even predict the remaining useful life (RUL) (Jardine et al., 
+2006), such as Random Forest, XGBoost and Support Vector 
+Machines (SVM). However, recently it was demonstrated that 
+deep learning models, e.g. convolutional neural networks 
+(CNNs) and recurrent neural networks (RNNs), are superior to 
+others in predicting the co mplex, multivariate time-series data 
+found in an industrial setting (Ren, 2021) . Real -time data 
+capture occurs using IoT sensors that measure factors like, 
+temperature, vibration, and pressure, to initiate predictive 
+maintenance. Such sensor data are then relayed to centralized 
+platforms such as CMMS systems via Industrial IoT platfo rm. 
+The equivalent of data is stored, organized, and processed in 
+cloud-based databases, in which a pattern can be identified. ML 
+requires historical and live data analysis to understand the 
+abnormalities and predict the failures more precisely compared 
+to threshold-based monitoring. In case of the identified issues, 
+automated alerts allow to identify the bug, its criticality, and 
+propose solutions. It is then possible to make maintenance 
+proactive to reduce downtime, optimize resource utilization, as 
+well as prolong equipment life.  
+The following is an overview of the  main steps involved in 
+predictive maintenance in the manufacturing environment 
+shown in figure 1(Lukito et al., 2025): 
+ 
+Fig. 1. Key steps of Predictive Maintenance for Manufacturing 
+Industries 
+3.2. Machine Learning Optimization in Supply Chain 
+Machine learning is also essential in optimization of supply 
+chain processes especially in predicting demand, supply 
+inventory management, translogistics, and supplier risks. 
+Supply chains within contemporary manufacturing have been a 
+moving state of affai rs affected both by inner activities of a 
+business and external conditions like the market trends, weather 
+situations, and geopolitical disturbances. Such non -linear 
+dependencies are not covered by the traditional linear 
+forecasting models and thus cause i mprecise predictions and 
+inefficiency(Wuest et al., 2016) . ML models, especially 
+ensemble-based algorithms such as the Gradient Boosted Trees 
+and Random Forests, have been shown to significantly improve 
+the accuracy of supply chain forecasting. Such models have the 
+potential to take into account various inputs such as historical 
+sales, point -of-sale, supplier lead times, macroeconomic 
+variables, and social media sentiment in coming up with strong 
+estimates of demand (Pasupuleti et al., 2024). ML systems can 
+learn complex, varied data to identify anomalies, adjust to 
+seasonality and dynamically react to a shock in supply or 
+demand. 
+Besides forecasting, ML allows optimizing inventory in real 
+time by avoiding overstock and stockouts. The ability to 
+forecast demand and equate it with lead time variability enables 
+ML algorithms to allow manufacturers to have just -in-time 
+inventory rules without falling into disruptions that are 
+expensive. Retailers such as Walmart, Amazon and Tesla have 
+existed as examples in implementing ML in inventory and 
+logistics processes to optimize the operations, decrease 
+wastages and improve the service levels. A final applying field 
+is supplier performance analysis as well as risk analytics. 
+Supplier delivery records, compliance history and contextual 
+parameters can be used to train ML models to evaluate the 
+nature of the vendor and predict delays. Together with  
+reinforcement learning, these insights can be utilized in </p><p>Hasan et al. (2025)                                                                                                                                              JITMBH, 1(2), pp. 1-XY.  
+ 
+4 
+ 
+changing the sourcing strategies in real time according to 
+fluctuations in the supply network (Peretz-Andersson et al., 
+2024). Nonetheless, the implementation of ML in the supply 
+chain setting raises some peculiar issues. Training data 
+availability and the quality can be intermittent especially where 
+the data is provided by larger suppliers or third -party sellers. 
+The problem of data privacy and cyber-attacks also hinder data 
+transfer and cooperation within the supply chains levels. One 
+growing solution that seems to have caught the attention of the 
+community is federated learning; a decentralized approach to 
+ML that allows train ing models on distributed data without 
+sending sensitive data over a network. 
+4. Methodology 
+ 
+ 4.1. Dataset Characteristics 
+Table 1 described descriptive statistics of the important supply 
+chain variables to give insight on right -skewed lead times 
+(mean=6.84+3.89 days) and balanced demand (mean~200 
+units). The quartile limits of 25 -75 percent (examples: 
+unit_cost: $32.93-75.71) were used to define outlier levels and 
+normalization processes in our ML pipeline, which would help 
+us to operate successfully in the manufacturing-related domain 
+by handling variability in operations. 
+ 
+ 
+ 
+ 
+Table 1. descriptive statistics of the important supply chain 
+ 
+ Count Mean Std Dev Min 25% 50% 75% Max 
+lead_time_days 500 6.84 3.89 1 3 7 11 13 
+unit_cost 500 54.86 25.18 10.09 32.93 54.44 75.71 99.93 
+inventory_units 500 279.81 128.53 50 169.75 286.5 389.25 499 
+week 500 27.07 15.21 1 14 26 41 52 
+forecast_demand 500 198.72 17.75 152 186 199 212 251 
+demand_units 500 199.42 13.62 165 190 199 208 239 
+class_encoded 500 0 0 0 0 0 0 0 
+The structure of the dataset and the distribution of variables are 
+revealed in Figure 2, which gives a complete picture of the main 
+characteristics utilized in our analysis. The geographic 
+allocation is indicative of the fact that the biggest shares of 
+manufacturing plants in our sample are concentrated in the 
+Midwest (22.6%) and South (27.0%) respectively pointing 
+towards the possibility of regional differences in the supply 
+chain dynamics. The level of demand is classified into a high 
+and a medium stage with 31.2 percent of the observations in the 
+medium level whereas the levels of inventory are also stratified. 
+Our preprocessing was highly dependent on such distributions 
+and enforced a sort of balance in both regions and operational 
+conditions. Our method of regional grouping and stratification 
+of demand has proven to be valid and it was used to directly 
+guide the selection of features and model ontology when 
+defining both a predictive maintenance and a supply chain 
+optimization aspect of the present study. 
+ 
+Fig. 2. Inventory level distribution 
+4.2. Data Description  
+Figure 3, the manufacturing dataset greatly informed our 
+machine learning pipeline. The analysis on regional 
+distribution showed that specific representation was well 
+distributed across the U.S. facilities (Midwest: 27.0%, South: 
+25.6%, West: 24.8%, Northeast: 22.6%), which guarantees the 
+geographic diversity of the model generalization. Even more </p><p>Hasan et al. (2025)                                                                                                                                              JITMBH, 1(2), pp. 1-XY.  
+ 
+5 
+ 
+importantly, the lead time categorization revealed a significant 
+operational variation: 28.4 percent of transactions were in the 
+short lead time group (1 -3 days), 44.6 percent were in the 
+Medium one (4-7 days), and 27.0 percent were in the Long (8 -
+14 days) . Such distributions guided three important 
+methodological decisions that included (1) applying regional 
+clustering as an engineering step to extract location -specific 
+supply chain dynamics, (2) stratified sampling when splitting 
+the train and test sets to  preserve the balance in the proportion 
+of lead time categories, and (3) selecting an XGBoost algorithm 
+with a weighted loss, as it helps to accommodate the moderate 
+imbalance in lead time values. These approaches to integrating 
+these data characteristics within our pipeline explicitly have 
+resulted in our predictive maintenance models being able to 
+distinguish between actual equipment failures and delays 
+caused by regional logistics, and to have our supply chain 
+optimization models have realistic limits to their lead time. 
+ 
+Fig. 3. Distribution by Lead Time Category 
+4.3. Data Driven Feature Engineering 
+Correlation heat map (Figure 4) was significant in influencing 
+our machine learning pipeline because it showed us important 
+relationships among supply chain variables. The high positive 
+relationship between forecasted demand and actual demand (r 
+= 0.77) en sured forecast_demand is indeed an important 
+predictive variable to our inventory optimization models. On 
+the other hand, the close to nil correlations among 
+lead_time_days under all other variables suggested possible 
+presence of non-linearities (Short: 1-3 days, Medium: 4-7 days, 
+Long: 8 -14 days), thus we decided to classify this numerical 
+column into categorical bins and design interactions. The signal 
+that a day of week and unit_cost were moderately related (r = 
+0.15) described significant cyclical prici ng trends within the 
+manufacturing procurement, so we designed temporal values 
+(3-week rolling averages and measures of month end) into this 
+feature set. It is also worth noting that the hardly apparent 
+correlation between inventory and demand indicators (|r|=0.00-
+0.02) indicated a lack of efficiency in the existing stocking 
+treatments that our models only could be capable of optimizing. 
+Such revelations were directly used in influencing the decision 
+to use tree -based models (XGBoost and Random Forest) that  
+perform well in both identifying the pronounced linearity of 
+relationships (such as the forecast -demand one) in addition to 
+intricate non-linearity of connections that is evidenced in data.  
+ 
+Fig. 4. Correlation Heatmap of Supply Chain Features 
+5. Result and Discussion 
+Figure 5 also breaks down the variables of supply chain against 
+different levels of demand, presenting important operational 
+readings. Lead times are much longer during high demand, and 
+inventories decrease, indicating that there is an overload in 
+logistics. Unit costs, and even the accuracy of forecasts, go 
+down and up with demand indicating a call to reactive 
+strategies. This evidence underlines that in 2022, high-demand 
+intervals should receive a high priority in predictive 
+maintenance and inventory modeling so that bottlenecks can be 
+avoided. Its figure confirms the relevance of demand -aware 
+optimization in the supply chain manufacturing industry, and 
+confirms the reasoning behind our ML solution using dynamic, 
+data-informed customization. The graphic su pports the 
+significance of the balance between demand and the key 
+performance indicators so as to initiate specific improvements 
+concerning resilience and efficiency. 
+ 
+ 
+ 
+ 
+ 
+ </p><p>Hasan et al. (2025)                                                                                                                                              JITMBH, 1(2), pp. 1-XY.  
+ 
+6 
+ 
+ 
+ 
+Fig. 5. Demand Units by Demand Level 
+5.1. Comparative Performance of Models 
+The comparison of the performance demonstrated in 
+Figure 6 indicates that XGBoost is highly competitive in 
+comparison with other models performing the predictive 
+maintenance task and supply chain forecasting activities. 
+An XGBoost model with a test accuracy of 0.987 and R2 
+score of 0.99 proved to be a success in mapping out the 
+linear and non -linear complexities seen in the industrial 
+data. This makes it more resilient to detect complex 
+signature of failure in sensors (e.g., vibration spikes, 
+temperature dr ifts) and even make precise demand 
+prediction Despite the changing supply chain conditions. 
+The gradient boosting algorithm used in XGBoost enables 
+the model to rectify the mistakes made during each 
+iteration and work on the hard to predict examples and 
+this makes XGBoost a suitable tool in planning for 
+operations that require high stakes like the quarterly 
+worrying inventory levels or maintenance schedules of 
+critical production units. 
+Random Forest came close behind with R2 score of 0.983 
+proving its dominance in high -dimensional classification 
+and regression. Though a bit less accurate than XGBoost, 
+it kept great performance and computing speed. 
+RANDOM Forest was particularly valuable when 
+detecting anomalies in real -time i n edge environments, 
+where speed and accuracy are critical to strike the right 
+balance between them. It is the ensemble process i.e. an 
+average of a series of decision trees thus minimizing 
+variance, and will not over fit as such, and hence suits 
+edge-based applications like fault recognition in 
+embedded industrial devices or sensor-based diagnostics. 
+Linear Regression, on the contrary, achieved low 
+performance with the test R 2 being 0.850, which 
+demonstrates the shortcomings of linear models to picture 
+the non -linear, complicated interdependencies in the 
+manufacturing operation. This contributor can be viewed 
+as the difference between the performance of this model 
+and the model s based on trees which indicates that the 
+dynamics of the system behind it, i.e. the combination of 
+inventory levels, lead times and demand surges in 
+different regions, would be better modeled with more 
+complex non -linear methods. Surprisingly, the Support 
+Vector Machines (SVM) showed a high genera lization 
+power as the test R2 was 0.99 though the training accuracy 
+was rather small 0.917. What this means is that the SVM 
+is extremely robust against over-fitting particularly in the 
+case of many outliers and contingent events in the case 
+where the deman d is hit by harsh weather conditions or 
+similar events. Its performance shows that SVM can be 
+beneficial under the contingent and unbalanced data like 
+when buying unprecedented machine breakdowns or 
+emergency procurement. 
+Based on such outcomes, it suggests the hybrid model 
+architecture specific to definite industrial situation. 
+XGBoost may be the choice, when there is a high -stakes 
+decision-making scenario, and where the predictive 
+accuracy is of the highest priority: e.g. when making long-
+term inventory planning, maintenance lifecycle 
+optimization, or long -term capacity planning. Random 
+Forest is most appropriate when considering resource -
+limited environments such as edge computing platforms, </p><p>Hasan et al. (2025)                                                                                                                                              JITMBH, 1(2), pp. 1-XY.  
+ 
+7 
+ 
+where real -time diagnostic necessitates faster and 
+consistent prediction. SVM can be a good complementary 
+model, which has high prospects to detect outliers as well 
+as Robust forecasting with unfavorable operating 
+conditions. Collectively, these models of benchmarking 
+assist in the strategic application of ML algorithms based 
+on the constraints of application, which demonstrates the 
+importance of personalized models in data -driven U.S. 
+manufacturing systems. 
+ 
+Fig. 6. Accuracy and R² Comparison Across Models  
+ 5.2. Analysis of equipment failure risk 
+The probability distribution plot outlined in Figure 7 
+appears to provide extremely essential insights on the 
+performance and interpretability of our predictive 
+maintenance model. The more-or-less symmetric shape of 
+the distribution clearly demonstrates th at the mean and 
+median (both equal to 0.5) of the outputs of the models 
+are situated in the middle values and thus, are not biased 
+in the direction of risk either. Such central tendency 
+makes this model adequately distinguish between low - 
+and high-risk conditions in the assessed equipment pool. 
+It is interesting to note that the maximum density falls on 
+the intermediate likelihood range (0.40 0.60). Such a level 
+of concentration is indicative of the sensitivity of the 
+system to transitional states that is to say: situations in 
+which the equipment  is not yet failing, but as yet it has 
+started drifting away below its ideal performance baseline. 
+These intermediate risk scores are considered as lead 
+indicators and can be used in advance actions, inspection 
+or small repairs can be scheduled by the main tenance 
+teams in advance when there is a risk of the situation 
+becoming critical.It is also essential to notice the long tail 
+that spreads through the high-risk area (probability &gt; 0.8). 
+These outlier cases are situations that the model has 
+determined a very high possibility of failure soon. In real 
+world terms, they are major alerts that need to be 
+addressed and given due maintenance. These outliers are 
+not supposed to be ignored because they are critical in the 
+minimization of unscheduled shut downs and a  
+catastrophic failure of the equipment that might stall an 
+entire production line. 
+ 
+Fig. 7. Probability Distribution Curve for Manufacturing 
+Failure Prediction 
+These bimodal traits of the distribution also support the 
+classification ability of the model. One mode will focus 
+on the typical wear and tear (0.3-0.7), this will correspond 
+to the normal degradation behavior of industrial 
+equipment and the other mode wi ll represent outlier 
+detection; which occurs in case of acute failure conditions. 
+Such division implies that the model allows separating 
+routine operational degradation and genuinely atypical, 
+high-hazardous behavior, and this distinction is critical to 
+making predictive maintenance interventions timely, 
+accurate, and resource-saving. 
+6. Challenges  
+Despite significant advancements in machine learning 
+(ML) applications for industrial settings, substantial 
+challenges persist in realizing their full potential within 
+U.S. manufacturing environments. The implementation of 
+ML in predictive maintenance and supply chain 
+optimization faces fundamental data -related obstacles, 
+including incomplete or noisy sensor data from industrial 
+IoT systems and severe class imbalance in failure 
+prediction datasets. While synthetic data generation 
+through techniques like gen erative adversarial networks 
+offers partial solutions, substantial sim -to-real 
+generalization gaps remain. Infrastructure limitations 
+compound these issues, as many U.S. manufacturers 
+operate legacy equipment lacking modern IoT 
+connectivity, which requires  expensive 
+retrofitting(Zambetti et al., 2020) . The coexistence of 
+edge and cloud computing introduces another layer of 
+complexity, with real -time predictive maintenance often 
+demanding low-latency edge processing that proves cost-
+prohibitive at scale. Standardization challenges emerge 
+from disparate industrial data formats across  different 
+equipment vendors, complicating the development of 
+integrated ML pipelines. These problems are further 
+amplified by cybersecurity concerns, particularly in 
+supply chain applications where centralized ML models 
+for d emand forecasting or inventory management are 
+susceptible to adversarial attacks such as data  poisoning. 
+At the same time, regulatory fragmentation—exemplified 
+by varying state -level IoT security laws —adds to 
+compliance difficulties, especially for manufacturers with 
+nationwide operations. Data privacy concerns also inhibit 
+cross-organizational ML collaboration, particularly when 
+sensitive operational data must be shared with suppliers. </p><p>Hasan et al. (2025)                                                                                                                                              JITMBH, 1(2), pp. 1-XY.  
+ 
+8 
+ 
+Federated learning offers some promise but remains 
+underutilized due to proprietary protection 
+concerns(Ochiai &amp; Terada). 
+Organizational barriers further impede ML deployment. 
+On the shop floor, resistance to algorithm -driven 
+recommendations remains widespread, as staff often 
+prefer traditional heuristics over automated decision -
+making. The shortage of skilled personnel capab le of 
+managing MLOps pipelines results in declining model 
+performance over time (Singla, 2023) . Cross -functional 
+silos within firms —between procurement, logistics, and 
+warehousing—also obstruct the deployment of integrated 
+ML solutions. High implementation costs add another 
+layer of difficulty, especially for small -to-midsize 
+manufacturers that str uggle to afford the upfront 
+investments required for custom ML tools and platforms. 
+These financial constraints are compounded by 
+uncertainty around return on investment, particularly 
+when the benefits —such as reduced stockouts or 
+improved asset reliabilit y—emerge gradually. Moreover, 
+many available ML solutions fail to scale effectively 
+across large fleets or multi -tiered supply networks, 
+necessitating expensive customizations(Baier et al., 2019; 
+Peretz-Andersson et al., 2024). 
+7. Future Outlook 
+Lever points for changing operational Intel, ethical/moral 
+responsibility, and how much of an impact we are having 
+on the environment are all around us as ML continues to  
+change the face of American industry. Powered by 
+cutting-edge tech such as Edge AI and Federated Learning, 
+the next wave of ML apps will deliver more than just 
+traditional automation; they will also address the urgent 
+need for  ethically-sourced and sustainable production 
+systems. 
+7.1. Recent Advancements: Federated Learning and 
+Edge AI 
+One of the most exciting developments to look out for in 
+the future, is the evolution of Edge AI — where ML 
+algorithms are directly applied to local devices such as 
+sensors, industrial robots and smart controllers. Edge AI 
+enables instantaneous decision -making at the source, 
+reducing latency, enhancing data privacy and consuming 
+less bandwidth when compared to classic  models that 
+rely on cloud -based processing (Chinta, 2024) . When it 
+comes to predictive maintenance, that means the 
+equipment is able to recognize a problem on its own, and 
+immediately raising an alert, so that issues can be fixed 
+sooner, minimizing unplanned downtime Edge AI also 
+plays in the supply chain: hyperlocal forecasting and real 
+time changes in reaction to demand or  a variable 
+environment. Equally ground breaking is the emergence 
+of techniques such as  Federated Learning, a distributed 
+approach that trains models in multiple locations without 
+ever moving raw data. This invention has a particular 
+advantage for industries which are data sensitive or have 
+competitive concerns. Using techniques like Federated 
+Learning, manufacturers can collaborate to improve  
+model accuracy without compromising privacy or legal 
+obligations, such as predicting when a part will fail or 
+optimizing delivery routes. This ensures a  unified 
+learning environment despite a fragmented context while 
+providing confidentiality and scalability (Brecko et al., 
+2022). 
+promoting model explainability, stakeholder  
+participation and human oversight to address it. Ethical 
+audits, staff AI literacy training and inclusive design  
+practices are required to ensure that machine learning 
+supplements, rather than displaces, human 
+expertise(Shneiderman, 2020). 
+8. Conclusion 
+Machine learning is transforming manufacturing in the 
+U.S. through predictive information that helps make 
+assets more reliable and the supply chain more agile. The 
+current research showed that predictive maintenance and 
+demand planning may benefit more if performed based on 
+XGBoost and Random Forest data -driven analysis, as 
+compared to generic forecasting techniques. Through our 
+models using real -time sensing and advanced 
+preprocessing-based features as well as region -wide 
+features, it is observed that the models-based metrics of 
+forecasting accuracy, inventory turnover, and 
+responsiveness have been improved by a large margin. 
+Nevertheless, there is still the barrier of scaling these 
+solutions especially on legacy systems, fragmented 
+supply-based chains and those systems with dearth of data.  
+Research developments of Edge AI and Federated 
+Learning are promising ways out of these limitations but 
+with guaranteed data security and sustainability. In the 
+context of U.S. manufacturers that seek to operate within 
+the framework of Industry 4.0, it will be necessary to align 
+the use of ML with the preparedness of the organization 
+and such ethical governance. The results reaffirm the idea 
+of the competitive advantage of ML, with the effective 
+implementation requiring mediation of the technical, 
+infrastructural, and human aspects. 
+ 
+References 
+Baier, L., Jöhren, F., &amp; Seebacher, S. (2019). Challenges in the 
+deployment and operation of machine learning in practice. 
+ECIS,  
+Betz, U. A., Arora, L., Assal, R. A., Azevedo, H., Baldwin, J., 
+Becker, M. S., Bostock, S., Cheng, V ., Egle, T., &amp; Ferrari, 
+N. (2023). Game changers in science and technology -now 
+and beyond. Technological Forecasting and Social Change, 
+193, 122588.  
+Brecko, A., Kajati, E., Koziorek, J., &amp; Zolotova, I. (2022). 
+Federated learning for edge computing: A survey. Applied 
+Sciences, 12(18), 9124.  
+Camarinha-Matos, L. M., Rocha, A. D., &amp; Graça, P. (2024). 
+Collaborative approaches in sustainable and resilient 
+manufacturing. Journal of Intelligent Manufacturing, 35(2), 
+499-519.  
+Chinta, S. (2024). Edge AI for real-time decision making in IoT 
+networks. International Journal of Innovative Research in 
+Hasan et al. (2025)                                                                                                                                              JITMBH, 1(2), pp. 1-XY.  
+ 
+9 
+ 
+Computer and Communication Engineering, 12(9), 11293-
+11309.  
+Cline, B., Niculescu, R. S., Huffman, D., &amp; Deckel, B. (2017). 
+Predictive maintenance applications for machine learning. 
+2017 annual reliability and maintainability symposium 
+(RAMS),  
+Datta, S., Granger, C. W. J., Barari, M., &amp; Gibbs, T. (2007). 
+Management of supply chain: an alternative modelling 
+technique for forecasting. Journal of the Operational 
+Research Society, 58(11), 1459-1469.  
+Gourisaria, M. K., Agrawal, R., Harshvardhan, G., Pandey, M., 
+&amp; Rautaray, S. S. (2021). Application of machine learning 
+in industry 4.0. Machine learning: Theoretical foundations 
+and practical applications, 57-87.  
+Hasan, M. R., Shawon, R. E. R., Rahman, A., Al Mukaddim, A., 
+Khan, M. A., Hider, M. A., &amp; Zeeshan, M. A. F. (2024). 
+Optimizing sustainable supply chains: Integrating 
+environmental concerns and carbon footprint reduction 
+through ai-enhanced decision-making in the USA. Journal 
+of Economics, Finance, and Accounting Studies, 6(4), 57.  
+Hashemian, H. (2011). Wireless sensors for predictive 
+maintenance of rotating equipment in research reactors. 
+Annals of Nuclear Energy, 38(2-3), 665-680.  
+Hashemian, H. M. (2010). State -of-the-art predictive 
+maintenance techniques. IEEE Transactions on 
+Instrumentation and measurement, 60(1), 226-236.  
+Jardine, A. K., Lin, D., &amp; Banjevic, D. (2006). A review on 
+machinery diagnostics and prognostics implementing 
+condition-based maintenance. Mechanical systems and 
+signal processing, 20(7), 1483-1510.  
+Jha, N., Prashar, D., &amp; Nagpal, A. (2021). Combining artificial 
+intelligence with robotic process automation —an 
+intelligent automation approach. Deep learning and big 
+data for intelligent transportation: enabling technologies 
+and future trends, 245-264.  
+Khan, S., &amp; Yairi, T. (2018). A review on the application of deep 
+learning in system health management. Mechanical 
+systems and signal processing, 107, 241-265.  
+Khawar, M. W., Salman, W., Shaheen, S., Shakil, A., Iftikhar, F., 
+&amp; Faisal, K. M. I. (2024). Investigating the most effective 
+AI/ML-based strategies for predictive network 
+maintenance to minimize downtime and enhance service 
+reliability. Spectrum of Engineering Sciences , 2(4), 115 -
+132.  
+Lee, J., Lapira, E., Bagheri, B., &amp; Kao, H. -a. (2013). Recent 
+advances and trends in predictive manufacturing systems 
+in big data environment. Manufacturing letters, 1(1), 38-
+41.  
+Lukito, T., Herlianti, R., Mayanti, M., &amp; Kusumah, L. H. (2025). 
+Implementation of predictive maintenance in various 
+Industry: A Review. TEKNOSAINS: Jurnal Sains, 
+Teknologi dan Informatika, 12(1), 133-144.  
+Musella, L. (2023). The impact of Covid-19 on thesupply chain: 
+Review of the effects of a pandemic crisis on the global 
+supplysystem and analysis of its fragilities.  
+Ochiai, K., &amp; Terada, M. End -to-End Privacy -Preserving 
+Vertical Federated Learning using Private Cross -
+Organizational Data Collaboration.  
+Pasupuleti, V ., Thuraka, B., Kodete, C. S., &amp; Malisetty, S. (2024). 
+Enhancing supply chain agility and sustainability through 
+machine learning: Optimization techniques for logistics 
+and inventory management. Logistics, 8(3), 73.  
+Peretz-Andersson, E., Tabares, S., Mikalef, P., &amp; Parida, V . 
+(2024). Artificial intelligence implementation in 
+manufacturing SMEs: A resource orchestration approach. 
+International Journal of Information Management , 77, 
+102781.  
+Porter, M. E. (2023). Changing patterns of international 
+competition. In International Strategic Management  (pp. 
+61-86). Routledge.  
+Prinsloo, J., Sinha, S., &amp; V on Solms, B. (2019). A review of 
+industry 4.0 manufacturing process security risks. Applied 
+Sciences, 9(23), 5105.  
+Ren, Y . (2021). Optimizing predictive maintenance with 
+machine learning for reliability improvement. ASCE-asme 
+journal of risk and uncertainty in engineering systems, part 
+b: mechanical engineering, 7(3), 030801.  
+Robinson, J. C. (1995). The impact of environmental and 
+occupational health regulation on productivity growth in 
+US manufacturing. Yale J. on Reg., 12, 387.  
+Shneiderman, B. (2020). Bridging the gap between ethics and 
+practice: guidelines for reliable, safe, and trustworthy 
+human-centered AI systems. ACM Transactions on 
+Interactive Intelligent Systems (TiiS), 10(4), 1-31.  
+Singla, A. (2023). Machine learning operations (mlops): 
+Challenges and strategies. Journal of Knowledge Learning 
+and Science Technology ISSN: 2959 -6386 (online) , 2(3), 
+333-340.  
+Swamidass, P., &amp; Winch, G. (2002). Exploratory study of the 
+adoption of manufacturing technology innovations in the 
+USA and the UK. International Journal of Production 
+Research, 40(12), 2677-2703.  
+Syafrudin, M., Alfian, G., Fitriyani, N. L., &amp; Rhee, J. (2018). 
+Performance analysis of IoT -based sensor, big data 
+processing, and machine learning model for real -time 
+monitoring system in automotive manufacturing. Sensors, 
+18(9), 2946.  
+Wuest, T., Weimer, D., Irgens, C., &amp; Thoben, K. -D. (2016). 
+Machine learning in manufacturing: advantages, 
+challenges, and applications. Production &amp; manufacturing 
+research, 4(1), 23-45.  
+Zambetti, M., Khan, M. A., Pinto, R., &amp; Wuest, T. (2020). 
+Enabling servitization by retrofitting legacy equipment for 
+Industry 4.0 applications: benefits and barriers for OEMs. 
+Procedia Manufacturing, 48, 1047-1053.  
+Zhang, W., Yang, D., &amp; Wang, H. (2019). Data-driven methods 
+for predictive maintenance of industrial equipment: A 
+survey. IEEE systems journal, 13(3), 2213-2227.  
+Zuashkiani, A., Rahmandad, H., &amp; Jardine, A. K. (2011). 
+Mapping the dynamics of overall equipment effectiveness 
+to enhance asset management practices. Journal of Quality 
+in Maintenance Engineering, 17(1), 74-92.  
+ </p>

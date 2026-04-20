@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
   try {
     const ip = req.headers.get('x-forwarded-for') || 'anonymous';
     try {
-      await limiter.check(NextResponse.next(), 5, ip); // 5 registration attempts per hour per IP
+      await limiter.check(NextResponse.next(), 50, ip); // Adjusted limit
     } catch {
       return apiError('Too many registration attempts. Please try again later.', 429, undefined, 'RATE_LIMIT_EXCEEDED');
     }
@@ -44,7 +44,12 @@ export async function POST(req: NextRequest) {
     });
 
     if (existingUser) {
-      return apiError('An account with this email already exists', 409, undefined, 'USER_EXISTS');
+      // SECURITY: Generic message to prevent Email Enumeration
+      return apiSuccess(
+        null,
+        'Registration successful. If an account with this email exists, a verification link has been sent.',
+        201
+      );
     }
 
     const passwordHash = await hashPassword(password);
@@ -96,31 +101,27 @@ export async function POST(req: NextRequest) {
       });
 
       for (const inv of invitations) {
-        // Check if review already exists (double check)
         const exists = await prisma.review.findFirst({
           where: { articleId: inv.articleId, reviewerId: user.id }
         });
 
         if (!exists) {
-          // Assign Reviewer
           const nextReviewerNumber = await prisma.review.count({ where: { articleId: inv.articleId } }) + 1;
           await prisma.review.create({
             data: {
               articleId: inv.articleId,
               reviewerId: user.id,
               reviewerNumber: nextReviewerNumber,
-              status: 'invited', // They need to accept it in dashboard, or auto-accept? "invited" is safe.
+              status: 'invited',
               dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
             }
           });
 
-          // Update Invitation Status
           await prisma.reviewerInvitation.update({
             where: { id: inv.id },
             data: { status: 'accepted' }
           });
 
-          // Upgrade Role if needed
           if (user.role !== 'reviewer' && user.role !== 'editor' && user.role !== 'super_admin') {
             await prisma.user.update({
               where: { id: user.id },
@@ -131,11 +132,10 @@ export async function POST(req: NextRequest) {
       }
     } catch (invError) {
       console.error("Error processing reviewer invitations:", invError);
-      // Do not fail registration
     }
 
     return apiSuccess(
-      { user, verificationToken }, // Exposed for Demo Mode (Investor Verification)
+      { user }, // SECURITY: verificationToken removed from response
       'Registration successful. Please check your email to verify your account.',
       201
     );

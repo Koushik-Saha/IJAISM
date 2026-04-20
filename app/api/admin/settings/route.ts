@@ -12,15 +12,27 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
-        const manualFee = await prisma.globalSettings.findUnique({
-            where: { key: 'apc_fee' }
+        const settingsKeys = [
+            'apc_fee', 'site_name', 'site_logo_url', 'site_location', 
+            'site_contact_email', 'site_contact_phone', 
+            'site_mission', 'site_vision', 
+            'privacy_policy', 'terms_conditions'
+        ];
+
+        const settingsResult: Record<string, any> = {};
+        const settings = await prisma.globalSettings.findMany({
+            where: { key: { in: settingsKeys } }
         });
 
-        return NextResponse.json({
-            settings: {
-                apc_fee: manualFee ? parseFloat(manualFee.value) : 500
-            }
+        settings.forEach(s => {
+            if (s.key === 'apc_fee') settingsResult[s.key] = parseFloat(s.value);
+            else settingsResult[s.key] = s.value;
         });
+
+        // Set defaults if missing
+        if (!settingsResult.site_name) settingsResult.site_name = 'C5K';
+
+        return NextResponse.json({ settings: settingsResult });
     } catch (error) {
         console.error('Settings fetch error:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
@@ -37,15 +49,18 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
-        const { apc_fee } = await request.json();
+        const body = await request.json();
 
-        if (apc_fee !== undefined) {
-            await prisma.globalSettings.upsert({
-                where: { key: 'apc_fee' },
-                update: { value: apc_fee.toString() },
-                create: { key: 'apc_fee', value: apc_fee.toString() }
+        const updates = Object.entries(body).map(([key, value]) => {
+            if (value === undefined || value === null) return null;
+            return prisma.globalSettings.upsert({
+                where: { key },
+                update: { value: value.toString() },
+                create: { key, value: value.toString() }
             });
-        }
+        }).filter(Boolean);
+
+        await Promise.all(updates);
 
         return NextResponse.json({ message: 'Settings updated successfully' });
     } catch (error) {

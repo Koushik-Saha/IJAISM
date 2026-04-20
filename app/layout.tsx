@@ -9,25 +9,32 @@ import ForcePasswordChangeModal from "@/components/auth/ForcePasswordChangeModal
 
 
 
-export const metadata: Metadata = {
-  title: "C5K - Academic Publishing Platform",
-  description: "Dedicated to publishing groundbreaking research in information technology, business management, and related disciplines",
-  manifest: "/manifest.json",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: "C5K",
-  },
-  icons: {
-    icon: [
-      { url: "/icons/icon-192x192.svg", sizes: "192x192", type: "image/svg+xml" },
-      { url: "/icons/icon-512x512.svg", sizes: "512x512", type: "image/svg+xml" },
-    ],
-    apple: [
-      { url: "/icons/icon-152x152.svg", sizes: "152x152", type: "image/svg+xml" },
-    ],
-  },
-};
+import { prisma } from "@/lib/prisma";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const setting = await prisma.globalSettings.findUnique({ where: { key: 'site_name' } });
+  const siteName = setting?.value || "C5K";
+
+  return {
+    title: `${siteName} - Academic Publishing Platform`,
+    description: `Leading the Future of Scholarly Research at ${siteName}`,
+    manifest: "/manifest.json",
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "default",
+      title: siteName,
+    },
+    icons: {
+      icon: [
+        { url: "/icons/icon-192x192.svg", sizes: "192x192", type: "image/svg+xml" },
+        { url: "/icons/icon-512x512.svg", sizes: "512x512", type: "image/svg+xml" },
+      ],
+      apple: [
+        { url: "/icons/icon-152x152.svg", sizes: "152x152", type: "image/svg+xml" },
+      ],
+    },
+  };
+}
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -37,18 +44,21 @@ export const viewport: Viewport = {
   themeColor: "#1a365d",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const setting = await prisma.globalSettings.findUnique({ where: { key: 'site_name' } });
+  const siteName = setting?.value || "C5K";
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <meta name="application-name" content="C5K" />
+        <meta name="application-name" content={siteName} />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="C5K" />
+        <meta name="apple-mobile-web-app-title" content={siteName} />
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
         <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.svg" />

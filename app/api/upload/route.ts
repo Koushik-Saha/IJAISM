@@ -117,11 +117,17 @@ export async function POST(req: NextRequest) {
       // Local File Storage Fallback
       const timestamp = Date.now();
       const publicDir = join(cwd(), 'public');
-      const uploadDir = join(publicDir, 'uploads', fileType);
-
+      
+      // SECURITY: Validate fileType against a strict allowlist to prevent Path Traversal
+      const validFileTypes = ['article', 'issue', 'journal', 'book', 'conference', 'dissertation', 'profile', 'announcement', 'blog'];
+      const safeFileType = validFileTypes.includes(fileType) ? fileType : 'misc';
+      
+      const uploadDir = join(publicDir, 'uploads', safeFileType);
       await mkdir(uploadDir, { recursive: true });
 
-      const localFileName = `${timestamp}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+      // SECURITY: Further sanitize the filename to prevent any hidden ".." or path injections
+      const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_').replace(/\.\./g, '_');
+      const localFileName = `${timestamp}_${safeName}`;
       const finalPath = join(uploadDir, localFileName);
 
       const bytes = await file.arrayBuffer();

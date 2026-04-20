@@ -186,7 +186,18 @@ export async function PATCH(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { userId, role, isActive, name, email, university, bio, profileImageUrl } = body;
+    const { userId, role, isActive, name, email, university, bio, profileImageUrl, password } = body;
+
+    // SECURITY: Only Mother Admin (Executive Board) can manually set passwords for existing users
+    if (password !== undefined) {
+      if (requester.role !== ROLES.MOTHER_ADMIN) {
+        return NextResponse.json({ error: 'Permission Denied: Only Executive Board Admins can manually set user passwords.' }, { status: 403 });
+      }
+      
+      if (password.length < 8) {
+        return NextResponse.json({ error: 'Password must be at least 8 characters' }, { status: 400 });
+      }
+    }
 
     // Target User Check
     const targetUser = await prisma.user.findUnique({ where: { id: userId } });
@@ -237,6 +248,12 @@ export async function PATCH(req: NextRequest) {
     if (university !== undefined) updateData.university = university;
     if (bio !== undefined) updateData.bio = bio;
     if (profileImageUrl !== undefined) updateData.profileImageUrl = profileImageUrl;
+
+    // Handle Password Update (Mother Admin Only)
+    if (password !== undefined) {
+      updateData.passwordHash = await hashPassword(password);
+      updateData.forcePasswordChange = true; // Security best practice: force user to change it
+    }
 
     const updatedUser = await prisma.user.update({
       where: { id: userId },

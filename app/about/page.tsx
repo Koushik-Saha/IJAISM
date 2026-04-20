@@ -6,6 +6,19 @@ import SafeJournalCover from "@/components/journals/SafeJournalCover";
 export const dynamic = 'force-dynamic';
 
 export default async function AboutPage() {
+  const settingsRecords = await prisma.globalSettings.findMany({
+    where: {
+      key: { in: ['site_name', 'site_mission', 'site_vision', 'site_location', 'site_contact_email'] }
+    }
+  });
+
+  const settings: Record<string, string> = {
+    site_name: 'C5K',
+    site_mission: 'At C5K, we are dedicated to publishing groundbreaking research and promoting innovative ideas in the fields of information technology, business management, and related disciplines.',
+    site_vision: 'To be a leading global platform for scholarly research.',
+  };
+  settingsRecords.forEach(s => settings[s.key] = s.value);
+
   const journals = await prisma.journal.findMany({
     take: 3,
     orderBy: { fullName: 'asc' },
@@ -23,31 +36,35 @@ export default async function AboutPage() {
       {/* Hero Section */}
       <div className="bg-[#c05621] text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold font-serif mb-6">About C5K</h1>
+          <h1 className="text-4xl md:text-5xl font-bold font-serif mb-6">About {settings.site_name}</h1>
           <p className="text-xl md:text-2xl max-w-3xl mx-auto opacity-90">
-            Leading the Future of Scholarly Research in IT and Business Management
+            Leading the Future of Scholarly Research
           </p>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-20">
 
-        {/* Mission */}
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+        {/* Mission & Vision */}
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
           <div>
             <h2 className="text-3xl font-bold text-gray-900 mb-6 font-serif border-b-4 border-[#006d77] inline-block pb-2">Our Mission</h2>
-            <p className="text-lg text-gray-700 leading-relaxed mb-6">
-              At C5K, we are dedicated to publishing groundbreaking research and promoting innovative ideas in the fields of information technology, business management, and related disciplines.
-            </p>
-            <p className="text-lg text-gray-700 leading-relaxed">
-              Our goal is to minimize the delay in sharing new ideas and discoveries with the world, making high-quality, peer-reviewed journals available online. We strive to bridge the gap between theoretical knowledge and real-world application.
-            </p>
+            <div 
+              className="text-lg text-gray-700 leading-relaxed mb-10 prose prose-blue max-w-none"
+              dangerouslySetInnerHTML={{ __html: settings.site_mission }}
+            />
+            
+            <h2 className="text-3xl font-bold text-gray-900 mb-6 font-serif border-b-4 border-[#006d77] inline-block pb-2">Our Vision</h2>
+            <div 
+              className="text-lg text-gray-700 leading-relaxed prose prose-blue max-w-none"
+              dangerouslySetInnerHTML={{ __html: settings.site_vision }}
+            />
           </div>
-          <div className="bg-gray-100 rounded-lg p-8 shadow-inner flex items-center justify-center">
-            {/* Placeholder for an About Image if needed, or just a decorative block */}
+          <div className="bg-gray-100 rounded-lg p-8 shadow-inner flex items-center justify-center sticky top-24">
             <div className="text-center">
               <span className="text-6xl mb-4 block">🎓</span>
               <p className="text-xl font-bold text-gray-800">Excellence in Publishing</p>
+              <p className="text-gray-600 mt-2">Serving the academic community since {new Date().getFullYear() - 2}</p>
             </div>
           </div>
         </section>
@@ -145,11 +162,12 @@ export default async function AboutPage() {
             <div className="flex flex-col items-center justify-center gap-4">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center text-3xl">📍</div>
               <div>
-                <p className="text-xl font-bold text-gray-800">C5K Academic Publishing</p>
-                <p className="text-lg text-gray-600 mt-2">761 STATE HIGHWAY 100</p>
-                <p className="text-lg text-gray-600">Port Isabel, TX 78578 USA</p>
+                <p className="text-xl font-bold text-gray-800">{settings.site_name} Academic Publishing</p>
+                <div className="text-lg text-gray-600 mt-2 whitespace-pre-line">
+                  {settings.site_location}
+                </div>
               </div>
-              <a href="mailto:contact@c5k.com" className="mt-4 px-6 py-2 bg-[#006d77] text-white rounded font-bold hover:bg-[#005a63] transition-colors">
+              <a href={`mailto:${settings.site_contact_email}`} className="mt-4 px-6 py-2 bg-[#006d77] text-white rounded font-bold hover:bg-[#005a63] transition-colors">
                 Contact & Support
               </a>
             </div>

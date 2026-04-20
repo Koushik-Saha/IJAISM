@@ -1,9 +1,7 @@
-'use client';
-
-import { useState } from 'react';
-import { toast } from 'sonner';
+import { useSettings } from "@/context/SettingsContext";
 
 export default function ContactPage() {
+    const { settings } = useSettings();
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -31,7 +29,7 @@ export default function ContactPage() {
         <div className="min-h-screen bg-gray-50 py-12">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-12">
-                    <h1 className="text-4xl font-bold text-primary mb-4">Contact Us</h1>
+                    <h1 className="text-4xl font-bold text-primary mb-4">Contact {settings.site_name}</h1>
                     <p className="text-xl text-gray-600">
                         Have questions? We're here to help.
                     </p>
@@ -48,10 +46,8 @@ export default function ContactPage() {
                                 </div>
                                 <div className="ml-4">
                                     <h3 className="font-bold text-gray-900">Address</h3>
-                                    <p className="text-gray-600">
-                                        123 Academic Way<br />
-                                        Research City, RC 90210<br />
-                                        United States
+                                    <p className="text-gray-600 whitespace-pre-line">
+                                        {settings.site_location || "761 State Highway 100, Port Isabel, TX 78578, USA"}
                                     </p>
                                 </div>
                             </div>
@@ -62,20 +58,17 @@ export default function ContactPage() {
                                 </div>
                                 <div className="ml-4">
                                     <h3 className="font-bold text-gray-900">Email</h3>
-                                    <p className="text-gray-600">support@c5k.org</p>
+                                    <p className="text-gray-600">{settings.site_contact_email || "contact@c5k.com"}</p>
                                 </div>
                             </div>
 
                             <div className="flex items-start">
                                 <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-primary">
-                                    ⏰
+                                    📞
                                 </div>
                                 <div className="ml-4">
-                                    <h3 className="font-bold text-gray-900">Hours</h3>
-                                    <p className="text-gray-600">
-                                        Monday - Friday<br />
-                                        9:00 AM - 5:00 PM EST
-                                    </p>
+                                    <h3 className="font-bold text-gray-900">Phone</h3>
+                                    <p className="text-gray-600">{settings.site_contact_phone || "+1 (956) 555-0123"}</p>
                                 </div>
                             </div>
                         </div>

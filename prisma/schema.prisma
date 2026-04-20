@@ -37,8 +37,9 @@ model User {
   orcidRefreshToken       String?
   activityLogs            ActivityLog[]
   articles                Article[]
-  coAuthors               CoAuthor[]
   blogs                   Blog[]
+  blogReviews             BlogReview[]
+  coAuthors               CoAuthor[]
   conferences             ConferenceRegistration[]
   dissertations           Dissertation[]
   downloads               DownloadLog[]
@@ -48,7 +49,6 @@ model User {
   notifications           Notification[]
   passwordResetTokens     PasswordResetToken[]
   reviews                 Review[]
-  blogReviews             BlogReview[]
   managedBy               User?                    @relation("UserHierarchy", fields: [managedById], references: [id])
   subordinates            User[]                   @relation("UserHierarchy")
   newsletterSubscription  NewsletterSubscriber?
@@ -234,9 +234,9 @@ model CoAuthor {
   order      Int      @default(0)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-  article    Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
   userId     String?
-  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  article    Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  user       User?    @relation(fields: [userId], references: [id])
 
   @@index([articleId])
   @@index([userId])
@@ -291,13 +291,13 @@ model Dissertation {
   deletedAt      DateTime?
   authorName     String?
   coverImageUrl  String?
-  price          Float?
-  hardCoverPrice Float?
-  paperBookPrice Float?
-  dimensions     String?
   copyright      String?
+  dimensions     String?
   doi            String?
   eIsbn          String?
+  hardCoverPrice Float?
+  paperBookPrice Float?
+  price          Float?
   printIsbn      String?
   author         User                  @relation(fields: [authorId], references: [id])
   chapters       DissertationChapter[]
@@ -363,25 +363,25 @@ model ConferenceRegistration {
 }
 
 model Blog {
-  id               String    @id @default(uuid())
-  title            String
-  slug             String    @unique
-  content          String
-  excerpt          String?
-  featuredImageUrl String?
-  category         String?
-  authorId         String
-  status           String    @default("draft") // draft, submitted, under_review, revision, accepted, published, rejected
-  reviewerComments String?
-  publishedAt      DateTime?
-  viewCount        Int       @default(0)
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-  deletedAt        DateTime?
-  author           User      @relation(fields: [authorId], references: [id])
-  comments         Comment[]
-  reviews          BlogReview[]
+  id                  String                   @id @default(uuid())
+  title               String
+  slug                String                   @unique
+  content             String
+  excerpt             String?
+  featuredImageUrl    String?
+  authorId            String
+  status              String                   @default("draft")
+  publishedAt         DateTime?
+  viewCount           Int                      @default(0)
+  createdAt           DateTime                 @default(now())
+  updatedAt           DateTime                 @updatedAt
+  deletedAt           DateTime?
+  category            String?
+  reviewerComments    String?
+  author              User                     @relation(fields: [authorId], references: [id])
+  reviews             BlogReview[]
   reviewerInvitations BlogReviewerInvitation[]
+  comments            Comment[]
 
   @@index([slug])
   @@index([status])
@@ -389,19 +389,19 @@ model Blog {
 }
 
 model BlogReview {
-  id                 String    @id @default(uuid())
-  blogId             String
-  reviewerId         String
-  reviewerNumber     Int
-  status             String    @default("pending") // pending, completed
-  decision           String?   // accept, revise, reject
-  commentsToAdmin    String?
-  commentsToAuthor   String?
-  submittedAt        DateTime?
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
-  blog               Blog      @relation(fields: [blogId], references: [id], onDelete: Cascade)
-  reviewer           User      @relation(fields: [reviewerId], references: [id])
+  id               String    @id @default(uuid())
+  blogId           String
+  reviewerId       String
+  reviewerNumber   Int
+  status           String    @default("pending")
+  decision         String?
+  commentsToAdmin  String?
+  commentsToAuthor String?
+  submittedAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  blog             Blog      @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  reviewer         User      @relation(fields: [reviewerId], references: [id])
 
   @@unique([blogId, reviewerNumber])
   @@index([blogId])
@@ -483,14 +483,14 @@ model Book {
   previewPages    Json?
   reviews         Json?
   relatedTopics   String[]
-  hardCoverPrice  String?
-  paperBookPrice  String?
-  dimensions      String?
-  weight          String?
-  doi             String?
-  keyFeatures     String[]
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
+  dimensions      String?
+  doi             String?
+  hardCoverPrice  String?
+  keyFeatures     String[]
+  paperBookPrice  String?
+  weight          String?
   chapters        BookChapter[]
   purchasedBy     PurchasedBook[]
   wishlistedBy    Wishlist[]
@@ -655,10 +655,9 @@ model Comment {
   content   String
   rating    Int?
   saveInfo  Boolean  @default(false)
-  status    String   @default("pending") // pending, approved, rejected
+  status    String   @default("pending")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
   blog      Blog     @relation(fields: [blogId], references: [id], onDelete: Cascade)
 
   @@index([blogId])

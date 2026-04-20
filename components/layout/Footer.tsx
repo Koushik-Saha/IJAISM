@@ -1,13 +1,16 @@
 import Link from "next/link";
+import { useSettings } from "@/context/SettingsContext";
 
 export default function Footer() {
+  const { settings } = useSettings();
+  
   return (
     <footer className="bg-gray-900 text-gray-300 mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* About C5K */}
           <div>
-            <h3 className="text-white text-lg font-bold mb-4">ABOUT C5K</h3>
+            <h3 className="text-white text-lg font-bold mb-4 uppercase">ABOUT {settings.site_name}</h3>
             <ul className="space-y-2">
               <li>
                 <Link href="/about" className="hover:text-white transition-colors">
@@ -35,10 +38,14 @@ export default function Footer() {
           {/* Location */}
           <div>
             <h3 className="text-white text-lg font-bold mb-4">LOCATION</h3>
-            <address className="not-italic">
-              761 State Highway 100<br />
-              Port Isabel, TX 78578<br />
-              USA
+            <address className="not-italic whitespace-pre-line">
+              {settings.site_location || (
+                <>
+                  761 State Highway 100<br />
+                  Port Isabel, TX 78578<br />
+                  USA
+                </>
+              )}
             </address>
           </div>
 
@@ -104,7 +111,7 @@ export default function Footer() {
 
         {/* Bottom Bar */}
         <div className="border-t border-gray-700 mt-8 pt-8 text-center">
-          <p>&copy; {new Date().getFullYear()} C5K - Academic Publishing Platform. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} {settings.site_name} - Academic Publishing Platform. All rights reserved.</p>
         </div>
       </div>
     </footer>

@@ -5,6 +5,7 @@ import React from "react";
 import fs from "fs";
 import path from "path";
 import Link from "next/link";
+import sanitizeHtml from "sanitize-html";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -54,14 +55,26 @@ export default async function FullArticleHtmlPage({ params }: Props) {
   }
 
   // REFINEMENT: Remove leading Logo/Cover images from the body content
-  // Mammoth often converts the header images found at the top of the Word doc.
-  // We remove the first 2 images if they are in the first 2k characters.
   for (let i = 0; i < 2; i++) {
     const imgMatch = articleHtml.match(/<img [^>]+>/);
     if (imgMatch && imgMatch.index !== undefined && imgMatch.index < 2000) {
       articleHtml = articleHtml.slice(0, imgMatch.index) + articleHtml.slice(imgMatch.index + imgMatch[0].length);
     }
   }
+
+  // SECURITY: Sanitize the final HTML to prevent XSS
+  const sanitizedHtml = sanitizeHtml(articleHtml, {
+    allowedTags: [
+      ...sanitizeHtml.defaults.allowedTags,
+      "img", "h1", "h2", "h3", "h4", "h5", "h6", "span", "table", "thead", "tbody", "tr", "th", "td", "br", "hr"
+    ],
+    allowedAttributes: {
+      ...sanitizeHtml.defaults.allowedAttributes,
+      "*": ["style", "class", "id"],
+      "img": ["src", "alt", "width", "height", "loading"],
+    },
+    allowedSchemes: ["http", "https", "data"],
+  });
 
   // Aggregate authors
   const allAuthors = [
@@ -390,7 +403,7 @@ export default async function FullArticleHtmlPage({ params }: Props) {
           <div className="two-col-body-wrap">
             <div
               className="two-col-body"
-              dangerouslySetInnerHTML={{ __html: articleHtml }}
+              dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
             />
           </div>
 

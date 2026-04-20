@@ -36,13 +36,22 @@ export function apiError(
     details?: Record<string, any>,
     code?: string
 ) {
+    // SECURITY: Redact details in production to prevent information disclosure
+    const safeDetails = process.env.NODE_ENV === 'production' 
+        ? (details?.safe ? { details: details.safe } : undefined) 
+        : details;
+
+    const safeMessage = (status === 500 && process.env.NODE_ENV === 'production')
+        ? 'An internal server error occurred. Our team has been notified.'
+        : message;
+
     return NextResponse.json(
         {
             success: false,
             error: {
-                message,
+                message: safeMessage,
                 code,
-                details,
+                details: safeDetails,
             },
         },
         { status }

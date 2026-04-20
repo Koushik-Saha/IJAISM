@@ -8,11 +8,13 @@ export const dynamic = "force-dynamic";
 export default async function AnnouncementDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
-  const announcement = await prisma.announcement.findUnique({
-    where: { id },
-  });
+  const [ann, siteNameSetting] = await Promise.all([
+    prisma.announcement.findUnique({ where: { id } }),
+    prisma.globalSettings.findUnique({ where: { key: "site_name" } })
+  ]);
+  const siteName = siteNameSetting?.value || "C5K";
 
-  if (!announcement) {
+  if (!ann) {
     notFound();
   }
 
@@ -21,10 +23,10 @@ export default async function AnnouncementDetailPage({ params }: { params: Promi
   // If no category, or not enough, just fetch latest 2 excluding current.
   let relatedAnnouncements: any[] = [];
 
-  if (announcement.category) {
+  if (ann.category) {
     relatedAnnouncements = await prisma.announcement.findMany({
       where: {
-        category: announcement.category,
+        category: ann.category,
         id: { not: id },
         publishedAt: { lte: new Date() }
       },
@@ -45,9 +47,6 @@ export default async function AnnouncementDetailPage({ params }: { params: Promi
     });
     relatedAnnouncements = [...relatedAnnouncements, ...more];
   }
-
-  // Cast to any to avoid TS errors until VS Code refreshes Prisma types
-  const ann = announcement as any;
 
   return (
     <div className="bg-[#f0f2f5] min-h-screen py-10 font-sans text-[#333]">
@@ -84,13 +83,13 @@ export default async function AnnouncementDetailPage({ params }: { params: Promi
                   <div className="w-24 h-24 rounded-full bg-primary flex items-center justify-center text-white text-3xl font-bold mb-2">
                       E
                   </div>
-                  <a href="#" className="text-xs text-blue-600 hover:underline">http://c5k.com</a>
+                  <a href="#" className="text-xs text-blue-600 hover:underline">http://{siteName.toLowerCase().replace(/\s+/g, '')}.com</a>
                 </div>
                 <div className="flex-1">
                   <h3 className="text-xl font-bold text-gray-900">Editorial Team</h3>
                   <p className="italic text-gray-600 text-sm mb-3">Administrator</p>
                   <p className="text-sm text-gray-700 leading-relaxed">
-                    Hello! Welcome to the announcements board. We share the latest updates, policies, and news regarding C5K Platform and journal publishing here.
+                    Hello! Welcome to the announcements board. We share the latest updates, policies, and news regarding {siteName} and journal publishing here.
                   </p>
                 </div>
               </div>

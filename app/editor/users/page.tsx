@@ -35,6 +35,8 @@ interface User {
 
 import CreateUserModal from "@/components/editor/CreateUserModal";
 import EditUserModal from "@/components/editor/EditUserModal";
+import ManagePasswordModal from "@/components/editor/ManagePasswordModal";
+import { Key } from "lucide-react";
 
 export default function AdminUsersPage() {
   const router = useRouter();
@@ -49,6 +51,7 @@ export default function AdminUsersPage() {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
 
   useEffect(() => {
@@ -389,7 +392,21 @@ export default function AdminUsersPage() {
                               <ChevronDown className="absolute right-1.5 top-2 h-3 w-3 text-gray-400 pointer-events-none" />
                             </div>
 
-                            {/* 3. Public Profile */}
+                            {/* 3. Password Management (Mother Admin Only) */}
+                            {currentUser?.role === 'mother_admin' && (
+                              <button
+                                onClick={() => {
+                                  setSelectedUser(user);
+                                  setIsPasswordModalOpen(true);
+                                }}
+                                title="Manage Password"
+                                className="p-1.5 bg-amber-50 text-amber-600 border border-amber-100 rounded-lg hover:bg-amber-600 hover:text-white transition-all active:scale-95"
+                              >
+                                <Key size={14} />
+                              </button>
+                            )}
+
+                            {/* 4. Public Profile */}
                             <Link
                               href={`/author/${user.id}`}
                               target="_blank"
@@ -399,7 +416,7 @@ export default function AdminUsersPage() {
                               <ExternalLink size={14} />
                             </Link>
 
-                            {/* 4. Status Toggle */}
+                            {/* 5. Status Toggle */}
                             <button
                               onClick={() => handleUpdateUser(user.id, { isActive: !user.isActive })}
                               disabled={!canManageUser(user)}
@@ -508,6 +525,14 @@ export default function AdminUsersPage() {
         onSuccess={fetchUsers}
         user={selectedUser}
         currentUserRole={currentUser?.role || ''}
+      />
+      <ManagePasswordModal
+        isOpen={isPasswordModalOpen}
+        onClose={() => {
+          setIsPasswordModalOpen(false);
+          setSelectedUser(null);
+        }}
+        user={selectedUser}
       />
     </div>
   );

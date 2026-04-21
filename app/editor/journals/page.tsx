@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { Search } from "lucide-react";
 
 import ResponsiveTable from "@/components/ui/ResponsiveTable";
 
@@ -29,6 +30,8 @@ export default function AdminJournalsPage() {
     const [currentUser, setCurrentUser] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [page, setPage] = useState(1);
+    const [search, setSearch] = useState("");
+    const [appliedSearch, setAppliedSearch] = useState("");
 
     // Confirmation State
     const [confirmModal, setConfirmModal] = useState<{
@@ -50,7 +53,11 @@ export default function AdminJournalsPage() {
                 setCurrentUser(meData.user);
 
                 // 2. Fetch Journals
-                const jRes = await fetch('/api/editor/journals', { headers: { Authorization: `Bearer ${token}` } });
+                let url = '/api/editor/journals';
+                if (appliedSearch) {
+                    url += `?search=${encodeURIComponent(appliedSearch)}`;
+                }
+                const jRes = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
                 const jData = await jRes.json();
                 setJournals(jData.journals || []);
 
@@ -67,7 +74,11 @@ export default function AdminJournalsPage() {
             }
         };
         init();
-    }, []);
+    }, [appliedSearch]);
+
+    useEffect(() => {
+        setPage(1);
+    }, [appliedSearch]);
 
     const executeAssignment = async (journalId: string, editorId: string) => {
         try {

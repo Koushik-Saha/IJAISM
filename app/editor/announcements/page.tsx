@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Link from "next/link";
+import { Search } from "lucide-react";
 import RichTextEditor from "@/components/ui/RichTextEditor";
 
 interface Announcement {
@@ -22,6 +23,8 @@ export default function AdminAnnouncementsPage() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const [appliedSearch, setAppliedSearch] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
   const [formData, setFormData] = useState({
@@ -34,9 +37,10 @@ export default function AdminAnnouncementsPage() {
 
   useEffect(() => {
     fetchAnnouncements();
-  }, []);
+  }, [appliedSearch]);
 
   const fetchAnnouncements = async () => {
+    setIsLoading(true);
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -44,7 +48,10 @@ export default function AdminAnnouncementsPage() {
         return;
       }
 
-      const response = await fetch('/api/editor/announcements', {
+      const queryParams = new URLSearchParams();
+      if (appliedSearch) queryParams.append('search', appliedSearch);
+
+      const response = await fetch(`/api/editor/announcements?${queryParams.toString()}`, {
         headers: { 'Authorization': `Bearer ${token}` },
       });
 
@@ -58,8 +65,8 @@ export default function AdminAnnouncementsPage() {
 
       const data = await response.json();
       setAnnouncements(data.announcements || []);
-    } catch (err: any) {
-      console.error('Error:', err);
+    } catch (e) {
+      toast.error('Failed to load announcements');
     } finally {
       setIsLoading(false);
     }
@@ -176,12 +183,12 @@ export default function AdminAnnouncementsPage() {
                     });
                   }
                 }}
-                className="btn-primary"
+                className="px-4 py-2 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary/90 shadow-md transition-all active:scale-95"
               >
                 {isEditing ? 'Cancel' : '+ New Announcement'}
               </button>
-              <Link href="/editor" className="btn-secondary">
-                ← Back to Dashboard
+              <Link href="/editor" className="px-4 py-2 border rounded-xl text-gray-600 font-bold hover:bg-gray-50">
+                Back
               </Link>
             </div>
           </div>
@@ -189,6 +196,39 @@ export default function AdminAnnouncementsPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Search Section */}
+        {!isEditing && (
+          <div className="mb-6 relative max-w-2xl">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              placeholder="Search announcements by title or content..."
+              className="block w-full pl-10 pr-32 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm font-medium shadow-sm"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && setAppliedSearch(search)}
+            />
+            <div className="absolute inset-y-1.5 right-1.5 flex gap-1">
+              {search && (
+                <button
+                  onClick={() => { setSearch(""); setAppliedSearch(""); }}
+                  className="px-3 py-1.5 text-xs font-bold text-gray-500 hover:text-red-500 transition-colors"
+                >
+                  Clear
+                </button>
+              )}
+              <button
+                onClick={() => setAppliedSearch(search)}
+                className="px-6 py-1.5 bg-gray-900 text-white text-xs font-bold rounded-lg hover:bg-gray-800 transition-all active:scale-95"
+              >
+                Find
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Create/Edit Form */}
         {isEditing && (
           <div className="bg-white rounded-lg shadow-md p-6 mb-8">

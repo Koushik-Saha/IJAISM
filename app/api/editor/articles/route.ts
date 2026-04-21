@@ -34,6 +34,7 @@ export async function GET(req: NextRequest) {
     const id = searchParams.get('id');
     const journalId = searchParams.get('journalId');
     const status = searchParams.get('status');
+    const search = searchParams.get('search') || searchParams.get('q');
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
     const skip = (page - 1) * limit;
@@ -43,6 +44,15 @@ export async function GET(req: NextRequest) {
 
     // Build where clause
     const where: any = { deletedAt: null };
+
+    // Apply Search Filter
+    if (search) {
+      where.OR = [
+        { title: { contains: search, mode: 'insensitive' } },
+        { doi: { contains: search, mode: 'insensitive' } },
+        { author: { name: { contains: search, mode: 'insensitive' } } },
+      ];
+    }
 
     // Apply RBAC Filter
     if (user.role === 'editor') {

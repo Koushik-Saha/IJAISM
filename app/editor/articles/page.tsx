@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { Search } from "lucide-react";
 
 interface Article {
   id: string;
@@ -34,15 +35,18 @@ export default function AdminArticlesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [noDoiFilter, setNoDoiFilter] = useState(false);
+  const [search, setSearch] = useState("");
+  const [appliedSearch, setAppliedSearch] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const limit = 10;
 
   useEffect(() => {
     fetchArticles();
-  }, [statusFilter, noDoiFilter, page, journalId]);
+  }, [statusFilter, noDoiFilter, page, journalId, appliedSearch]);
 
   const fetchArticles = async () => {
+    setIsLoading(true);
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -50,18 +54,16 @@ export default function AdminArticlesPage() {
         return;
       }
 
-      let url = `/api/editor/articles?page=${page}&limit=${limit}`;
-      if (statusFilter !== 'all') {
-        url += `&status=${statusFilter}`;
-      }
-      if (journalId) {
-        url += `&journalId=${journalId}`;
-      }
-      if (noDoiFilter) {
-        url += `&noDoi=true`;
-      }
+      const queryParams = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString()
+      });
+      if (statusFilter !== 'all') queryParams.append('status', statusFilter);
+      if (journalId) queryParams.append('journalId', journalId);
+      if (appliedSearch) queryParams.append('search', appliedSearch);
+      if (noDoiFilter) queryParams.append('noDoi', 'true');
 
-      const response = await fetch(url, {
+      const response = await fetch(`/api/editor/articles?${queryParams.toString()}`, {
         headers: { 'Authorization': `Bearer ${token}` },
       });
 
@@ -139,9 +141,39 @@ export default function AdminArticlesPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Filter */}
-        <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-          <div className="flex flex-wrap gap-2">
+        {/* Search & Filter Section */}
+        <div className="flex flex-col lg:flex-row gap-4 mb-6">
+          <div className="flex-1 relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              placeholder="Search by title, DOI, or author name..."
+              className="block w-full pl-10 pr-32 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm font-medium"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && setAppliedSearch(search)}
+            />
+            <div className="absolute inset-y-1 right-1 flex gap-1">
+              {search && (
+                <button
+                  onClick={() => { setSearch(""); setAppliedSearch(""); }}
+                  className="px-3 py-1.5 text-xs font-bold text-gray-500 hover:text-red-500 transition-colors"
+                >
+                  Clear
+                </button>
+              )}
+              <button
+                onClick={() => setAppliedSearch(search)}
+                className="px-6 py-1.5 bg-gray-900 text-white text-xs font-bold rounded-lg hover:bg-gray-800 transition-all active:scale-95"
+              >
+                Find
+              </button>
+            </div>
+          </div>
+          
+          <div className="flex flex-wrap gap-2 items-center bg-white rounded-xl shadow-sm p-2 border border-gray-200">
             {statuses.map((status) => (
               <button
                 key={status.value}
@@ -149,9 +181,9 @@ export default function AdminArticlesPage() {
                   setStatusFilter(status.value);
                   setPage(1);
                 }}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${statusFilter === status.value
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${statusFilter === status.value
                   ? 'bg-primary text-white shadow-md'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                   }`}
               >
                 {status.label}
@@ -162,7 +194,7 @@ export default function AdminArticlesPage() {
                 setNoDoiFilter(prev => !prev);
                 setPage(1);
               }}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border ${noDoiFilter
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${noDoiFilter
                 ? 'bg-orange-500 text-white border-orange-500 shadow-md'
                 : 'bg-white text-orange-600 border-orange-400 hover:bg-orange-50'
                 }`}
@@ -170,19 +202,19 @@ export default function AdminArticlesPage() {
               No DOI
             </button>
           </div>
-
-          {journalId && (
-            <div className="mt-4 flex items-center gap-2 p-3 bg-blue-50 text-blue-800 rounded border border-blue-200">
-              <span className="text-sm">Filtered by Journal ID: <span className="font-mono font-bold">{journalId.substring(0, 8)}...</span></span>
-              <button
-                onClick={() => router.push('/editor/articles')}
-                className="text-xs bg-white border border-blue-300 px-2 py-1 rounded hover:bg-blue-100"
-              >
-                Clear Filter
-              </button>
-            </div>
-          )}
         </div>
+
+        {journalId && (
+          <div className="mb-6 flex items-center gap-2 p-3 bg-blue-50 text-blue-800 rounded-xl border border-blue-200">
+            <span className="text-sm font-medium">Filtered by Journal ID: <span className="font-mono font-bold">{journalId.substring(0, 8)}...</span></span>
+            <button
+              onClick={() => router.push('/editor/articles')}
+              className="text-xs bg-white border border-blue-300 px-3 py-1 rounded-lg font-bold hover:bg-blue-100"
+            >
+              Clear Journal Filter
+            </button>
+          </div>
+        )}
 
         {/* Articles Table */}
         {isLoading ? (

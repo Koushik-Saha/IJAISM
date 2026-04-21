@@ -47,6 +47,7 @@ export async function GET(req: NextRequest) {
                 { title: { contains: search, mode: "insensitive" } },
                 { isbn: { contains: search, mode: "insensitive" } },
                 { publisher: { contains: search, mode: "insensitive" } },
+                { authors: { has: search } },
             ];
         }
 

@@ -27,9 +27,20 @@ export async function GET(req: NextRequest) {
 
         const { searchParams } = new URL(req.url);
         const status = searchParams.get('status');
+        const search = searchParams.get('search') || searchParams.get('q');
+
+        const where: any = { deletedAt: null };
+        if (status) where.status = status;
+        if (search) {
+            where.OR = [
+                { title: { contains: search, mode: 'insensitive' } },
+                { excerpt: { contains: search, mode: 'insensitive' } },
+                { author: { name: { contains: search, mode: 'insensitive' } } },
+            ];
+        }
 
         const blogs = await prisma.blog.findMany({
-            where: status ? { status } : undefined,
+            where,
             include: {
                 author: {
                     select: {

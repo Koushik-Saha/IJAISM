@@ -1,10 +1,10 @@
-
 'use client';
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { Search } from "lucide-react";
 import ResponsiveTable from "@/components/ui/ResponsiveTable";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 
@@ -15,6 +15,8 @@ export default function BooksPage() {
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [isAuthorized, setIsAuthorized] = useState(false);
+    const [search, setSearch] = useState("");
+    const [appliedSearch, setAppliedSearch] = useState("");
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -37,7 +39,10 @@ export default function BooksPage() {
     });
 
     useEffect(() => { checkAuth(); }, []);
-    useEffect(() => { if (isAuthorized) fetchData(); }, [page, isAuthorized]);
+    useEffect(() => { if (isAuthorized) fetchData(); }, [page, isAuthorized, appliedSearch]);
+    useEffect(() => {
+        setPage(1);
+    }, [appliedSearch]);
 
     const checkAuth = async () => {
         const token = localStorage.getItem('token');
@@ -54,7 +59,13 @@ export default function BooksPage() {
         setIsLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`/api/editor/books?page=${page}&limit=10`, { headers: { Authorization: `Bearer ${token}` } });
+            const queryParams = new URLSearchParams({
+                page: page.toString(),
+                limit: '10'
+            });
+            if (appliedSearch) queryParams.append('search', appliedSearch);
+
+            const res = await fetch(`/api/editor/books?${queryParams.toString()}`, { headers: { Authorization: `Bearer ${token}` } });
             const data = await res.json();
             setBooks(data.data?.books || []);
             setTotalPages(data.data?.pagination?.pages || 1);
@@ -173,6 +184,37 @@ export default function BooksPage() {
             </div>
 
             <div className="max-w-7xl mx-auto px-4 py-8">
+                {/* Search Section */}
+                <div className="mb-6 relative max-w-2xl">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Search className="h-5 w-5 text-gray-400" />
+                    </div>
+                    <input
+                        type="text"
+                        placeholder="Search books by title, ISBN, or publisher..."
+                        className="block w-full pl-10 pr-32 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm font-medium shadow-sm"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && setAppliedSearch(search)}
+                    />
+                    <div className="absolute inset-y-1.5 right-1.5 flex gap-1">
+                        {search && (
+                            <button
+                                onClick={() => { setSearch(""); setAppliedSearch(""); }}
+                                className="px-3 py-1.5 text-xs font-bold text-gray-500 hover:text-red-500 transition-colors"
+                            >
+                                Clear
+                            </button>
+                        )}
+                        <button
+                            onClick={() => setAppliedSearch(search)}
+                            className="px-6 py-1.5 bg-gray-900 text-white text-xs font-bold rounded-lg hover:bg-gray-800 transition-all active:scale-95"
+                        >
+                            Find
+                        </button>
+                    </div>
+                </div>
+
                 <ResponsiveTable
                     columns={columns}
                     data={books}

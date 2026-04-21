@@ -27,8 +27,20 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
-        // 2. Fetch all journals
-        const where: any = {};
+        const { searchParams } = new URL(req.url);
+        const search = searchParams.get('search') || searchParams.get('q');
+
+        // 2. Fetch journals
+        const where: any = { deletedAt: null };
+
+        if (search) {
+            where.OR = [
+                { fullName: { contains: search, mode: 'insensitive' } },
+                { code: { contains: search, mode: 'insensitive' } },
+                { description: { contains: search, mode: 'insensitive' } },
+            ];
+        }
+
         if (user.role === 'editor') {
             where.editorId = decoded.userId;
         }

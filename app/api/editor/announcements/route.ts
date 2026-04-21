@@ -26,8 +26,20 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
+    const { searchParams } = new URL(req.url);
+    const search = searchParams.get('search') || searchParams.get('q');
+
+    const where: any = { deletedAt: null };
+
+    if (search) {
+      where.OR = [
+        { title: { contains: search, mode: 'insensitive' } },
+        { content: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
     const announcements = await prisma.announcement.findMany({
-      where: { deletedAt: null },
+      where,
       orderBy: { createdAt: 'desc' },
     });
 

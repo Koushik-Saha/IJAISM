@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { Search } from 'lucide-react';
 
 interface Blog {
     id: string;
@@ -24,10 +25,12 @@ export default function BlogsPage() {
     const [blogs, setBlogs] = useState<Blog[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('all');
+    const [search, setSearch] = useState("");
+    const [appliedSearch, setAppliedSearch] = useState("");
 
     useEffect(() => {
         fetchBlogs();
-    }, [filter]);
+    }, [filter, appliedSearch]);
 
     const fetchBlogs = async () => {
         setLoading(true);
@@ -38,7 +41,11 @@ export default function BlogsPage() {
                 return;
             }
 
-            const url = filter === 'all' ? '/api/editor/blogs' : `/api/editor/blogs?status=${filter}`;
+            const queryParams = new URLSearchParams();
+            if (filter !== 'all') queryParams.append('status', filter);
+            if (appliedSearch) queryParams.append('search', appliedSearch);
+
+            const url = `/api/editor/blogs?${queryParams.toString()}`;
             const response = await fetch(url, {
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -122,21 +129,55 @@ export default function BlogsPage() {
             </div>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Filters */}
-                <div className="flex flex-wrap gap-2 mb-8 bg-white p-2 rounded-2xl shadow-sm border border-gray-100 w-fit">
-                    {['all', 'submitted', 'under_review', 'accepted', 'published', 'rejected'].map((s) => (
-                        <button
-                            key={s}
-                            onClick={() => setFilter(s)}
-                            className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
-                                filter === s
-                                    ? 'bg-primary text-white shadow-md'
-                                    : 'text-gray-600 hover:bg-gray-50'
-                            }`}
-                        >
-                            {formatStatus(s)}
-                        </button>
-                    ))}
+                {/* Search & Filter Section */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+                    <div className="lg:col-span-7 relative">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <Search className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                            type="text"
+                            placeholder="Search by title, excerpt, or author..."
+                            className="block w-full pl-11 pr-32 py-3 bg-white border border-gray-200 rounded-2xl shadow-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm font-medium"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && setAppliedSearch(search)}
+                        />
+                        <div className="absolute inset-y-1 right-1 flex gap-1">
+                            {search && (
+                                <button
+                                    onClick={() => { setSearch(""); setAppliedSearch(""); }}
+                                    className="px-3 py-1.5 text-xs font-bold text-gray-500 hover:text-red-500 transition-colors"
+                                >
+                                    Clear
+                                </button>
+                            )}
+                            <button
+                                onClick={() => setAppliedSearch(search)}
+                                className="px-6 py-1.5 bg-gray-900 text-white text-xs font-bold rounded-xl hover:bg-gray-800 transition-all active:scale-95"
+                            >
+                                Find
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="lg:col-span-5">
+                        <div className="flex flex-wrap gap-2 bg-white p-1.5 rounded-2xl shadow-sm border border-gray-100 w-full overflow-x-auto whitespace-nowrap">
+                            {['all', 'submitted', 'under_review', 'accepted', 'published', 'rejected'].map((s) => (
+                                <button
+                                    key={s}
+                                    onClick={() => setFilter(s)}
+                                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                                        filter === s
+                                            ? 'bg-primary text-white shadow-md'
+                                            : 'text-gray-600 hover:bg-gray-50'
+                                    }`}
+                                >
+                                    {formatStatus(s)}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
                 </div>
 
                 <div className="bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100">

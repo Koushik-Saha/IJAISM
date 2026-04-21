@@ -119,11 +119,11 @@ async function extractChartsFromDocx(docxBuffer: Buffer): Promise<Map<string, st
       const chartType = typeMatch ? typeMatch[1] : 'unknown';
       
       // Extract title
-      const titleMatch = chartXml.match(/<c:title>.*?<a:t>([^<]+)<\/a:t>/s);
+      const titleMatch = chartXml.match(/<c:title>[\s\S]*?<a:t>([^<]+)<\/a:t>/);
       const title = titleMatch ? titleMatch[1] : 'Chart';
       
       // Extract string labels
-      const strPts = [...chartXml.matchAll(/<c:strRef>.*?<\/c:strRef>/gs)];
+      const strPts = [...chartXml.matchAll(/<c:strRef>[\s\S]*?<\/c:strRef>/g)];
       const labels: string[] = [];
       for (const [block] of strPts) {
         const pts = [...block.matchAll(/<c:pt idx="\d+"><c:v>([^<]+)<\/c:v>/g)];
@@ -132,7 +132,7 @@ async function extractChartsFromDocx(docxBuffer: Buffer): Promise<Map<string, st
       }
       
       // Extract numeric values
-      const numPts = [...chartXml.matchAll(/<c:numRef>.*?<\/c:numRef>/gs)];
+      const numPts = [...chartXml.matchAll(/<c:numRef>[\s\S]*?<\/c:numRef>/g)];
       const values: number[] = [];
       for (const [block] of numPts) {
         const pts = [...block.matchAll(/<c:pt idx="\d+"><c:v>([^<]+)<\/c:v>/g)];
@@ -189,7 +189,7 @@ async function injectChartsIntoHtml(html: string, docxBuffer: Buffer): Promise<s
     
     // Find chart elements in order of appearance in document.xml
     const chartRefPattern = /r:id="([^"]+)"[^>]*\/>/g;
-    const drawingPattern = /<w:drawing>.*?<\/w:drawing>/gs;
+    const drawingPattern = /<w:drawing>[\s\S]*?<\/w:drawing>/g;
     
     for (const [drawingBlock] of [...docXml.matchAll(drawingPattern)]) {
       const rIdMatch = drawingBlock.match(/r:embed="([^"]+)"|r:id="([^"]+)"/);

@@ -1,8 +1,5 @@
 # Exclude large static data folders from serverless functions
-# These will still be available as static assets if served via /public
-# but won't be bundled into the lambda functions.
 data/article-content
-public/uploads/article
 node_modules
 .next
 .git

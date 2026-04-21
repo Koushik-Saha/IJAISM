@@ -47,4 +47,3 @@ CLAUDE.md
 
 # Large static data
 /data/article-content/*.html
-/public/uploads/article/*.pdf

@@ -2,8 +2,6 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Script from "next/script";
 import React from "react";
-import fs from "fs";
-import path from "path";
 import Link from "next/link";
 import sanitizeHtml from "sanitize-html";
 
@@ -37,14 +35,11 @@ export default async function FullArticleHtmlPage({ params }: Props) {
 
   if (!article) return notFound();
 
-  // 2. Locate and read the pre-converted HTML content
-  const contentPath = path.join(process.cwd(), "data", "article-content", `${id}.html`);
-  let articleHtml = "";
+  // 2. Use the HTML content from the database
+  let articleHtml = article.fullText || "";
   
-  if (fs.existsSync(contentPath)) {
-    articleHtml = fs.readFileSync(contentPath, "utf-8");
-  } else {
-    // Fallback: If no HTML file exists, show abstract at least
+  if (!articleHtml) {
+    // Fallback: If no HTML exists in DB, show abstract at least
     articleHtml = `<div class="bg-amber-50 p-6 border border-amber-200 rounded text-amber-800">
       <p>Full-text HTML view is being prepared for this article. Please check back later or view the PDF version.</p>
     </div>

@@ -36,6 +36,7 @@ const nextConfig = {
       }
     ],
   },
+  output: 'standalone',
   /* config options here */
   async headers() {
     return [

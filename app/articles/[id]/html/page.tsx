@@ -55,11 +55,11 @@ export default async function FullArticleHtmlPage({ params }: Props) {
   }
 
   // REFINEMENT: Remove leading Logo/Cover images from the body content
-  for (let i = 0; i < 2; i++) {
-    const imgMatch = articleHtml.match(/<img [^>]+>/);
-    if (imgMatch && imgMatch.index !== undefined && imgMatch.index < 2000) {
-      articleHtml = articleHtml.slice(0, imgMatch.index) + articleHtml.slice(imgMatch.index + imgMatch[0].length);
-    }
+  // MODIFIED: Only strip the VERY FIRST image if it is at the absolute top (first 300 chars)
+  // We no longer use a loop to prevent "sliding" deletions of article figures.
+  const firstImg = articleHtml.match(/<img [^>]+>/);
+  if (firstImg && firstImg.index !== undefined && firstImg.index < 300) {
+    articleHtml = articleHtml.slice(0, firstImg.index) + articleHtml.slice(firstImg.index + firstImg[0].length);
   }
 
   // SECURITY: Sanitize the final HTML to prevent XSS

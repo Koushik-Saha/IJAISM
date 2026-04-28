@@ -9,6 +9,16 @@ import { revalidatePath } from 'next/cache';
 import * as fs from 'fs';
 import mammoth from 'mammoth';
 import JSZip from 'jszip';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+
+const s3Client = new S3Client({
+  region: process.env.AWS_REGION || 'us-east-2',
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
+  },
+});
+const BUCKET_NAME = process.env.AWS_S3_BUCKET_NAME || 'koushik-freedomshippingllc-reports';
 
 // ── DOCX Chart Extraction Engine ─────────────────────────────────────────────
 // mammoth.js cannot handle DrawingML Chart objects (Word charts stored as XML).
@@ -381,12 +391,51 @@ export async function POST(req: NextRequest) {
     // 2. Parse Form Data
     const formData = await req.formData();
     const articleId = formData.get('articleId') as string;
-    const file = formData.get('file') as File;
-    const docxFile = formData.get('docxFile') as File | null;
-
-    if (!articleId || !file) {
-      return apiError('Article ID and PDF file are required', 400);
+    
+    if (!articleId) {
+      return apiError('Article ID is required', 400);
     }
+
+    // Extract metadata fields
+    const title = formData.get('title') as string | null;
+    const abstract = formData.get('abstract') as string | null;
+    const keywordsRaw = formData.get('keywords') as string | null;
+    const articleType = formData.get('articleType') as string | null;
+    const doi = formData.get('doi') as string | null;
+    const volume = formData.get('volume') ? parseInt(formData.get('volume') as string) : null;
+    const issue = formData.get('issue') ? parseInt(formData.get('issue') as string) : null;
+    const pageStart = formData.get('pageStart') ? parseInt(formData.get('pageStart') as string) : null;
+    const pageEnd = formData.get('pageEnd') ? parseInt(formData.get('pageEnd') as string) : null;
+    const language = formData.get('language') as string | null;
+    const status = formData.get('status') as string | null;
+    
+    const isBestPaper = formData.get('isBestPaper') !== null ? formData.get('isBestPaper') === 'true' : undefined;
+    const isOpenAccess = formData.get('isOpenAccess') !== null ? formData.get('isOpenAccess') === 'true' : undefined;
+    
+    const publicationDate = formData.get('publicationDate') ? new Date(formData.get('publicationDate') as string) : null;
+    const submissionDate = formData.get('submissionDate') ? new Date(formData.get('submissionDate') as string) : null;
+    const acceptanceDate = formData.get('acceptanceDate') ? new Date(formData.get('acceptanceDate') as string) : null;
+
+    const keywords = keywordsRaw ? keywordsRaw.split(',').map(k => k.trim()).filter(k => k) : undefined;
+
+    // Build update data object
+    const updateData: any = {};
+    if (title !== null) updateData.title = title;
+    if (abstract !== null) updateData.abstract = abstract;
+    if (keywords !== undefined) updateData.keywords = keywords;
+    if (articleType !== null) updateData.articleType = articleType;
+    if (doi !== null) updateData.doi = doi;
+    if (volume !== null && !isNaN(volume)) updateData.volume = volume;
+    if (issue !== null && !isNaN(issue)) updateData.issue = issue;
+    if (pageStart !== null && !isNaN(pageStart)) updateData.pageStart = pageStart;
+    if (pageEnd !== null && !isNaN(pageEnd)) updateData.pageEnd = pageEnd;
+    if (language !== null) updateData.language = language;
+    if (status !== null) updateData.status = status;
+    if (isBestPaper !== undefined) updateData.isBestPaper = isBestPaper;
+    if (isOpenAccess !== undefined) updateData.isOpenAccess = isOpenAccess;
+    if (publicationDate) updateData.publicationDate = publicationDate;
+    if (submissionDate) updateData.submissionDate = submissionDate;
+    if (acceptanceDate) updateData.acceptanceDate = acceptanceDate;
 
     // 3. Verify Article Existence
     const article = await prisma.article.findUnique({
@@ -398,82 +447,103 @@ export async function POST(req: NextRequest) {
       return apiError('Article not found', 404);
     }
 
-    // 4. Save PDF locally
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const timestamp = Date.now();
-    const fileName = `${timestamp}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-    const uploadDir = join(cwd(), 'public', 'uploads', 'article');
-    
-    await mkdir(uploadDir, { recursive: true });
-    const finalPdfPath = join(uploadDir, fileName);
-    await writeFile(finalPdfPath, buffer);
-    const pdfUrl = `/uploads/article/${fileName}`;
+    // 4. Handle Files
+    const file = formData.get('file') as File | null;
+    const docxFile = formData.get('docxFile') as File | null;
+    let pdfUrl: string | undefined = undefined;
+
+    if (file && file.size > 0) {
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const timestamp = Date.now();
+      const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+      const s3FileName = `article/${timestamp}_${sanitizedName}`;
+
+      try {
+        const command = new PutObjectCommand({
+          Bucket: BUCKET_NAME,
+          Key: s3FileName,
+          Body: buffer,
+          ContentType: file.type,
+        });
+
+        await s3Client.send(command);
+        pdfUrl = `/api/media/${s3FileName}`;
+        updateData.pdfUrl = pdfUrl;
+        console.log(`[SYNCHRONIZER] Uploaded PDF to S3 successfully: ${pdfUrl}`);
+      } catch (uploadError: any) {
+        console.error('S3 Upload failed in synchronizer, falling back to local storage', uploadError.message);
+        
+        // Fallback to local storage
+        const fileName = `${timestamp}_${sanitizedName}`;
+        const uploadDir = join(cwd(), 'public', 'uploads', 'article');
+        
+        await mkdir(uploadDir, { recursive: true });
+        const finalPdfPath = join(uploadDir, fileName);
+        await writeFile(finalPdfPath, buffer);
+        pdfUrl = `/uploads/article/${fileName}`;
+        updateData.pdfUrl = pdfUrl;
+      }
+    }
 
     // 5. Update Database
     await prisma.article.update({
       where: { id: articleId },
-      data: { pdfUrl }
+      data: updateData
     });
 
-    // 6. Regenerate HTML Content
-    try {
-      let htmlContent = "";
+    // 6. Regenerate HTML Content (Only if a new file or docx is provided)
+    if (file || docxFile) {
+      try {
+        let htmlContent = "";
 
-      if (docxFile) {
-        // High-Fidelity Conversion from DOCX
-        console.log(`[SYNCHRONIZER] Starting DOCX to HTML conversion for article ${articleId}`);
-        const docxBuffer = Buffer.from(await docxFile.arrayBuffer());
-        
-        let imageCount = 0;
-        const result = await mammoth.convertToHtml({ buffer: docxBuffer }, {
-          includeDefaultStyleMap: true,
-          convertImage: mammoth.images.imgElement(async (image) => {
-            imageCount++;
-            const imageBuffer = await image.read("base64");
-            console.log(`[SYNCHRONIZER] Found image #${imageCount}, type: ${image.contentType}, size: ${imageBuffer.length}`);
-            return {
-              src: `data:${image.contentType};base64,${imageBuffer}`
-            };
-          })
-        });
-        
-        htmlContent = result.value;
-        
-        // Inject DrawingML charts (mammoth cannot extract these — they're XML-based)
-        htmlContent = await injectChartsIntoHtml(htmlContent, docxBuffer);
-        
-        console.log(`[SYNCHRONIZER] Conversion complete. Extracted ${imageCount} images.`);
-        
-        if (result.messages.length > 0) {
-          console.warn(`[SYNCHRONIZER] Conversion messages:`, result.messages);
+        if (docxFile && docxFile.size > 0) {
+          // High-Fidelity Conversion from DOCX
+          console.log(`[SYNCHRONIZER] Starting DOCX to HTML conversion for article ${articleId}`);
+          const docxBuffer = Buffer.from(await docxFile.arrayBuffer());
+          
+          let imageCount = 0;
+          const result = await mammoth.convertToHtml({ buffer: docxBuffer }, {
+            includeDefaultStyleMap: true,
+            convertImage: mammoth.images.imgElement(async (image) => {
+              imageCount++;
+              const imageBuffer = await image.read("base64");
+              return {
+                src: `data:${image.contentType};base64,${imageBuffer}`
+              };
+            })
+          });
+          
+          htmlContent = result.value;
+          htmlContent = await injectChartsIntoHtml(htmlContent, docxBuffer);
+        } else if (file && file.size > 0) {
+          // Fallback to extraction from PDF
+          const buffer = Buffer.from(await file.arrayBuffer());
+          const extractedText = await extractTextFromPdf(buffer);
+          htmlContent = textToHtml(extractedText);
         }
-      } else {
-        // Fallback to extraction from PDF
-        const extractedText = await extractTextFromPdf(buffer);
-        htmlContent = textToHtml(extractedText);
+        
+        if (htmlContent) {
+          const contentDir = join(cwd(), 'data', 'article-content');
+          await mkdir(contentDir, { recursive: true });
+          const htmlFilePath = join(contentDir, `${articleId}.html`);
+          
+          await writeFile(htmlFilePath, htmlContent, 'utf-8');
+          
+          await prisma.article.update({
+            where: { id: articleId },
+            data: { fullText: htmlContent }
+          });
+        }
+      } catch (conversionError: any) {
+        console.error('Article conversion failed:', conversionError);
       }
-      
-      const contentDir = join(cwd(), 'data', 'article-content');
-      await mkdir(contentDir, { recursive: true });
-      const htmlFilePath = join(contentDir, `${articleId}.html`);
-      
-      await writeFile(htmlFilePath, htmlContent, 'utf-8');
-      
-      // Update fullText in DB as well to keep it in sync with the script patterns
-      await prisma.article.update({
-        where: { id: articleId },
-        data: { fullText: htmlContent }
-      });
-    } catch (conversionError: any) {
-      console.error('Article conversion failed:', conversionError);
-      // We still return success for the upload, but warn about the conversion
-      return apiSuccess({ pdfUrl }, 'PDF uploaded successfully, but HTML regeneration failed. Please check server logs.');
     }
 
     // 7. Revalidate the view route
     revalidatePath(`/articles/${articleId}/html`);
+    revalidatePath(`/articles/${articleId}`);
 
-    return apiSuccess({ pdfUrl }, 'Article PDF replaced and HTML content regenerated successfully.');
+    return apiSuccess({ pdfUrl: pdfUrl || undefined }, 'Article updated successfully!');
 
   } catch (error: any) {
     console.error('Error in direct-pdf-update:', error);

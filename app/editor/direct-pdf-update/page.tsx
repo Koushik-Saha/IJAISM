@@ -104,9 +104,9 @@ export default function DirectPdfUpdatePage() {
         const { name, value, type } = e.target;
         if (type === 'checkbox') {
             const checked = (e.target as HTMLInputElement).checked;
-            setFormData(prev => ({ ...prev, [name]: checked }));
+            setFormData((prev: any) => ({ ...prev, [name]: checked }));
         } else {
-            setFormData(prev => ({ ...prev, [name]: value }));
+            setFormData((prev: any) => ({ ...prev, [name]: value }));
         }
     };
 

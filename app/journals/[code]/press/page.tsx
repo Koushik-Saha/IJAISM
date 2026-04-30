@@ -19,6 +19,7 @@ export default async function ArticlesInPressPage({ params }: { params: Promise<
 
     // Fetch Articles in Press (accepted status)
     const articles = await prisma.article.findMany({
+        omit: { fullText: true },
         where: {
             journalId: journal.id,
             status: "accepted", // Assuming 'accepted' means In Press before assigned to an issue/published

@@ -74,6 +74,7 @@ export async function GET(req: NextRequest) {
 
       const totalArticles = await prisma.article.count({ where: whereClause });
       const articles = await prisma.article.findMany({
+        omit: { fullText: true },
         where: whereClause,
         take: scope === 'all' ? 10 : limit,
         skip: scope === 'all' ? 0 : skip,

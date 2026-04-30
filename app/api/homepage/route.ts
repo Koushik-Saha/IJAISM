@@ -34,6 +34,7 @@ export async function GET() {
 
     // Fetch latest published articles
     const articles = await prisma.article.findMany({
+        omit: { fullText: true },
       where: {
         status: 'published',
         deletedAt: null,

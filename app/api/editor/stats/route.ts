@@ -140,6 +140,7 @@ export async function GET(req: NextRequest) {
 
     // Recent Articles (Filtered)
     const recentArticlesList = await prisma.article.findMany({
+        omit: { fullText: true },
       where: articleWhere,
       take: 5,
       orderBy: { createdAt: 'desc' },

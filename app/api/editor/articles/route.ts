@@ -134,6 +134,7 @@ export async function GET(req: NextRequest) {
     // Get articles
     const [articles, total] = await Promise.all([
       prisma.article.findMany({
+        omit: { fullText: true },
         where,
         skip,
         take: limit,

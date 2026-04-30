@@ -19,6 +19,7 @@ export async function GET(req: NextRequest) {
 
     // Get user's articles
     const articles = await prisma.article.findMany({
+        omit: { fullText: true },
       where: {
         authorId: decoded.userId,
         deletedAt: null,

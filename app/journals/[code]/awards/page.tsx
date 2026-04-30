@@ -20,6 +20,7 @@ export default async function BestPapersPage({ params }: { params: Promise<{ cod
 
     // Fetch Best Papers
     const articles = await prisma.article.findMany({
+        omit: { fullText: true },
         where: {
             journalId: journal.id,
             isBestPaper: true,

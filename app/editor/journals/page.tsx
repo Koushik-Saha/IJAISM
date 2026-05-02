@@ -222,13 +222,22 @@ export default function AdminJournalsPage() {
             accessor: "id",
             className: "text-right",
             render: (journal: any) => (
-                <Link
-                    href={`/editor/journals/${journal.id}`}
-                    className="text-primary hover:text-primary/80 font-medium"
-                    onClick={(e) => e.stopPropagation()}
-                >
-                    Edit
-                </Link>
+                <div className="flex justify-end gap-3">
+                    <Link
+                        href={`/editor/articles?journalId=${journal.id}`}
+                        className="text-gray-600 hover:text-primary font-medium"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        View
+                    </Link>
+                    <Link
+                        href={`/editor/journals/${journal.id}`}
+                        className="text-primary hover:text-primary/80 font-medium"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        Edit
+                    </Link>
+                </div>
             )
         }
     ];

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
+import FileUploadButton from "@/components/ui/FileUploadButton";
 
 export default function EditJournalPage() {
     const router = useRouter();
@@ -197,12 +198,20 @@ export default function EditJournalPage() {
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Cover Image URL
                             </label>
-                            <input
-                                type="url"
-                                className="input-field"
-                                value={formData.coverImageUrl}
-                                onChange={(e) => setFormData({ ...formData, coverImageUrl: e.target.value })}
-                            />
+                            <div className="flex gap-2">
+                                <input
+                                    type="url"
+                                    className="input-field flex-1"
+                                    value={formData.coverImageUrl}
+                                    onChange={(e) => setFormData({ ...formData, coverImageUrl: e.target.value })}
+                                />
+                                <FileUploadButton
+                                    onUploadSuccess={(url) => setFormData({ ...formData, coverImageUrl: url })}
+                                    accept="image/*"
+                                    label="Upload Image"
+                                    fileType="journal"
+                                />
+                            </div>
                         </div>
 
                         <div className="md:col-span-2">

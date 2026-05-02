@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Search } from "lucide-react";
 import ResponsiveTable from "@/components/ui/ResponsiveTable";
 import ConfirmModal from "@/components/ui/ConfirmModal";
+import FileUploadButton from "@/components/ui/FileUploadButton";
 
 export default function DissertationsPage() {
     const router = useRouter();
@@ -33,7 +34,9 @@ export default function DissertationsPage() {
         degreeType: 'masters',
         authorId: '',
         year: new Date().getFullYear(),
-        status: 'pending'
+        status: 'pending',
+        coverImageUrl: '',
+        pdfUrl: ''
     });
 
     useEffect(() => {
@@ -137,7 +140,9 @@ export default function DissertationsPage() {
             degreeType: item.degreeType,
             authorId: item.authorId || '',
             year: item.submissionDate ? new Date(item.submissionDate).getFullYear() : new Date().getFullYear(),
-            status: item.status
+            status: item.status,
+            coverImageUrl: item.coverImageUrl || '',
+            pdfUrl: item.pdfUrl || ''
         });
         setIsModalOpen(true);
     };
@@ -151,7 +156,9 @@ export default function DissertationsPage() {
             degreeType: 'masters',
             authorId: '',
             year: new Date().getFullYear(),
-            status: 'pending'
+            status: 'pending',
+            coverImageUrl: '',
+            pdfUrl: ''
         });
         setIsModalOpen(true);
     };
@@ -242,8 +249,8 @@ export default function DissertationsPage() {
 
             {/* Edit/Create Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
+                    <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6 my-8">
                         <h2 className="text-xl font-bold mb-4">{selectedItem ? 'Edit' : 'Create'} Dissertation</h2>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
@@ -274,6 +281,20 @@ export default function DissertationsPage() {
                                     <option value="masters">Masters</option>
                                     <option value="phd">PhD</option>
                                 </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold mb-1">Cover Image URL</label>
+                                <div className="flex gap-2">
+                                    <input className="w-full border rounded p-2 flex-1" value={formData.coverImageUrl} onChange={e => setFormData({ ...formData, coverImageUrl: e.target.value })} />
+                                    <FileUploadButton onUploadSuccess={(url) => setFormData({ ...formData, coverImageUrl: url })} accept="image/*" label="Upload Image" fileType="thesis" />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold mb-1">PDF URL</label>
+                                <div className="flex gap-2">
+                                    <input className="w-full border rounded p-2 flex-1" value={formData.pdfUrl} onChange={e => setFormData({ ...formData, pdfUrl: e.target.value })} />
+                                    <FileUploadButton onUploadSuccess={(url) => setFormData({ ...formData, pdfUrl: url })} accept="application/pdf" label="Upload PDF" fileType="thesis" />
+                                </div>
                             </div>
                             <div className="flex justify-end gap-2 mt-6">
                                 <button type="button" onClick={() => setIsModalOpen(false)} className="btn-secondary">Cancel</button>

@@ -480,6 +480,7 @@ model Book {
   edition         String
   format          String
   coverImageUrl   String?
+  pdfUrl          String?
   tableOfContents Json?
   previewPages    Json?
   reviews         Json?

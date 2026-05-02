@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Search } from "lucide-react";
 import ResponsiveTable from "@/components/ui/ResponsiveTable";
 import ConfirmModal from "@/components/ui/ConfirmModal";
+import FileUploadButton from "@/components/ui/FileUploadButton";
 
 export default function ConferencesPage() {
     const router = useRouter();
@@ -34,7 +35,8 @@ export default function ConferencesPage() {
         description: '',
         status: 'upcoming',
         brochureUrl: '',
-        callForPapersUrl: ''
+        callForPapersUrl: '',
+        bannerImageUrl: ''
     });
 
     useEffect(() => { checkAuth(); }, []);
@@ -121,7 +123,8 @@ export default function ConferencesPage() {
             description: item.description || '',
             status: item.status,
             brochureUrl: item.brochureUrl || '',
-            callForPapersUrl: item.callForPapersUrl || ''
+            callForPapersUrl: item.callForPapersUrl || '',
+            bannerImageUrl: item.bannerImageUrl || ''
         });
         setIsModalOpen(true);
     };
@@ -139,7 +142,8 @@ export default function ConferencesPage() {
             description: '',
             status: 'upcoming',
             brochureUrl: '',
-            callForPapersUrl: ''
+            callForPapersUrl: '',
+            bannerImageUrl: ''
         });
         setIsModalOpen(true);
     };
@@ -254,8 +258,29 @@ export default function ConferencesPage() {
                                 <div><label className="block text-sm font-bold mb-1">Country</label><input required className="w-full border rounded p-2" value={formData.country} onChange={e => setFormData({ ...formData, country: e.target.value })} /></div>
                             </div>
 
-                            <div><label className="block text-sm font-bold mb-1">Brochure URL</label><input className="w-full border rounded p-2" value={formData.brochureUrl} onChange={e => setFormData({ ...formData, brochureUrl: e.target.value })} placeholder="https://..." /></div>
-                            <div><label className="block text-sm font-bold mb-1">Call for Papers URL</label><input className="w-full border rounded p-2" value={formData.callForPapersUrl} onChange={e => setFormData({ ...formData, callForPapersUrl: e.target.value })} placeholder="https://..." /></div>
+                            <div>
+                                <label className="block text-sm font-bold mb-1">Banner Image URL</label>
+                                <div className="flex gap-2">
+                                    <input className="w-full border rounded p-2 flex-1" value={formData.bannerImageUrl} onChange={e => setFormData({ ...formData, bannerImageUrl: e.target.value })} placeholder="https://..." />
+                                    <FileUploadButton onUploadSuccess={(url) => setFormData({ ...formData, bannerImageUrl: url })} accept="image/*" label="Upload Image" fileType="conferences" />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-bold mb-1">Brochure URL</label>
+                                <div className="flex gap-2">
+                                    <input className="w-full border rounded p-2 flex-1" value={formData.brochureUrl} onChange={e => setFormData({ ...formData, brochureUrl: e.target.value })} placeholder="https://..." />
+                                    <FileUploadButton onUploadSuccess={(url) => setFormData({ ...formData, brochureUrl: url })} accept="application/pdf" label="Upload PDF" fileType="conferences" />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-bold mb-1">Call for Papers URL</label>
+                                <div className="flex gap-2">
+                                    <input className="w-full border rounded p-2 flex-1" value={formData.callForPapersUrl} onChange={e => setFormData({ ...formData, callForPapersUrl: e.target.value })} placeholder="https://..." />
+                                    <FileUploadButton onUploadSuccess={(url) => setFormData({ ...formData, callForPapersUrl: url })} accept="application/pdf" label="Upload PDF" fileType="conferences" />
+                                </div>
+                            </div>
 
                             <div>
                                 <label className="block text-sm font-bold mb-1">Status</label>

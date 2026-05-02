@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Search } from "lucide-react";
 import ResponsiveTable from "@/components/ui/ResponsiveTable";
 import ConfirmModal from "@/components/ui/ConfirmModal";
+import FileUploadButton from "@/components/ui/FileUploadButton";
 
 export default function BooksPage() {
     const router = useRouter();
@@ -35,7 +36,9 @@ export default function BooksPage() {
         edition: '1st',
         format: 'Hardcover',
         price: '0.00',
-        authors: ''
+        authors: '',
+        coverImageUrl: '',
+        pdfUrl: ''
     });
 
     useEffect(() => { checkAuth(); }, []);
@@ -124,7 +127,9 @@ export default function BooksPage() {
             edition: item.edition,
             format: item.format,
             price: item.price,
-            authors: item.authors ? item.authors.join(', ') : ''
+            authors: item.authors ? item.authors.join(', ') : '',
+            coverImageUrl: item.coverImageUrl || '',
+            pdfUrl: item.pdfUrl || ''
         });
         setIsModalOpen(true);
     };
@@ -143,7 +148,9 @@ export default function BooksPage() {
             edition: '1st',
             format: 'Hardcover',
             price: '0.00',
-            authors: ''
+            authors: '',
+            coverImageUrl: '',
+            pdfUrl: ''
         });
         setIsModalOpen(true);
     };
@@ -251,6 +258,20 @@ export default function BooksPage() {
                                 <div className="col-span-2">
                                     <label className="block text-sm font-bold mb-1">Authors (comma separated)</label>
                                     <input required className="w-full border rounded p-2" value={formData.authors} onChange={e => setFormData({ ...formData, authors: e.target.value })} placeholder="Author 1, Author 2" />
+                                </div>
+                                <div className="col-span-2">
+                                    <label className="block text-sm font-bold mb-1">Cover Image URL</label>
+                                    <div className="flex gap-2">
+                                        <input className="w-full border rounded p-2 flex-1" value={formData.coverImageUrl} onChange={e => setFormData({ ...formData, coverImageUrl: e.target.value })} />
+                                        <FileUploadButton onUploadSuccess={(url) => setFormData({ ...formData, coverImageUrl: url })} accept="image/*" label="Upload Image" fileType="books" />
+                                    </div>
+                                </div>
+                                <div className="col-span-2">
+                                    <label className="block text-sm font-bold mb-1">PDF URL</label>
+                                    <div className="flex gap-2">
+                                        <input className="w-full border rounded p-2 flex-1" value={formData.pdfUrl} onChange={e => setFormData({ ...formData, pdfUrl: e.target.value })} />
+                                        <FileUploadButton onUploadSuccess={(url) => setFormData({ ...formData, pdfUrl: url })} accept="application/pdf" label="Upload PDF" fileType="books" />
+                                    </div>
                                 </div>
                             </div>
                             <div>

@@ -16,7 +16,7 @@ export default function CoverImage({ src, alt, fallbackText, className, basePath
     // Helper to fix URLs
     const getFixedUrl = (url: string) => {
         if (!url) return '';
-        if (url.startsWith('http') || url.startsWith('//')) return url;
+        if (url.startsWith('http') || url.startsWith('//') || url.startsWith('/')) return url;
         // Fix relative paths from backend
         // Note: Old site used 'public/backend/books' for most book/thesis covers
         const path = basePath || 'https://c5k.com/public/backend/books/';

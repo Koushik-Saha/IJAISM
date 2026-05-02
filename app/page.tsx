@@ -4,6 +4,7 @@ import AuthProtectedLink from "@/components/ui/AuthProtectedLink";
 import { prisma } from "@/lib/prisma";
 import HeroCarousel from "@/components/marketing/HeroCarousel";
 import NewsletterSection from "@/components/marketing/NewsletterSection";
+import SafeJournalCover from "@/components/journals/SafeJournalCover";
 
 export const dynamic = "force-dynamic";
 
@@ -215,13 +216,12 @@ export default async function HomePage() {
                   journals.map((journal: any) => (
                     <Link key={journal.id} href={`/journals/${journal.code.toLowerCase()}`}>
                       <Card className="h-full">
-                        {journal.coverImageUrl ? (
-                          <img src={journal.coverImageUrl.startsWith('http') ? journal.coverImageUrl : `https://c5k.com/public/backend/journal/${journal.coverImageUrl.replace(/^\//, '')}`} alt={journal.code} className="h-48 w-full object-cover rounded mb-4" />
-                        ) : (
-                          <div className="h-48 bg-gradient-to-br from-primary-light to-primary rounded mb-4 flex items-center justify-center">
-                            <span className="text-white text-3xl font-bold">{journal.code}</span>
-                          </div>
-                        )}
+                        <SafeJournalCover 
+                            code={journal.code} 
+                            coverImageUrl={journal.coverImageUrl} 
+                            className="h-48 w-full object-cover rounded mb-4"
+                            fallbackClassName="h-48 w-full bg-gradient-to-br from-primary-light to-primary rounded mb-4 flex items-center justify-center text-white text-3xl font-bold"
+                        />
                         <h3 className="text-sm font-bold text-center">{journal.fullName}</h3>
                       </Card>
                     </Link>

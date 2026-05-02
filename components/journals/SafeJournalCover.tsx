@@ -29,7 +29,7 @@ export default function SafeJournalCover({
         return <Fallback />;
     }
 
-    const src = coverImageUrl.startsWith('http')
+    const src = coverImageUrl.startsWith('http') || coverImageUrl.startsWith('/')
         ? coverImageUrl
         : `https://c5k.com/public/backend/journal/${coverImageUrl.replace(/^\//, '')}`;
 

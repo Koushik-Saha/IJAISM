@@ -107,7 +107,7 @@ export default async function FullArticleHtmlPage({ params }: Props) {
   const logoUrl = "/logo.png"; // Fallback to main platform logo
   const journalName = article.journal.fullName;
   const journalCover = article.journal.coverImageUrl ? 
-    (article.journal.coverImageUrl.startsWith('http') ? article.journal.coverImageUrl : `https://c5k.com/public/backend/journal/${article.journal.coverImageUrl}`) 
+    (article.journal.coverImageUrl.startsWith('http') || article.journal.coverImageUrl.startsWith('/') ? article.journal.coverImageUrl : `https://c5k.com/public/backend/journal/${article.journal.coverImageUrl}`) 
     : "/placeholder-cover.jpg";
 
   // CSS for the IEEE template (synchronized with sample page)

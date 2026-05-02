@@ -15,8 +15,8 @@ const updateDissertationSchema = z.object({
     department: z.string().optional(),
     supervisorName: z.string().optional(),
     keywords: z.array(z.string()).optional(),
-    pdfUrl: z.string().url().optional().or(z.literal("")),
-    coverImageUrl: z.string().url().optional().or(z.literal("")),
+    pdfUrl: z.string().optional().or(z.literal("")),
+    coverImageUrl: z.string().optional().or(z.literal("")),
 });
 
 export async function GET(

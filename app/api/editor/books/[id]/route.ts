@@ -19,7 +19,8 @@ const updateBookSchema = z.object({
     language: z.string().optional(),
     edition: z.string().optional(),
     format: z.string().optional(),
-    coverImageUrl: z.string().url().optional().or(z.literal("")),
+    coverImageUrl: z.string().optional().or(z.literal("")),
+    pdfUrl: z.string().optional().or(z.literal("")),
 });
 
 export async function GET(

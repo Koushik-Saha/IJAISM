@@ -18,7 +18,12 @@ const createBookSchema = z.object({
     language: z.string().default("English"),
     edition: z.string().default("1st"),
     format: z.string().default("Paperback"),
-    coverImageUrl: z.string().url().optional().or(z.literal("")),
+    coverImageUrl: z.string().optional().or(z.literal("")),
+    pdfUrl: z.string().optional().or(z.literal("")),
+});
+
+const updateBookSchema = createBookSchema.partial().extend({
+    id: z.string().min(1, "Book ID is required"),
 });
 
 export async function GET(req: NextRequest) {
@@ -95,6 +100,7 @@ export async function POST(req: NextRequest) {
             data: {
                 ...validated,
                 coverImageUrl: validated.coverImageUrl || null,
+                pdfUrl: validated.pdfUrl || null,
             },
         });
 
@@ -106,6 +112,48 @@ export async function POST(req: NextRequest) {
         // Handle Unique Constraint (ISBN)
         if (error.code === 'P2002') {
             return apiError("ISBN already exists", 409);
+        }
+        return apiError(error.message, 500);
+    }
+}
+
+export async function PATCH(req: NextRequest) {
+    try {
+        const authHeader = req.headers.get("authorization");
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+            return apiError("Unauthorized", 401);
+        }
+        const token = authHeader.split(" ")[1];
+        const auth = verifyToken(token);
+
+        if (!auth || !["super_admin", "mother_admin"].includes(auth.role)) {
+            return apiError("Forbidden: Insufficient permissions", 403);
+        }
+
+        const body = await req.json();
+        const validated = updateBookSchema.parse(body);
+
+        const { id, ...updateData } = validated;
+
+        const book = await prisma.book.update({
+            where: { id },
+            data: {
+                ...updateData,
+                coverImageUrl: updateData.coverImageUrl || null,
+                pdfUrl: updateData.pdfUrl || null,
+            },
+        });
+
+        return apiSuccess({ book }, "Book updated successfully", 200);
+    } catch (error: any) {
+        if (error instanceof z.ZodError) {
+            return apiError("Validation Error", 400, error.issues);
+        }
+        if (error.code === 'P2002') {
+            return apiError("ISBN already exists", 409);
+        }
+        if (error.code === 'P2025') {
+            return apiError("Book not found", 404);
         }
         return apiError(error.message, 500);
     }

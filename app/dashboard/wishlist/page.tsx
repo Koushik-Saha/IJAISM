@@ -92,7 +92,7 @@ export default function WishlistPage() {
                                 <div className="flex h-48">
                                     <div className="w-1/3 bg-gray-200">
                                         {item.book.coverImageUrl ? (
-                                            <img src={item.book.coverImageUrl.startsWith('http') ? item.book.coverImageUrl : `https://c5k.com/public/backend/books/${item.book.coverImageUrl.replace(/^\//, '')}`} alt={item.book.title} className="w-full h-full object-cover" />
+                                            <img src={item.book.coverImageUrl.startsWith('http') || item.book.coverImageUrl.startsWith('/') ? item.book.coverImageUrl : `https://c5k.com/public/backend/books/${item.book.coverImageUrl.replace(/^\//, '')}`} alt={item.book.title} className="w-full h-full object-cover" />
                                         ) : (
                                             <div className="w-full h-full bg-primary flex items-center justify-center text-white p-2 text-xs text-center">
                                                 {item.book.title}

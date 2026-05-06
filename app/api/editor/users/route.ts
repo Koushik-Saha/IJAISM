@@ -173,6 +173,72 @@ export async function POST(req: NextRequest) {
   }
 }
 
+export async function DELETE(req: NextRequest) {
+  try {
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const decoded = verifyToken(authHeader.split(' ')[1]);
+    if (!decoded) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const requester = await prisma.user.findUnique({ where: { id: decoded.userId } });
+    if (!requester || requester.role !== ROLES.MOTHER_ADMIN) {
+      return NextResponse.json({ error: 'Only Executive Board Admin can delete users' }, { status: 403 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const userId = searchParams.get('userId');
+    if (!userId) return NextResponse.json({ error: 'userId is required' }, { status: 400 });
+
+    const targetUser = await prisma.user.findUnique({ where: { id: userId } });
+    if (!targetUser || targetUser.deletedAt) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    if (targetUser.id === requester.id) {
+      return NextResponse.json({ error: 'Cannot delete your own account' }, { status: 400 });
+    }
+
+    const now = new Date();
+    const anonEmail = `deleted_${now.getTime()}_${userId}@deleted.invalid`;
+
+    await prisma.$transaction([
+      // Soft delete all user's articles
+      prisma.article.updateMany({
+        where: { authorId: userId, deletedAt: null },
+        data: { deletedAt: now },
+      }),
+      // Soft delete all user's blogs
+      prisma.blog.updateMany({
+        where: { authorId: userId, deletedAt: null },
+        data: { deletedAt: now },
+      }),
+      // Soft delete all user's dissertations
+      prisma.dissertation.updateMany({
+        where: { authorId: userId, deletedAt: null },
+        data: { deletedAt: now },
+      }),
+      // Soft delete the user and anonymize PII
+      prisma.user.update({
+        where: { id: userId },
+        data: {
+          deletedAt: now,
+          isActive: false,
+          name: 'Deleted User',
+          email: anonEmail,
+          bio: null,
+          profileImageUrl: null,
+          affiliation: null,
+        },
+      }),
+    ]);
+
+    return NextResponse.json({ success: true, message: 'User deleted successfully' });
+  } catch (error: any) {
+    console.error('Error deleting user:', error);
+    return NextResponse.json({ error: 'Failed to delete user' }, { status: 500 });
+  }
+}
+
 export async function PATCH(req: NextRequest) {
   try {
     const authHeader = req.headers.get('authorization');

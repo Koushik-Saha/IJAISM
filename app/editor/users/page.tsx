@@ -4,18 +4,20 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
-import { 
-  ExternalLink, 
-  MoreVertical, 
-  UserPlus, 
-  Shield, 
-  CheckCircle, 
-  XCircle, 
+import {
+  ExternalLink,
+  MoreVertical,
+  UserPlus,
+  Shield,
+  CheckCircle,
+  XCircle,
   ChevronDown,
   Search,
   Users as UsersIcon,
   Filter,
-  Pencil
+  Pencil,
+  Trash2,
+  AlertTriangle
 } from "lucide-react";
 import { Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
@@ -53,6 +55,9 @@ export default function AdminUsersPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     // Fetch current user for RBAC
@@ -189,6 +194,41 @@ export default function AdminUsersPage() {
   const handleEditClick = (user: User) => {
     setSelectedUser(user);
     setIsEditModalOpen(true);
+  };
+
+  const handleDeleteClick = (user: User) => {
+    setUserToDelete(user);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!userToDelete) return;
+    setIsDeleting(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/editor/users?userId=${userToDelete.id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to delete user');
+      }
+      toast.success('User deleted', {
+        description: 'The user and their content have been removed.',
+        duration: 4000,
+      });
+      setIsDeleteModalOpen(false);
+      setUserToDelete(null);
+      fetchUsers();
+    } catch (err: any) {
+      toast.error('Delete failed', {
+        description: err.message || 'Failed to delete user',
+        duration: 4000,
+      });
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   return (
@@ -422,13 +462,24 @@ export default function AdminUsersPage() {
                               disabled={!canManageUser(user)}
                               title={user.isActive ? 'Deactivate User' : 'Reactivate User'}
                               className={`p-1.5 border rounded-lg transition-all active:scale-95 disabled:opacity-30 ${
-                                user.isActive 
-                                  ? 'bg-rose-50 text-rose-600 border-rose-100 hover:bg-rose-600 hover:text-white' 
+                                user.isActive
+                                  ? 'bg-rose-50 text-rose-600 border-rose-100 hover:bg-rose-600 hover:text-white'
                                   : 'bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-600 hover:text-white'
                               }`}
                             >
                               {user.isActive ? <XCircle size={14} /> : <CheckCircle size={14} />}
                             </button>
+
+                            {/* 6. Delete User (Mother Admin Only) */}
+                            {currentUser?.role === 'mother_admin' && user.id !== currentUser?.id && (
+                              <button
+                                onClick={() => handleDeleteClick(user)}
+                                title="Delete User"
+                                className="p-1.5 bg-red-50 text-red-600 border border-red-100 rounded-lg hover:bg-red-600 hover:text-white transition-all active:scale-95"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -534,6 +585,47 @@ export default function AdminUsersPage() {
         }}
         user={selectedUser}
       />
+
+      {/* Delete Confirmation Modal */}
+      {isDeleteModalOpen && userToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md mx-4">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2.5 bg-red-100 rounded-xl">
+                <AlertTriangle className="w-5 h-5 text-red-600" />
+              </div>
+              <h2 className="text-lg font-bold text-gray-900">Delete User</h2>
+            </div>
+            <p className="text-sm text-gray-600 mb-2">
+              You are about to permanently delete <span className="font-bold text-gray-900">{userToDelete.name || userToDelete.email}</span>.
+            </p>
+            <p className="text-sm text-gray-500 mb-6">
+              This will also remove all their articles, blogs, and dissertations. This action cannot be undone.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => { setIsDeleteModalOpen(false); setUserToDelete(null); }}
+                disabled={isDeleting}
+                className="px-4 py-2 text-sm font-semibold text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmDelete}
+                disabled={isDeleting}
+                className="px-4 py-2 text-sm font-bold text-white bg-red-600 rounded-xl hover:bg-red-700 transition-all disabled:opacity-50 flex items-center gap-2"
+              >
+                {isDeleting ? (
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <Trash2 size={14} />
+                )}
+                {isDeleting ? 'Deleting...' : 'Delete User'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

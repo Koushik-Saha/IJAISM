@@ -2,8 +2,18 @@
 
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Search, Upload, FileText, ArrowRight, CheckCircle2, RotateCcw, HelpCircle, Lock, Save } from "lucide-react";
+import { Search, Upload, FileText, ArrowRight, CheckCircle2, RotateCcw, HelpCircle, Lock, Save, Plus, Trash2, GripVertical, User } from "lucide-react";
 import { useRouter } from "next/navigation";
+
+interface CoAuthorEntry {
+    id?: string;
+    name: string;
+    email: string;
+    university: string;
+    isMain: boolean;
+    order: number;
+    _userId?: string; // set for the main article author (User record)
+}
 
 export default function DirectPdfUpdatePage() {
     const router = useRouter();
@@ -16,6 +26,7 @@ export default function DirectPdfUpdatePage() {
     
     // Form States
     const [formData, setFormData] = useState<any>({});
+    const [coAuthors, setCoAuthors] = useState<CoAuthorEntry[]>([]);
     const [file, setFile] = useState<File | null>(null);
     const [docxFile, setDocxFile] = useState<File | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -92,6 +103,28 @@ export default function DirectPdfUpdatePage() {
                 acceptanceDate: data.article.acceptanceDate ? new Date(data.article.acceptanceDate).toISOString().split('T')[0] : "",
             });
 
+            // Prepend the main article author (User record) as first entry
+            const mainAuthor = data.article.author;
+            const mainEntry: CoAuthorEntry = {
+                _userId: mainAuthor?.id,
+                name: mainAuthor?.name || "",
+                email: mainAuthor?.email || "",
+                university: mainAuthor?.university || "",
+                isMain: true,
+                order: 0,
+            };
+
+            const coAuthorEntries: CoAuthorEntry[] = (data.article.coAuthors || []).map((ca: any, idx: number) => ({
+                id: ca.id,
+                name: ca.name || "",
+                email: ca.email || "",
+                university: ca.university || "",
+                isMain: ca.isMain || false,
+                order: idx + 1,
+            }));
+
+            setCoAuthors([mainEntry, ...coAuthorEntries]);
+
             toast.success("Article found! You can now edit its properties.");
         } catch (error: any) {
             toast.error(error.message);
@@ -119,13 +152,16 @@ export default function DirectPdfUpdatePage() {
             const submitData = new FormData();
             
             submitData.append("articleId", foundArticle.id);
-            
+
             // Append all form data
             Object.keys(formData).forEach(key => {
                 if (formData[key] !== "" && formData[key] !== null && formData[key] !== undefined) {
                     submitData.append(key, formData[key].toString());
                 }
             });
+
+            // Append coAuthors as JSON
+            submitData.append("coAuthors", JSON.stringify(coAuthors));
 
             // Append files if they exist
             if (file) submitData.append("file", file);
@@ -161,6 +197,19 @@ export default function DirectPdfUpdatePage() {
         setDocxFile(null);
         setResult(null);
         setFormData({});
+        setCoAuthors([]);
+    };
+
+    const addCoAuthor = () => {
+        setCoAuthors(prev => [...prev, { name: "", email: "", university: "", isMain: false, order: prev.length }]);
+    };
+
+    const removeCoAuthor = (index: number) => {
+        setCoAuthors(prev => prev.filter((_, i) => i !== index).map((ca, i) => ({ ...ca, order: i })));
+    };
+
+    const updateCoAuthor = (index: number, field: keyof CoAuthorEntry, value: string | boolean | number) => {
+        setCoAuthors(prev => prev.map((ca, i) => i === index ? { ...ca, [field]: value } : ca));
     };
 
     if (isCheckingRole) {
@@ -288,6 +337,93 @@ export default function DirectPdfUpdatePage() {
                                                 <label className="block text-sm font-semibold text-slate-700 mb-1">Keywords (Comma separated)</label>
                                                 <input type="text" name="keywords" value={formData.keywords} onChange={handleInputChange} className="w-full p-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all" />
                                             </div>
+                                        </div>
+                                    </div>
+
+                                    {/* SECTION: AUTHORS & AFFILIATIONS */}
+                                    <div className="space-y-4 bg-white p-6 rounded-2xl border border-slate-200">
+                                        <div className="flex items-center justify-between border-b pb-2 mb-4">
+                                            <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                                                <User className="h-5 w-5 text-slate-400" />
+                                                Authors &amp; Affiliations
+                                            </h3>
+                                            <button
+                                                type="button"
+                                                onClick={addCoAuthor}
+                                                className="flex items-center gap-1.5 text-sm font-bold text-primary bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-lg transition-colors"
+                                            >
+                                                <Plus className="h-4 w-4" />
+                                                Add Author
+                                            </button>
+                                        </div>
+                                        {coAuthors.length === 0 && (
+                                            <p className="text-sm text-slate-400 text-center py-4">No co-authors loaded. Click "Add Author" to add one.</p>
+                                        )}
+                                        <div className="space-y-4">
+                                            {coAuthors.map((ca, index) => (
+                                                <div key={index} className="relative bg-slate-50 rounded-xl border border-slate-200 p-4 space-y-3">
+                                                    <div className="flex items-center justify-between mb-1">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Author {index + 1}</span>
+                                                            {ca._userId && (
+                                                                <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full uppercase tracking-wide">Main Author</span>
+                                                            )}
+                                                        </div>
+                                                        <div className="flex items-center gap-3">
+                                                            <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 cursor-pointer">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={ca.isMain}
+                                                                    onChange={e => updateCoAuthor(index, 'isMain', e.target.checked)}
+                                                                    className="w-4 h-4 text-primary rounded focus:ring-primary"
+                                                                />
+                                                                Corresponding Author
+                                                            </label>
+                                                            {!ca._userId && (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => removeCoAuthor(index)}
+                                                                    className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                                >
+                                                                    <Trash2 className="h-4 w-4" />
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                        <div>
+                                                            <label className="block text-xs font-semibold text-slate-600 mb-1">Full Name <span className="text-red-400">*</span></label>
+                                                            <input
+                                                                type="text"
+                                                                value={ca.name}
+                                                                onChange={e => updateCoAuthor(index, 'name', e.target.value)}
+                                                                placeholder="e.g. Tahmina Akther"
+                                                                className="w-full p-2.5 rounded-lg border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm"
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <label className="block text-xs font-semibold text-slate-600 mb-1">Email</label>
+                                                            <input
+                                                                type="email"
+                                                                value={ca.email}
+                                                                onChange={e => updateCoAuthor(index, 'email', e.target.value)}
+                                                                placeholder="author@university.edu"
+                                                                className="w-full p-2.5 rounded-lg border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-xs font-semibold text-slate-600 mb-1">Affiliation / University</label>
+                                                        <input
+                                                            type="text"
+                                                            value={ca.university}
+                                                            onChange={e => updateCoAuthor(index, 'university', e.target.value)}
+                                                            placeholder="e.g. Department of Computer Science, MIT, Cambridge, MA, USA"
+                                                            className="w-full p-2.5 rounded-lg border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
 

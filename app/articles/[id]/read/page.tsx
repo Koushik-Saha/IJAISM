@@ -8,7 +8,7 @@ import ArticleCiteShare from "@/components/articles/ArticleCiteShare";
 import AuthorListWithModal from "@/components/articles/AuthorListWithModal";
 import SafeJournalCover from "@/components/journals/SafeJournalCover";
  
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 function journalCoverUrl(raw: string | null): string | null {
     if (!raw) return null;

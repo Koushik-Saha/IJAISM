@@ -2,7 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import AuthProtectedLink from "@/components/ui/AuthProtectedLink";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export default async function ConferencesPage() {
   const upcomingConferences = await prisma.conference.findMany({

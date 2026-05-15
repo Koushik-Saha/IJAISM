@@ -1,7 +1,9 @@
-
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyFileToken } from '@/lib/security/url-signer';
 import { logger } from '@/lib/logger';
+import { s3Client } from '@/lib/s3';
+import { GetObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import fs from 'fs';
 import path from 'path';
 import mime from 'mime';
@@ -44,21 +46,10 @@ export async function GET(req: NextRequest) {
 
             // Generate S3 Pre-signed URL directly to solve AccessDenied for private buckets
             if (filePath.includes('.s3.') && filePath.includes('amazonaws.com')) {
-                const { S3Client, GetObjectCommand } = await import('@aws-sdk/client-s3');
-                const { getSignedUrl } = await import('@aws-sdk/s3-request-presigner');
-
                 const urlObj = new URL(filePath);
                 const bucketMatch = urlObj.host.match(/^(.*?)\.s3/);
                 const bucketName = bucketMatch ? bucketMatch[1] : (process.env.AWS_S3_BUCKET_NAME || 'koushik-freedomshippingllc-reports');
                 const key = urlObj.pathname.startsWith('/') ? urlObj.pathname.substring(1) : urlObj.pathname;
-
-                const s3Client = new S3Client({
-                    region: process.env.AWS_REGION || 'us-east-2',
-                    credentials: {
-                        accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
-                        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
-                    },
-                });
 
                 const command = new GetObjectCommand({
                     Bucket: bucketName,

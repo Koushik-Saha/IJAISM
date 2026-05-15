@@ -3,7 +3,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import CoverImage from "@/components/ui/CoverImage";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export default async function BooksPage(props: {
   searchParams: Promise<{ page?: string }>;

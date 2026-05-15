@@ -2,7 +2,7 @@ import React from 'react';
 import { prisma } from '@/lib/prisma';
 import Link from "next/link";
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
 
 export default async function TermsPage() {
     const settings = await prisma.globalSettings.findMany({

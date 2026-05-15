@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import CommentForm from "@/components/blog/CommentForm";
 import InteractiveSidebar from "@/components/blog/InteractiveSidebar";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export default async function BlogDetailsPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

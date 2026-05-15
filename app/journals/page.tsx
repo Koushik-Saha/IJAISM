@@ -4,7 +4,7 @@ import Card from "@/components/ui/Card";
 import { prisma } from "@/lib/prisma";
 import JournalSearch from "@/components/journals/JournalSearch";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 async function getJournals(page: number, limit: number, query?: string) {
   const where: any = { isActive: true };

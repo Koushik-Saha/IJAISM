@@ -2,7 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import SubmitBlogCTA from "@/components/blog/SubmitBlogCTA";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export default async function BlogsPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
   const resolvedParams = await searchParams;

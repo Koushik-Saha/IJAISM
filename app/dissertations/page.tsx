@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import SecureDownloadButton from "@/components/ui/SecureDownloadButton";
 import CoverImage from "@/components/ui/CoverImage";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export default async function DissertationsPage(props: {
   searchParams: Promise<{ page?: string }>;

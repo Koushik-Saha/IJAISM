@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import JournalSidebar from "@/components/journals/JournalSidebar";
 import { notFound } from "next/navigation";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 export default async function ArticlesInPressPage({ params }: { params: Promise<{ code: string }> }) {
     const { code } = await params;

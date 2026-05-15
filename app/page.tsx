@@ -6,7 +6,7 @@ import HeroCarousel from "@/components/marketing/HeroCarousel";
 import NewsletterSection from "@/components/marketing/NewsletterSection";
 import SafeJournalCover from "@/components/journals/SafeJournalCover";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 async function getHomepageData() {
   try {

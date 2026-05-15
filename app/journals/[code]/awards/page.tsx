@@ -4,7 +4,7 @@ import JournalSidebar from "@/components/journals/JournalSidebar";
 import { notFound } from "next/navigation";
 import { TrophyIcon } from "@heroicons/react/24/solid";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 export default async function BestPapersPage({ params }: { params: Promise<{ code: string }> }) {
     const { code } = await params;

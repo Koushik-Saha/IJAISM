@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import JournalNav from "@/components/journals/JournalNav";
 import { notFound } from "next/navigation";
  
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 export default async function JournalLayout({
     children,

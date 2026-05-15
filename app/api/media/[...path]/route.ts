@@ -1,19 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
-import { logger } from '@/lib/logger';
-import { readFile } from 'fs/promises';
-import { join } from 'path';
-import { cwd } from 'process';
+import { NextRequest, NextResponse } from "next/server";
+import { GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { s3Client, BUCKET_NAME } from "@/lib/s3";
+import { logger } from "@/lib/logger";
+import { readFile } from "fs/promises";
+import { join } from "path";
+import { cwd } from "process";
 
-const s3Client = new S3Client({
-  region: process.env.AWS_REGION || 'us-east-2',
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
-  },
-});
-
-const BUCKET_NAME = process.env.AWS_S3_BUCKET_NAME || 'koushik-freedomshippingllc-reports';
+// Pre-signed URL expires in 1 hour; tell the browser/CDN to cache the redirect for 55 min.
+const PRESIGN_TTL = 3600;
+const CDN_CACHE_TTL = 3300;
 
 export async function GET(
   req: NextRequest,
@@ -21,67 +17,66 @@ export async function GET(
 ) {
   try {
     const { path } = await params;
-    const key = path.join('/');
+    const key = path.join("/");
 
     if (!key) {
-      return NextResponse.json({ error: 'Missing file path' }, { status: 400 });
+      return NextResponse.json({ error: "Missing file path" }, { status: 400 });
     }
 
-    // Try S3 first
+    // Generate a pre-signed URL and redirect — S3 serves the bytes directly.
+    // This eliminates streaming through the Vercel Function entirely.
     try {
       const command = new GetObjectCommand({
         Bucket: BUCKET_NAME,
         Key: key,
       });
 
-      const response = await s3Client.send(command);
+      const presignedUrl = await getSignedUrl(s3Client, command, {
+        expiresIn: PRESIGN_TTL,
+      });
 
-      if (!response.Body) {
-        throw new Error('Empty body from S3');
-      }
-
-      const bytes = await (response.Body as any).transformToByteArray();
-
-      return new NextResponse(bytes, {
+      return NextResponse.redirect(presignedUrl, {
+        status: 302,
         headers: {
-          'Content-Type': response.ContentType || 'application/octet-stream',
-          'Cache-Control': 'public, max-age=31536000, immutable',
+          "Cache-Control": `public, max-age=${CDN_CACHE_TTL}`,
         },
       });
     } catch (s3Error: any) {
-      if (s3Error.name === 'NoSuchKey') {
-        return NextResponse.json({ error: 'File not found' }, { status: 404 });
+      if (s3Error.name === "NoSuchKey") {
+        return NextResponse.json({ error: "File not found" }, { status: 404 });
       }
 
-      logger.warn('S3 fetch failed, falling back to local storage', {
+      logger.warn("S3 presign failed, falling back to local storage", {
         error: s3Error.message,
         key,
       });
 
-      // Fallback: try reading from local public/uploads directory
-      const localPath = join(cwd(), 'public', 'uploads', key);
+      // Fallback: serve from local public/uploads
+      const localPath = join(cwd(), "public", "uploads", key);
       const fileBuffer = await readFile(localPath);
-      const ext = key.split('.').pop()?.toLowerCase() || '';
+      const ext = key.split(".").pop()?.toLowerCase() || "";
       const mimeMap: Record<string, string> = {
-        jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png',
-        webp: 'image/webp', gif: 'image/gif', pdf: 'application/pdf',
+        jpg: "image/jpeg",
+        jpeg: "image/jpeg",
+        png: "image/png",
+        webp: "image/webp",
+        gif: "image/gif",
+        pdf: "application/pdf",
       };
-      const mimeType = mimeMap[ext] || 'application/octet-stream';
 
       return new NextResponse(fileBuffer, {
         headers: {
-          'Content-Type': mimeType,
-          'Content-Length': fileBuffer.length.toString(),
-          'Cache-Control': 'public, max-age=3600',
+          "Content-Type": mimeMap[ext] || "application/octet-stream",
+          "Content-Length": fileBuffer.length.toString(),
+          "Cache-Control": "public, max-age=3600",
         },
       });
     }
   } catch (error: any) {
-    logger.error('Error serving media file', {
+    logger.error("Error serving media file", {
       error: error.message,
       path: req.nextUrl.pathname,
     });
-
-    return NextResponse.json({ error: 'File not found' }, { status: 404 });
+    return NextResponse.json({ error: "File not found" }, { status: 404 });
   }
 }

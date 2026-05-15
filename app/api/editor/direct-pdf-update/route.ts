@@ -417,6 +417,7 @@ export async function POST(req: NextRequest) {
     const acceptanceDate = formData.get('acceptanceDate') ? new Date(formData.get('acceptanceDate') as string) : null;
 
     const keywords = keywordsRaw ? keywordsRaw.split(',').map(k => k.trim()).filter(k => k) : undefined;
+    const coAuthorsRaw = formData.get('coAuthors') as string | null;
 
     // Build update data object
     const updateData: any = {};
@@ -490,6 +491,48 @@ export async function POST(req: NextRequest) {
       where: { id: articleId },
       data: updateData
     });
+
+    // 5b. Update CoAuthors if provided
+    if (coAuthorsRaw) {
+      try {
+        const coAuthors: { id?: string; name: string; email?: string; university?: string; isMain?: boolean; order?: number; _userId?: string }[] = JSON.parse(coAuthorsRaw);
+
+        // Separate the main author (User record) from regular co-authors
+        const mainAuthorEntry = coAuthors.find(ca => ca._userId);
+        const coAuthorEntries = coAuthors.filter(ca => !ca._userId);
+
+        // Update the main author's User record if provided
+        if (mainAuthorEntry?._userId && mainAuthorEntry.name?.trim()) {
+          await prisma.user.update({
+            where: { id: mainAuthorEntry._userId },
+            data: {
+              name: mainAuthorEntry.name.trim(),
+              university: mainAuthorEntry.university?.trim() || undefined,
+            },
+          });
+        }
+
+        // Delete all existing co-authors and re-create
+        await prisma.coAuthor.deleteMany({ where: { articleId } });
+
+        if (coAuthorEntries.length > 0) {
+          await prisma.coAuthor.createMany({
+            data: coAuthorEntries
+              .filter(ca => ca.name?.trim())
+              .map((ca, idx) => ({
+                articleId,
+                name: ca.name.trim(),
+                email: ca.email?.trim() || null,
+                university: ca.university?.trim() || null,
+                isMain: ca.isMain ?? false,
+                order: ca.order ?? idx,
+              })),
+          });
+        }
+      } catch (coAuthorError: any) {
+        console.error('CoAuthor update failed:', coAuthorError.message);
+      }
+    }
 
     // 6. Regenerate HTML Content (Only if a new file or docx is provided)
     if (file || docxFile) {

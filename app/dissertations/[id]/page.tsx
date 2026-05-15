@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import SecureDownloadButton from "@/components/ui/SecureDownloadButton";
 import DissertationActions from "./DissertationActions";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 export default async function DissertationDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

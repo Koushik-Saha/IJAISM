@@ -4,7 +4,7 @@ import JournalSidebar from "@/components/journals/JournalSidebar";
 import IssueCoverImage, { IssueCoverPlaceholder } from "@/components/journals/IssueCoverImage";
 import { notFound } from "next/navigation";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 export default async function CurrentIssuePage({
     params,

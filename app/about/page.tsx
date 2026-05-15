@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import SafeJournalCover from "@/components/journals/SafeJournalCover";
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
 
 export default async function AboutPage() {
   const settingsRecords = await prisma.globalSettings.findMany({

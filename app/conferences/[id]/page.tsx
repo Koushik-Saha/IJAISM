@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import ConferenceClient from "./ConferenceClient";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 export default async function ConferenceDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { PencilSquareIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 export default async function EditingServicePage({ params }: { params: Promise<{ code: string }> }) {
     const { code } = await params;

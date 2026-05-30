@@ -1,0 +1,58 @@
+# Caddyfile for IJAISM
+#
+# - Auto-HTTPS via Cloudflare DNS-01 challenge (works behind Oracle's hostile firewall;
+#   we never need port 80 publicly reachable for ACME).
+# - The DOMAIN env var is interpolated by docker-compose so this file stays env-agnostic.
+# - To use a different ACME provider, swap the `tls` block below.
+
+{
+	email {$ACME_EMAIL}
+	# Use Let's Encrypt's production endpoint (default). Override to staging during testing
+	# by uncommenting:  acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
+}
+
+{$DOMAIN}, www.{$DOMAIN} {
+	encode zstd gzip
+
+	# Real-client-IP forwarding so Next.js sees the actual visitor (rate-limit, Sentry, logs).
+	header_up X-Real-IP {remote_host}
+	header_up X-Forwarded-For {remote_host}
+	header_up X-Forwarded-Proto {scheme}
+
+	# Long-lived caching for hashed Next.js static assets and public/.
+	@static path /_next/static/* /public/* /favicon.ico /manifest.json
+	header @static Cache-Control "public, max-age=31536000, immutable"
+
+	# Cloudflare DNS-01 — needs CLOUDFLARE_API_TOKEN passed to the Caddy container.
+	# The token only needs Zone:DNS:Edit permission on the target zone.
+	tls {
+		dns cloudflare {$CLOUDFLARE_API_TOKEN}
+		resolvers 1.1.1.1
+	}
+
+	reverse_proxy app:3000 {
+		# Health check against the Next.js /api/health endpoint.
+		health_uri /api/health
+		health_interval 30s
+		health_timeout 5s
+
+		# Pass through; Caddy already sets the X-Forwarded-* headers above.
+		transport http {
+			read_timeout 60s
+			write_timeout 60s
+		}
+	}
+
+	# Basic security headers (most are also set by next.config.mjs; harmless to repeat).
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	log {
+		output stdout
+		format json
+	}
+}

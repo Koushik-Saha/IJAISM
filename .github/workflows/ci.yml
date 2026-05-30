@@ -11,15 +11,26 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
+      # Build-time placeholders — same set the Dockerfile expects so `next build`
+      # passes its page-data collection step. Real secrets only live in
+      # production (.env on the VM) and the cd.yml deploy step.
       DATABASE_URL: "postgresql://postgres:password@localhost:5432/c5k_db"
-      JWT_SECRET: "test-secret"
+      JWT_SECRET: "ci-jwt-secret"
+      NEXTAUTH_SECRET: "ci-nextauth-secret"
+      NEXTAUTH_URL: "http://localhost:3000"
       NEXT_PUBLIC_APP_URL: "http://localhost:3000"
-      STRIPE_SECRET_KEY: "mock_stripe_key"
-      STRIPE_WEBHOOK_SECRET: "mock_webhook_secret"
+      STRIPE_SECRET_KEY: "sk_test_ci_placeholder"
+      STRIPE_WEBHOOK_SECRET: "whsec_ci_placeholder"
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: "pk_test_ci_placeholder"
+      STRIPE_PRICE_BASIC: "price_ci_placeholder"
+      STRIPE_PRICE_PREMIUM: "price_ci_placeholder"
+      STRIPE_PRICE_INSTITUTIONAL: "price_ci_placeholder"
+      PAYPAL_CLIENT_ID: "ci_placeholder"
+      PAYPAL_CLIENT_SECRET: "ci_placeholder"
 
     services:
       postgres:
-        image: postgres:15
+        image: postgres:16
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
@@ -48,8 +59,9 @@ jobs:
     - name: Generate Prisma Client
       run: npx prisma generate
 
-    - name: Apply Database Migrations
-      run: npx prisma migrate deploy
+    - name: Apply Prisma Schema
+      # Project uses `prisma db push` (no migrations dir). Same approach as cd.yml.
+      run: npx prisma db push --accept-data-loss --skip-generate
 
     - name: Lint
       run: npm run lint

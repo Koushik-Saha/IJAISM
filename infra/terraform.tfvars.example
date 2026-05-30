@@ -1,0 +1,21 @@
+# Copy to terraform.tfvars (gitignored) and fill in.
+
+# Oracle Cloud auth (User Settings → API Keys in the OCI console)
+tenancy_ocid     = "ocid1.tenancy.oc1..xxxx"
+user_ocid        = "ocid1.user.oc1..xxxx"
+fingerprint      = "aa:bb:cc:dd:..."
+private_key_path = "~/.oci/oci_api_key.pem"
+oci_region       = "us-ashburn-1"
+compartment_id   = "ocid1.tenancy.oc1..xxxx"   # use tenancy OCID for personal accounts
+
+# Availability domain — find via:  oci iam availability-domain list
+availability_domain = "Uocm:US-ASHBURN-AD-1"
+
+# Public SSH key contents (cat ~/.ssh/id_ed25519.pub)
+ssh_public_key = "ssh-ed25519 AAAA..."
+
+# Cloudflare
+cloudflare_api_token  = "xxxx"
+cloudflare_account_id = "xxxx"
+cloudflare_zone_id    = "xxxx"
+domain_name           = "ijaism.com"

@@ -1,47 +1,155 @@
-name: CD Pipeline
+name: CD — build & deploy
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
+  workflow_dispatch: {}
+
+# Cancel in-flight deploys when a newer commit lands.
+concurrency:
+  group: cd-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write   # push to ghcr.io
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    
+  build-and-deploy:
+    # GitHub-hosted ARM runner: native arm64 builds, no QEMU emulation.
+    runs-on: ubuntu-24.04-arm
+
+    services:
+      # Postgres is required during `next build` because several pages call
+      # Prisma at static-prerender time. Mirrors ci.yml.
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ijaism
+          POSTGRES_PASSWORD: ijaism
+          POSTGRES_DB: ijaism
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     env:
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      REGISTRY: ghcr.io
+      IMAGE_NAME: ${{ github.repository }}
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
 
-    - name: Install Dependencies
-      run: npm ci
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Run Database Migrations
-      run: npx prisma migrate deploy
+      - name: Compute image tags
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest
+            type=sha,format=short
 
-    - name: Install Vercel CLI
-      run: npm install --global vercel@latest
+      - name: Push Prisma schema to build-time Postgres
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          DATABASE_URL=postgresql://ijaism:ijaism@localhost:5432/ijaism \
+            npx prisma db push --accept-data-loss --skip-generate
 
-    - name: Pull Vercel Environment Information
-      run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Build & push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          platforms: linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          # Use the registry as the build cache — no extra storage needed.
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
+          # NEXT_PUBLIC_* are baked into the client bundle here, so they must be
+          # real values at BUILD time (they are not secret — they ship to the
+          # browser). Server-side secrets are NOT passed here; they are injected
+          # at runtime from /opt/ijaism/.env on the VM (see deploy step).
+          build-args: |
+            DATABASE_URL=postgresql://ijaism:ijaism@localhost:5432/ijaism
+            SENTRY_ORG=${{ secrets.SENTRY_ORG }}
+            SENTRY_PROJECT=${{ secrets.SENTRY_PROJECT }}
+            SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
+            NEXT_PUBLIC_APP_URL=${{ vars.NEXT_PUBLIC_APP_URL }}
+            NEXT_PUBLIC_APP_NAME=${{ vars.NEXT_PUBLIC_APP_NAME }}
+            NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
+            NEXT_PUBLIC_PAYPAL_CLIENT_ID=${{ secrets.NEXT_PUBLIC_PAYPAL_CLIENT_ID }}
+            NEXT_PUBLIC_PAYPAL_PLAN_BASIC=${{ vars.NEXT_PUBLIC_PAYPAL_PLAN_BASIC }}
+            NEXT_PUBLIC_PAYPAL_PLAN_PREMIUM=${{ vars.NEXT_PUBLIC_PAYPAL_PLAN_PREMIUM }}
+            NEXT_PUBLIC_PAYPAL_PLAN_INSTITUTIONAL=${{ vars.NEXT_PUBLIC_PAYPAL_PLAN_INSTITUTIONAL }}
+            NEXT_PUBLIC_SENTRY_DSN=${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
+            NEXT_PUBLIC_MOCK_PAYMENT=${{ vars.NEXT_PUBLIC_MOCK_PAYMENT }}
 
-    - name: Build Project Artifacts
-      run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Deploy to Oracle Cloud VM
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          # Whole runtime .env stored as one base64 GitHub secret (single line,
+          # so newlines survive transport). Create it with:
+          #   base64 -i .env.production | gh secret set PROD_ENV_B64
+          ENV_B64: ${{ secrets.PROD_ENV_B64 }}
+          IMAGE_REF: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          GIT_SHA: ${{ github.sha }}
+        with:
+          host: ${{ secrets.OCI_HOST }}
+          username: ${{ secrets.OCI_USER }}
+          key: ${{ secrets.OCI_SSH_KEY }}
+          envs: ENV_B64,IMAGE_REF,GIT_SHA
+          script: |
+            set -euo pipefail
+            cd /opt/ijaism
 
-    - name: Deploy Project Artifacts to Vercel
-      run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+            # 1. Render the runtime secrets file from the GitHub secret.
+            umask 077
+            echo "$ENV_B64" | base64 -d > .env
+            chmod 600 .env
 
-    - name: Send Notification (Optional)
-      if: success()
-      run: echo "Deployment Successful!"
+            # 2. Pin APP_IMAGE to this exact commit (avoid :latest races).
+            SHORT_SHA=$(echo "$GIT_SHA" | cut -c1-7)
+            if grep -q '^APP_IMAGE=' .env; then
+              sed -i "s|^APP_IMAGE=.*|APP_IMAGE=${IMAGE_REF}:sha-${SHORT_SHA}|" .env
+            else
+              echo "APP_IMAGE=${IMAGE_REF}:sha-${SHORT_SHA}" >> .env
+            fi
+
+            # 3. Pull the new image and roll the app (postgres/caddy untouched).
+            docker compose pull app
+            docker compose up -d app
+
+            # 4. Apply pending Prisma schema changes against the running DB.
+            docker compose exec -T app npx prisma db push --accept-data-loss --skip-generate || true
+
+            # 5. Reclaim disk from old image layers.
+            docker image prune -f
+
+      - name: Smoke test
+        run: |
+          for i in 1 2 3 4 5 6 7 8 9 10; do
+            if curl -fsS --max-time 5 "https://${{ secrets.PRODUCTION_DOMAIN }}/api/health" > /tmp/health.json; then
+              cat /tmp/health.json
+              grep -q '"status":"healthy"' /tmp/health.json && exit 0
+            fi
+            echo "Attempt $i: not ready yet, waiting..."
+            sleep 6
+          done
+          echo "Smoke test failed."
+          exit 1

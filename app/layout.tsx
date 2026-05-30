@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import LayoutWrapper from "@/components/layout/LayoutWrapper";
 import CookieConsent from "@/components/CookieConsent";
-import { Analytics } from "@vercel/analytics/react";
+import { Analytics } from "@/lib/analytics";
 import PWARegister from "@/components/PWARegister";
 import { Toaster } from "sonner";
 import ForcePasswordChangeModal from "@/components/auth/ForcePasswordChangeModal";

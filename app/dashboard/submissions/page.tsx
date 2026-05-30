@@ -81,7 +81,7 @@ export default function MySubmissionsPage() {
     fetchSubmissions();
 
     if (typeof window !== 'undefined' && window.location.search.includes('success=true')) {
-      import("@vercel/analytics").then(({ track }) => {
+      import("@/lib/analytics").then(({ track }) => {
         track('Successful Payment', { method: 'stripe', type: 'apc' });
       });
       toast.success("Payment Successful!");

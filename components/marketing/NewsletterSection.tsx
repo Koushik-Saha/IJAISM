@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { track } from "@vercel/analytics";
+import { track } from "@/lib/analytics";
 
 interface NewsletterSectionProps {
     title?: string | null;

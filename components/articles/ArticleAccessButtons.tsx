@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
-import { track } from "@vercel/analytics";
+import { track } from "@/lib/analytics";
 import Link from "next/link";
 import { toast } from "sonner";
 

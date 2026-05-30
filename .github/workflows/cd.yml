@@ -81,30 +81,64 @@ jobs:
           # Use the registry as the build cache — no extra storage needed.
           cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache
           cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
+          # NEXT_PUBLIC_* are baked into the client bundle here, so they must be
+          # real values at BUILD time (they are not secret — they ship to the
+          # browser). Server-side secrets are NOT passed here; they are injected
+          # at runtime from /opt/ijaism/.env on the VM (see deploy step).
           build-args: |
             DATABASE_URL=postgresql://ijaism:ijaism@localhost:5432/ijaism
             SENTRY_ORG=${{ secrets.SENTRY_ORG }}
             SENTRY_PROJECT=${{ secrets.SENTRY_PROJECT }}
             SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
+            NEXT_PUBLIC_APP_URL=${{ vars.NEXT_PUBLIC_APP_URL }}
+            NEXT_PUBLIC_APP_NAME=${{ vars.NEXT_PUBLIC_APP_NAME }}
+            NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
+            NEXT_PUBLIC_PAYPAL_CLIENT_ID=${{ secrets.NEXT_PUBLIC_PAYPAL_CLIENT_ID }}
+            NEXT_PUBLIC_PAYPAL_PLAN_BASIC=${{ vars.NEXT_PUBLIC_PAYPAL_PLAN_BASIC }}
+            NEXT_PUBLIC_PAYPAL_PLAN_PREMIUM=${{ vars.NEXT_PUBLIC_PAYPAL_PLAN_PREMIUM }}
+            NEXT_PUBLIC_PAYPAL_PLAN_INSTITUTIONAL=${{ vars.NEXT_PUBLIC_PAYPAL_PLAN_INSTITUTIONAL }}
+            NEXT_PUBLIC_SENTRY_DSN=${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
+            NEXT_PUBLIC_MOCK_PAYMENT=${{ vars.NEXT_PUBLIC_MOCK_PAYMENT }}
 
       - name: Deploy to Oracle Cloud VM
         uses: appleboy/ssh-action@v1.2.0
+        env:
+          # Whole runtime .env stored as one base64 GitHub secret (single line,
+          # so newlines survive transport). Create it with:
+          #   base64 -i .env.production | gh secret set PROD_ENV_B64
+          ENV_B64: ${{ secrets.PROD_ENV_B64 }}
+          IMAGE_REF: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          GIT_SHA: ${{ github.sha }}
         with:
           host: ${{ secrets.OCI_HOST }}
           username: ${{ secrets.OCI_USER }}
           key: ${{ secrets.OCI_SSH_KEY }}
-          # Pulls the new image, applies the Prisma schema, and restarts the app.
-          # docker-compose.yml on the VM reads APP_IMAGE from /opt/ijaism/.env.
+          envs: ENV_B64,IMAGE_REF,GIT_SHA
           script: |
             set -euo pipefail
             cd /opt/ijaism
-            # Update APP_IMAGE pin so we don't depend on :latest race conditions
-            sed -i "s|^APP_IMAGE=.*|APP_IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-$(echo ${{ github.sha }} | cut -c1-7)|" .env
+
+            # 1. Render the runtime secrets file from the GitHub secret.
+            umask 077
+            echo "$ENV_B64" | base64 -d > .env
+            chmod 600 .env
+
+            # 2. Pin APP_IMAGE to this exact commit (avoid :latest races).
+            SHORT_SHA=$(echo "$GIT_SHA" | cut -c1-7)
+            if grep -q '^APP_IMAGE=' .env; then
+              sed -i "s|^APP_IMAGE=.*|APP_IMAGE=${IMAGE_REF}:sha-${SHORT_SHA}|" .env
+            else
+              echo "APP_IMAGE=${IMAGE_REF}:sha-${SHORT_SHA}" >> .env
+            fi
+
+            # 3. Pull the new image and roll the app (postgres/caddy untouched).
             docker compose pull app
             docker compose up -d app
-            # Apply pending Prisma schema changes against the running DB.
+
+            # 4. Apply pending Prisma schema changes against the running DB.
             docker compose exec -T app npx prisma db push --accept-data-loss --skip-generate || true
-            # Clean up dangling images so we don't fill the disk.
+
+            # 5. Reclaim disk from old image layers.
             docker image prune -f
 
       - name: Smoke test

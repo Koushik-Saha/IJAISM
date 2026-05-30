@@ -51,6 +51,20 @@ write_files:
       enabled = true
 
 runcmd:
+  # ---- Swap (critical on small 2 GB boxes; harmless on large ones) ----
+  # Gives the OOM killer breathing room so a memory spike doesn't kill Postgres
+  # or the Node process. 2 GB swap + vm.swappiness=10 (prefer RAM, spill late).
+  - |
+    if [ ! -f /swapfile ]; then
+      fallocate -l 2G /swapfile || dd if=/dev/zero of=/swapfile bs=1M count=2048
+      chmod 600 /swapfile
+      mkswap /swapfile
+      swapon /swapfile
+      echo '/swapfile none swap sw 0 0' >> /etc/fstab
+      sysctl -w vm.swappiness=10
+      echo 'vm.swappiness=10' >> /etc/sysctl.conf
+    fi
+
   # ---- Docker engine + compose plugin ----
   - install -m 0755 -d /etc/apt/keyrings
   - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg

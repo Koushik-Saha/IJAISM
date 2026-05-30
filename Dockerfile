@@ -21,31 +21,54 @@ WORKDIR /app
 
 RUN apk add --no-cache libc6-compat openssl
 
-# Build-time args (Sentry source-map upload). Optional: build succeeds without them.
+# --- Sentry source-map upload (optional; build succeeds without them) ---
 ARG SENTRY_ORG
 ARG SENTRY_PROJECT
 ARG SENTRY_AUTH_TOKEN
-# DATABASE_URL must point at a reachable Postgres during `next build` because
-# several pages call Prisma during static prerender. In CI this is the
-# `postgres` service container. Locally pass --build-arg DATABASE_URL=... .
+
+# --- DATABASE_URL: required during `next build` because several pages call
+# Prisma during static prerender. In CI this is the `postgres` service
+# container. Locally pass --build-arg DATABASE_URL=... .
 ARG DATABASE_URL=postgresql://placeholder:placeholder@localhost:5432/placeholder
+
+# --- NEXT_PUBLIC_* : these are INLINED into the client bundle at build time,
+# so they MUST be real values here (passed as --build-arg from CI). They are
+# not secret — they ship to the browser regardless. Defaults are safe fallbacks.
+ARG NEXT_PUBLIC_APP_URL=http://localhost:3000
+ARG NEXT_PUBLIC_APP_NAME=IJAISM
+ARG NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_build_placeholder
+ARG NEXT_PUBLIC_PAYPAL_CLIENT_ID=
+ARG NEXT_PUBLIC_PAYPAL_PLAN_BASIC=
+ARG NEXT_PUBLIC_PAYPAL_PLAN_PREMIUM=
+ARG NEXT_PUBLIC_PAYPAL_PLAN_INSTITUTIONAL=
+ARG NEXT_PUBLIC_SENTRY_DSN=
+ARG NEXT_PUBLIC_MOCK_PAYMENT=false
+
 ENV SENTRY_ORG=$SENTRY_ORG \
     SENTRY_PROJECT=$SENTRY_PROJECT \
     SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN \
     DATABASE_URL=$DATABASE_URL \
     NEXT_TELEMETRY_DISABLED=1 \
     CI=true \
-    # Next.js page-data collection imports every API route, which evaluates
-    # module-level env checks (auth.ts requires JWT_SECRET, Stripe needs a key,
-    # etc.). These placeholders satisfy those checks at build time only; real
-    # values are injected at runtime via docker-compose env_file.
+    # Client-side vars baked into the bundle (from build args above):
+    NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL \
+    NEXT_PUBLIC_APP_NAME=$NEXT_PUBLIC_APP_NAME \
+    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=$NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY \
+    NEXT_PUBLIC_PAYPAL_CLIENT_ID=$NEXT_PUBLIC_PAYPAL_CLIENT_ID \
+    NEXT_PUBLIC_PAYPAL_PLAN_BASIC=$NEXT_PUBLIC_PAYPAL_PLAN_BASIC \
+    NEXT_PUBLIC_PAYPAL_PLAN_PREMIUM=$NEXT_PUBLIC_PAYPAL_PLAN_PREMIUM \
+    NEXT_PUBLIC_PAYPAL_PLAN_INSTITUTIONAL=$NEXT_PUBLIC_PAYPAL_PLAN_INSTITUTIONAL \
+    NEXT_PUBLIC_SENTRY_DSN=$NEXT_PUBLIC_SENTRY_DSN \
+    NEXT_PUBLIC_MOCK_PAYMENT=$NEXT_PUBLIC_MOCK_PAYMENT \
+    # Server-side placeholders: Next.js page-data collection imports every API
+    # route, which evaluates module-level env checks (auth needs JWT_SECRET,
+    # Stripe needs a key, etc.). These satisfy those checks at build time only;
+    # real values are injected at runtime from /opt/ijaism/.env on the VM.
     JWT_SECRET=build-time-placeholder \
     NEXTAUTH_SECRET=build-time-placeholder \
     NEXTAUTH_URL=http://localhost:3000 \
-    NEXT_PUBLIC_APP_URL=http://localhost:3000 \
     STRIPE_SECRET_KEY=sk_test_build_placeholder \
     STRIPE_WEBHOOK_SECRET=whsec_build_placeholder \
-    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_build_placeholder \
     STRIPE_PRICE_BASIC=price_build_placeholder \
     STRIPE_PRICE_PREMIUM=price_build_placeholder \
     STRIPE_PRICE_INSTITUTIONAL=price_build_placeholder \

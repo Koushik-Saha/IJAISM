@@ -4,10 +4,13 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Search } from "lucide-react";
+import { toast } from "sonner";
 
 interface Article {
   id: string;
   title: string;
+  abstract?: string;
+  keywords?: string[];
   status: string;
   submissionDate: string;
   publicationDate?: string;
@@ -15,11 +18,16 @@ interface Article {
   volume?: number;
   issue?: number;
   articleType?: string;
+  journalId: string;
+  language?: string;
+  isOpenAccess?: boolean;
+  pdfUrl?: string;
   author: {
     name: string;
     email: string;
   };
   journal: {
+    id: string;
     fullName: string;
     code: string;
   };
@@ -41,9 +49,31 @@ export default function AdminArticlesPage() {
   const [totalPages, setTotalPages] = useState(1);
   const limit = 10;
 
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
   useEffect(() => {
     fetchArticles();
   }, [statusFilter, noDoiFilter, page, journalId, appliedSearch]);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const response = await fetch('/api/auth/me', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setCurrentUser(data.user);
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    };
+    fetchUser();
+  }, []);
 
   const fetchArticles = async () => {
     setIsLoading(true);
@@ -91,6 +121,10 @@ export default function AdminArticlesPage() {
     if (newPage >= 1 && newPage <= totalPages) {
       setPage(newPage);
     }
+  };
+
+  const handleEditClick = (article: Article) => {
+    router.push(`/editor/articles/${article.id}/edit`);
   };
 
   const formatStatus = (status: string) => {
@@ -279,13 +313,23 @@ export default function AdminArticlesPage() {
                     <td className="px-6 py-4 text-sm text-gray-900">
                       {article.reviews?.length || 0}
                     </td>
-                    <td className="px-6 py-4 text-sm">
-                      <Link
-                        href={`/editor/articles/${article.id}`}
-                        className="text-primary hover:text-primary/80 font-semibold"
-                      >
-                        View →
-                      </Link>
+                    <td className="px-6 py-4 text-sm whitespace-nowrap">
+                      <div className="flex items-center gap-3">
+                        <Link
+                          href={`/editor/articles/${article.id}`}
+                          className="text-primary hover:text-primary/80 font-semibold"
+                        >
+                          View →
+                        </Link>
+                        {(currentUser?.role === 'mother_admin' || (currentUser?.role === 'super_admin' && !article.doi)) && (
+                          <button
+                            onClick={() => handleEditClick(article)}
+                            className="text-indigo-600 hover:text-indigo-800 font-semibold cursor-pointer"
+                          >
+                            Edit
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                   );

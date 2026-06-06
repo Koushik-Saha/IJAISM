@@ -4,6 +4,8 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
+import AuthorsManager from "@/components/articles/AuthorsManager";
+import { getArticleAuthors } from "@/lib/articles/authors";
 
 interface MembershipStatus {
   tier: string;
@@ -46,7 +48,7 @@ function SubmitFormContent() {
     manuscript: File | null;
     coverLetter: File | null;
     supplementaryFiles: File[];
-    coAuthors: { name: string; email: string; university: string }[];
+    coAuthors: { name: string; email: string; university: string; isMain: boolean; isCorresponding: boolean }[];
   }>({
     submissionType: "article",
     journal: "",
@@ -78,12 +80,17 @@ function SubmitFormContent() {
           });
           const data = await res.json();
 
-          if (data.success) { // Modified to check data.success directly
-            const article = data.data?.article || data.article; // Handle standard wrapper or legacy
+          if (data.success) { 
+            const article = data.data?.article || data.article; 
             setOriginalArticle(article);
             setIsResubmission(true);
 
-            // Pre-fill form
+            // Pre-fill form using the getArticleAuthors helper
+            const resolvedAuthors = getArticleAuthors({
+              author: article.author,
+              coAuthors: article.coAuthors
+            });
+
             setFormData(prev => ({
               ...prev,
               submissionType: article.articleType || 'article',
@@ -91,11 +98,13 @@ function SubmitFormContent() {
               title: article.title,
               abstract: article.abstract,
               keywords: Array.isArray(article.keywords) ? article.keywords.join(', ') : article.keywords,
-              coAuthors: article.coAuthors ? article.coAuthors.map((ca: any) => ({
+              coAuthors: resolvedAuthors.map((ca: any) => ({
                 name: ca.name,
                 email: ca.email || '',
-                university: ca.university
-              })) : [],
+                university: ca.affiliation || ca.university || '',
+                isMain: ca.isMain || false,
+                isCorresponding: ca.isCorresponding ?? ca.isMain ?? false,
+              })),
             }));
 
             toast.info("Resubmission Mode", {
@@ -123,6 +132,33 @@ function SubmitFormContent() {
         if (!token) {
           router.push('/login?redirect=/submit');
           return;
+        }
+
+        // If not in resubmission mode, pre-populate the current logged-in user as the first author (Corresponding Author)
+        if (!resubmitId) {
+          const userData = localStorage.getItem('user');
+          if (userData) {
+            try {
+              const parsedUser = JSON.parse(userData);
+              const isSystemAdmin = ['mother_admin', 'super_admin', 'admin'].includes(parsedUser.role);
+              if (!isSystemAdmin) {
+                setFormData(prev => ({
+                  ...prev,
+                  coAuthors: [
+                    {
+                      name: parsedUser.name || '',
+                      email: parsedUser.email || '',
+                      university: parsedUser.university || '',
+                      isMain: true,
+                      isCorresponding: true,
+                    }
+                  ]
+                }));
+              }
+            } catch (e) {
+              console.error("Error parsing user data", e);
+            }
+          }
         }
 
         // Fetch Journals
@@ -173,27 +209,7 @@ function SubmitFormContent() {
     };
 
     fetchData();
-  }, [router]);
-
-  const addCoAuthor = () => {
-    setFormData({
-      ...formData,
-      coAuthors: [...formData.coAuthors, { name: '', email: '', university: '' }]
-    });
-  };
-
-  const removeCoAuthor = (index: number) => {
-    const newCoAuthors = [...formData.coAuthors];
-    newCoAuthors.splice(index, 1);
-    setFormData({ ...formData, coAuthors: newCoAuthors });
-  };
-
-  const updateCoAuthor = (index: number, field: string, value: string) => {
-    const newCoAuthors = [...formData.coAuthors];
-    // @ts-ignore
-    newCoAuthors[index][field] = value;
-    setFormData({ ...formData, coAuthors: newCoAuthors });
-  };
+  }, [router, resubmitId]);
 
   const validateForm = () => {
     const errors: Record<string, string> = {};
@@ -229,13 +245,60 @@ function SubmitFormContent() {
     }
 
     // validate co-authors
-    formData.coAuthors.forEach((author, index) => {
-      if (!author.name) errors[`coAuthor_${index}_name`] = 'Name is required';
-      if (!author.university) errors[`coAuthor_${index}_university`] = 'University is required';
-      if (author.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(author.email)) {
-        errors[`coAuthor_${index}_email`] = 'Invalid email';
+    const userData = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
+    let isSystemAdmin = false;
+    let userEmail = '';
+    if (userData) {
+      try {
+        const parsed = JSON.parse(userData);
+        isSystemAdmin = ['mother_admin', 'super_admin', 'admin'].includes(parsed.role);
+        userEmail = parsed.email || '';
+      } catch (e) {
+        console.error('Error parsing user data', e);
       }
-    });
+    }
+
+    if (isSystemAdmin) {
+      if (formData.coAuthors.length === 0) {
+        errors.authors = 'At least one author must be added';
+      } else {
+        const correspondingCount = formData.coAuthors.filter(a => a.isCorresponding).length;
+        if (correspondingCount !== 1) {
+          errors.authors = 'Exactly one author must be designated as the Corresponding Author';
+        }
+        formData.coAuthors.forEach((author, index) => {
+          if (!author.name) errors[`coAuthor_${index}_name`] = 'Name is required';
+          if (!author.university) errors[`coAuthor_${index}_university`] = 'University is required';
+          if (author.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(author.email)) {
+            errors[`coAuthor_${index}_email`] = 'Invalid email';
+          }
+        });
+      }
+    } else {
+      // Regular user: can submit with 0 authors (the backend will auto-add them)
+      if (formData.coAuthors.length > 0) {
+        const hasSelf = formData.coAuthors.some(a => a.email && a.email.trim().toLowerCase() === userEmail.toLowerCase());
+        const correspondingCount = formData.coAuthors.filter(a => a.isCorresponding).length;
+
+        if (hasSelf) {
+          if (correspondingCount !== 1) {
+            errors.authors = 'Exactly one author must be designated as the Corresponding Author';
+          }
+        } else {
+          if (correspondingCount > 1) {
+            errors.authors = 'Exactly one author must be designated as the Corresponding Author';
+          }
+        }
+
+        formData.coAuthors.forEach((author, index) => {
+          if (!author.name) errors[`coAuthor_${index}_name`] = 'Name is required';
+          if (!author.university) errors[`coAuthor_${index}_university`] = 'University is required';
+          if (author.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(author.email)) {
+            errors[`coAuthor_${index}_email`] = 'Invalid email';
+          }
+        });
+      }
+    }
 
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
@@ -706,73 +769,19 @@ function SubmitFormContent() {
               />
             </div>
 
-            {/* Co-Authors Section */}
-            <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-bold text-gray-700">Co-Authors</h3>
-                <button
-                  type="button"
-                  onClick={addCoAuthor}
-                  className="text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded hover:bg-blue-200"
-                >
-                  + Add Co-Author
-                </button>
-              </div>
-
-              <p className="text-sm text-gray-500 mb-4">
-                Note: You (the submitter) are automatically listed as the 1st / Main Author. Add additional authors here.
-              </p>
-
-              {formData.coAuthors.map((author, index) => (
-                <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 pb-4 border-b border-gray-200 last:border-0 relative">
-                  <button
-                    type="button"
-                    onClick={() => removeCoAuthor(index)}
-                    className="absolute top-0 right-0 text-red-500 hover:text-red-700 text-xs"
-                  >
-                    Remove
-                  </button>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">Name</label>
-                    <input
-                      type="text"
-                      value={author.name}
-                      onChange={(e) => updateCoAuthor(index, 'name', e.target.value)}
-                      className="w-full px-3 py-2 border rounded-md text-sm"
-                      placeholder="Full Name"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">Email</label>
-                    <input
-                      type="email"
-                      value={author.email}
-                      onChange={(e) => updateCoAuthor(index, 'email', e.target.value)}
-                      className="w-full px-3 py-2 border rounded-md text-sm"
-                      placeholder="Email"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">University/Affiliation</label>
-                    <input
-                      type="text"
-                      value={author.university}
-                      onChange={(e) => updateCoAuthor(index, 'university', e.target.value)}
-                      className="w-full px-3 py-2 border rounded-md text-sm"
-                      placeholder="University"
-                      required
-                    />
-                  </div>
-                  {validationErrors[`coAuthor_${index}_email`] && (
-                    <p className="text-red-500 text-xs col-span-3">{validationErrors[`coAuthor_${index}_email`]}</p>
-                  )}
+            <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 mb-6">
+              {validationErrors.authors && (
+                <div className="bg-red-50 border-l-4 border-red-500 rounded-lg p-4 mb-4">
+                  <p className="text-sm text-red-700">{validationErrors.authors}</p>
                 </div>
-              ))}
-
-              {formData.coAuthors.length === 0 && (
-                <div className="text-center text-gray-400 text-sm py-4">No co-authors added</div>
               )}
+
+              <AuthorsManager
+                authors={formData.coAuthors}
+                onChange={(newAuthors) => setFormData({ ...formData, coAuthors: newAuthors })}
+                validationErrors={validationErrors}
+                isEditing={true}
+              />
             </div>
 
             {/* Manuscript Upload */}

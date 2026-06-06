@@ -55,6 +55,8 @@ model User {
   newsletterSubscription  NewsletterSubscriber?
   purchasedBooks          PurchasedBook[]
   wishlist                Wishlist[]
+  journalEditors          JournalEditor[]
+  articleEditors          ArticleEditor[]
 
   @@index([email])
   @@index([role])
@@ -144,6 +146,7 @@ model Journal {
   articles                  Article[]
   editor                    User?          @relation("JournalEditor", fields: [editorId], references: [id])
   issues                    JournalIssue[]
+  editors                   JournalEditor[]
 
   @@index([code])
   @@index([isActive])
@@ -218,6 +221,7 @@ model Article {
   coAuthors           CoAuthor[]
   reviews             Review[]
   reviewerInvitations ReviewerInvitation[]
+  editors             ArticleEditor[]
 
   @@index([journalId])
   @@index([status])
@@ -226,18 +230,19 @@ model Article {
 }
 
 model CoAuthor {
-  id         String   @id @default(uuid())
-  articleId  String
-  name       String
-  email      String?
-  university String?
-  isMain     Boolean  @default(false)
-  order      Int      @default(0)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  userId     String?
-  article    Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
-  user       User?    @relation(fields: [userId], references: [id])
+  id              String   @id @default(uuid())
+  articleId       String
+  name            String
+  email           String?
+  university      String?
+  isMain          Boolean  @default(false)
+  isCorresponding Boolean  @default(false)
+  order           Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  userId          String?
+  article         Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  user            User?    @relation(fields: [userId], references: [id])
 
   @@index([articleId])
   @@index([userId])
@@ -665,4 +670,34 @@ model Comment {
   @@index([blogId])
   @@index([status])
   @@map("comments")
+}
+
+model JournalEditor {
+  id        String   @id @default(uuid())
+  journalId String
+  userId    String
+  role      String   // "editor_in_chief", "assistant_editor", "editorial_board_member"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  journal   Journal  @relation(fields: [journalId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([journalId, userId])
+  @@index([journalId])
+  @@index([userId])
+}
+
+model ArticleEditor {
+  id        String   @id @default(uuid())
+  articleId String
+  userId    String
+  comments  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([articleId, userId])
+  @@index([articleId])
+  @@index([userId])
 }

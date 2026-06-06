@@ -25,6 +25,8 @@ export const articleSubmissionSchema = z.object({
         name: z.string().min(1, 'Name is required'),
         email: z.string().email('Invalid email').optional().or(z.literal('')),
         university: z.string().min(1, 'University is required'),
+        isMain: z.boolean().optional().default(false),
+        order: z.number().optional(),
     })).optional().default([]),
     resubmissionId: z.string().optional(),
 });

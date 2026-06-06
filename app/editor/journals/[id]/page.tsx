@@ -24,9 +24,26 @@ export default function EditJournalPage() {
         isActive: true
     });
 
+    const [currentUser, setCurrentUser] = useState<any>(null);
+    const [editors, setEditors] = useState<any[]>([]);
+    const [allEditors, setAllEditors] = useState<any[]>([]);
+    const [selectedUserId, setSelectedUserId] = useState('');
+    const [selectedRole, setSelectedRole] = useState('assistant_editor');
+    const [isSubmittingEditor, setIsSubmittingEditor] = useState(false);
+
     useEffect(() => {
         if (id) {
             fetchJournal();
+            fetchJournalEditors();
+            fetchAllSystemEditors();
+        }
+        
+        const token = localStorage.getItem('token');
+        if (token) {
+            fetch('/api/auth/me', { headers: { Authorization: `Bearer ${token}` } })
+                .then(res => res.json())
+                .then(data => setCurrentUser(data.user || null))
+                .catch(err => console.error(err));
         }
     }, [id]);
 
@@ -87,6 +104,93 @@ export default function EditJournalPage() {
             });
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const fetchJournalEditors = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`/api/editor/journals/${id}/editors`, {
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setEditors(data.editors || []);
+            }
+        } catch (err) {
+            console.error("Error loading journal editors", err);
+        }
+    };
+
+    const fetchAllSystemEditors = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`/api/editor/users?role=editor&limit=100`, {
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setAllEditors(data.users || []);
+            }
+        } catch (err) {
+            console.error("Error loading system editors", err);
+        }
+    };
+
+    const handleAddEditor = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedUserId) {
+            toast.error("Please select a user");
+            return;
+        }
+        setIsSubmittingEditor(true);
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`/api/editor/journals/${id}/editors`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userId: selectedUserId,
+                    role: selectedRole
+                })
+            });
+
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.error || "Failed to add editor");
+            }
+
+            toast.success("Editor added successfully");
+            fetchJournalEditors();
+            setSelectedUserId('');
+        } catch (err: any) {
+            toast.error(err.message);
+        } finally {
+            setIsSubmittingEditor(false);
+        }
+    };
+
+    const handleRemoveEditor = async (userId: string) => {
+        if (!confirm("Are you sure you want to remove this editor?")) return;
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`/api/editor/journals/${id}/editors?userId=${userId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.error || "Failed to remove editor");
+            }
+
+            toast.success("Editor removed successfully");
+            fetchJournalEditors();
+        } catch (err: any) {
+            toast.error(err.message);
         }
     };
 
@@ -237,6 +341,107 @@ export default function EditJournalPage() {
                         </button>
                     </div>
                 </form>
+
+                {currentUser && ['super_admin', 'mother_admin'].includes(currentUser.role) && (
+                    <div className="bg-white rounded-lg shadow-md p-6 mt-8 space-y-6">
+                        <h2 className="text-xl font-bold text-gray-900 border-b pb-3">Manage Editorial Board</h2>
+                        
+                        <form onSubmit={handleAddEditor} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Select Editor
+                                </label>
+                                <select
+                                    className="input-field"
+                                    value={selectedUserId}
+                                    onChange={(e) => setSelectedUserId(e.target.value)}
+                                    required
+                                >
+                                    <option value="">-- Choose Editor --</option>
+                                    {allEditors.map((u) => (
+                                        <option key={u.id} value={u.id}>
+                                            {u.name} ({u.email})
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Role
+                                </label>
+                                <select
+                                    className="input-field"
+                                    value={selectedRole}
+                                    onChange={(e) => setSelectedRole(e.target.value)}
+                                    required
+                                >
+                                    <option value="editor_in_chief">Editor-in-Chief</option>
+                                    <option value="assistant_editor">Assistant Editor</option>
+                                    <option value="editorial_board_member">Editorial Board Member</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <button
+                                    type="submit"
+                                    disabled={isSubmittingEditor}
+                                    className="w-full bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-indigo-700 disabled:opacity-50 h-[42px]"
+                                >
+                                    {isSubmittingEditor ? 'Adding...' : 'Add to Board'}
+                                </button>
+                            </div>
+                        </form>
+
+                        <div className="mt-6">
+                            <h3 className="text-sm font-medium text-gray-700 mb-3">Current Editorial Board</h3>
+                            {editors.length === 0 ? (
+                                <p className="text-gray-500 text-sm italic">No editors assigned to this journal board yet.</p>
+                            ) : (
+                                <div className="border rounded-lg overflow-hidden">
+                                    <table className="min-w-full divide-y divide-gray-200">
+                                        <thead className="bg-gray-50">
+                                            <tr>
+                                                <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Name</th>
+                                                <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Email</th>
+                                                <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Role</th>
+                                                <th className="px-4 py-2 text-right text-xs font-semibold text-gray-500 uppercase">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="bg-white divide-y divide-gray-200 text-sm">
+                                            {editors.map((editor) => (
+                                                <tr key={editor.id} className="hover:bg-gray-50 transition-colors">
+                                                    <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-950">{editor.user.name}</td>
+                                                    <td className="px-4 py-3 whitespace-nowrap text-gray-600">{editor.user.email}</td>
+                                                    <td className="px-4 py-3 whitespace-nowrap">
+                                                        <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                                                            editor.role === 'editor_in_chief' ? 'bg-purple-100 text-purple-800' :
+                                                            editor.role === 'assistant_editor' ? 'bg-blue-100 text-blue-800' :
+                                                            'bg-green-100 text-green-800'
+                                                        }`}>
+                                                            {editor.role === 'editor_in_chief' ? 'Editor-in-Chief' :
+                                                             editor.role === 'assistant_editor' ? 'Assistant Editor' :
+                                                             'Editorial Board Member'}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-4 py-3 whitespace-nowrap text-right">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleRemoveEditor(editor.userId)}
+                                                            className="text-red-600 hover:text-red-800 font-medium text-xs"
+                                                        >
+                                                            Remove
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

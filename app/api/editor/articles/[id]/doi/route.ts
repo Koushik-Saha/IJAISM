@@ -38,6 +38,11 @@ export async function PATCH(
             return NextResponse.json({ error: "Article not found" }, { status: 404 });
         }
 
+        // mother_admin can overwrite an existing DOI; super_admin cannot
+        if (existingArticle.doi && decoded.role !== 'mother_admin') {
+            return NextResponse.json({ error: "Forbidden - DOI is locked once assigned. Only Mother Admin can change it." }, { status: 403 });
+        }
+
         // Update DOI and log activity
         const updatedArticle = await prisma.article.update({
             where: { id: articleId },

@@ -10,7 +10,7 @@ interface EditorialMember {
     image: string | null;
 }
 
-export const revalidate = 3600;
+export const revalidate = 0; // Dynamic rendering to fetch board updates instantly
 
 export default async function EditorialBoardPage({ params }: { params: Promise<{ code: string }> }) {
     const { code } = await params;
@@ -26,8 +26,26 @@ export default async function EditorialBoardPage({ params }: { params: Promise<{
 
     const editorialBoard = (journal.editorialBoard as unknown as EditorialMember[]) || [];
 
-    // Group by role for better display if needed, but simple list for now
-    // Or prioritize EIC
+    // Fetch dynamic journal editors from database
+    const dbJournalEditors = await prisma.journalEditor.findMany({
+        where: { journalId: journal.id },
+        include: {
+            user: {
+                select: {
+                    name: true,
+                    university: true,
+                    affiliation: true,
+                    profileImageUrl: true,
+                    bio: true
+                }
+            }
+        },
+        orderBy: { createdAt: "asc" }
+    });
+
+    const eics = dbJournalEditors.filter(je => je.role === "editor_in_chief");
+    const assistants = dbJournalEditors.filter(je => je.role === "assistant_editor");
+    const boardMembers = dbJournalEditors.filter(je => je.role === "editorial_board_member");
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -45,29 +63,116 @@ export default async function EditorialBoardPage({ params }: { params: Promise<{
                         </p>
                     )}
 
-                    <div className="space-y-8">
-                        {editorialBoard.length > 0 ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8">
-                                {editorialBoard.map((member, index) => (
-                                    <div key={index} className="flex gap-4 items-start">
-                                        <div className="w-16 h-16 bg-gray-100 rounded-full flex-shrink-0 flex items-center justify-center text-gray-400 overflow-hidden">
-                                            {member.image ? (
-                                                <img src={member.image} alt={member.name} className="w-full h-full object-cover" />
-                                            ) : (
-                                                <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
-                                                </svg>
-                                            )}
+                    <div className="space-y-10">
+                        {/* Editor-in-Chiefs */}
+                        {eics.length > 0 && (
+                            <div>
+                                <h3 className="text-xl font-bold text-gray-900 mb-4 border-b border-gray-100 pb-2">Editor-in-Chief</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                                    {eics.map((je) => (
+                                        <div key={je.id} className="flex gap-4 items-start">
+                                            <div className="w-16 h-16 bg-gray-100 rounded-full flex-shrink-0 flex items-center justify-center text-gray-400 overflow-hidden">
+                                                {je.user.profileImageUrl ? (
+                                                    <img src={je.user.profileImageUrl} alt={je.user.name} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 24 24">
+                                                        <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+                                                    </svg>
+                                                )}
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-lg text-gray-900">{je.user.name}</h4>
+                                                <div className="text-[#006d77] font-medium text-sm mb-1">Editor-in-Chief</div>
+                                                <div className="text-sm text-gray-600 leading-tight">{je.user.affiliation || je.user.university || 'Affiliation N/A'}</div>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h3 className="font-bold text-lg text-gray-900">{member.name}</h3>
-                                            <div className="text-[#006d77] font-medium text-sm mb-1">{member.role}</div>
-                                            <div className="text-sm text-gray-600 leading-tight">{member.affiliation}</div>
-                                        </div>
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
                             </div>
-                        ) : (
+                        )}
+
+                        {/* Assistant Editors */}
+                        {assistants.length > 0 && (
+                            <div>
+                                <h3 className="text-xl font-bold text-gray-900 mb-4 border-b border-gray-100 pb-2">Assistant Editors</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                                    {assistants.map((je) => (
+                                        <div key={je.id} className="flex gap-4 items-start">
+                                            <div className="w-16 h-16 bg-gray-100 rounded-full flex-shrink-0 flex items-center justify-center text-gray-400 overflow-hidden">
+                                                {je.user.profileImageUrl ? (
+                                                    <img src={je.user.profileImageUrl} alt={je.user.name} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 24 24">
+                                                        <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+                                                    </svg>
+                                                )}
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-lg text-gray-900">{je.user.name}</h4>
+                                                <div className="text-[#006d77] font-medium text-sm mb-1">Assistant Editor</div>
+                                                <div className="text-sm text-gray-600 leading-tight">{je.user.affiliation || je.user.university || 'Affiliation N/A'}</div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Editorial Board Members */}
+                        {boardMembers.length > 0 && (
+                            <div>
+                                <h3 className="text-xl font-bold text-gray-900 mb-4 border-b border-gray-100 pb-2">Editorial Board Members</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                                    {boardMembers.map((je) => (
+                                        <div key={je.id} className="flex gap-4 items-start">
+                                            <div className="w-16 h-16 bg-gray-100 rounded-full flex-shrink-0 flex items-center justify-center text-gray-400 overflow-hidden">
+                                                {je.user.profileImageUrl ? (
+                                                    <img src={je.user.profileImageUrl} alt={je.user.name} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 24 24">
+                                                        <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+                                                    </svg>
+                                                )}
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-lg text-gray-900">{je.user.name}</h4>
+                                                <div className="text-[#006d77] font-medium text-sm mb-1">Editorial Board Member</div>
+                                                <div className="text-sm text-gray-600 leading-tight">{je.user.affiliation || je.user.university || 'Affiliation N/A'}</div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Legacy Editorial Board (if any, as fallbacks or additions) */}
+                        {editorialBoard.length > 0 && (
+                            <div>
+                                <h3 className="text-xl font-bold text-gray-900 mb-4 border-b border-gray-100 pb-2">Board Members (Listed)</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                                    {editorialBoard.map((member, index) => (
+                                        <div key={index} className="flex gap-4 items-start">
+                                            <div className="w-16 h-16 bg-gray-100 rounded-full flex-shrink-0 flex items-center justify-center text-gray-400 overflow-hidden">
+                                                {member.image ? (
+                                                    <img src={member.image} alt={member.name} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 24 24">
+                                                        <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+                                                    </svg>
+                                                )}
+                                            </div>
+                                            <div>
+                                                <h3 className="font-bold text-lg text-gray-900">{member.name}</h3>
+                                                <div className="text-[#006d77] font-medium text-sm mb-1">{member.role}</div>
+                                                <div className="text-sm text-gray-600 leading-tight">{member.affiliation}</div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {dbJournalEditors.length === 0 && editorialBoard.length === 0 && (
                             <p className="text-gray-500 italic">No editorial board members listed.</p>
                         )}
                     </div>

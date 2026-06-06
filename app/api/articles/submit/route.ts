@@ -89,6 +89,25 @@ export async function POST(req: NextRequest) {
       return apiError('Account is not active. Please contact support.', 403, undefined, 'ACCOUNT_INACTIVE');
     }
 
+    const isSystemAdmin = ['mother_admin', 'super_admin'].includes(user.role);
+    let processedCoAuthors = validation.data.coAuthors ? [...validation.data.coAuthors] : [];
+
+    if (!isSystemAdmin) {
+      const hasSelf = processedCoAuthors.some(
+        (ca: any) => ca.email && ca.email.trim().toLowerCase() === user.email.toLowerCase()
+      );
+
+      if (!hasSelf) {
+        const hasCorresponding = processedCoAuthors.some((ca: any) => ca.isMain);
+        processedCoAuthors.push({
+          name: user.name || '',
+          email: user.email,
+          university: user.university || user.affiliation || '',
+          isMain: !hasCorresponding,
+        });
+      }
+    }
+
     let article: any;
 
     if (resubmissionId) {
@@ -145,16 +164,31 @@ export async function POST(req: NextRequest) {
 
       if (validation.data.coAuthors) {
         await prisma.coAuthor.deleteMany({ where: { articleId: article.id } });
-        if (validation.data.coAuthors.length > 0) {
+        if (processedCoAuthors.length > 0) {
+          const coAuthorData = await Promise.all(
+            processedCoAuthors.map(async (author: any, index: number) => {
+              const email = author.email?.trim() || null;
+              let matchedUserId: string | null = null;
+              if (email) {
+                const userRecord = await prisma.user.findUnique({
+                  where: { email },
+                  select: { id: true }
+                });
+                matchedUserId = userRecord?.id || null;
+              }
+              return {
+                articleId: article.id,
+                name: author.name.trim(),
+                email: email,
+                university: author.university.trim(),
+                order: author.order !== undefined ? author.order : index + 1,
+                isMain: author.isMain || false,
+                userId: matchedUserId,
+              };
+            })
+          );
           await prisma.coAuthor.createMany({
-            data: validation.data.coAuthors.map((author: any, index: number) => ({
-              articleId: article.id,
-              name: author.name,
-              email: author.email || null,
-              university: author.university,
-              order: index + 1,
-              isMain: false,
-            }))
+            data: coAuthorData
           });
         }
       }
@@ -231,17 +265,31 @@ export async function POST(req: NextRequest) {
         }
       });
 
-      if (validation.data.coAuthors && validation.data.coAuthors.length > 0) {
+      if (processedCoAuthors.length > 0) {
+        const coAuthorData = await Promise.all(
+          processedCoAuthors.map(async (author: any, index: number) => {
+            const email = author.email?.trim() || null;
+            let matchedUserId: string | null = null;
+            if (email) {
+              const userRecord = await prisma.user.findUnique({
+                where: { email },
+                select: { id: true }
+              });
+              matchedUserId = userRecord?.id || null;
+            }
+            return {
+              articleId: article.id,
+              name: author.name.trim(),
+              email: email,
+              university: author.university.trim(),
+              order: author.order !== undefined ? author.order : index + 1,
+              isMain: author.isMain || false,
+              userId: matchedUserId,
+            };
+          })
+        );
         await prisma.coAuthor.createMany({
-          data: validation.data.coAuthors.map((author: any, index: number) => ({
-            articleId: article.id,
-            name: author.name,
-            email: author.email || null,
-            university: author.university,
-            order: index + 1,
-            isMain: false,
-            // Assuming affiliation is stored in university for simplicity or check schema
-          }))
+          data: coAuthorData
         });
       }
 
@@ -292,7 +340,7 @@ export async function POST(req: NextRequest) {
     if (validation.data.coAuthors && validation.data.coAuthors.length > 0) {
       const coAuthors = validation.data.coAuthors;
       for (const coAuthor of coAuthors) {
-        if (coAuthor.email) {
+        if (coAuthor.email && coAuthor.email.trim().toLowerCase() !== user.email.toLowerCase()) {
           sendCoAuthorNotification(
             coAuthor.email,
             coAuthor.name,

@@ -28,7 +28,7 @@ export async function POST(
             select: { role: true },
         });
 
-        if (!user || !['editor', 'super_admin'].includes(user.role)) {
+        if (!user || !['editor', 'super_admin', 'mother_admin'].includes(user.role)) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
@@ -59,6 +59,27 @@ export async function POST(
 
         if (!article) {
             return NextResponse.json({ error: 'Article not found' }, { status: 404 });
+        }
+
+        // Authorize: super_admin / mother_admin OR Editor-in-Chief of the journal
+        const isAdmin = ['super_admin', 'mother_admin'].includes(user.role);
+        let isAuthorized = isAdmin;
+
+        if (!isAuthorized) {
+            const journalEditor = await prisma.journalEditor.findFirst({
+                where: {
+                    journalId: article.journalId,
+                    userId: decoded.userId,
+                    role: "editor_in_chief"
+                }
+            });
+            if (journalEditor) {
+                isAuthorized = true;
+            }
+        }
+
+        if (!isAuthorized) {
+            return NextResponse.json({ error: 'Forbidden - Only Admins or Editor-in-Chief can make decisions' }, { status: 403 });
         }
 
         let newStatus = '';

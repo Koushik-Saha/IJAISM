@@ -39,6 +39,14 @@ function SubmitFormContent() {
   const [isResubmission, setIsResubmission] = useState(false);
   const [originalArticle, setOriginalArticle] = useState<any>(null);
 
+  const typeParam = searchParams.get('type');
+
+  useEffect(() => {
+    if (typeParam && ['article', 'review', 'case-study', 'technical-note', 'book', 'dissertation'].includes(typeParam)) {
+      setFormData(prev => ({ ...prev, submissionType: typeParam }));
+    }
+  }, [typeParam]);
+
   const [formData, setFormData] = useState<{
     submissionType: string;
     journal: string;
@@ -694,6 +702,8 @@ function SubmitFormContent() {
                 <option value="review">Review Paper</option>
                 <option value="case-study">Case Study</option>
                 <option value="technical-note">Technical Note</option>
+                <option value="book">Book Manuscript</option>
+                <option value="dissertation">Thesis/Dissertation</option>
               </select>
             </div>
 

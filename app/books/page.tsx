@@ -62,10 +62,10 @@ export default async function BooksPage(props: {
               </p>
             </div>
             <Link
-              href="/book-publishing"
+              href="/submit"
               className="bg-white text-accent hover:bg-gray-100 px-8 py-3 rounded-lg font-bold transition-colors whitespace-nowrap"
             >
-              Learn More
+              Submit Here
             </Link>
           </div>
         </div>

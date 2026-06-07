@@ -52,7 +52,12 @@ export async function GET(req: NextRequest) {
     }
 
     // Build where clause
-    const where: any = { deletedAt: null };
+    const where: any = {
+      deletedAt: null,
+      NOT: {
+        articleType: { in: ['book', 'dissertation'] }
+      }
+    };
 
     // Apply RBAC Filter
     if (user.role === 'editor') {

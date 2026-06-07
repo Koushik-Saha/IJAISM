@@ -1,4 +1,4 @@
-import { getResendClient, EMAIL_CONFIG } from './client';
+import { getBrevoClient, EMAIL_CONFIG } from './client';
 import * as templates from './templates';
 
 // Email sending result type
@@ -15,35 +15,31 @@ export async function sendEmail(
   html: string
 ): Promise<EmailResult> {
   try {
-    // 1. Try Resend
-    const resend = getResendClient();
+    // 1. Try Brevo
+    const brevo = getBrevoClient();
 
-    if (resend) {
-      const result = await resend.emails.send({
-        from: `"${EMAIL_CONFIG.fromName}" <${EMAIL_CONFIG.from}>`,
-        to,
+    if (brevo) {
+      const result = await brevo.transactionalEmails.sendTransacEmail({
+        sender: { name: EMAIL_CONFIG.fromName, email: EMAIL_CONFIG.from },
+        to: [{ email: to }],
+        replyTo: { email: EMAIL_CONFIG.replyTo },
         subject,
-        html,
-        replyTo: EMAIL_CONFIG.replyTo,
+        htmlContent: html,
       });
 
-      if (result.error) {
-        console.error('[EMAIL] Failed to send email (Resend):', result.error);
-        return { success: false, error: result.error.message };
-      }
-
-      console.log(`[EMAIL] Sent (Resend) successfully to ${to}: ${subject} (ID: ${result.data?.id})`);
-      return { success: true, messageId: result.data?.id };
+      const msgId = (result as any)?.messageId || (result as any)?.body?.messageId || 'ok';
+      console.log(`[EMAIL] Sent (Brevo) successfully to ${to}: "${subject}" (ID: ${msgId})`);
+      return { success: true, messageId: msgId };
     }
 
     // 2. Dev Mode (No provider)
     console.warn(`[EMAIL] Would send to ${to}: ${subject}`);
-    console.warn('[EMAIL] No email provider configured. Set RESEND_API_KEY.');
+    console.warn('[EMAIL] No email provider configured. Set BREVO_API_KEY in your .env');
     return { success: true, messageId: 'dev-mode-no-send' };
 
   } catch (error: any) {
-    console.error('[EMAIL] Error sending email:', error);
-    return { success: false, error: error.message };
+    console.error('[EMAIL] Error sending email (Brevo):', error?.message || error);
+    return { success: false, error: error?.message || 'Unknown error' };
   }
 }
 

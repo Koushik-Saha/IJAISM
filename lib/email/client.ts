@@ -1,21 +1,17 @@
-import { Resend } from 'resend';
+import { BrevoClient } from '@getbrevo/brevo';
 
 // Lazy getters so env vars are always read at call time, never frozen at module load
 export const EMAIL_CONFIG = {
-  get from() { return process.env.SMTP_FROM_EMAIL || 'noreply@c5k.com'; },
-  get fromName() { return process.env.SMTP_FROM_NAME || 'C5K Platform'; },
-  get replyTo() { return process.env.SMTP_FROM_EMAIL || 'noreply@c5k.com'; },
-  get appName() { return process.env.NEXT_PUBLIC_APP_NAME || 'C5K'; },
+  get from() { return process.env.SMTP_FROM_EMAIL || 'c5kpublication@gmail.com'; },
+  get fromName() { return process.env.SMTP_FROM_NAME || 'C5K'; },
+  get replyTo() { return process.env.SMTP_FROM_EMAIL || 'c5kpublication@gmail.com'; },
+  get appName() { return process.env.NEXT_PUBLIC_APP_NAME || 'C5K Publications'; },
   get appUrl() { return process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'; },
 };
 
-// Initialize Resend client
-export function getResendClient() {
-  const apiKey = process.env.RESEND_API_KEY;
-
-  if (!apiKey) {
-    return null;
-  }
-
-  return new Resend(apiKey);
+// Initialize Brevo client (new SDK style)
+export function getBrevoClient(): BrevoClient | null {
+  const apiKey = process.env.BREVO_API_KEY;
+  if (!apiKey) return null;
+  return new BrevoClient({ apiKey });
 }

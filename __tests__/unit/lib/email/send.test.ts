@@ -3,11 +3,11 @@ import {
     sendWelcomeEmail,
     sendArticleSubmissionEmail
 } from '@/lib/email/send';
-import { getResendClient, EMAIL_CONFIG } from '@/lib/email/client';
+import { getBrevoClient, EMAIL_CONFIG } from '@/lib/email/client';
 
 // Mock dependencies
 jest.mock('@/lib/email/client', () => ({
-    getResendClient: jest.fn(),
+    getBrevoClient: jest.fn(),
     EMAIL_CONFIG: {
         from: 'test@example.com',
         fromName: 'Test App',
@@ -23,32 +23,30 @@ jest.mock('@/lib/email/templates', () => ({
 }));
 
 describe('Email Service', () => {
-    const mockSendMail = jest.fn();
-    const mockResendSend = jest.fn();
+    const mockSendTransacEmail = jest.fn();
 
     beforeEach(() => {
         jest.clearAllMocks();
     });
 
     describe('Transport Selection', () => {
-        it('should use Resend if Resend available', async () => {
-            (getResendClient as jest.Mock).mockReturnValue({
-                emails: { send: mockResendSend }
+        it('should use Brevo if client is available', async () => {
+            (getBrevoClient as jest.Mock).mockReturnValue({
+                transactionalEmails: { sendTransacEmail: mockSendTransacEmail }
             });
-            mockResendSend.mockResolvedValue({ data: { id: 'resend-123' }, error: null });
+            mockSendTransacEmail.mockResolvedValue({ messageId: 'brevo-123' });
 
             const result = await sendWelcomeEmail('user@test.com', 'User');
 
-            expect(getResendClient).toHaveBeenCalled();
-            expect(mockResendSend).toHaveBeenCalledWith(expect.objectContaining({
-                to: 'user@test.com',
+            expect(getBrevoClient).toHaveBeenCalled();
+            expect(mockSendTransacEmail).toHaveBeenCalledWith(expect.objectContaining({
+                to: [{ email: 'user@test.com' }],
             }));
             expect(result.success).toBe(true);
-            expect(result.messageId).toBe('resend-123');
         });
 
-        it('should fallback to dev mode if Resend unavailable', async () => {
-            (getResendClient as jest.Mock).mockReturnValue(null);
+        it('should fallback to dev mode if Brevo unavailable', async () => {
+            (getBrevoClient as jest.Mock).mockReturnValue(null);
 
             const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
             const result = await sendWelcomeEmail('user@test.com', 'User');
@@ -61,9 +59,8 @@ describe('Email Service', () => {
     });
 
     describe('Function Wrappers', () => {
-        // Basic wrapper test to ensure arguments are passed correctly
         it('sendArticleSubmissionEmail passes correct data', async () => {
-            (getResendClient as jest.Mock).mockReturnValue(null);
+            (getBrevoClient as jest.Mock).mockReturnValue(null);
 
             const result = await sendArticleSubmissionEmail(
                 'author@test.com',

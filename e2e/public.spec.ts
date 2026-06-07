@@ -6,7 +6,7 @@ test.describe('Public Access Flows', () => {
         await page.goto('/');
 
         // Check Hero - using Regex for flexibility
-        await expect(page.getByRole('heading', { name: /Welcome to IJAISM/i })).toBeVisible();
+        await expect(page.getByRole('heading', { name: /Welcome to C5K Publications/i })).toBeVisible();
 
         // Check Stats
         await expect(page.getByRole('heading', { name: 'Academic Journals', level: 2 })).toBeVisible();

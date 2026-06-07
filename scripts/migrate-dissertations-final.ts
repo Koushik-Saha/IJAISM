@@ -15,7 +15,7 @@ async function main() {
 
     // 2. Identify/Create Admin User for Attribution
     const admin = await prisma.user.findFirst({ where: { role: 'super_admin' } }) || 
-                  await prisma.user.findFirst({ where: { email: 'admin@ijaism.org' } }) ||
+                  await prisma.user.findFirst({ where: { email: 'admin@c5k.com' } }) ||
                   await prisma.user.findFirst();
     
     if (!admin) {

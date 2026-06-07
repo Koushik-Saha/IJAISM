@@ -11,7 +11,7 @@ export interface AuthorInfo {
 export const ADMIN_NAMES = [
   'C5K Executive Administrator',
   'The Mother Admin',
-  'IJAISM Admin',
+  'C5K Admin',
   'admin',
   'super_admin',
   'mother_admin'

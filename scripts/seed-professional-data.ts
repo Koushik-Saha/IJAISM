@@ -2,7 +2,7 @@
 /**
  * Professional Academic Data Seeding Script
  * ============================================
- * Seeds realistic Google Scholar-like academic data into the IJAISM database.
+ * Seeds realistic Google Scholar-like academic data into the C5K Publications database.
  * 
  * This script creates:
  * - Professional authors with ORCIDs, affiliations, and bios
@@ -458,7 +458,7 @@ class ProfessionalDataSeeder {
             const timestamp = Date.now();
             const random = Math.floor(Math.random() * 10000);
             const uniqueId = `${timestamp}${random}${articleIndex}`.slice(-8); // Last 8 digits
-            const candidateDOI = `10.1234/ijaism.${year}.${uniqueId}`;
+            const candidateDOI = `10.1234/c5k.${year}.${uniqueId}`;
             
             // Check if already used in this run
             if (usedDOIs.has(candidateDOI)) {

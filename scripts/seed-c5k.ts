@@ -535,9 +535,9 @@ class C5KSeeder {
 
     const announcements = [
       {
-        title: 'Welcome to IJAISM Publishing Platform',
-        content: 'We are excited to announce the launch of our new academic publishing platform. IJAISM is dedicated to publishing high-quality research in information technology, business management, and related disciplines. Our platform features a fast 4-reviewer approval system to minimize delays in sharing new ideas and discoveries with the world.',
-        excerpt: 'IJAISM academic publishing platform is now live! Submit your research today.',
+        title: 'Welcome to C5K Publications',
+        content: 'We are excited to announce the launch of our new academic publishing platform. C5K Publications is dedicated to publishing high-quality research in information technology, business management, and related disciplines. Our platform features a fast 4-reviewer approval system to minimize delays in sharing new ideas and discoveries with the world.',
+        excerpt: 'C5K Publications academic publishing platform is now live! Submit your research today.',
         category: 'news',
         priority: 10,
         isFeatured: true,
@@ -568,7 +568,7 @@ class C5KSeeder {
       },
       {
         title: 'Fast-Track Review Now Available',
-        content: 'Authors can now request fast-track review for urgent research findings. Our 4-reviewer system can complete reviews within 2-3 weeks for qualifying submissions. Contact editorial@ijaism.com for more information.',
+        content: 'Authors can now request fast-track review for urgent research findings. Our 4-reviewer system can complete reviews within 2-3 weeks for qualifying submissions. Contact editorial@c5k.com for more information.',
         excerpt: 'Get your research published faster with our new fast-track review process.',
         category: 'update',
         priority: 6,
@@ -576,8 +576,8 @@ class C5KSeeder {
       },
       {
         title: 'Open Access Publishing Benefits',
-        content: 'All articles published in IJAISM journals are open access, ensuring maximum visibility and citation potential for your research. Learn about our transparent pricing and author benefits.',
-        excerpt: 'Discover the benefits of open access publishing with IJAISM.',
+        content: 'All articles published in C5K journals are open access, ensuring maximum visibility and citation potential for your research. Learn about our transparent pricing and author benefits.',
+        excerpt: 'Discover the benefits of open access publishing with C5K Publications.',
         category: 'news',
         priority: 5,
         isFeatured: false,

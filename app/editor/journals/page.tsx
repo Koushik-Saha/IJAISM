@@ -33,6 +33,7 @@ export default function AdminJournalsPage() {
     const [search, setSearch] = useState("");
     const [appliedSearch, setAppliedSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
+    const [editorFilter, setEditorFilter] = useState("");
 
     // Confirmation State
     const [confirmModal, setConfirmModal] = useState<{
@@ -55,9 +56,11 @@ export default function AdminJournalsPage() {
 
                 // 2. Fetch Journals
                 let url = '/api/editor/journals';
-                if (appliedSearch) {
-                    url += `?search=${encodeURIComponent(appliedSearch)}`;
-                }
+                const params = new URLSearchParams();
+                if (appliedSearch) params.set('search', appliedSearch);
+                // Only send editorId to API when it's a real userId (not the special __unassigned__ sentinel)
+                if (editorFilter && editorFilter !== '__unassigned__') params.set('editorId', editorFilter);
+                if (params.toString()) url += `?${params.toString()}`;
                 const jRes = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
                 const jData = await jRes.json();
                 setJournals(jData.journals || []);
@@ -75,11 +78,11 @@ export default function AdminJournalsPage() {
             }
         };
         init();
-    }, [appliedSearch]);
+    }, [appliedSearch, editorFilter]);
 
     useEffect(() => {
         setPage(1);
-    }, [appliedSearch, statusFilter]);
+    }, [appliedSearch, statusFilter, editorFilter]);
 
     const executeAssignment = async (journalId: string, editorId: string) => {
         try {
@@ -150,9 +153,14 @@ export default function AdminJournalsPage() {
 
     const isAdmin = currentUser && ['super_admin', 'mother_admin'].includes(currentUser.role);
 
-    const filteredJournals = journals.filter(j => {
-        if (statusFilter === 'active') return j.isActive === true;
-        if (statusFilter === 'inactive') return j.isActive === false;
+    const filteredJournals = journals.filter((j: any) => {
+        if (statusFilter === 'active' && !j.isActive) return false;
+        if (statusFilter === 'inactive' && j.isActive) return false;
+        // Client-side unassigned filter
+        if (editorFilter === '__unassigned__') {
+            const hasEditors = j.editorId || (j.editors && j.editors.length > 0);
+            if (hasEditors) return false;
+        }
         return true;
     });
 
@@ -274,8 +282,8 @@ export default function AdminJournalsPage() {
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Search & Filter Section */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
-                    <div className="lg:col-span-8 relative">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-8">
+                    <div className="lg:col-span-6 relative">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                             <Search className="h-5 w-5 text-gray-400" />
                         </div>
@@ -305,7 +313,35 @@ export default function AdminJournalsPage() {
                         </div>
                     </div>
 
-                    <div className="lg:col-span-4 relative group">
+                    {/* Editor Filter — admin only */}
+                    {isAdmin && (
+                        <div className="lg:col-span-3 relative group">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                            </div>
+                            <select
+                                value={editorFilter}
+                                onChange={(e) => {
+                                    setEditorFilter(e.target.value);
+                                    setPage(1);
+                                }}
+                                className="block w-full pl-10 pr-10 py-3.5 bg-white border-none rounded-2xl shadow-sm ring-1 ring-gray-200 focus:ring-2 focus:ring-primary appearance-none transition-all text-sm font-bold text-gray-700 cursor-pointer"
+                            >
+                                <option value="">All Editors</option>
+                                <option value="__unassigned__">Unassigned</option>
+                                {editors.map(e => (
+                                    <option key={e.id} value={e.id}>{e.name}</option>
+                                ))}
+                            </select>
+                            <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                                <ChevronDown className="h-4 w-4 text-gray-400" />
+                            </div>
+                        </div>
+                    )}
+
+                    <div className={`${isAdmin ? 'lg:col-span-3' : 'lg:col-span-6'} relative group`}>
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <Filter className="h-4 w-4 text-gray-400" />
                         </div>

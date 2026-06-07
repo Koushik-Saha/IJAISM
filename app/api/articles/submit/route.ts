@@ -168,19 +168,17 @@ export async function POST(req: NextRequest) {
         if (processedCoAuthors.length > 0) {
           const coAuthorData = await Promise.all(
             processedCoAuthors.map(async (author: any, index: number) => {
-              const email = author.email?.trim() || null;
-              let matchedUserId: string | null = null;
-              if (email) {
-                const userRecord = await prisma.user.findUnique({
-                  where: { email },
-                  select: { id: true }
-                });
-                matchedUserId = userRecord?.id || null;
-              }
+              const matchedUserId = await getOrCreateCoAuthorUserId(
+                author,
+                title.trim(),
+                journalRecord.fullName,
+                user.email,
+                userId
+              );
               return {
                 articleId: article.id,
                 name: author.name.trim(),
-                email: email,
+                email: author.email?.trim() || null,
                 university: author.university.trim(),
                 order: author.order !== undefined ? author.order : index + 1,
                 isMain: author.isMain || false,
@@ -270,19 +268,17 @@ export async function POST(req: NextRequest) {
       if (processedCoAuthors.length > 0) {
         const coAuthorData = await Promise.all(
           processedCoAuthors.map(async (author: any, index: number) => {
-            const email = author.email?.trim() || null;
-            let matchedUserId: string | null = null;
-            if (email) {
-              const userRecord = await prisma.user.findUnique({
-                where: { email },
-                select: { id: true }
-              });
-              matchedUserId = userRecord?.id || null;
-            }
+            const matchedUserId = await getOrCreateCoAuthorUserId(
+              author,
+              title.trim(),
+              journalRecord.fullName,
+              user.email,
+              userId
+            );
             return {
               articleId: article.id,
               name: author.name.trim(),
-              email: email,
+              email: author.email?.trim() || null,
               university: author.university.trim(),
               order: author.order !== undefined ? author.order : index + 1,
               isMain: author.isMain || false,
@@ -390,4 +386,74 @@ export async function POST(req: NextRequest) {
 
     return apiError('Internal server error. Please try again later.', 500, process.env.NODE_ENV === 'development' ? { message: error.message } : undefined);
   }
+}
+
+async function getOrCreateCoAuthorUserId(
+  author: any,
+  articleTitle: string,
+  journalName: string,
+  submittingUserEmail: string,
+  submittingUserId: string
+): Promise<string | null> {
+  const email = author.email?.trim() || null;
+  if (!email) return null;
+
+  if (email.toLowerCase() === submittingUserEmail.toLowerCase()) {
+    return submittingUserId;
+  }
+
+  // Check if user exists
+  const existingUser = await prisma.user.findUnique({
+    where: { email },
+    select: { id: true }
+  });
+
+  if (existingUser) {
+    return existingUser.id;
+  }
+
+  // Create new user account automatically
+  const tempPassword = `Temp-${Math.random().toString(36).substring(2, 10).toUpperCase()}1!`;
+  const { hashPassword } = await import('@/lib/auth');
+  const passwordHash = await hashPassword(tempPassword);
+
+  const newUser = await prisma.user.create({
+    data: {
+      email,
+      name: author.name.trim(),
+      passwordHash,
+      university: author.university.trim() || 'N/A',
+      role: 'author',
+      isActive: true,
+      isEmailVerified: true,
+    }
+  });
+
+  // Send credentials email
+  try {
+    const subject = `Welcome to C5K Journals - Account Created as Co-Author`;
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const html = `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; line-height: 1.6; color: #333;">
+        <h2 style="color: #4F46E5;">Listed as Co-Author</h2>
+        <p>Dear ${author.name.trim()},</p>
+        <p>You have been listed as a co-author on the paper titled <strong>"${articleTitle}"</strong> submitted to the journal <strong>"${journalName}"</strong>.</p>
+        <p>An account has been automatically created for you to access the system and track the progress of the submission.</p>
+        <div style="background-color: #F3F4F6; padding: 15px; border-radius: 8px; margin: 20px 0;">
+          <p style="margin: 5px 0;"><strong>Dashboard Link:</strong> <a href="${appUrl}/login" style="color: #4F46E5;">Login Here</a></p>
+          <p style="margin: 5px 0;"><strong>Username / Email:</strong> ${email}</p>
+          <p style="margin: 5px 0;"><strong>Temporary Password:</strong> <code style="background-color: #E5E7EB; padding: 2px 6px; border-radius: 4px; font-weight: bold;">${tempPassword}</code></p>
+        </div>
+        <p style="color: #EF4444; font-size: 13px;"><em>Please change your password after logging in for security.</em></p>
+        <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 20px 0;" />
+        <p style="color: #6B7280; font-size: 12px;">This is an automated message from C5K Platform.</p>
+      </div>
+    `;
+    const { sendEmail } = await import('@/lib/email/send');
+    await sendEmail(email, subject, html);
+  } catch (err) {
+    console.error("Failed to send co-author welcome email:", err);
+  }
+
+  return newUser.id;
 }

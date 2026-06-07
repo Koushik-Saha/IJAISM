@@ -46,9 +46,46 @@ export async function GET(req: NextRequest) {
     // Build Scope (Who can see whom)
     const where: any = { deletedAt: null };
 
-    // EDITOR restrict: Can only see their own Sub-Editors
+    // EDITOR restrict: Can see their own Sub-Editors AND all users associated with their assigned journals/papers
     if (requester.role === ROLES.EDITOR) {
-      where.managedById = requester.id;
+      const eicJournals = await prisma.journalEditor.findMany({
+        where: {
+          userId: requester.id,
+          role: "editor_in_chief"
+        },
+        select: { journalId: true }
+      });
+      const eicJournalIds = eicJournals.map(j => j.journalId);
+
+      const [journalEditorUsers, articleAuthors, coAuthors] = await Promise.all([
+        prisma.journalEditor.findMany({
+          where: { journalId: { in: eicJournalIds } },
+          select: { userId: true }
+        }),
+        prisma.article.findMany({
+          where: { journalId: { in: eicJournalIds }, deletedAt: null },
+          select: { authorId: true }
+        }),
+        prisma.coAuthor.findMany({
+          where: { article: { journalId: { in: eicJournalIds }, deletedAt: null }, NOT: { userId: null } },
+          select: { userId: true }
+        })
+      ]);
+
+      const allowedUserIds = new Set<string>([
+        ...journalEditorUsers.map(je => je.userId),
+        ...articleAuthors.map(a => a.authorId),
+        ...coAuthors.map(ca => ca.userId as string)
+      ]);
+
+      where.AND = [
+        {
+          OR: [
+            { managedById: requester.id },
+            { id: { in: Array.from(allowedUserIds) } }
+          ]
+        }
+      ];
     }
 
     if (role) {
@@ -56,10 +93,15 @@ export async function GET(req: NextRequest) {
     }
 
     if (search) {
-      where.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-        { email: { contains: search, mode: 'insensitive' } },
-      ];
+      if (!where.AND) {
+        where.AND = [];
+      }
+      where.AND.push({
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { email: { contains: search, mode: 'insensitive' } },
+        ]
+      });
     }
 
     // Execute Query
@@ -271,9 +313,32 @@ export async function PATCH(req: NextRequest) {
 
     // Hierarchy Check for Modification
     if (requester.role === ROLES.EDITOR) {
-      // Editor can only modify their own sub-editors
-      if (targetUser.managedById !== requester.id) {
-        return NextResponse.json({ error: 'You can only modify your own sub-editors' }, { status: 403 });
+      // Editor can modify their own sub-editors, or users in their assigned journals/papers
+      const eicJournals = await prisma.journalEditor.findMany({
+        where: {
+          userId: requester.id,
+          role: "editor_in_chief"
+        },
+        select: { journalId: true }
+      });
+      const eicJournalIds = eicJournals.map(j => j.journalId);
+
+      const [journalEditorCount, articleAuthorCount, coAuthorCount] = await Promise.all([
+        prisma.journalEditor.count({
+          where: { journalId: { in: eicJournalIds }, userId: targetUser.id }
+        }),
+        prisma.article.count({
+          where: { journalId: { in: eicJournalIds }, authorId: targetUser.id, deletedAt: null }
+        }),
+        prisma.coAuthor.count({
+          where: { article: { journalId: { in: eicJournalIds }, deletedAt: null }, userId: targetUser.id }
+        })
+      ]);
+
+      const isUnderEic = journalEditorCount > 0 || articleAuthorCount > 0 || coAuthorCount > 0;
+
+      if (targetUser.managedById !== requester.id && !isUnderEic) {
+        return NextResponse.json({ error: 'Forbidden - You do not have permission to modify this user' }, { status: 403 });
       }
     }
 

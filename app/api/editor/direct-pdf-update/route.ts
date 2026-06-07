@@ -487,7 +487,7 @@ export async function POST(req: NextRequest) {
     // 5b. Update CoAuthors if provided
     if (coAuthorsRaw) {
       try {
-        const coAuthors: { id?: string; name: string; email?: string; university?: string; isMain?: boolean; order?: number; _userId?: string }[] = JSON.parse(coAuthorsRaw);
+        const coAuthors: { id?: string; name: string; email?: string; university?: string; isMain?: boolean; isCorresponding?: boolean; order?: number; _userId?: string }[] = JSON.parse(coAuthorsRaw);
 
         // Separate the main author (User record) from regular co-authors
         const mainAuthorEntry = coAuthors.find(ca => ca._userId);
@@ -517,6 +517,7 @@ export async function POST(req: NextRequest) {
                 email: ca.email?.trim() || null,
                 university: ca.university?.trim() || null,
                 isMain: ca.isMain ?? false,
+                isCorresponding: ca.isCorresponding ?? false,
                 order: ca.order ?? idx,
               })),
           });

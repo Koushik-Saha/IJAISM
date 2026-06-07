@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getArticleAuthors } from '@/lib/articles/authors';
 
 export async function GET(req: NextRequest) {
   try {
@@ -56,8 +57,8 @@ export async function GET(req: NextRequest) {
         take: limit,
         orderBy,
         include: {
-          author: { select: { id: true, name: true } },
-          coAuthors: { select: { name: true }, orderBy: { order: 'asc' } },
+          author: { select: { id: true, name: true, email: true } },
+          coAuthors: { select: { id: true, userId: true, name: true, university: true, email: true, isMain: true, order: true }, orderBy: { order: 'asc' } },
           journal: { select: { id: true, code: true, fullName: true } },
         },
       }),
@@ -65,9 +66,23 @@ export async function GET(req: NextRequest) {
     ]);
 
     const formattedArticles = articles.map((article) => {
-      const ADMIN_NAMES = ['C5K Executive Administrator', 'The Mother Admin'];
-      const allAuthors = [article.author.name, ...article.coAuthors.map(c => c.name)]
-        .filter(name => !ADMIN_NAMES.includes(name));
+      const resolvedAuthors = getArticleAuthors({
+        author: {
+          id: article.author.id,
+          name: article.author.name,
+          email: article.author.email || ''
+        },
+        coAuthors: article.coAuthors.map(ca => ({
+          id: ca.id,
+          userId: ca.userId,
+          name: ca.name,
+          email: ca.email || '',
+          university: ca.university || '',
+          isMain: ca.isMain || false,
+          order: ca.order || 0
+        }))
+      });
+      const allAuthors = resolvedAuthors.map(a => a.name);
       return {
         id: article.id,
         title: article.title,

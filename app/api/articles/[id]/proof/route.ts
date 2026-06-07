@@ -79,7 +79,8 @@ export async function POST(
           name: c.name,
           email: c.email || null,
           university: c.university || null,
-          isMain: false,
+          isMain: c.isMain ?? false,
+          isCorresponding: c.isCorresponding ?? false,
           order: index + 1
         }))
       });

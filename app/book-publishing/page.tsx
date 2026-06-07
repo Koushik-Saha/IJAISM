@@ -303,9 +303,12 @@ export default function BookPublishingPage() {
           </div>
 
           <div className="mt-8">
-            <button className="bg-accent hover:bg-accent-dark text-white px-8 py-4 rounded-lg font-bold text-lg transition-colors">
+            <Link
+              href="/submit"
+              className="inline-block bg-accent hover:bg-accent-dark text-white px-8 py-4 rounded-lg font-bold text-lg transition-colors text-center"
+            >
               Submit Book Proposal
-            </button>
+            </Link>
           </div>
         </div>
 
@@ -441,9 +444,12 @@ export default function BookPublishingPage() {
             Submit your proposal today and join our prestigious list of authors
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-accent hover:bg-accent-dark text-white px-8 py-4 rounded-lg font-bold text-lg transition-colors">
+            <Link
+              href="/submit"
+              className="inline-block bg-accent hover:bg-accent-dark text-white px-8 py-4 rounded-lg font-bold text-lg transition-colors text-center"
+            >
               Submit Proposal
-            </button>
+            </Link>
             <Link
               href="/contact"
               className="bg-white hover:bg-gray-100 text-primary px-8 py-4 rounded-lg font-bold text-lg transition-colors"

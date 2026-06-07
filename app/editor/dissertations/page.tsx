@@ -25,6 +25,7 @@ export default function DissertationsPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedItem, setSelectedItem] = useState<any>(null);
+    const [activeTab, setActiveTab] = useState<"submissions" | "published">("submissions");
 
     // Form State
     const [formData, setFormData] = useState({
@@ -45,11 +46,11 @@ export default function DissertationsPage() {
 
     useEffect(() => {
         if (isAuthorized) fetchData();
-    }, [page, isAuthorized, appliedSearch]);
+    }, [page, isAuthorized, appliedSearch, activeTab]);
 
     useEffect(() => {
         setPage(1);
-    }, [appliedSearch]);
+    }, [appliedSearch, activeTab]);
 
     const checkAuth = async () => {
         const token = localStorage.getItem('token');
@@ -74,7 +75,8 @@ export default function DissertationsPage() {
             const token = localStorage.getItem('token');
             const queryParams = new URLSearchParams({
                 page: page.toString(),
-                limit: '10'
+                limit: '10',
+                type: activeTab
             });
             if (appliedSearch) queryParams.append('search', appliedSearch);
 
@@ -165,7 +167,51 @@ export default function DissertationsPage() {
 
     if (isLoading && !isAuthorized) return <div className="p-8 text-center">Loading...</div>;
 
-    const columns = [
+    const columns = activeTab === "submissions" ? [
+        {
+            header: "Title",
+            accessor: "title",
+            className: "font-medium"
+        },
+        {
+            header: "Author",
+            accessor: "author",
+            render: (item: any) => item.author?.name || item.author?.email || 'N/A'
+        },
+        {
+            header: "Status",
+            accessor: "status",
+            render: (item: any) => {
+                const badges: Record<string, string> = {
+                    submitted: 'bg-yellow-100 text-yellow-800',
+                    under_review: 'bg-blue-100 text-blue-800',
+                    published: 'bg-green-100 text-green-800',
+                    rejected: 'bg-red-100 text-red-800',
+                    revision_requested: 'bg-orange-100 text-orange-800',
+                    waiting_for_editor: 'bg-purple-100 text-purple-800',
+                    accepted: 'bg-green-100 text-green-800',
+                };
+                const badgeClass = badges[item.status] || 'bg-gray-100 text-gray-800';
+                const label = item.status?.split('_').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || 'Unknown';
+                return <span className={`px-2.5 py-1 text-xs font-bold rounded-full ${badgeClass}`}>{label}</span>;
+            }
+        },
+        {
+            header: "Date Submitted",
+            accessor: "createdAt",
+            render: (item: any) => new Date(item.createdAt).toLocaleDateString()
+        },
+        {
+            header: "Actions",
+            accessor: "id",
+            className: "text-right",
+            render: (item: any) => (
+                <div className="flex justify-end gap-2">
+                    <Link href={`/editor/articles/${item.id}`} className="text-blue-600 hover:underline text-sm font-bold">Review</Link>
+                </div>
+            )
+        }
+    ] : [
         { header: "Title", accessor: "title", className: "font-medium" },
         { header: "University", accessor: "university" },
         { header: "Type", accessor: "degreeType", render: (item: any) => <span className="uppercase text-xs font-bold bg-gray-100 px-2 py-1 rounded">{item.degreeType}</span> },
@@ -186,14 +232,16 @@ export default function DissertationsPage() {
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="bg-white border-b">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex justify-between items-center">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
                         <h1 className="text-3xl font-bold text-primary">Manage Dissertations</h1>
                         <p className="mt-1 text-gray-600">Super Admin Access Only</p>
                     </div>
-                    <div className="flex gap-3">
-                        <button onClick={openCreate} className="btn-primary">+ New Dissertation</button>
-                        <Link href="/editor" className="btn-secondary">Back</Link>
+                    <div className="flex items-center gap-3">
+                        <Link href="/editor" className="inline-flex items-center px-4 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-all active:scale-95 shadow-sm">
+                            ← Back
+                        </Link>
+                        <Link href="/submit?type=dissertation" className="btn-primary font-bold px-5 py-2.5 rounded-xl shadow-lg transition-all active:scale-95 text-sm inline-block text-center">+ New Dissertation</Link>
                     </div>
                 </div>
             </div>
@@ -230,11 +278,35 @@ export default function DissertationsPage() {
                     </div>
                 </div>
 
+                {/* Tabs */}
+                <div className="flex border-b border-gray-200 mb-6">
+                    <button
+                        onClick={() => setActiveTab("submissions")}
+                        className={`py-3 px-6 font-bold text-sm border-b-2 transition-all ${
+                            activeTab === "submissions"
+                                ? "border-primary text-primary"
+                                : "border-transparent text-gray-500 hover:text-gray-700"
+                        }`}
+                    >
+                        Submissions Pipeline
+                    </button>
+                    <button
+                        onClick={() => setActiveTab("published")}
+                        className={`py-3 px-6 font-bold text-sm border-b-2 transition-all ${
+                            activeTab === "published"
+                                ? "border-primary text-primary"
+                                : "border-transparent text-gray-500 hover:text-gray-700"
+                        }`}
+                    >
+                        Published Directory
+                    </button>
+                </div>
+
                 <ResponsiveTable
                     columns={columns}
                     data={dissertations}
                     keyExtractor={(i) => i.id}
-                    emptyMessage="No dissertations found."
+                    emptyMessage={activeTab === "submissions" ? "No dissertation submissions found." : "No published dissertations found."}
                 />
                 {/* Pagination - Reuse logic from other pages */}
                 {/* Simplified for MVP -> Pages handled by useEffect */}
@@ -283,10 +355,27 @@ export default function DissertationsPage() {
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-sm font-bold mb-1">Cover Image URL</label>
-                                <div className="flex gap-2">
-                                    <input className="w-full border rounded p-2 flex-1" value={formData.coverImageUrl} onChange={e => setFormData({ ...formData, coverImageUrl: e.target.value })} />
-                                    <FileUploadButton onUploadSuccess={(url) => setFormData({ ...formData, coverImageUrl: url })} accept="image/*" label="Upload Image" fileType="thesis" />
+                                <label className="block text-sm font-bold mb-1">Cover Image</label>
+                                <div className="flex items-start gap-4 p-3 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                                    <div className="w-16 h-20 bg-gray-200 rounded border flex-shrink-0 overflow-hidden flex items-center justify-center">
+                                        {formData.coverImageUrl ? (
+                                            <img src={formData.coverImageUrl} alt="Cover Preview" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <span className="text-[10px] text-gray-400 font-bold uppercase px-1 text-center">No Cover</span>
+                                        )}
+                                    </div>
+                                    <div className="flex-1 space-y-2">
+                                        <FileUploadButton onUploadSuccess={(url) => setFormData({ ...formData, coverImageUrl: url })} accept="image/*" label={formData.coverImageUrl ? "Change Image" : "Upload Image"} fileType="thesis" />
+                                        {formData.coverImageUrl && (
+                                            <button
+                                                type="button"
+                                                onClick={() => setFormData({ ...formData, coverImageUrl: '' })}
+                                                className="block text-[10px] text-red-600 hover:text-red-700 font-bold"
+                                            >
+                                                Remove Image
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                             <div>

@@ -161,19 +161,21 @@ export default function IssueDetailsPage() {
         <div className="min-h-screen bg-gray-50">
             <div className="bg-white border-b sticky top-0 z-10">
                 <div className="max-w-7xl mx-auto px-4 py-6">
-                    <Link href="/editor/issues" className="text-sm text-gray-500 hover:text-gray-700 mb-2 block">
-                        ← Back to Issues
-                    </Link>
-                    <div className="flex justify-between items-start">
-                        <div>
-                            <h1 className="text-3xl font-bold text-primary">
-                                Vol {issue.volume}, Issue {issue.issue} ({issue.year})
-                            </h1>
-                            <p className="text-gray-600 mt-1">{issue.journal?.fullName}</p>
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div className="flex items-center gap-4">
+                            <Link href="/editor/issues" className="inline-flex items-center px-4 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-all active:scale-95 shadow-sm">
+                                ← Back
+                            </Link>
+                            <div>
+                                <h1 className="text-3xl font-bold text-primary">
+                                    Vol {issue.volume}, Issue {issue.issue} ({issue.year})
+                                </h1>
+                                <p className="text-gray-600 mt-1">{issue.journal?.fullName}</p>
+                            </div>
                         </div>
                         <button
                             onClick={handleDelete}
-                            className="bg-red-50 text-red-600 px-4 py-2 rounded-lg hover:bg-red-100 border border-red-200 text-sm font-semibold"
+                            className="bg-red-50 text-red-600 px-4 py-2.5 rounded-xl hover:bg-red-100 border border-red-200 text-sm font-semibold transition-all active:scale-95"
                         >
                             Delete Issue
                         </button>

@@ -4,7 +4,9 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
+import Link from "next/link";
 import Card from "@/components/ui/Card";
+import FileUploadButton from "@/components/ui/FileUploadButton";
 
 type HeroSlide = {
     id: string;
@@ -24,6 +26,7 @@ export default function HeroSlidesManager() {
     const [slides, setSlides] = useState<HeroSlide[]>([]);
     const [loading, setLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
+    const [saving, setSaving] = useState(false);
     const [currentSlide, setCurrentSlide] = useState<Partial<HeroSlide>>({});
     const router = useRouter();
 
@@ -70,6 +73,7 @@ export default function HeroSlidesManager() {
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
+        setSaving(true);
         const token = localStorage.getItem('token');
 
         try {
@@ -101,52 +105,39 @@ export default function HeroSlidesManager() {
             }
         } catch (error) {
             toast.error("Error saving slide");
-        }
-    };
-
-    const [uploading, setUploading] = useState(false);
-
-    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        setUploading(true);
-        const formData = new FormData();
-        formData.append('file', file);
-
-        try {
-            const token = localStorage.getItem('token');
-            const res = await fetch('/api/upload', {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` },
-                body: formData
-            });
-
-            if (!res.ok) throw new Error('Upload failed');
-
-            const data = await res.json();
-            setCurrentSlide({ ...currentSlide, imageUrl: data.url });
-            toast.success('Image uploaded successfully');
-        } catch (error) {
-            toast.error('Failed to upload image');
         } finally {
-            setUploading(false);
+            setSaving(false);
         }
     };
+
 
     if (loading) return <div className="p-8">Loading...</div>;
 
     return (
-        <div className="p-6">
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold">Homepage Hero Slides</h1>
-                <button
-                    onClick={() => { setCurrentSlide({ displayOrder: slides.length + 1, isActive: true }); setIsEditing(true); }}
-                    className="btn-primary"
-                >
-                    + Add New Slide
-                </button>
+        <div className="min-h-screen bg-gray-50 pb-12">
+            <div className="bg-white border-b sticky top-0 z-10">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                    <div className="flex flex-col md:flex-row justify-between items-md-center gap-4">
+                        <div>
+                            <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Homepage Hero Slides</h1>
+                            <p className="text-gray-500 mt-1">Manage carousel slides displayed on the homepage.</p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={() => { setCurrentSlide({ displayOrder: slides.length + 1, isActive: true }); setIsEditing(true); }}
+                                className="bg-primary text-white px-6 py-2.5 rounded-xl font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-95 text-sm"
+                            >
+                                + Add New Slide
+                            </button>
+                            <Link href="/editor" className="inline-flex items-center px-4 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-all active:scale-95">
+                                ← Back
+                            </Link>
+                        </div>
+                    </div>
+                </div>
             </div>
+
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
             {isEditing && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -179,39 +170,34 @@ export default function HeroSlidesManager() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium">Image (Upload or URL)</label>
-                                <div className="flex gap-2 mb-2">
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        className="hidden"
-                                        id="slide-image-upload"
-                                        onChange={handleImageUpload}
-                                        disabled={uploading}
-                                    />
-                                    <label
-                                        htmlFor="slide-image-upload"
-                                        className={`btn-secondary cursor-pointer ${uploading ? 'opacity-50' : ''}`}
-                                    >
-                                        {uploading ? 'Uploading...' : 'Upload Image'}
-                                    </label>
-                                </div>
-                                <input
-                                    className="w-full border p-2 rounded"
-                                    placeholder="https://..."
-                                    value={currentSlide.imageUrl || ''}
-                                    onChange={e => setCurrentSlide({ ...currentSlide, imageUrl: e.target.value })}
-                                />
-                                {currentSlide.imageUrl && (
-                                    <div className="mt-2 h-32 w-full relative bg-gray-100 rounded overflow-hidden">
-                                        {/* eslint-disable-next-line */}
-                                        <img
-                                            src={currentSlide.imageUrl}
-                                            alt="Preview"
-                                            className="h-full w-full object-cover"
-                                        />
+                                <label className="block text-sm font-medium mb-1">Slide Image</label>
+                                <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                                    <div className="w-32 h-20 bg-gray-200 rounded-lg border flex-shrink-0 overflow-hidden flex items-center justify-center shadow-sm">
+                                        {currentSlide.imageUrl ? (
+                                            <img src={currentSlide.imageUrl} alt="Slide Preview" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <span className="text-[10px] text-gray-400 font-bold uppercase px-1 text-center">No Image</span>
+                                        )}
                                     </div>
-                                )}
+                                    <div className="flex-1 space-y-3">
+                                        <FileUploadButton
+                                            onUploadSuccess={(url) => setCurrentSlide({ ...currentSlide, imageUrl: url })}
+                                            accept="image/*"
+                                            label={currentSlide.imageUrl ? "Change Image" : "Upload Image"}
+                                            fileType="announcement"
+                                        />
+                                        {currentSlide.imageUrl && (
+                                            <button
+                                                type="button"
+                                                onClick={() => setCurrentSlide({ ...currentSlide, imageUrl: '' })}
+                                                className="block text-xs font-bold text-red-600 hover:text-red-700 transition-colors"
+                                            >
+                                                Remove Image
+                                            </button>
+                                        )}
+                                        <p className="text-[10px] text-gray-500">Recommended: Large landscape image (e.g. 1920x1080). Max 10MB.</p>
+                                    </div>
+                                </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
@@ -275,8 +261,8 @@ export default function HeroSlidesManager() {
 
                             <div className="flex justify-end gap-2 mt-6">
                                 <button type="button" onClick={() => setIsEditing(false)} className="btn-secondary">Cancel</button>
-                                <button type="submit" className="btn-primary" disabled={uploading}>
-                                    {uploading ? 'Uploading...' : 'Save Slide'}
+                                <button type="submit" className="btn-primary" disabled={saving}>
+                                    {saving ? 'Saving...' : 'Save Slide'}
                                 </button>
                             </div>
                         </form>
@@ -299,6 +285,7 @@ export default function HeroSlidesManager() {
                     </Card>
                 ))}
                 {slides.length === 0 && <div className="text-center text-gray-500 py-8">No slides found. Create one!</div>}
+            </div>
             </div>
         </div>
     );

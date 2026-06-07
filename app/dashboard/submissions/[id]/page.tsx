@@ -4,6 +4,9 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import ArticleAccessButtons from "@/components/articles/ArticleAccessButtons";
 import { useRouter, useParams } from "next/navigation";
+import AuthorsManager from "@/components/articles/AuthorsManager";
+import { getArticleAuthors } from "@/lib/articles/authors";
+import { toast } from "sonner";
 
 interface Article {
   id: string;
@@ -23,9 +26,22 @@ interface Article {
     issn: string;
   };
   author: {
+    id: string;
     name: string;
     email: string;
+    affiliation?: string | null;
+    university?: string | null;
   };
+  coAuthors?: Array<{
+    id: string;
+    userId?: string | null;
+    name: string;
+    email?: string | null;
+    university?: string | null;
+    isMain: boolean;
+    isCorresponding: boolean;
+    order: number;
+  }>;
   editorComments: string | null;
   rejectionReason: string | null;
   isApcPaid?: boolean;
@@ -40,6 +56,70 @@ export default function SubmissionDetailPage() {
   const [article, setArticle] = useState<Article | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [isEditingAuthors, setIsEditingAuthors] = useState(false);
+  const [editedAuthors, setEditedAuthors] = useState<any[]>([]);
+  const [isSavingAuthors, setIsSavingAuthors] = useState(false);
+  const [authorErrors, setAuthorErrors] = useState<Record<string, string>>({});
+
+  const startEditingAuthors = () => {
+    if (!article) return;
+    const resolved = getArticleAuthors({
+      author: article.author as any,
+      coAuthors: article.coAuthors || []
+    });
+    setEditedAuthors(resolved.map(a => ({
+      name: a.name,
+      email: a.email || '',
+      university: a.affiliation || '',
+      isMain: a.isMain,
+      isCorresponding: a.isCorresponding ?? a.isMain ?? false,
+      order: a.order,
+    })));
+    setIsEditingAuthors(true);
+  };
+
+  const handleSaveAuthors = async () => {
+    setAuthorErrors({});
+    setIsSavingAuthors(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/articles/${id}/authors`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ authors: editedAuthors })
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        if (data.error?.details && data.error.code === 'VALIDATION_ERROR') {
+          setAuthorErrors(data.error.details);
+        }
+        throw new Error(data.error?.message || data.error || 'Failed to update authors');
+      }
+
+      toast.success('Authors updated successfully');
+      setIsEditingAuthors(false);
+      
+      // Refresh article data
+      if (id) {
+        const fetchRes = await fetch(`/api/articles/${id}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (fetchRes.ok) {
+          const fetchVal = await fetchRes.json();
+          setArticle(fetchVal.article);
+        }
+      }
+    } catch (e: any) {
+      toast.error(e.message || 'Failed to update authors');
+    } finally {
+      setIsSavingAuthors(false);
+    }
+  };
 
   useEffect(() => {
     const fetchSubmission = async () => {
@@ -183,10 +263,10 @@ export default function SubmissionDetailPage() {
                   <p className="font-semibold">{article.journal.fullName}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Author</p>
+                  <p className="text-sm text-gray-600">Submitter</p>
                   <p className="font-semibold">{article.author.name}</p>
                   <p className="text-sm text-gray-600">{article.author.email}</p>
-                  <div>
+                  <div className="mt-2">
                     <p className="text-sm text-gray-600">Status</p>
                     <span className={`px-3 py-1 text-xs font-semibold rounded-full ${getStatusColor(article.status)}`}>
                       {article.status.replace(/_/g, ' ')}
@@ -194,6 +274,78 @@ export default function SubmissionDetailPage() {
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* Authors & Affiliations Card */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold">Authors & Affiliations</h2>
+                {article.status !== 'published' && !isEditingAuthors && (
+                  <button
+                    onClick={startEditingAuthors}
+                    className="text-xs bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-lg font-semibold hover:bg-blue-100 transition-colors"
+                  >
+                    Edit Authors
+                  </button>
+                )}
+              </div>
+
+              {isEditingAuthors ? (
+                <div className="space-y-4">
+                  <AuthorsManager
+                    authors={editedAuthors}
+                    onChange={setEditedAuthors}
+                    validationErrors={authorErrors}
+                    isEditing={true}
+                  />
+                  <div className="flex justify-end gap-3 pt-4 border-t">
+                    <button
+                      onClick={() => setIsEditingAuthors(false)}
+                      disabled={isSavingAuthors}
+                      className="px-4 py-2 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleSaveAuthors}
+                      disabled={isSavingAuthors}
+                      className="px-4 py-2 text-sm font-semibold text-white bg-accent hover:bg-accent-dark rounded-lg shadow-sm transition-colors"
+                    >
+                      {isSavingAuthors ? 'Saving...' : 'Save Changes'}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {getArticleAuthors({
+                    author: article.author as any,
+                    coAuthors: article.coAuthors || []
+                  }).map((auth, index) => (
+                    <div key={index} className="flex items-start gap-4 p-3 rounded-lg border border-gray-100 bg-gray-50/50">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm">
+                        {index + 1}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-semibold text-gray-900">{auth.name}</span>
+                          {auth.isMain && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800">
+                              Main Author
+                            </span>
+                          )}
+                          {auth.isCorresponding && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                              Corresponding
+                            </span>
+                          )}
+                        </div>
+                        {auth.email && <p className="text-xs text-gray-500 mt-0.5">{auth.email}</p>}
+                        {auth.affiliation && <p className="text-xs text-gray-600 mt-0.5">{auth.affiliation}</p>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Plagiarism Check */}

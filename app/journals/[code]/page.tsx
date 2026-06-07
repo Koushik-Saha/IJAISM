@@ -5,6 +5,7 @@ import JournalInsights from "@/components/journals/JournalInsights";
 import JournalSidebar from "@/components/journals/JournalSidebar";
 import AuthorListWithModal from "@/components/articles/AuthorListWithModal";
 import { notFound } from "next/navigation";
+import { getArticleAuthors } from "@/lib/articles/authors";
 
 export const revalidate = 3600; // Revalidate every hour
 
@@ -36,8 +37,8 @@ export default async function JournalDetailPage({ params }: { params: Promise<{ 
         orderBy: { publicationDate: "desc" },
         take: 8,
         include: {
-          author: { select: { id: true, name: true } },
-          coAuthors: { select: { id: true, userId: true, name: true, university: true, email: true }, orderBy: { order: "asc" } }
+          author: { select: { id: true, name: true, email: true } },
+          coAuthors: { select: { id: true, userId: true, name: true, university: true, email: true, isMain: true, order: true }, orderBy: { order: "asc" } }
         }
       }
     }
@@ -72,24 +73,22 @@ export default async function JournalDetailPage({ params }: { params: Promise<{ 
                     </h3>
                   </Link>
                   {(() => {
-                    const ADMIN_NAMES = ['C5K Executive Administrator', 'The Mother Admin'];
-                    const isAdmin = ADMIN_NAMES.includes(article.author.name || '');
-                    const allAuthors = [
-                      ...(!isAdmin ? [{
+                    const allAuthors = getArticleAuthors({
+                      author: {
                         id: article.author.id,
                         name: article.author.name || '',
-                        affiliation: null,
-                        email: null,
-                        isMain: true,
-                      }] : []),
-                      ...article.coAuthors.map(ca => ({
-                        id: ca.userId || null,
+                        email: article.author.email || '',
+                      },
+                      coAuthors: article.coAuthors.map(ca => ({
+                        id: ca.id,
+                        userId: ca.userId,
                         name: ca.name,
-                        affiliation: ca.university || null,
-                        email: ca.email || null,
-                        isMain: false,
-                      })),
-                    ];
+                        email: ca.email,
+                        university: ca.university,
+                        isMain: ca.isMain || false,
+                        order: ca.order || 0
+                      }))
+                    });
                     if (allAuthors.length === 0) return null;
                     return (
                       <div className="text-sm text-gray-600 mb-2 flex flex-wrap items-center gap-x-1">

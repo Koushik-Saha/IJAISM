@@ -4,10 +4,14 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Search } from "lucide-react";
+import { toast } from "sonner";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 
 interface Article {
   id: string;
   title: string;
+  abstract?: string;
+  keywords?: string[];
   status: string;
   submissionDate: string;
   publicationDate?: string;
@@ -15,11 +19,16 @@ interface Article {
   volume?: number;
   issue?: number;
   articleType?: string;
+  journalId: string;
+  language?: string;
+  isOpenAccess?: boolean;
+  pdfUrl?: string;
   author: {
     name: string;
     email: string;
   };
   journal: {
+    id: string;
     fullName: string;
     code: string;
   };
@@ -41,9 +50,33 @@ export default function AdminArticlesPage() {
   const [totalPages, setTotalPages] = useState(1);
   const limit = 10;
 
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [articleToDelete, setArticleToDelete] = useState<string | null>(null);
+
   useEffect(() => {
     fetchArticles();
   }, [statusFilter, noDoiFilter, page, journalId, appliedSearch]);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const response = await fetch('/api/auth/me', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setCurrentUser(data.user);
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    };
+    fetchUser();
+  }, []);
 
   const fetchArticles = async () => {
     setIsLoading(true);
@@ -93,6 +126,42 @@ export default function AdminArticlesPage() {
     }
   };
 
+  const handleEditClick = (article: Article) => {
+    router.push(`/editor/articles/${article.id}/edit`);
+  };
+
+  const handleDeleteClick = (articleId: string) => {
+    setArticleToDelete(articleId);
+    setDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!articleToDelete) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/editor/articles/${articleToDelete}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to delete article");
+      }
+
+      toast.success("Article deleted successfully");
+      fetchArticles(); // Refresh list
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || "Failed to delete article");
+    } finally {
+      setArticleToDelete(null);
+    }
+  };
+
   const formatStatus = (status: string) => {
     return status
       .split('_')
@@ -128,13 +197,13 @@ export default function AdminArticlesPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
               <h1 className="text-3xl font-bold text-primary">Manage Articles</h1>
               <p className="mt-1 text-gray-600">View and manage all article submissions</p>
             </div>
-            <Link href="/editor" className="btn-secondary">
-              ← Back to Dashboard
+            <Link href="/editor" className="inline-flex items-center px-4 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-all active:scale-95 shadow-sm">
+              ← Back
             </Link>
           </div>
         </div>
@@ -279,13 +348,31 @@ export default function AdminArticlesPage() {
                     <td className="px-6 py-4 text-sm text-gray-900">
                       {article.reviews?.length || 0}
                     </td>
-                    <td className="px-6 py-4 text-sm">
-                      <Link
-                        href={`/editor/articles/${article.id}`}
-                        className="text-primary hover:text-primary/80 font-semibold"
-                      >
-                        View →
-                      </Link>
+                    <td className="px-6 py-4 text-sm whitespace-nowrap">
+                      <div className="flex items-center gap-3">
+                        <Link
+                          href={`/editor/articles/${article.id}`}
+                          className="text-primary hover:text-primary/80 font-semibold"
+                        >
+                          View →
+                        </Link>
+                        {(currentUser?.role === 'mother_admin' || (currentUser?.role === 'super_admin' && !article.doi)) && (
+                          <button
+                            onClick={() => handleEditClick(article)}
+                            className="text-indigo-600 hover:text-indigo-800 font-semibold cursor-pointer"
+                          >
+                            Edit
+                          </button>
+                        )}
+                        {currentUser?.role === 'mother_admin' && (
+                          <button
+                            onClick={() => handleDeleteClick(article.id)}
+                            className="text-red-600 hover:text-red-800 font-semibold cursor-pointer"
+                          >
+                            Delete
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                   );
@@ -356,6 +443,19 @@ export default function AdminArticlesPage() {
             </div>
           </div>
         )}
+        <ConfirmModal
+          isOpen={deleteModalOpen}
+          onClose={() => {
+            setDeleteModalOpen(false);
+            setArticleToDelete(null);
+          }}
+          onConfirm={handleConfirmDelete}
+          title="Delete Article"
+          message="Are you sure you want to delete this article? This action cannot be undone."
+          confirmLabel="Yes, Delete"
+          cancelLabel="No"
+          isDestructive={true}
+        />
       </div>
     </div>
   );

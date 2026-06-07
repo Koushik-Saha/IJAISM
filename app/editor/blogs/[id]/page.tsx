@@ -207,12 +207,10 @@ export default function BlogReviewPage() {
             {/* Header */}
             <header className="bg-white border-b sticky top-0 z-20">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div className="flex items-center gap-4">
-                            <Link href="/editor/blogs" className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
-                                </svg>
+                            <Link href="/editor/blogs" className="inline-flex items-center px-4 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-all active:scale-95 shadow-sm">
+                                ← Back
                             </Link>
                             <div>
                                 <h1 className="text-xl font-bold text-gray-900 truncate max-w-md">{blog.title}</h1>

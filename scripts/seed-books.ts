@@ -71,7 +71,7 @@ const authors = [
 ];
 
 const publishers = [
-    "IJAISM Press",
+    "C5K Press",
     "TechPublishing",
     "Academic World",
     "Future Books",

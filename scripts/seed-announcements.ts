@@ -52,9 +52,9 @@ const announcements = [
     thumbnailUrl: "https://images.unsplash.com/photo-1544531586-fde5298cdd40?auto=format&fit=crop&q=80&w=800"
   },
   {
-    title: "IJAISM Research Scholarship Program Announced",
+    title: "C5K Publications Research Scholarship Program Announced",
     content: `
-      <p>IJAISM is proud to launch a new scholarship program supporting doctoral researchers in information technology and business management.</p>
+      <p>C5K Publications is proud to launch a new scholarship program supporting doctoral researchers in information technology and business management.</p>
       <p>This initiative underscores our commitment to fostering the next generation of scholars. The scholarship provides financial support and mentorship opportunities to outstanding PhD candidates.</p>
       <h3>Eligibility Criteria</h3>
       <ul>
@@ -66,9 +66,9 @@ const announcements = [
     `,
     category: "Scholarship",
     priority: 2, // High
-    excerpt: "IJAISM is proud to launch a new scholarship program supporting doctoral researchers in information technology and business management. Applications open February 1, 2024.",
+    excerpt: "C5K Publications is proud to launch a new scholarship program supporting doctoral researchers in information technology and business management. Applications open February 1, 2024.",
     publishedAt: new Date("2024-01-05"),
-    author: "IJAISM Grants Commitee",
+    author: "C5K Grants Committee",
     isFeatured: false,
     thumbnailUrl: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&q=80&w=800"
   },
@@ -83,20 +83,20 @@ const announcements = [
     priority: 1, // Medium
     excerpt: "We have updated our author guidelines to include new formatting requirements and best practices. All authors should review the updated guidelines before submission.",
     publishedAt: new Date("2024-01-03"),
-    author: "IJAISM Admin",
+    author: "C5K Admin",
     isFeatured: false,
     thumbnailUrl: "https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&q=80&w=800"
   },
   {
     title: "New Editorial Board Members Appointed",
     content: `
-      <p>IJAISM welcomes five distinguished researchers to our editorial boards across multiple journals, strengthening our commitment to academic excellence.</p>
+      <p>C5K Publications welcomes five distinguished researchers to our editorial boards across multiple journals, strengthening our commitment to academic excellence.</p>
       <p>These new members bring a wealth of experience and expertise in their respective fields. We look forward to their contributions in maintaining the high standards of our publications.</p>
-      <p>Join us in welcoming them to the IJAISM family!</p>
+      <p>Join us in welcoming them to the C5K family!</p>
     `,
     category: "Editorial",
     priority: 1, // Medium
-    excerpt: "IJAISM welcomes five distinguished researchers to our editorial boards across multiple journals, strengthening our commitment to academic excellence.",
+    excerpt: "C5K Publications welcomes five distinguished researchers to our editorial boards across multiple journals, strengthening our commitment to academic excellence.",
     publishedAt: new Date("2023-12-28"),
     author: "Editor-in-Chief",
     isFeatured: false,
@@ -119,7 +119,7 @@ const announcements = [
     thumbnailUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800"
   },
   {
-    title: "IJAISM Platform Update: Enhanced Features",
+    title: "C5K Platform Update: Enhanced Features",
     content: `
       <p>Our platform has been updated with new features including improved manuscript tracking, enhanced reviewer dashboard, and mobile responsiveness.</p>
       <p>We are constantly working to improve the user experience for our authors, reviewers, and readers. These updates are part of our ongoing efforts to provide a state-of-the-art publishing platform.</p>
@@ -136,14 +136,14 @@ const announcements = [
   {
     title: "Partnership with Leading Universities",
     content: `
-      <p>IJAISM announces strategic partnerships with Stanford, MIT, and Oxford to promote open access research and collaborative publishing initiatives.</p>
+      <p>C5K Publications announces strategic partnerships with Stanford, MIT, and Oxford to promote open access research and collaborative publishing initiatives.</p>
       <p>These partnerships will facilitate knowledge exchange and joint research projects. We are excited about the opportunities this collaboration brings to the global research community.</p>
     `,
     category: "Partnership",
     priority: 1, // Medium
-    excerpt: "IJAISM announces strategic partnerships with Stanford, MIT, and Oxford to promote open access research and collaborative publishing initiatives.",
+    excerpt: "C5K Publications announces strategic partnerships with Stanford, MIT, and Oxford to promote open access research and collaborative publishing initiatives.",
     publishedAt: new Date("2023-12-10"),
-    author: "IJAISM Board",
+    author: "C5K Board",
     isFeatured: true,
     thumbnailUrl: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&q=80&w=800"
   }

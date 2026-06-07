@@ -1,6 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 152 152" width="152" height="152">
-  <rect width="152" height="152" fill="#1a365d" rx="15"/>
-  <text x="76" y="82" font-family="Georgia, serif" font-size="42" font-weight="bold" fill="#ffffff" text-anchor="middle">IJAISM</text>
-  <text x="76" y="110" font-family="Georgia, serif" font-size="12" fill="#e5e7eb" text-anchor="middle">Advanced Info Systems</text>
+<svg width="152" height="152" viewBox="0 0 152 152" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="152" height="152" fill="#1a365d"/>
+
+  <!-- C5K Text -->
+  <text
+    x="76"
+    y="76"
+    font-family="Georgia, serif"
+    font-size="45.6"
+    font-weight="bold"
+    fill="#ffffff"
+    text-anchor="middle"
+    dominant-baseline="central"
+  >C5K</text>
 </svg>

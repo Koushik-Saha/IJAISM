@@ -445,7 +445,7 @@ model Announcement {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   deletedAt    DateTime?
-  author       String?   @default("IJAISM Admin")
+  author       String?   @default("C5K Admin")
 
   @@index([category])
   @@index([isFeatured])

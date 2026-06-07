@@ -19,7 +19,7 @@ sizes.forEach(size => {
   <!-- Background -->
   <rect width="${size}" height="${size}" fill="#1a365d"/>
 
-  <!-- IJAISM Text -->
+  <!-- C5K Text -->
   <text
     x="${size / 2}"
     y="${size / 2}"
@@ -29,7 +29,7 @@ sizes.forEach(size => {
     fill="#ffffff"
     text-anchor="middle"
     dominant-baseline="central"
-  >IJAISM</text>
+  >C5K</text>
 </svg>`;
 
   const filename = `icon-${size}x${size}.svg`;

@@ -21,7 +21,6 @@ export async function GET(req: NextRequest) {
       where: { id: decoded.userId },
       select: {
         role: true,
-        managedJournals: { select: { id: true } }
       },
     });
 
@@ -39,45 +38,75 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20');
     const skip = (page - 1) * limit;
 
-    // RBAC: Editors can only see articles for their managed journals
-    const managedJournalIds = user.managedJournals.map(j => j.id);
+    // Fetch EIC journals if editor
+    let eicJournalIds: string[] = [];
+    if (user.role === 'editor') {
+      const eicJournals = await prisma.journalEditor.findMany({
+        where: {
+          userId: decoded.userId,
+          role: "editor_in_chief"
+        },
+        select: { journalId: true }
+      });
+      eicJournalIds = eicJournals.map(j => j.journalId);
+    }
 
     // Build where clause
-    const where: any = { deletedAt: null };
-
-    // Apply Search Filter
-    if (search) {
-      where.OR = [
-        { title: { contains: search, mode: 'insensitive' } },
-        { doi: { contains: search, mode: 'insensitive' } },
-        { author: { name: { contains: search, mode: 'insensitive' } } },
-      ];
-    }
+    const where: any = {
+      deletedAt: null,
+      NOT: {
+        articleType: { in: ['book', 'dissertation'] }
+      }
+    };
 
     // Apply RBAC Filter
     if (user.role === 'editor') {
-      if (managedJournalIds.length === 0) {
-        // Editor with no journals sees nothing
-        return NextResponse.json({
-          success: true,
-          articles: [],
-          pagination: { page, limit, total: 0, pages: 0 }
-        });
+      const accessConditions = {
+        OR: [
+          { journalId: { in: eicJournalIds } },
+          { editors: { some: { userId: decoded.userId } } }
+        ]
+      };
+      
+      if (search) {
+        where.AND = [
+          accessConditions,
+          {
+            OR: [
+              { title: { contains: search, mode: 'insensitive' } },
+              { doi: { contains: search, mode: 'insensitive' } },
+              { author: { name: { contains: search, mode: 'insensitive' } } },
+            ]
+          }
+        ];
+      } else {
+        where.AND = [accessConditions];
       }
-      where.journalId = { in: managedJournalIds };
+    } else {
+      if (search) {
+        where.OR = [
+          { title: { contains: search, mode: 'insensitive' } },
+          { doi: { contains: search, mode: 'insensitive' } },
+          { author: { name: { contains: search, mode: 'insensitive' } } },
+        ];
+      }
     }
 
     // If ID is provided, return single article (WITH RBAC CHECK)
     if (id) {
-      // If editor, we must ensure the article belongs to one of their journals.
-      // We can add journalId: { in: managedJournalIds } to the query or check after.
-      // Adding to query is safer.
       const singleArticleWhere: any = { id, deletedAt: null };
       if (user.role === 'editor') {
-        singleArticleWhere.journalId = { in: managedJournalIds };
+        singleArticleWhere.AND = [
+          {
+            OR: [
+              { journalId: { in: eicJournalIds } },
+              { editors: { some: { userId: decoded.userId } } }
+            ]
+          }
+        ];
       }
 
-      const article = await prisma.article.findUnique({
+      const article = await prisma.article.findFirst({
         where: singleArticleWhere,
         include: {
           author: {
@@ -88,6 +117,13 @@ export async function GET(req: NextRequest) {
           },
           coAuthors: {
             orderBy: { order: 'asc' },
+          },
+          editors: {
+            include: {
+              user: {
+                select: { id: true, name: true, email: true, university: true }
+              }
+            }
           },
           reviews: {
             include: {
@@ -145,6 +181,13 @@ export async function GET(req: NextRequest) {
           },
           journal: {
             select: { id: true, fullName: true, code: true },
+          },
+          editors: {
+            include: {
+              user: {
+                select: { id: true, name: true, email: true, university: true }
+              }
+            }
           },
           reviews: {
             include: {

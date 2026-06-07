@@ -4,7 +4,10 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 import ArticleAccessButtons from "@/components/articles/ArticleAccessButtons";
+import AuthorsManager from "@/components/articles/AuthorsManager";
+import { getArticleAuthors } from "@/lib/articles/authors";
 
 interface Article {
   id: string;
@@ -69,6 +72,19 @@ interface Article {
       role: string;
     }
   }>;
+  editors?: Array<{
+    id: string;
+    articleId: string;
+    userId: string;
+    comments?: string | null;
+    updatedAt: string;
+    user: {
+      id: string;
+      name: string;
+      email: string;
+      university: string;
+    };
+  }>;
 }
 
 export default function AdminArticleDetailPage() {
@@ -86,6 +102,7 @@ export default function AdminArticleDetailPage() {
   const [decisionComments, setDecisionComments] = useState('');
   const [isSubmittingDecision, setIsSubmittingDecision] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   // Issue Assignment State
   const [availableIssues, setAvailableIssues] = useState<any[]>([]);
@@ -112,6 +129,169 @@ export default function AdminArticleDetailPage() {
   const [isEditingArticleId, setIsEditingArticleId] = useState(false);
   const [editedArticleId, setEditedArticleId] = useState('');
   const [isUpdatingArticleId, setIsUpdatingArticleId] = useState(false);
+  const [isEditingAuthors, setIsEditingAuthors] = useState(false);
+  const [editedAuthors, setEditedAuthors] = useState<any[]>([]);
+  const [isSavingAuthors, setIsSavingAuthors] = useState(false);
+  const [authorErrors, setAuthorErrors] = useState<Record<string, string>>({});
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [isUpdatingArticle, setIsUpdatingArticle] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    title: "",
+    abstract: "",
+    keywords: "",
+    articleType: "",
+    journalId: "",
+    volume: "",
+    issue: "",
+    status: "",
+    language: "en",
+    isOpenAccess: true,
+    pdfUrl: "",
+  });
+
+  const [journalEditors, setJournalEditors] = useState<any[]>([]);
+  const [journalEditorialBoard, setJournalEditorialBoard] = useState<any[]>([]);
+  const [isSavingArticleEditors, setIsSavingArticleEditors] = useState(false);
+  const [editorSearch, setEditorSearch] = useState('');
+  const [pendingEditorIds, setPendingEditorIds] = useState<string[]>([]);
+  const [evaluationComment, setEvaluationComment] = useState('');
+  const [isSavingComment, setIsSavingComment] = useState(false);
+
+  const openEditModal = () => {
+    if (!article) return;
+    setEditFormData({
+      title: article.title || "",
+      abstract: article.abstract || "",
+      keywords: Array.isArray(article.keywords) ? article.keywords.join(", ") : (article.keywords || ""),
+      articleType: article.articleType || "Research Article",
+      journalId: article.journalId || "",
+      volume: article.volume !== null && article.volume !== undefined ? String(article.volume) : "",
+      issue: article.issue !== null && article.issue !== undefined ? String(article.issue) : "",
+      status: article.status || "submitted",
+      language: article.language || "en",
+      isOpenAccess: article.isOpenAccess ?? true,
+      pdfUrl: article.pdfUrl || "",
+    });
+    setShowEditModal(true);
+  };
+
+  const handleDeleteArticle = () => {
+    setDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/editor/articles/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to delete article");
+      }
+
+      toast.success("Article deleted successfully");
+      router.push('/editor/articles');
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || "Failed to delete article");
+    }
+  };
+
+  const handleUpdateArticle = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsUpdatingArticle(true);
+    try {
+      const token = localStorage.getItem('token');
+      const volumeVal = editFormData.volume.trim() ? parseInt(editFormData.volume) : null;
+      const issueVal = editFormData.issue.trim() ? parseInt(editFormData.issue) : null;
+      const keywordsArray = editFormData.keywords.split(",").map(k => k.trim()).filter(Boolean);
+
+      const response = await fetch(`/api/editor/articles/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          title: editFormData.title,
+          abstract: editFormData.abstract,
+          keywords: keywordsArray,
+          articleType: editFormData.articleType,
+          journalId: editFormData.journalId,
+          volume: volumeVal,
+          issue: issueVal,
+          status: editFormData.status,
+          language: editFormData.language,
+          isOpenAccess: editFormData.isOpenAccess,
+          pdfUrl: editFormData.pdfUrl,
+        })
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Failed to update article");
+
+      toast.success("Article updated successfully");
+      setShowEditModal(false);
+      fetchArticle();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update article");
+    } finally {
+      setIsUpdatingArticle(false);
+    }
+  };
+
+  const startEditingAuthors = () => {
+    if (!article) return;
+    const resolved = getArticleAuthors({
+      author: article.author as any,
+      coAuthors: article.coAuthors || []
+    });
+    setEditedAuthors(resolved.map(a => ({
+      name: a.name,
+      email: a.email || '',
+      university: a.affiliation || '',
+      isMain: a.isMain,
+      order: a.order
+    })));
+    setIsEditingAuthors(true);
+  };
+
+  const handleSaveAuthors = async () => {
+    setAuthorErrors({});
+    setIsSavingAuthors(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/articles/${id}/authors`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ authors: editedAuthors })
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        if (data.error?.details && data.error.code === 'VALIDATION_ERROR') {
+          setAuthorErrors(data.error.details);
+        }
+        throw new Error(data.error?.message || data.error || 'Failed to update authors');
+      }
+
+      toast.success('Authors updated successfully');
+      setIsEditingAuthors(false);
+      fetchArticle();
+    } catch (e: any) {
+      toast.error(e.message || 'Failed to update authors');
+    } finally {
+      setIsSavingAuthors(false);
+    }
+  };
 
   useEffect(() => {
     if (id) {
@@ -120,6 +300,21 @@ export default function AdminArticleDetailPage() {
       fetchCurrentUser();
     }
   }, [id]);
+
+  useEffect(() => {
+    if (article?.journalId) {
+      fetchJournalEditors();
+    }
+  }, [article?.journalId, currentUser]);
+
+  useEffect(() => {
+    if (article && currentUser) {
+      const myAssignment = article.editors?.find((e: any) => e.userId === currentUser.id);
+      if (myAssignment) {
+        setEvaluationComment(myAssignment.comments || '');
+      }
+    }
+  }, [article, currentUser]);
 
   const handleCreateIssue = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -333,6 +528,47 @@ export default function AdminArticleDetailPage() {
     }
   };
 
+  const fetchJournalEditors = async () => {
+    if (!article?.journalId) return;
+    try {
+      const token = localStorage.getItem('token');
+      const isSuperOrMother = currentUser && ['super_admin', 'mother_admin'].includes(currentUser.role);
+      
+      // Fetch the journal's actual editorial board to display roles accurately
+      const boardRes = await fetch(`/api/editor/journals/${article.journalId}/editors`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (boardRes.ok) {
+        const boardData = await boardRes.json();
+        setJournalEditorialBoard(boardData.editors || []);
+      }
+
+      const url = isSuperOrMother
+        ? `/api/editor/users?role=editor&limit=100`
+        : `/api/editor/journals/${article.journalId}/editors`;
+
+      const response = await fetch(url, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (isSuperOrMother) {
+          const systemEditors = (data.users || []).map((u: any) => ({
+            id: u.id,
+            userId: u.id,
+            role: 'editor',
+            user: u
+          }));
+          setJournalEditors(systemEditors);
+        } else {
+          setJournalEditors(data.editors || []);
+        }
+      }
+    } catch (e) {
+      console.error("Failed to fetch journal editors", e);
+    }
+  };
+
   const fetchReviewers = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -535,6 +771,11 @@ export default function AdminArticleDetailPage() {
     return statusMap[status] || status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   };
 
+  const isUserEic = journalEditors.some(
+    je => je.userId === currentUser?.id && je.role === 'editor_in_chief'
+  );
+  const canMakeDecision = ['super_admin', 'mother_admin'].includes(currentUser?.role) || isUserEic;
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -546,9 +787,11 @@ export default function AdminArticleDetailPage() {
   if (!article) {
     return (
       <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-7xl mx-auto px-4">
+        <div className="max-w-7xl mx-auto px-4 space-y-4">
           <p className="text-red-600">Article not found</p>
-          <Link href="/editor/articles" className="text-primary">← Back to Articles</Link>
+          <Link href="/editor/articles" className="inline-flex items-center px-4 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-all active:scale-95 shadow-sm">
+            ← Back
+          </Link>
         </div>
       </div>
     );
@@ -558,14 +801,42 @@ export default function AdminArticleDetailPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div>
-            <Link href="/editor/articles" className="text-primary hover:text-primary/80 font-semibold mb-4 inline-block">
-              ← Back to Articles
+      <div className="bg-white border-b shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-3">
+            <Link
+              href="/editor/articles"
+              className="inline-flex items-center px-4 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-all active:scale-95 shadow-sm"
+            >
+              ← Back
             </Link>
-            <h1 className="text-3xl font-bold text-primary">{article.title}</h1>
+            <div className="flex items-center gap-2">
+              {(currentUser?.role === 'mother_admin' || (currentUser?.role === 'super_admin' && !article.doi)) && (
+                <Link
+                  href={`/editor/articles/${article.id}/edit`}
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg shadow-sm text-white bg-accent hover:bg-accent-dark focus:outline-none transition-colors shrink-0"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                  Edit Article
+                </Link>
+              )}
+              {currentUser?.role === 'mother_admin' && (
+                <button
+                  onClick={handleDeleteArticle}
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none transition-colors shrink-0 cursor-pointer"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  Delete Article
+                </button>
+              )}
+            </div>
           </div>
+          {/* Title row */}
+          <h1 className="text-2xl lg:text-3xl font-bold text-primary leading-snug">{article.title}</h1>
         </div>
       </div>
 
@@ -642,33 +913,67 @@ export default function AdminArticleDetailPage() {
                 </div>
 
                 <div className="border-t pt-3">
-                  <p className="text-xs text-gray-500 uppercase font-semibold mb-1">Main Author</p>
-                  <p className="font-semibold text-gray-800">{article.author.name}</p>
-                  <p className="text-sm text-gray-500">{article.author.email}</p>
-                  {article.author.university && (
-                    <p className="text-xs text-gray-400">{article.author.university}</p>
-                  )}
-                </div>
+                  <div className="flex justify-between items-center mb-2">
+                    <p className="text-xs text-gray-500 uppercase font-semibold">Authors & Sequence</p>
+                    {((!article.doi && article.status !== 'published') ||
+                      currentUser?.role === 'mother_admin' ||
+                      (currentUser?.role === 'super_admin' && !article.doi)) && !isEditingAuthors && (
+                      <button
+                        onClick={startEditingAuthors}
+                        className="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold px-2.5 py-1 rounded transition-colors"
+                      >
+                        Edit Authors
+                      </button>
+                    )}
+                  </div>
 
-                {article.coAuthors && article.coAuthors.length > 0 && (
-                  <div className="border-t pt-3">
-                    <p className="text-xs text-gray-500 uppercase font-semibold mb-2">Co-Authors ({article.coAuthors.length})</p>
-                    <div className="space-y-2">
-                      {article.coAuthors.map((ca, i) => (
-                        <div key={ca.id} className="flex items-start gap-2">
-                          <span className="text-xs text-gray-400 w-4 mt-0.5">{i + 1}.</span>
+                  {isEditingAuthors ? (
+                    <div className="space-y-4 mt-2">
+                      <AuthorsManager
+                        authors={editedAuthors}
+                        onChange={setEditedAuthors}
+                        validationErrors={authorErrors}
+                        isEditing={true}
+                      />
+                      <div className="flex justify-end gap-2 pt-3 border-t">
+                        <button
+                          onClick={() => setIsEditingAuthors(false)}
+                          disabled={isSavingAuthors}
+                          className="px-3 py-1.5 text-xs font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={handleSaveAuthors}
+                          disabled={isSavingAuthors}
+                          className="px-3 py-1.5 text-xs font-semibold text-white bg-primary hover:bg-primary/95 rounded transition-colors"
+                        >
+                          {isSavingAuthors ? 'Saving...' : 'Save Sequence'}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-2.5">
+                      {getArticleAuthors({
+                        author: article.author as any,
+                        coAuthors: article.coAuthors || []
+                      }).map((ca, i) => (
+                        <div key={i} className="flex items-start gap-2 bg-gray-50/50 p-2 rounded border border-gray-100 hover:bg-gray-50 transition-colors">
+                          <span className="text-xs text-gray-400 w-4 mt-0.5 font-semibold">{i + 1}.</span>
                           <div>
-                            <p className="text-sm font-medium text-gray-800">
+                            <p className="text-sm font-semibold text-gray-800">
                               {ca.name}
-                              {ca.isMain && <span className="ml-1 text-xs text-primary">(Main)</span>}
+                              {ca.isMain && <span className="ml-2 text-[10px] bg-green-100 text-green-800 font-bold px-1.5 py-0.5 rounded">Corresponding</span>}
+                              {i === 0 && <span className="ml-1.5 text-[10px] bg-indigo-100 text-indigo-800 font-bold px-1.5 py-0.5 rounded">First / Main</span>}
                             </p>
-                            {ca.university && <p className="text-xs text-gray-400">{ca.university}</p>}
+                            {ca.email && <p className="text-xs text-gray-500">{ca.email}</p>}
+                            {ca.affiliation && <p className="text-xs text-gray-400 mt-0.5">{ca.affiliation}</p>}
                           </div>
                         </div>
                       ))}
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
 
@@ -764,7 +1069,7 @@ export default function AdminArticleDetailPage() {
                         <span className="text-sm font-mono font-bold text-gray-900">
                           {article.doi ? article.doi.replace('https://doi.org/10.63471/', '') : '—'}
                         </span>
-                        {['mother_admin', 'super_admin'].includes(currentUser?.role) && (
+                        {(currentUser?.role === 'mother_admin' || (currentUser?.role === 'super_admin' && !article.doi)) && (
                           <button
                             onClick={() => {
                               setEditedArticleId(article.doi ? article.doi.replace('https://doi.org/10.63471/', '') : '');
@@ -826,7 +1131,7 @@ export default function AdminArticleDetailPage() {
                           <span className="text-sm text-gray-400">Not assigned</span>
                         )}
                         
-                        {['mother_admin', 'super_admin'].includes(currentUser?.role) && (
+                        {(currentUser?.role === 'mother_admin' || (currentUser?.role === 'super_admin' && !article.doi)) && (
                           <button
                             onClick={() => {
                               setEditedDOI(article.doi || '');
@@ -861,6 +1166,55 @@ export default function AdminArticleDetailPage() {
                   </span>
                 ))}
               </div>
+            </div>
+
+            {/* Assigned Paper Editors List */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                Assigned Editors
+              </h2>
+              {article.editors && article.editors.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {article.editors.map((editorObj: any) => {
+                    // Find editor role on the journal
+                    const boardMatch = journalEditorialBoard.find(boardJe => boardJe.userId === editorObj.userId);
+                    const rawRole = boardMatch?.role || 'editorial_board_member';
+                    const roleLabel =
+                      rawRole === 'editor_in_chief' ? 'Editor-in-Chief' :
+                      rawRole === 'assistant_editor' ? 'Assistant Editor' :
+                      rawRole === 'editorial_board_member' ? 'Editorial Board Member' :
+                      'Editor';
+
+                    return (
+                      <div key={editorObj.id} className="flex items-center gap-4 p-4 border border-gray-100 rounded-xl bg-gray-50/50 hover:bg-indigo-50/20 hover:border-indigo-100 transition-all">
+                        {/* Avatar */}
+                        <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm shrink-0 border border-indigo-200">
+                          {(editorObj.user?.name || 'E').charAt(0).toUpperCase()}
+                        </div>
+                        {/* Info */}
+                        <div className="min-w-0 flex-1">
+                          <p className="font-bold text-gray-800 text-sm truncate">{editorObj.user?.name}</p>
+                          <p className="text-xs text-gray-500 truncate">{editorObj.user?.email}</p>
+                          <div className="mt-1">
+                            <span className={`inline-flex items-center text-xs px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+                              rawRole === 'editor_in_chief' ? 'bg-amber-100 text-amber-800 border border-amber-200' :
+                              rawRole === 'assistant_editor' ? 'bg-teal-100 text-teal-800 border border-teal-200' :
+                              'bg-indigo-100 text-indigo-800 border border-indigo-200'
+                            }`}>
+                              {roleLabel}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-gray-500 text-sm">No editors assigned to this paper yet.</p>
+              )}
             </div>
 
             {/* Reviewers List */}
@@ -958,6 +1312,208 @@ export default function AdminArticleDetailPage() {
 
           {/* Sidebar */}
           <div className="lg:col-span-1 space-y-6">
+
+            {/* ── Assign Paper Editors Card (top of sidebar) ── */}
+            {(['super_admin', 'mother_admin'].includes(currentUser?.role) || journalEditors.some(je => je.userId === currentUser?.id && je.role === 'editor_in_chief')) && (() => {
+              const isSuperOrMother = ['super_admin', 'mother_admin'].includes(currentUser?.role);
+              const isJournalEic = journalEditors.some(je => je.userId === currentUser?.id && je.role === 'editor_in_chief');
+              const searchTerm = editorSearch.toLowerCase().trim();
+
+              const filteredEditors = journalEditors.filter(je => {
+                const matchesSearch = !searchTerm ||
+                  (je.user.name || '').toLowerCase().includes(searchTerm) ||
+                  (je.user.email || '').toLowerCase().includes(searchTerm);
+                if (!matchesSearch) return false;
+                if (isSuperOrMother) return true;
+                if (isJournalEic) {
+                  return je.role === 'assistant_editor' || je.role === 'editorial_board_member';
+                }
+                return false;
+              });
+
+              const eicEditors = journalEditors.filter(je => je.role === 'editor_in_chief');
+              
+              // Always sort EIC/Editorial Chiefs to the top
+              const sortedEditors = [...filteredEditors].sort((a, b) => {
+                const aIsEic = a.role === 'editor_in_chief';
+                const bIsEic = b.role === 'editor_in_chief';
+                if (aIsEic && !bIsEic) return -1;
+                if (!aIsEic && bIsEic) return 1;
+                return 0;
+              });
+
+              // Show only 3 editors when not searching, show all matches when searching
+              const displayedEditors = searchTerm === "" ? sortedEditors.slice(0, 3) : sortedEditors;
+              const assignedIds = article.editors?.map((e: any) => e.userId) || [];
+
+              const handleSaveEditors = async () => {
+                setIsSavingArticleEditors(true);
+                try {
+                  const token = localStorage.getItem('token');
+                  const finalUserIds = [
+                    ...assignedIds.filter((id: string) => !pendingEditorIds.includes(id)),
+                    ...pendingEditorIds.filter((id: string) => !assignedIds.includes(id))
+                  ];
+                  const res = await fetch(`/api/editor/articles/${article.id}/assign-editors`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userIds: finalUserIds })
+                  });
+                  if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'Failed'); }
+                  toast.success('Editor assignments updated');
+                  setPendingEditorIds([]);
+                  fetchArticle();
+                } catch (err: any) {
+                  toast.error(err.message);
+                } finally {
+                  setIsSavingArticleEditors(false);
+                }
+              };
+
+              return (
+                <>
+                  <div className="bg-white rounded-lg shadow-md p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-bold text-gray-800 text-lg">Assign Paper Editors</h3>
+                      {assignedIds.length > 0 && (
+                        <span className="text-xs bg-indigo-50 text-indigo-700 px-2 py-1 rounded-full border border-indigo-200 font-semibold">
+                          {assignedIds.length} assigned
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Search */}
+                    <div className="relative mb-3">
+                      <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                      <input
+                        type="text"
+                        placeholder="Search by name or email..."
+                        value={editorSearch}
+                        onChange={e => setEditorSearch(e.target.value)}
+                        className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-transparent bg-gray-50 placeholder-gray-400"
+                      />
+                    </div>
+
+                    {/* Editor cards */}
+                    <div className="space-y-2 mb-4">
+                      {displayedEditors.length === 0 ? (
+                        <p className="text-gray-400 text-center py-6 text-sm">No editors found.</p>
+                      ) : displayedEditors.map((je) => {
+                        const isAlreadyAssigned = assignedIds.includes(je.userId);
+                        const isPending = pendingEditorIds.includes(je.userId);
+                        // toggle: pending overrides assigned when present
+                        const isChecked = isPending ? !isAlreadyAssigned : isAlreadyAssigned;
+
+                        const boardMatch = journalEditorialBoard.find(boardJe => boardJe.userId === je.userId);
+                        const displayRole = boardMatch ? boardMatch.role : je.role;
+
+                        const roleLabel =
+                          displayRole === 'editor_in_chief' ? 'Editor-in-Chief' :
+                          displayRole === 'assistant_editor' ? 'Assistant Editor' :
+                          'Editorial Board Member';
+
+                        return (
+                          <button
+                            key={je.id}
+                            type="button"
+                            onClick={() => {
+                              setPendingEditorIds(prev => {
+                                if (prev.includes(je.userId)) return prev.filter(id => id !== je.userId);
+                                return [...prev, je.userId];
+                              });
+                            }}
+                            className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
+                              isChecked
+                                ? 'border-indigo-500 bg-indigo-50 shadow-sm'
+                                : 'border-gray-100 bg-gray-50 hover:border-gray-300 hover:bg-white'
+                            }`}
+                          >
+                            {/* Custom Checkbox */}
+                            <div className={`shrink-0 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${
+                              isChecked ? 'bg-indigo-600 border-indigo-600' : 'border-gray-300 bg-white'
+                            }`}>
+                              {isChecked && (
+                                <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                </svg>
+                              )}
+                            </div>
+
+                            {/* Avatar */}
+                            <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                              isChecked ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-600'
+                            }`}>
+                              {(je.user.name || 'E').charAt(0).toUpperCase()}
+                            </div>
+
+                            {/* Info */}
+                            <div className="flex-1 min-w-0">
+                              <p className={`text-sm font-semibold truncate ${isChecked ? 'text-gray-900' : 'text-gray-700'}`}>
+                                {je.user.name}
+                              </p>
+                              <p className="text-xs text-gray-500 truncate">{roleLabel}</p>
+                            </div>
+
+                            {/* Saved badge */}
+                            {isAlreadyAssigned && !isPending && (
+                              <span className="text-xs font-semibold text-indigo-500 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded shrink-0">
+                                Assigned
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Selection summary */}
+                    {pendingEditorIds.length > 0 && (
+                      <div className="flex items-center gap-2 bg-indigo-50 border border-indigo-100 rounded-lg px-3 py-2 mb-3">
+                        <div className="w-5 h-5 bg-indigo-600 rounded-full flex items-center justify-center shrink-0">
+                          <span className="text-white text-xs font-bold">{pendingEditorIds.length}</span>
+                        </div>
+                        <p className="text-sm text-indigo-700 font-medium">
+                          {pendingEditorIds.length} change{pendingEditorIds.length !== 1 ? 's' : ''} pending
+                        </p>
+                      </div>
+                    )}
+
+                    <button
+                      onClick={handleSaveEditors}
+                      disabled={pendingEditorIds.length === 0 || isSavingArticleEditors}
+                      className="w-full bg-indigo-600 text-white py-2.5 px-4 rounded-xl font-semibold hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {isSavingArticleEditors ? 'Saving…' : 'Assign Editors'}
+                    </button>
+                  </div>
+
+                  {/* Journal Editorial Chief Display */}
+                  <div className="bg-[#1e293b] text-white rounded-lg shadow-md p-4 mt-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-xs font-black uppercase tracking-widest text-[#38bdf8]">Journal Editorial Chief</span>
+                    </div>
+                    {eicEditors.length === 0 ? (
+                      <p className="text-xs text-slate-400 italic">No Editorial Chief assigned to this journal.</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {eicEditors.map((eic: any) => (
+                          <div key={eic.id} className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-sky-500 text-white flex items-center justify-center font-bold text-xs shrink-0">
+                              {(eic.user.name || 'E').charAt(0).toUpperCase()}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-sm font-bold text-white truncate">{eic.user.name}</p>
+                              <p className="text-xs text-slate-400 truncate">{eic.user.email}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </>
+              );
+            })()}
 
             {/* Assign to Issue Card */}
             <div className="bg-white rounded-lg shadow-md p-6">
@@ -1217,80 +1773,156 @@ export default function AdminArticleDetailPage() {
 
 
 
-            {/* Editor Decision */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-bold mb-4">Make Decision</h2>
-              <div className="space-y-3">
+            {/* Assign Editors Card moved to top of sidebar ↑ */}
 
-                {/* Accept Button (Only if not already accepted/published) */}
-                {article.status !== 'accepted' && article.status !== 'published' && (!article.isApcPaid || currentUser?.role === 'mother_admin') && (
+            {/* Editor Evaluation Box */}
+            {article.editors?.some((e: any) => e.userId === currentUser?.id) && (
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <h3 className="font-bold text-gray-800 mb-4 text-lg">My Evaluation Comments</h3>
+                <div className="space-y-3">
+                  <textarea
+                    rows={4}
+                    placeholder="Enter your internal evaluation comments and notes for this article..."
+                    value={evaluationComment}
+                    onChange={(e) => setEvaluationComment(e.target.value)}
+                    className="w-full border rounded-lg p-2.5 text-sm focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 placeholder-gray-400"
+                  />
                   <button
-                    className="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-bold hover:bg-green-700 transition"
-                    onClick={() => openDecisionModal('accept')}
+                    onClick={async () => {
+                      setIsSavingComment(true);
+                      try {
+                        const token = localStorage.getItem('token');
+                        const res = await fetch(`/api/editor/articles/${article.id}/comments`, {
+                          method: 'PATCH',
+                          headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                          },
+                          body: JSON.stringify({ comments: evaluationComment })
+                        });
+                        if (!res.ok) {
+                          const errData = await res.json();
+                          throw new Error(errData.error || "Failed to save comment");
+                        }
+                        toast.success("Evaluation comment saved");
+                        fetchArticle();
+                      } catch (err: any) {
+                        toast.error(err.message);
+                      } finally {
+                        setIsSavingComment(false);
+                      }
+                    }}
+                    disabled={isSavingComment}
+                    className="w-full bg-indigo-600 text-white py-2 rounded-lg font-semibold hover:bg-indigo-700 disabled:opacity-50 text-sm"
                   >
-                    ✅ Accept Article
+                    {isSavingComment ? 'Saving Comment...' : 'Save Evaluation Comment'}
                   </button>
-                )}
-
-                {/* Post-Acceptance Actions */}
-                {(article.status === 'accepted' || article.status === 'proof_requested' || article.status === 'proof_resubmitted') && (
-                  <div className="space-y-2">
-                    {!article.isApcPaid && !['mother_admin', 'super_admin'].includes(currentUser?.role || '') ? (
-                      <div className="bg-yellow-50 p-3 rounded border border-yellow-200 text-sm text-yellow-800 mb-2">
-                        ⚠️ Authors must pay APC fee before you can proceed with publication workflow.
-                        <br />
-                        <span className="font-semibold">Payment Status: Pending</span>
-                      </div>
-                    ) : (
-                      (article as any).isApcPaid && (
-                        <div className="bg-green-50 p-2 rounded text-green-700 text-sm mb-2 font-bold">
-                          ✓ APC Fee Paid
-                        </div>
-                      )
-                    )}
-
-                    {/* Request Final Proofing - Available when paid */}
-                    {((article as any).isApcPaid || ['mother_admin', 'super_admin'].includes(currentUser?.role || '')) && (
-                      <button
-                        className="w-full bg-purple-600 text-white py-3 px-4 rounded-lg font-bold hover:bg-purple-700 transition"
-                        onClick={() => openDecisionModal('proof_requested')}
-                      >
-                        📝 Request Final Proofing
-                      </button>
-                    )}
-
-                    {/* Publish - Super Admin Only */}
-                    {['mother_admin', 'super_admin'].includes(currentUser?.role || '') && (
-                      <button
-                        className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-bold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                        onClick={() => openDecisionModal('publish')}
-                      >
-                        📢 Publish Article
-                        {!article.isApcPaid && " (Admin Bypass)"}
-                      </button>
-                    )}
-                  </div>
-                )}
-                
-                {/* Revise / Reject Buttons */}
-                {article.status !== 'published' && article.status !== 'rejected' && (!article.isApcPaid || currentUser?.role === 'mother_admin') && (
-                  <>
-                    <button
-                      className="w-full bg-yellow-500 text-white py-3 px-4 rounded-lg font-bold hover:bg-yellow-600 transition"
-                      onClick={() => openDecisionModal('revise')}
-                    >
-                      📝 Request Revision
-                    </button>
-                    <button
-                      className="w-full bg-red-600 text-white py-3 px-4 rounded-lg font-bold hover:bg-red-700 transition"
-                      onClick={() => openDecisionModal('reject')}
-                    >
-                      ❌ Reject Article
-                    </button>
-                  </>
-                )}
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* All Editors Comments (Visible to Admin and EIC) */}
+            {(['super_admin', 'mother_admin'].includes(currentUser?.role) || journalEditors.some(je => je.userId === currentUser?.id && je.role === 'editor_in_chief')) && (
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <h3 className="font-bold text-gray-800 mb-4 text-lg">Editorial Evaluation Comments</h3>
+                <div className="space-y-4">
+                  {article.editors && article.editors.filter((e: any) => e.comments).length > 0 ? (
+                    article.editors.filter((e: any) => e.comments).map((editorAssignment: any) => (
+                      <div key={editorAssignment.id} className="border-b border-gray-100 pb-3 last:border-0">
+                        <div className="flex justify-between items-start mb-1">
+                          <p className="font-semibold text-sm text-gray-900">{editorAssignment.user.name}</p>
+                          <span className="text-xs text-gray-400">
+                            {new Date(editorAssignment.updatedAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-700 bg-gray-50 rounded-lg p-3 whitespace-pre-wrap">
+                          {editorAssignment.comments}
+                        </p>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-gray-500 italic text-center py-2">No evaluation comments submitted by editors yet.</p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Editor Decision */}
+            {canMakeDecision && (
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <h2 className="text-xl font-bold mb-4">Make Decision</h2>
+                <div className="space-y-3">
+
+                  {/* Accept Button (Only if not already accepted/published) */}
+                  {article.status !== 'accepted' && article.status !== 'published' && (!article.isApcPaid || currentUser?.role === 'mother_admin') && (
+                    <button
+                      className="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-bold hover:bg-green-700 transition"
+                      onClick={() => openDecisionModal('accept')}
+                    >
+                      ✅ Accept Article
+                    </button>
+                  )}
+
+                  {/* Post-Acceptance Actions */}
+                  {(article.status === 'accepted' || article.status === 'proof_requested' || article.status === 'proof_resubmitted') && (
+                    <div className="space-y-2">
+                      {!article.isApcPaid && !['mother_admin', 'super_admin'].includes(currentUser?.role || '') ? (
+                        <div className="bg-yellow-50 p-3 rounded border border-yellow-200 text-sm text-yellow-800 mb-2">
+                          ⚠️ Authors must pay APC fee before you can proceed with publication workflow.
+                          <br />
+                          <span className="font-semibold">Payment Status: Pending</span>
+                        </div>
+                      ) : (
+                        (article as any).isApcPaid && (
+                          <div className="bg-green-50 p-2 rounded text-green-700 text-sm mb-2 font-bold">
+                            ✓ APC Fee Paid
+                          </div>
+                        )
+                      )}
+
+                      {/* Request Final Proofing - Available when paid */}
+                      {((article as any).isApcPaid || ['mother_admin', 'super_admin'].includes(currentUser?.role || '')) && (
+                        <button
+                          className="w-full bg-purple-600 text-white py-3 px-4 rounded-lg font-bold hover:bg-purple-700 transition"
+                          onClick={() => openDecisionModal('proof_requested')}
+                        >
+                          📝 Request Final Proofing
+                        </button>
+                      )}
+
+                      {/* Publish - Super Admin Only */}
+                      {['mother_admin', 'super_admin'].includes(currentUser?.role || '') && (
+                        <button
+                          className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-bold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                          onClick={() => openDecisionModal('publish')}
+                        >
+                          📢 Publish Article
+                          {!article.isApcPaid && " (Admin Bypass)"}
+                        </button>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Revise / Reject Buttons */}
+                  {article.status !== 'published' && article.status !== 'rejected' && (!article.isApcPaid || currentUser?.role === 'mother_admin') && (
+                    <>
+                      <button
+                        className="w-full bg-yellow-500 text-white py-3 px-4 rounded-lg font-bold hover:bg-yellow-600 transition"
+                        onClick={() => openDecisionModal('revise')}
+                      >
+                        📝 Request Revision
+                      </button>
+                      <button
+                        className="w-full bg-red-600 text-white py-3 px-4 rounded-lg font-bold hover:bg-red-700 transition"
+                        onClick={() => openDecisionModal('reject')}
+                      >
+                        ❌ Reject Article
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
 
           </div>
         </div>
@@ -1607,6 +2239,193 @@ export default function AdminArticleDetailPage() {
             </div>
           )
         }
+        {
+          showEditModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-y-auto">
+              <div className="bg-white rounded-xl max-w-2xl w-full p-6 shadow-2xl my-8">
+                <div className="flex justify-between items-center mb-4 border-b pb-3">
+                  <h3 className="text-xl font-bold text-gray-800">Edit Article Details</h3>
+                  <button
+                    onClick={() => setShowEditModal(false)}
+                    className="text-gray-400 hover:text-gray-600 font-bold text-lg"
+                  >
+                    ✕
+                  </button>
+                </div>
+                
+                <form onSubmit={handleUpdateArticle} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-600 uppercase mb-1">Title</label>
+                    <input
+                      type="text"
+                      required
+                      value={editFormData.title}
+                      onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
+                      className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-600 uppercase mb-1">Abstract</label>
+                    <textarea
+                      required
+                      rows={5}
+                      value={editFormData.abstract}
+                      onChange={(e) => setEditFormData({ ...editFormData, abstract: e.target.value })}
+                      className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-600 uppercase mb-1">Keywords (comma separated)</label>
+                      <input
+                        type="text"
+                        required
+                        value={editFormData.keywords}
+                        onChange={(e) => setEditFormData({ ...editFormData, keywords: e.target.value })}
+                        className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+                        placeholder="keyword1, keyword2, ..."
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-600 uppercase mb-1">Article Type</label>
+                      <select
+                        value={editFormData.articleType}
+                        onChange={(e) => setEditFormData({ ...editFormData, articleType: e.target.value })}
+                        className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none bg-white"
+                      >
+                        <option value="Research Article">Research Article</option>
+                        <option value="Review Article">Review Article</option>
+                        <option value="Case Report">Case Report</option>
+                        <option value="Review">Review</option>
+                        <option value="Mini Review">Mini Review</option>
+                        <option value="Communication">Communication</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-600 uppercase mb-1">Journal</label>
+                      <select
+                        required
+                        value={editFormData.journalId}
+                        onChange={(e) => setEditFormData({ ...editFormData, journalId: e.target.value })}
+                        className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none bg-white"
+                      >
+                        <option value="">Select Journal</option>
+                        {allJournals.map((j) => (
+                          <option key={j.id} value={j.id}>
+                            {j.code?.toUpperCase()} — {j.fullName?.substring(0, 20)}...
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-600 uppercase mb-1">Volume</label>
+                      <input
+                        type="number"
+                        value={editFormData.volume}
+                        onChange={(e) => setEditFormData({ ...editFormData, volume: e.target.value })}
+                        className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+                        placeholder="e.g. 1"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-600 uppercase mb-1">Issue</label>
+                      <input
+                        type="number"
+                        value={editFormData.issue}
+                        onChange={(e) => setEditFormData({ ...editFormData, issue: e.target.value })}
+                        className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+                        placeholder="e.g. 2"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-600 uppercase mb-1">Status</label>
+                      <select
+                        value={editFormData.status}
+                        onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })}
+                        className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none bg-white"
+                      >
+                        <option value="submitted">Submitted</option>
+                        <option value="under_review">Under Review</option>
+                        <option value="waiting_for_editor">Waiting for Editor</option>
+                        <option value="revision_requested">Revision Requested</option>
+                        <option value="accepted">Accepted</option>
+                        <option value="published">Published</option>
+                        <option value="rejected">Rejected</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-600 uppercase mb-1">Language</label>
+                      <input
+                        type="text"
+                        value={editFormData.language}
+                        onChange={(e) => setEditFormData({ ...editFormData, language: e.target.value })}
+                        className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+                        placeholder="en"
+                      />
+                    </div>
+                    <div className="flex items-center pt-6">
+                      <label className="inline-flex items-center cursor-pointer text-sm text-gray-700">
+                        <input
+                          type="checkbox"
+                          checked={editFormData.isOpenAccess}
+                          onChange={(e) => setEditFormData({ ...editFormData, isOpenAccess: e.target.checked })}
+                          className="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary"
+                        />
+                        <span className="ml-2 font-semibold select-none">Open Access</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-600 uppercase mb-1">PDF URL</label>
+                    <input
+                      type="text"
+                      value={editFormData.pdfUrl}
+                      onChange={(e) => setEditFormData({ ...editFormData, pdfUrl: e.target.value })}
+                      className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+                      placeholder="https://..."
+                    />
+                  </div>
+
+                  <div className="flex justify-end gap-2 pt-4 border-t mt-6">
+                    <button
+                      type="button"
+                      onClick={() => setShowEditModal(false)}
+                      className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 transition"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isUpdatingArticle}
+                      className="px-6 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/95 transition disabled:opacity-50"
+                    >
+                      {isUpdatingArticle ? "Saving..." : "Save Changes"}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )
+        }
+        <ConfirmModal
+          isOpen={deleteModalOpen}
+          onClose={() => setDeleteModalOpen(false)}
+          onConfirm={handleConfirmDelete}
+          title="Delete Article"
+          message="Are you sure you want to delete this article? This action cannot be undone."
+          confirmLabel="Yes, Delete"
+          cancelLabel="No"
+          isDestructive={true}
+        />
       </div >
     </div >
   );

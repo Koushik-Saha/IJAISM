@@ -29,6 +29,7 @@ export async function GET(req: NextRequest) {
 
         const { searchParams } = new URL(req.url);
         const search = searchParams.get('search') || searchParams.get('q');
+        const filterEditorId = searchParams.get('editorId');
 
         // 2. Fetch journals
         const where: any = { deletedAt: null };
@@ -39,6 +40,22 @@ export async function GET(req: NextRequest) {
                 { code: { contains: search, mode: 'insensitive' } },
                 { description: { contains: search, mode: 'insensitive' } },
             ];
+        }
+
+        if (filterEditorId) {
+            // Match journals where the user is either the legacy EIC or on the editorial board
+            where.OR = [
+                ...(where.OR || []),
+                { editorId: filterEditorId },
+                { editors: { some: { userId: filterEditorId } } },
+            ];
+            // When filtering by editor, override OR to only match editor conditions (no search mixing)
+            if (!search) {
+                where.OR = [
+                    { editorId: filterEditorId },
+                    { editors: { some: { userId: filterEditorId } } },
+                ];
+            }
         }
 
         if (user.role === 'editor') {
@@ -52,6 +69,13 @@ export async function GET(req: NextRequest) {
                 _count: {
                     select: { articles: true },
                 },
+                editors: {
+                    include: {
+                        user: {
+                            select: { id: true, name: true, email: true }
+                        }
+                    }
+                }
             },
         });
 

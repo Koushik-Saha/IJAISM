@@ -219,7 +219,7 @@ export default async function HomePage() {
                         <SafeJournalCover 
                             code={journal.code} 
                             coverImageUrl={journal.coverImageUrl} 
-                            className="h-48 w-full object-cover rounded mb-4"
+                            className="h-48 w-full object-contain bg-gray-50 rounded mb-4 border border-gray-100"
                             fallbackClassName="h-48 w-full bg-gradient-to-br from-primary-light to-primary rounded mb-4 flex items-center justify-center text-white text-3xl font-bold"
                         />
                         <h3 className="text-sm font-bold text-center">{journal.fullName}</h3>

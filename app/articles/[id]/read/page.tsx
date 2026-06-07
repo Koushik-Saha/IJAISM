@@ -7,6 +7,7 @@ import ArticleContentViewer from "@/components/articles/ArticleContentViewer";
 import ArticleCiteShare from "@/components/articles/ArticleCiteShare";
 import AuthorListWithModal from "@/components/articles/AuthorListWithModal";
 import SafeJournalCover from "@/components/journals/SafeJournalCover";
+import { getArticleAuthors } from "@/lib/articles/authors";
  
 export const revalidate = 300;
 
@@ -43,7 +44,7 @@ export default async function ReadArticlePage({ params }: { params: Promise<{ id
             author: {
                 select: { id: true, name: true, university: true, affiliation: true, email: true },
             },
-            coAuthors: { select: { id: true, name: true, university: true, email: true, isMain: true, userId: true }, orderBy: { order: "asc" } },
+            coAuthors: { select: { id: true, name: true, university: true, email: true, isMain: true, userId: true, order: true }, orderBy: { order: "asc" } },
         },
     });
 
@@ -69,25 +70,10 @@ export default async function ReadArticlePage({ params }: { params: Promise<{ id
     });
 
     // Aggregate authors
-    let allAuthors = [
-        {
-            id: article.author.id,
-            name: article.author.name || "Unknown",
-            affiliation: article.author.affiliation || article.author.university || null,
-            email: article.author.email,
-            isMain: true,
-        },
-        ...article.coAuthors.map((ca) => ({
-            id: ca.userId || null,
-            name: ca.name,
-            affiliation: ca.university || null,
-            email: ca.email || null,
-            isMain: ca.isMain,
-        })),
-    ];
-
-    const ADMIN_NAMES = ['C5K Executive Administrator', 'The Mother Admin'];
-    allAuthors = allAuthors.filter(a => !ADMIN_NAMES.includes(a.name));
+    let allAuthors = getArticleAuthors({
+        author: article.author,
+        coAuthors: article.coAuthors
+    });
 
     const pubDate = article.publicationDate
         ? new Date(article.publicationDate).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" })

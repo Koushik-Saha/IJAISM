@@ -179,14 +179,16 @@ export default function ConferencesPage() {
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="bg-white border-b">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex justify-between items-center">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
                         <h1 className="text-3xl font-bold text-primary">Manage Conferences</h1>
                         <p className="mt-1 text-gray-600">Super Admin Access Only</p>
                     </div>
-                    <div className="flex gap-3">
-                        <button onClick={openCreate} className="btn-primary">+ New Conference</button>
-                        <Link href="/editor" className="btn-secondary">Back</Link>
+                    <div className="flex items-center gap-3">
+                        <Link href="/editor" className="inline-flex items-center px-4 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-all active:scale-95 shadow-sm">
+                            ← Back
+                        </Link>
+                        <button onClick={openCreate} className="btn-primary font-bold px-5 py-2.5 rounded-xl shadow-lg transition-all active:scale-95 text-sm">+ New Conference</button>
                     </div>
                 </div>
             </div>
@@ -259,10 +261,27 @@ export default function ConferencesPage() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-bold mb-1">Banner Image URL</label>
-                                <div className="flex gap-2">
-                                    <input className="w-full border rounded p-2 flex-1" value={formData.bannerImageUrl} onChange={e => setFormData({ ...formData, bannerImageUrl: e.target.value })} placeholder="https://..." />
-                                    <FileUploadButton onUploadSuccess={(url) => setFormData({ ...formData, bannerImageUrl: url })} accept="image/*" label="Upload Image" fileType="conferences" />
+                                <label className="block text-sm font-bold mb-1">Banner Image</label>
+                                <div className="flex items-start gap-4 p-3 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                                    <div className="w-32 h-20 bg-gray-200 rounded border flex-shrink-0 overflow-hidden flex items-center justify-center">
+                                        {formData.bannerImageUrl ? (
+                                            <img src={formData.bannerImageUrl} alt="Banner Preview" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <span className="text-[10px] text-gray-400 font-bold uppercase px-1 text-center">No Banner</span>
+                                        )}
+                                    </div>
+                                    <div className="flex-1 space-y-2">
+                                        <FileUploadButton onUploadSuccess={(url) => setFormData({ ...formData, bannerImageUrl: url })} accept="image/*" label={formData.bannerImageUrl ? "Change Image" : "Upload Image"} fileType="conferences" />
+                                        {formData.bannerImageUrl && (
+                                            <button
+                                                type="button"
+                                                onClick={() => setFormData({ ...formData, bannerImageUrl: '' })}
+                                                className="block text-[10px] text-red-600 hover:text-red-700 font-bold"
+                                            >
+                                                Remove Image
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
 

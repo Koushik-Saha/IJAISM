@@ -108,12 +108,15 @@ export default function BlogsPage() {
         <div className="min-h-screen bg-gray-50 pb-12">
             <div className="bg-white border-b sticky top-0 z-10">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <div className="flex flex-col md:flex-row justify-between items-md-center gap-4">
+                    <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
                         <div>
                             <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Blog Management</h1>
                             <p className="text-gray-500 mt-1">Review, assign, and publish community insights.</p>
                         </div>
                         <div className="flex items-center gap-3">
+                            <Link href="/editor" className="inline-flex items-center px-4 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-all active:scale-95 shadow-sm">
+                                ← Back
+                            </Link>
                             <Link
                                 href="/editor/blogs/new"
                                 className="bg-primary text-white px-6 py-2.5 rounded-xl font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all transform hover:-translate-y-0.5 active:scale-95 flex items-center gap-2"

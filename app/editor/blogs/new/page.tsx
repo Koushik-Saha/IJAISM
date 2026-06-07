@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { toast } from 'sonner';
 import RichTextEditor from '@/components/ui/RichTextEditor';
+import FileUploadButton from '@/components/ui/FileUploadButton';
 
 export default function NewBlogPage() {
     const router = useRouter();
@@ -69,7 +71,12 @@ export default function NewBlogPage() {
 
     return (
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-8">Create New Post</h1>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+                <h1 className="text-3xl font-bold text-gray-900">Create New Post</h1>
+                <Link href="/editor/blogs" className="inline-flex items-center px-4 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-all active:scale-95 shadow-sm">
+                    ← Back
+                </Link>
+            </div>
 
             <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-lg shadow">
                 <div className="grid grid-cols-1 gap-6">
@@ -114,13 +121,34 @@ export default function NewBlogPage() {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Featured Image URL</label>
-                        <input
-                            type="url"
-                            value={formData.featuredImageUrl}
-                            onChange={(e) => setFormData({ ...formData, featuredImageUrl: e.target.value })}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary h-10 px-3 border"
-                        />
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Featured Image</label>
+                        <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                            <div className="w-32 h-20 bg-gray-200 rounded-lg border flex-shrink-0 overflow-hidden flex items-center justify-center shadow-sm">
+                                {formData.featuredImageUrl ? (
+                                    <img src={formData.featuredImageUrl} alt="Featured Preview" className="w-full h-full object-cover" />
+                                ) : (
+                                    <span className="text-[10px] text-gray-400 font-bold uppercase px-1 text-center">No Image</span>
+                                )}
+                            </div>
+                            <div className="flex-1 space-y-3">
+                                <FileUploadButton
+                                    onUploadSuccess={(url) => setFormData({ ...formData, featuredImageUrl: url })}
+                                    accept="image/*"
+                                    label={formData.featuredImageUrl ? "Change Image" : "Upload Image"}
+                                    fileType="blog"
+                                />
+                                {formData.featuredImageUrl && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData({ ...formData, featuredImageUrl: '' })}
+                                        className="block text-xs font-bold text-red-600 hover:text-red-700 transition-colors"
+                                    >
+                                        Remove Image
+                                    </button>
+                                )}
+                                <p className="text-[10px] text-gray-500">Recommended: Landscape aspect ratio (e.g. 16:9). Max 10MB.</p>
+                            </div>
+                        </div>
                     </div>
 
                     <div>

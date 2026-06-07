@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import JournalSidebar from "@/components/journals/JournalSidebar";
 import IssueCoverImage, { IssueCoverPlaceholder } from "@/components/journals/IssueCoverImage";
 import { notFound } from "next/navigation";
+import { getArticleAuthors } from "@/lib/articles/authors";
 
 export const revalidate = 3600;
 
@@ -34,8 +35,8 @@ export default async function CurrentIssuePage({
             articles: {
                 orderBy: { pageStart: "asc" },
                 include: {
-                    author: { select: { name: true } },
-                    coAuthors: { select: { name: true, isMain: true }, orderBy: { order: "asc" } }
+                    author: { select: { id: true, name: true, email: true } },
+                    coAuthors: { select: { id: true, userId: true, name: true, university: true, email: true, isMain: true, order: true }, orderBy: { order: "asc" } }
                 }
             }
         }
@@ -82,22 +83,24 @@ export default async function CurrentIssuePage({
                             <div className="divide-y divide-gray-100">
                                 {currentIssue.articles.length > 0 ? (
                                     currentIssue.articles.map((article) => {
-                                        // Filter out admin names to find real authors
-                                        let displayAuthors = [];
-                                        if (!ADMIN_NAMES.includes(article.author.name)) {
-                                            displayAuthors.push(article.author.name);
-                                        }
-                                        article.coAuthors.forEach(ca => {
-                                            if (!ADMIN_NAMES.includes(ca.name)) {
-                                                displayAuthors.push(ca.name);
-                                            }
-                                        });
+                                         const resolvedAuthors = getArticleAuthors({
+                                             author: {
+                                                 id: article.author.id,
+                                                 name: article.author.name,
+                                                 email: article.author.email || ''
+                                             },
+                                             coAuthors: article.coAuthors.map(ca => ({
+                                                 id: ca.id,
+                                                 userId: ca.userId,
+                                                 name: ca.name,
+                                                 email: ca.email || '',
+                                                 university: ca.university || '',
+                                                 isMain: ca.isMain || false,
+                                                 order: ca.order || 0
+                                             }))
+                                         });
 
-                                        // De-duplicate in case main author is also in coAuthors
-                                        const uniqueAuthors = Array.from(new Set(displayAuthors));
-                                        const authorText = uniqueAuthors.length > 0 
-                                            ? uniqueAuthors.join(", ") 
-                                            : article.author.name; // Fallback to admin if absolutely no other name
+                                         const authorText = resolvedAuthors.map(a => a.name).join(", ");
 
                                         return (
                                             <div key={article.id} className="py-4">

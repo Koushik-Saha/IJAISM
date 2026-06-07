@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Search, Upload, FileText, ArrowRight, CheckCircle2, RotateCcw, HelpCircle, Lock, Save, Plus, Trash2, GripVertical, User } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface CoAuthorEntry {
     id?: string;
@@ -240,7 +241,7 @@ export default function DirectPdfUpdatePage() {
                     
                     {/* Header */}
                     <div className="bg-slate-900 p-8 text-white">
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div className="flex items-center gap-3">
                                 <div className="bg-primary p-2.5 rounded-xl shadow-lg shadow-primary/20">
                                     <FileText className="h-6 w-6" />
@@ -250,15 +251,20 @@ export default function DirectPdfUpdatePage() {
                                     <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider mt-0.5">Mother Admin Exclusive Access</p>
                                 </div>
                             </div>
-                            {foundArticle && (
-                                <button 
-                                    onClick={reset}
-                                    className="p-2 hover:bg-white/10 rounded-full transition-colors group"
-                                    title="Search New Article"
-                                >
-                                    <RotateCcw className="h-5 w-5 text-slate-400 group-hover:text-white" />
-                                </button>
-                            )}
+                            <div className="flex items-center gap-3">
+                                <Link href="/editor" className="inline-flex items-center px-4 py-2.5 text-sm font-semibold text-white bg-slate-800 border border-slate-700 rounded-xl hover:bg-slate-700 transition-all active:scale-95 shadow-sm">
+                                    ← Back
+                                </Link>
+                                {foundArticle && (
+                                    <button 
+                                        onClick={reset}
+                                        className="p-2 hover:bg-white/10 rounded-full transition-colors group"
+                                        title="Search New Article"
+                                    >
+                                        <RotateCcw className="h-5 w-5 text-slate-400 group-hover:text-white" />
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     </div>
 

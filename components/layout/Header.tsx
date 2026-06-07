@@ -38,6 +38,7 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isImpersonating, setIsImpersonating] = useState(false);
 
   const handleSubmitClick = (e: React.MouseEvent) => {
     if (!user) {
@@ -52,6 +53,8 @@ export default function Header() {
     const checkAuth = () => {
       const token = localStorage.getItem('token');
       const loginTime = localStorage.getItem('loginTime');
+      const impersonatorToken = localStorage.getItem('impersonatorToken');
+      setIsImpersonating(!!impersonatorToken);
       const MAX_SESSION_TIME = 2 * 60 * 60 * 1000; // 2 hours
 
       // Check for session timeout
@@ -193,6 +196,32 @@ export default function Header() {
     router.push('/');
   };
 
+  const handleRevertImpersonation = () => {
+    const impersonatorToken = localStorage.getItem('impersonatorToken');
+    if (impersonatorToken) {
+      localStorage.setItem('token', impersonatorToken);
+      localStorage.removeItem('impersonatorToken');
+      localStorage.setItem('loginTime', Date.now().toString());
+
+      // Clear cached user info to force refetch of the admin profile
+      localStorage.removeItem('user');
+
+      // Dispatch login and profile update events
+      window.dispatchEvent(new Event('userLoggedIn'));
+      window.dispatchEvent(new Event('userProfileUpdated'));
+
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success('Returned to administrator profile', {
+          description: 'You are now logged in as your admin account.',
+          duration: 3000,
+        });
+      }
+
+      router.push('/editor/users');
+    }
+  };
+
   const fetchWishlistCount = async (token: string) => {
     try {
       const res = await fetch('/api/dashboard/wishlist', {
@@ -211,6 +240,23 @@ export default function Header() {
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-200 w-full">
+      {isImpersonating && (
+        <div className="bg-gradient-to-r from-amber-500 to-amber-600 text-white text-xs font-bold py-2 px-4 sm:px-6 lg:px-8 flex justify-between items-center z-50 border-b border-amber-600 shadow-md">
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+            </span>
+            <span>You are currently viewing C5K as <strong className="underline font-extrabold">{user?.name || user?.email}</strong></span>
+          </div>
+          <button 
+            onClick={handleRevertImpersonation} 
+            className="bg-white text-amber-900 px-3.5 py-1.5 rounded-lg hover:bg-amber-50 active:scale-95 transition-all text-[10px] font-black shadow-sm uppercase tracking-wider whitespace-nowrap ml-4"
+          >
+            Return to Admin
+          </button>
+        </div>
+      )}
       <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
         <div className="flex justify-between items-center h-16 md:h-20">
           {/* Logo */}
@@ -327,11 +373,9 @@ export default function Header() {
                         <span className="sr-only">Open user menu</span>
                         {user.profileImageUrl ? (
                           <div className="w-9 h-9 md:w-10 md:h-10 rounded-full overflow-hidden border border-gray-200">
-                            <Image
+                            <img
                               src={user.profileImageUrl || "/placeholder-user.jpg"}
                               alt={user.name || "User"}
-                              width={40}
-                              height={40}
                               className="object-cover w-full h-full"
                             />
                           </div>

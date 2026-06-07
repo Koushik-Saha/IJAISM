@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Search } from "lucide-react";
+import { Search, Filter, ChevronDown } from "lucide-react";
 
 import ResponsiveTable from "@/components/ui/ResponsiveTable";
 
@@ -32,6 +32,7 @@ export default function AdminJournalsPage() {
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState("");
     const [appliedSearch, setAppliedSearch] = useState("");
+    const [statusFilter, setStatusFilter] = useState("all");
 
     // Confirmation State
     const [confirmModal, setConfirmModal] = useState<{
@@ -78,7 +79,7 @@ export default function AdminJournalsPage() {
 
     useEffect(() => {
         setPage(1);
-    }, [appliedSearch]);
+    }, [appliedSearch, statusFilter]);
 
     const executeAssignment = async (journalId: string, editorId: string) => {
         try {
@@ -148,6 +149,12 @@ export default function AdminJournalsPage() {
     }
 
     const isAdmin = currentUser && ['super_admin', 'mother_admin'].includes(currentUser.role);
+
+    const filteredJournals = journals.filter(j => {
+        if (statusFilter === 'active') return j.isActive === true;
+        if (statusFilter === 'inactive') return j.isActive === false;
+        return true;
+    });
 
     const columns: any[] = [
         {
@@ -246,17 +253,19 @@ export default function AdminJournalsPage() {
         <div className="min-h-screen bg-gray-50">
             <div className="bg-white border-b">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <div className="flex justify-between items-center">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div>
                             <h1 className="text-3xl font-bold text-primary">Manage Journals</h1>
                             <p className="mt-1 text-gray-600">
                                 {isAdmin ? 'Assign Editors and manage all journals' : 'Your Managed Journals'}
                             </p>
                         </div>
-                        <div className="flex gap-3">
-                            <Link href="/editor" className="px-4 py-2 border rounded text-gray-600 hover:bg-gray-50">Back</Link>
+                        <div className="flex items-center gap-3">
+                            <Link href="/editor" className="inline-flex items-center px-4 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-all active:scale-95 shadow-sm">
+                                ← Back
+                            </Link>
                             {isAdmin && (
-                                <Link href="/editor/journals/new" className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90">+ Create Journal</Link>
+                                <Link href="/editor/journals/new" className="px-5 py-2.5 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all active:scale-95 text-sm">+ Create Journal</Link>
                             )}
                         </div>
                     </div>
@@ -264,18 +273,72 @@ export default function AdminJournalsPage() {
             </div>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {/* Search & Filter Section */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+                    <div className="lg:col-span-8 relative">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <Search className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                            type="text"
+                            placeholder="Search journals by code or name..."
+                            className="block w-full pl-11 pr-32 py-3.5 bg-white border-none rounded-2xl shadow-sm ring-1 ring-gray-200 focus:ring-2 focus:ring-primary transition-all text-sm font-medium"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && setAppliedSearch(search)}
+                        />
+                        <div className="absolute inset-y-1.5 right-1.5 flex gap-1">
+                            {search && (
+                                <button
+                                    onClick={() => { setSearch(""); setAppliedSearch(""); }}
+                                    className="px-3 py-1.5 text-xs font-bold text-gray-500 hover:text-red-500 transition-colors"
+                                >
+                                    Clear
+                                </button>
+                            )}
+                            <button
+                                onClick={() => setAppliedSearch(search)}
+                                className="px-6 py-1.5 bg-gray-900 text-white text-xs font-bold rounded-xl hover:bg-gray-800 transition-all active:scale-95"
+                            >
+                                Find
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="lg:col-span-4 relative group">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <Filter className="h-4 w-4 text-gray-400" />
+                        </div>
+                        <select
+                            onChange={(e) => {
+                                setStatusFilter(e.target.value);
+                                setPage(1);
+                            }}
+                            value={statusFilter}
+                            className="block w-full pl-10 pr-10 py-3.5 bg-white border-none rounded-2xl shadow-sm ring-1 ring-gray-200 focus:ring-2 focus:ring-primary appearance-none transition-all text-sm font-bold text-gray-700 cursor-pointer"
+                        >
+                            <option value="all">All Statuses</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                        <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                            <ChevronDown className="h-4 w-4 text-gray-400" />
+                        </div>
+                    </div>
+                </div>
+
                 <ResponsiveTable
                     columns={columns}
-                    data={journals.slice((page - 1) * 10, page * 10)}
+                    data={filteredJournals.slice((page - 1) * 10, page * 10)}
                     keyExtractor={(item: any) => item.id}
                     emptyMessage="No journals found."
                 />
 
                 {/* Pagination Controls */}
-                {journals.length > 0 && (
+                {filteredJournals.length > 0 && (
                     <div className="flex flex-col sm:flex-row justify-between items-center mt-6 gap-4">
                         <p className="text-sm text-gray-600">
-                            Showing page {page} of {Math.ceil(journals.length / 10)}
+                            Showing page {page} of {Math.ceil(filteredJournals.length / 10)}
                         </p>
 
                         <div className="flex gap-1 items-center">
@@ -294,8 +357,8 @@ export default function AdminJournalsPage() {
                                 ‹
                             </button>
 
-                            {Array.from({ length: Math.min(5, Math.ceil(journals.length / 10)) }, (_, i) => {
-                                const totalPages = Math.ceil(journals.length / 10);
+                            {Array.from({ length: Math.min(5, Math.ceil(filteredJournals.length / 10)) }, (_, i) => {
+                                const totalPages = Math.ceil(filteredJournals.length / 10);
                                 let start = Math.max(1, page - 2);
                                 if (start + 4 > totalPages) start = Math.max(1, totalPages - 4);
                                 const pNum = start + i;
@@ -313,15 +376,15 @@ export default function AdminJournalsPage() {
                             })}
 
                             <button
-                                onClick={() => setPage(p => Math.min(Math.ceil(journals.length / 10), p + 1))}
-                                disabled={page === Math.ceil(journals.length / 10)}
+                                onClick={() => setPage(p => Math.min(Math.ceil(filteredJournals.length / 10), p + 1))}
+                                disabled={page === Math.ceil(filteredJournals.length / 10)}
                                 className="px-3 py-1 border rounded disabled:opacity-50 hover:bg-gray-50 bg-white"
                             >
                                 ›
                             </button>
                             <button
-                                onClick={() => setPage(Math.ceil(journals.length / 10))}
-                                disabled={page === Math.ceil(journals.length / 10)}
+                                onClick={() => setPage(Math.ceil(filteredJournals.length / 10))}
+                                disabled={page === Math.ceil(filteredJournals.length / 10)}
                                 className="px-3 py-1 border rounded disabled:opacity-50 hover:bg-gray-50 bg-white"
                             >
                                 »

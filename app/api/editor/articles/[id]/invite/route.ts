@@ -18,7 +18,7 @@ export async function POST(
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
         const decoded = verifyToken(authHeader.split(' ')[1]);
-        if (!decoded || !['editor', 'super_admin'].includes(decoded.role)) {
+        if (!decoded || !['editor', 'super_admin', 'mother_admin'].includes(decoded.role)) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
@@ -79,7 +79,7 @@ export async function POST(
             }
 
             // Send Notification Email (Standard Assignment with Accept/Decline Link)
-            await sendReviewerInvitationEmail(
+            const emailResult1 = await sendReviewerInvitationEmail(
                 email,
                 name,
                 article.title,
@@ -88,7 +88,12 @@ export async function POST(
                 newReview.id
             );
 
-            return NextResponse.json({ success: true, message: "User existed. Assigned as reviewer and invitation portal link sent." });
+            return NextResponse.json({
+                success: true,
+                message: "User existed. Assigned as reviewer and invitation portal link sent.",
+                emailSent: emailResult1.success,
+                emailError: emailResult1.success ? undefined : emailResult1.error,
+            });
         }
 
         // 2. If User does NOT exist -> Create Account instantly with tempPassword
@@ -117,7 +122,7 @@ export async function POST(
                 }
             });
 
-            await sendReviewerTempPasswordEmail(
+            const emailResult2 = await sendReviewerTempPasswordEmail(
                 email,
                 name,
                 article.title,
@@ -127,7 +132,12 @@ export async function POST(
                 newReview.id
             );
 
-            return NextResponse.json({ success: true, message: "Reviewer account created and invitation portal link sent with temporary credentials." });
+            return NextResponse.json({
+                success: true,
+                message: "Reviewer account created and invitation portal link sent with temporary credentials.",
+                emailSent: emailResult2.success,
+                emailError: emailResult2.success ? undefined : emailResult2.error,
+            });
         }
 
         return NextResponse.json({ error: "A temporary password must be provided for new reviewers." }, { status: 400 });

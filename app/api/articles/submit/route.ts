@@ -98,12 +98,13 @@ export async function POST(req: NextRequest) {
       );
 
       if (!hasSelf) {
-        const hasCorresponding = processedCoAuthors.some((ca: any) => ca.isMain);
+        const hasCorresponding = processedCoAuthors.some((ca: any) => ca.isCorresponding);
         processedCoAuthors.push({
           name: user.name || '',
           email: user.email,
           university: user.university || user.affiliation || '',
-          isMain: !hasCorresponding,
+          isMain: processedCoAuthors.length === 0,
+          isCorresponding: !hasCorresponding,
         });
       }
     }
@@ -183,6 +184,7 @@ export async function POST(req: NextRequest) {
                 university: author.university.trim(),
                 order: author.order !== undefined ? author.order : index + 1,
                 isMain: author.isMain || false,
+                isCorresponding: author.isCorresponding || false,
                 userId: matchedUserId,
               };
             })
@@ -284,6 +286,7 @@ export async function POST(req: NextRequest) {
               university: author.university.trim(),
               order: author.order !== undefined ? author.order : index + 1,
               isMain: author.isMain || false,
+              isCorresponding: author.isCorresponding || false,
               userId: matchedUserId,
             };
           })

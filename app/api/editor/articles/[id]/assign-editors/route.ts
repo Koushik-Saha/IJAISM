@@ -40,7 +40,7 @@ export async function POST(
       return NextResponse.json({ error: "Article not found" }, { status: 404 });
     }
 
-    // 3. Verify access control: super_admin, mother_admin or editor_in_chief assigned to this paper
+    // 3. Verify access control: super_admin, mother_admin or editor_in_chief of this journal
     const isAdmin = ["super_admin", "mother_admin"].includes(user.role);
     let isAuthorized = isAdmin;
 
@@ -55,16 +55,7 @@ export async function POST(
       });
 
       if (journalEditor) {
-        // Must also be assigned to the paper
-        const articleEditor = await prisma.articleEditor.findFirst({
-          where: {
-            articleId,
-            userId: decoded.userId
-          }
-        });
-        if (articleEditor) {
-          isAuthorized = true;
-        }
+        isAuthorized = true;
       }
     }
 
@@ -89,17 +80,53 @@ export async function POST(
         journalId: article.journalId,
         userId: { in: userIds }
       },
-      select: { userId: true }
+      select: { userId: true, role: true }
     });
 
     const validUserIds = journalEditors.map(je => je.userId);
     const invalidUserIds = userIds.filter(id => !validUserIds.includes(id));
 
     if (invalidUserIds.length > 0) {
-      return NextResponse.json(
-        { error: `Users ${invalidUserIds.join(", ")} are not editors of this journal` },
-        { status: 400 }
-      );
+      // Validate that these invalidUserIds are valid system users with editor roles
+      const systemEditors = await prisma.user.findMany({
+        where: {
+          id: { in: invalidUserIds },
+          role: { in: ["editor", "sub_editor", "super_admin", "mother_admin"] },
+          deletedAt: null
+        },
+        select: { id: true }
+      });
+
+      const validSystemEditorIds = systemEditors.map(u => u.id);
+      const invalidSystemEditorIds = invalidUserIds.filter(id => !validSystemEditorIds.includes(id));
+
+      if (invalidSystemEditorIds.length > 0) {
+        return NextResponse.json(
+          { error: `Users ${invalidSystemEditorIds.join(", ")} are not valid editors in the system` },
+          { status: 400 }
+        );
+      }
+
+      // Automatically assign them to the journal as editorial_board_member
+      await prisma.journalEditor.createMany({
+        data: validSystemEditorIds.map(userId => ({
+          journalId: article.journalId,
+          userId,
+          role: "editorial_board_member"
+        })),
+        skipDuplicates: true
+      });
+    }
+
+    // If not super/mother admin, EIC cannot assign another EIC or anyone with other roles
+    if (!isAdmin) {
+      const invalidRoles = journalEditors.filter(je => je.role !== "assistant_editor" && je.role !== "editorial_board_member");
+      if (invalidRoles.length > 0) {
+        return NextResponse.json(
+          { error: "Forbidden - As Editorial Chief, you can only assign Assistant Editors or Editorial Board Members under your journal." },
+          { status: 403 }
+        );
+      }
     }
 
     // 5. Update assignments

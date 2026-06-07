@@ -396,16 +396,12 @@ export default function EditArticlePage() {
   return (
     <div className="min-h-screen bg-gray-100 py-8 px-4 sm:px-6 lg:px-10">
       <div className="max-w-6xl mx-auto">
-        {/* ── Back button ────────────────────────────────────────── */}
-        <div className="mb-4">
+        <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <Link
             href={`/editor/articles/${id}`}
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-gray-800 transition"
+            className="inline-flex items-center px-4 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-all active:scale-95 shadow-sm"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to Article
+            ← Back
           </Link>
         </div>
 

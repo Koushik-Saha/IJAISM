@@ -163,12 +163,15 @@ export default function AdminAnnouncementsPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
               <h1 className="text-3xl font-bold text-primary">Manage Announcements</h1>
               <p className="mt-1 text-gray-600">Create and edit announcements</p>
             </div>
-            <div className="flex gap-4">
+            <div className="flex items-center gap-4">
+              <Link href="/editor" className="inline-flex items-center px-4 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-all active:scale-95 shadow-sm">
+                ← Back
+              </Link>
               <button
                 onClick={() => {
                   setIsEditing(!isEditing);
@@ -183,13 +186,10 @@ export default function AdminAnnouncementsPage() {
                     });
                   }
                 }}
-                className="px-4 py-2 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary/90 shadow-md transition-all active:scale-95"
+                className="px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all active:scale-95"
               >
                 {isEditing ? 'Cancel' : '+ New Announcement'}
               </button>
-              <Link href="/editor" className="px-4 py-2 border rounded-xl text-gray-600 font-bold hover:bg-gray-50">
-                Back
-              </Link>
             </div>
           </div>
         </div>

@@ -18,6 +18,7 @@ interface InvitationData {
 
 export default function InvitationPage() {
     const params = useParams();
+    const id = params?.id as string;
     const router = useRouter();
     const [invitation, setInvitation] = useState<InvitationData | null>(null);
     const [loading, setLoading] = useState(true);
@@ -28,9 +29,9 @@ export default function InvitationPage() {
     useEffect(() => {
         const fetchInvitation = async () => {
             try {
-                if (!params?.id) return;
+                if (!id) return;
 
-                const response = await fetch(`/api/invitations/${params.id}`);
+                const response = await fetch(`/api/invitations/${id}`);
                 const data = await response.json();
 
                 if (!response.ok) {
@@ -46,14 +47,14 @@ export default function InvitationPage() {
         };
 
         fetchInvitation();
-    }, [params]);
+    }, [id]);
 
     const handleAction = async (action: 'accept' | 'decline') => {
         setActionLoading(action);
         setError(null);
 
         try {
-            const response = await fetch(`/api/invitations/${params.id}`, {
+            const response = await fetch(`/api/invitations/${id}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action })

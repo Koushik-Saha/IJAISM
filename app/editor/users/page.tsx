@@ -17,7 +17,8 @@ import {
   Filter,
   Pencil,
   Trash2,
-  AlertTriangle
+  AlertTriangle,
+  LogIn
 } from "lucide-react";
 import { Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
@@ -58,6 +59,9 @@ export default function AdminUsersPage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isImpersonateModalOpen, setIsImpersonateModalOpen] = useState(false);
+  const [userToImpersonate, setUserToImpersonate] = useState<User | null>(null);
+  const [isImpersonatingUser, setIsImpersonatingUser] = useState(false);
 
   useEffect(() => {
     // Fetch current user for RBAC
@@ -231,6 +235,59 @@ export default function AdminUsersPage() {
     }
   };
 
+  const handleConfirmImpersonate = async () => {
+    if (!userToImpersonate) return;
+    setIsImpersonatingUser(true);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch('/api/editor/users/impersonate', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId: userToImpersonate.id }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || error.message || 'Failed to impersonate');
+      }
+
+      const resData = await response.json();
+      if (resData.success && resData.data) {
+        // Cache original token
+        localStorage.setItem('impersonatorToken', token);
+        
+        // Update user session
+        localStorage.setItem('token', resData.data.accessToken);
+        localStorage.setItem('user', JSON.stringify(resData.data.user));
+        localStorage.setItem('loginTime', Date.now().toString());
+
+        toast.success(`Logged in as ${resData.data.user.name || resData.data.user.email}`);
+
+        // Dispatch login events
+        window.dispatchEvent(new Event('userLoggedIn'));
+        window.dispatchEvent(new Event('userProfileUpdated'));
+
+        setIsImpersonateModalOpen(false);
+        setUserToImpersonate(null);
+
+        // Redirect to dashboard
+        router.push('/dashboard');
+      }
+    } catch (err: any) {
+      toast.error('Impersonation failed', {
+        description: err.message || 'Failed to switch profiles',
+        duration: 4000,
+      });
+    } finally {
+      setIsImpersonatingUser(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
@@ -247,7 +304,7 @@ export default function AdminUsersPage() {
             </div>
             <div className="flex items-center gap-3">
               <Link href="/editor" className="inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-all active:scale-95">
-                Dashboard
+                ← Back
               </Link>
               {currentUser && ['mother_admin', 'super_admin', 'editor', 'reviewer'].includes(currentUser.role) && (
                 <button
@@ -480,6 +537,20 @@ export default function AdminUsersPage() {
                                 <Trash2 size={14} />
                               </button>
                             )}
+
+                            {/* 7. Login As User (Mother Admin Only) */}
+                            {currentUser?.role === 'mother_admin' && user.id !== currentUser?.id && (
+                              <button
+                                onClick={() => {
+                                  setUserToImpersonate(user);
+                                  setIsImpersonateModalOpen(true);
+                                }}
+                                title="Login As User"
+                                className="p-1.5 bg-indigo-50 text-indigo-600 border border-indigo-100 rounded-lg hover:bg-indigo-600 hover:text-white transition-all active:scale-95"
+                              >
+                                <LogIn size={14} />
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -621,6 +692,47 @@ export default function AdminUsersPage() {
                   <Trash2 size={14} />
                 )}
                 {isDeleting ? 'Deleting...' : 'Delete User'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Impersonate Confirmation Modal */}
+      {isImpersonateModalOpen && userToImpersonate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md mx-4">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2.5 bg-indigo-100 rounded-xl">
+                <UsersIcon className="w-5 h-5 text-indigo-600" />
+              </div>
+              <h2 className="text-lg font-bold text-gray-900">Login As User</h2>
+            </div>
+            <p className="text-sm text-gray-600 mb-2">
+              You are about to log in as <span className="font-bold text-gray-900">{userToImpersonate.name || userToImpersonate.email}</span> without a password.
+            </p>
+            <p className="text-sm text-gray-500 mb-6">
+              This will grant you full access to this user's profile and actions. You can return to your admin account at any time using the banner at the top of the screen.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => { setIsImpersonateModalOpen(false); setUserToImpersonate(null); }}
+                disabled={isImpersonatingUser}
+                className="px-4 py-2 text-sm font-semibold text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmImpersonate}
+                disabled={isImpersonatingUser}
+                className="px-4 py-2 text-sm font-bold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-all disabled:opacity-50 flex items-center gap-2"
+              >
+                {isImpersonatingUser ? (
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <LogIn size={14} />
+                )}
+                {isImpersonatingUser ? 'Logging in...' : 'Login As User'}
               </button>
             </div>
           </div>

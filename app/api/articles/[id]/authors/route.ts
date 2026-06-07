@@ -72,6 +72,7 @@ export async function PUT(
 
     // Validate entries and count corresponding authors
     let correspondingCount = 0;
+    let mainCount = 0;
     for (let i = 0; i < authors.length; i++) {
       const author = authors[i];
       if (!author.name || !author.name.trim()) {
@@ -83,8 +84,11 @@ export async function PUT(
       if (author.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(author.email.trim())) {
         return apiError(`Invalid email address for ${author.name}`, 400, undefined, 'VALIDATION_ERROR');
       }
-      if (author.isMain) {
+      if (author.isCorresponding) {
         correspondingCount++;
+      }
+      if (author.isMain) {
+        mainCount++;
       }
     }
 
@@ -123,6 +127,7 @@ export async function PUT(
             university: author.university.trim(),
             order: index + 1,
             isMain: author.isMain || false,
+            isCorresponding: author.isCorresponding || false,
             userId: matchedUserId,
           },
         });

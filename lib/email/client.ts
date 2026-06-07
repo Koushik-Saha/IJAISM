@@ -1,12 +1,12 @@
 import { Resend } from 'resend';
 
-// Email configuration
+// Lazy getters so env vars are always read at call time, never frozen at module load
 export const EMAIL_CONFIG = {
-  from: process.env.SMTP_FROM_EMAIL || 'noreply@c5k.co',
-  fromName: process.env.SMTP_FROM_NAME || 'C5K Platform',
-  replyTo: process.env.SMTP_FROM_EMAIL || 'noreply@c5k.co',
-  appName: process.env.NEXT_PUBLIC_APP_NAME || 'C5K',
-  appUrl: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+  get from() { return process.env.SMTP_FROM_EMAIL || 'noreply@c5k.com'; },
+  get fromName() { return process.env.SMTP_FROM_NAME || 'C5K Platform'; },
+  get replyTo() { return process.env.SMTP_FROM_EMAIL || 'noreply@c5k.com'; },
+  get appName() { return process.env.NEXT_PUBLIC_APP_NAME || 'C5K'; },
+  get appUrl() { return process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'; },
 };
 
 // Initialize Resend client

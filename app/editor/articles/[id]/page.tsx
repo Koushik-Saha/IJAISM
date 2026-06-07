@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 import ArticleAccessButtons from "@/components/articles/ArticleAccessButtons";
 import AuthorsManager from "@/components/articles/AuthorsManager";
 import { getArticleAuthors } from "@/lib/articles/authors";
@@ -101,6 +102,7 @@ export default function AdminArticleDetailPage() {
   const [decisionComments, setDecisionComments] = useState('');
   const [isSubmittingDecision, setIsSubmittingDecision] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   // Issue Assignment State
   const [availableIssues, setAvailableIssues] = useState<any[]>([]);
@@ -170,6 +172,33 @@ export default function AdminArticleDetailPage() {
       pdfUrl: article.pdfUrl || "",
     });
     setShowEditModal(true);
+  };
+
+  const handleDeleteArticle = () => {
+    setDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/editor/articles/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to delete article");
+      }
+
+      toast.success("Article deleted successfully");
+      router.push('/editor/articles');
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || "Failed to delete article");
+    }
   };
 
   const handleUpdateArticle = async (e: React.FormEvent) => {
@@ -732,9 +761,11 @@ export default function AdminArticleDetailPage() {
   if (!article) {
     return (
       <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-7xl mx-auto px-4">
+        <div className="max-w-7xl mx-auto px-4 space-y-4">
           <p className="text-red-600">Article not found</p>
-          <Link href="/editor/articles" className="text-primary">← Back to Articles</Link>
+          <Link href="/editor/articles" className="inline-flex items-center px-4 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-all active:scale-95 shadow-sm">
+            ← Back
+          </Link>
         </div>
       </div>
     );
@@ -746,25 +777,37 @@ export default function AdminArticleDetailPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white border-b shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
-          {/* Top row: Back link + Edit button */}
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-3">
             <Link
               href="/editor/articles"
-              className="text-primary hover:text-primary/80 font-semibold text-sm inline-flex items-center gap-1"
+              className="inline-flex items-center px-4 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-all active:scale-95 shadow-sm"
             >
-              ← Back to Articles
+              ← Back
             </Link>
-            {(currentUser?.role === 'mother_admin' || (currentUser?.role === 'super_admin' && !article.doi)) && (
-              <Link
-                href={`/editor/articles/${article.id}/edit`}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg shadow-sm text-white bg-accent hover:bg-accent-dark focus:outline-none transition-colors shrink-0"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                </svg>
-                Edit Article
-              </Link>
-            )}
+            <div className="flex items-center gap-2">
+              {(currentUser?.role === 'mother_admin' || (currentUser?.role === 'super_admin' && !article.doi)) && (
+                <Link
+                  href={`/editor/articles/${article.id}/edit`}
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg shadow-sm text-white bg-accent hover:bg-accent-dark focus:outline-none transition-colors shrink-0"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                  Edit Article
+                </Link>
+              )}
+              {currentUser?.role === 'mother_admin' && (
+                <button
+                  onClick={handleDeleteArticle}
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none transition-colors shrink-0 cursor-pointer"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  Delete Article
+                </button>
+              )}
+            </div>
           </div>
           {/* Title row */}
           <h1 className="text-2xl lg:text-3xl font-bold text-primary leading-snug">{article.title}</h1>
@@ -1196,13 +1239,36 @@ export default function AdminArticleDetailPage() {
           <div className="lg:col-span-1 space-y-6">
 
             {/* ── Assign Paper Editors Card (top of sidebar) ── */}
-            {(['super_admin', 'mother_admin'].includes(currentUser?.role) || (journalEditors.some(je => je.userId === currentUser?.id && je.role === 'editor_in_chief') && article.editors?.some((e: any) => e.userId === currentUser?.id))) && (() => {
+            {(['super_admin', 'mother_admin'].includes(currentUser?.role) || journalEditors.some(je => je.userId === currentUser?.id && je.role === 'editor_in_chief')) && (() => {
+              const isSuperOrMother = ['super_admin', 'mother_admin'].includes(currentUser?.role);
+              const isJournalEic = journalEditors.some(je => je.userId === currentUser?.id && je.role === 'editor_in_chief');
               const searchTerm = editorSearch.toLowerCase().trim();
-              const filteredEditors = journalEditors.filter(je =>
-                !searchTerm ||
-                (je.user.name || '').toLowerCase().includes(searchTerm) ||
-                (je.user.email || '').toLowerCase().includes(searchTerm)
-              );
+
+              const filteredEditors = journalEditors.filter(je => {
+                const matchesSearch = !searchTerm ||
+                  (je.user.name || '').toLowerCase().includes(searchTerm) ||
+                  (je.user.email || '').toLowerCase().includes(searchTerm);
+                if (!matchesSearch) return false;
+                if (isSuperOrMother) return true;
+                if (isJournalEic) {
+                  return je.role === 'assistant_editor' || je.role === 'editorial_board_member';
+                }
+                return false;
+              });
+
+              const eicEditors = journalEditors.filter(je => je.role === 'editor_in_chief');
+              
+              // Always sort EIC/Editorial Chiefs to the top
+              const sortedEditors = [...filteredEditors].sort((a, b) => {
+                const aIsEic = a.role === 'editor_in_chief';
+                const bIsEic = b.role === 'editor_in_chief';
+                if (aIsEic && !bIsEic) return -1;
+                if (!aIsEic && bIsEic) return 1;
+                return 0;
+              });
+
+              // Show only 3 editors when not searching, show all matches when searching
+              const displayedEditors = searchTerm === "" ? sortedEditors.slice(0, 3) : sortedEditors;
               const assignedIds = article.editors?.map((e: any) => e.userId) || [];
 
               const handleSaveEditors = async () => {
@@ -1226,118 +1292,144 @@ export default function AdminArticleDetailPage() {
               };
 
               return (
-                <div className="bg-white rounded-lg shadow-md p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-bold text-gray-800 text-lg">Assign Paper Editors</h3>
-                    {assignedIds.length > 0 && (
-                      <span className="text-xs bg-indigo-50 text-indigo-700 px-2 py-1 rounded-full border border-indigo-200 font-semibold">
-                        {assignedIds.length} assigned
-                      </span>
+                <>
+                  <div className="bg-white rounded-lg shadow-md p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-bold text-gray-800 text-lg">Assign Paper Editors</h3>
+                      {assignedIds.length > 0 && (
+                        <span className="text-xs bg-indigo-50 text-indigo-700 px-2 py-1 rounded-full border border-indigo-200 font-semibold">
+                          {assignedIds.length} assigned
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Search */}
+                    <div className="relative mb-3">
+                      <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                      <input
+                        type="text"
+                        placeholder="Search by name or email..."
+                        value={editorSearch}
+                        onChange={e => setEditorSearch(e.target.value)}
+                        className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-transparent bg-gray-50 placeholder-gray-400"
+                      />
+                    </div>
+
+                    {/* Editor cards */}
+                    <div className="space-y-2 mb-4">
+                      {displayedEditors.length === 0 ? (
+                        <p className="text-gray-400 text-center py-6 text-sm">No editors found.</p>
+                      ) : displayedEditors.map((je) => {
+                        const isAlreadyAssigned = assignedIds.includes(je.userId);
+                        const isPending = pendingEditorIds.includes(je.userId);
+                        // toggle: pending overrides assigned when present
+                        const isChecked = isPending ? !isAlreadyAssigned : isAlreadyAssigned;
+
+                        const roleLabel =
+                          je.role === 'editor_in_chief' ? 'Editor-in-Chief' :
+                          je.role === 'assistant_editor' ? 'Assistant Editor' :
+                          'Editorial Board Member';
+
+                        return (
+                          <button
+                            key={je.id}
+                            type="button"
+                            onClick={() => {
+                              setPendingEditorIds(prev => {
+                                if (prev.includes(je.userId)) return prev.filter(id => id !== je.userId);
+                                return [...prev, je.userId];
+                              });
+                            }}
+                            className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
+                              isChecked
+                                ? 'border-indigo-500 bg-indigo-50 shadow-sm'
+                                : 'border-gray-100 bg-gray-50 hover:border-gray-300 hover:bg-white'
+                            }`}
+                          >
+                            {/* Custom Checkbox */}
+                            <div className={`shrink-0 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${
+                              isChecked ? 'bg-indigo-600 border-indigo-600' : 'border-gray-300 bg-white'
+                            }`}>
+                              {isChecked && (
+                                <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                </svg>
+                              )}
+                            </div>
+
+                            {/* Avatar */}
+                            <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                              isChecked ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-600'
+                            }`}>
+                              {(je.user.name || 'E').charAt(0).toUpperCase()}
+                            </div>
+
+                            {/* Info */}
+                            <div className="flex-1 min-w-0">
+                              <p className={`text-sm font-semibold truncate ${isChecked ? 'text-gray-900' : 'text-gray-700'}`}>
+                                {je.user.name}
+                              </p>
+                              <p className="text-xs text-gray-500 truncate">{roleLabel}</p>
+                            </div>
+
+                            {/* Saved badge */}
+                            {isAlreadyAssigned && !isPending && (
+                              <span className="text-xs font-semibold text-indigo-500 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded shrink-0">
+                                Assigned
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Selection summary */}
+                    {pendingEditorIds.length > 0 && (
+                      <div className="flex items-center gap-2 bg-indigo-50 border border-indigo-100 rounded-lg px-3 py-2 mb-3">
+                        <div className="w-5 h-5 bg-indigo-600 rounded-full flex items-center justify-center shrink-0">
+                          <span className="text-white text-xs font-bold">{pendingEditorIds.length}</span>
+                        </div>
+                        <p className="text-sm text-indigo-700 font-medium">
+                          {pendingEditorIds.length} change{pendingEditorIds.length !== 1 ? 's' : ''} pending
+                        </p>
+                      </div>
+                    )}
+
+                    <button
+                      onClick={handleSaveEditors}
+                      disabled={pendingEditorIds.length === 0 || isSavingArticleEditors}
+                      className="w-full bg-indigo-600 text-white py-2.5 px-4 rounded-xl font-semibold hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {isSavingArticleEditors ? 'Saving…' : 'Assign Editors'}
+                    </button>
+                  </div>
+
+                  {/* Journal Editorial Chief Display */}
+                  <div className="bg-[#1e293b] text-white rounded-lg shadow-md p-4 mt-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-xs font-black uppercase tracking-widest text-[#38bdf8]">Journal Editorial Chief</span>
+                    </div>
+                    {eicEditors.length === 0 ? (
+                      <p className="text-xs text-slate-400 italic">No Editorial Chief assigned to this journal.</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {eicEditors.map((eic: any) => (
+                          <div key={eic.id} className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-sky-500 text-white flex items-center justify-center font-bold text-xs shrink-0">
+                              {(eic.user.name || 'E').charAt(0).toUpperCase()}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-sm font-bold text-white truncate">{eic.user.name}</p>
+                              <p className="text-xs text-slate-400 truncate">{eic.user.email}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     )}
                   </div>
-
-                  {/* Search */}
-                  <div className="relative mb-3">
-                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                    <input
-                      type="text"
-                      placeholder="Search by name or email..."
-                      value={editorSearch}
-                      onChange={e => setEditorSearch(e.target.value)}
-                      className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-transparent bg-gray-50 placeholder-gray-400"
-                    />
-                  </div>
-
-                  {/* Editor cards */}
-                  <div className="space-y-2 mb-4">
-                    {filteredEditors.length === 0 ? (
-                      <p className="text-gray-400 text-center py-6 text-sm">No editors found.</p>
-                    ) : filteredEditors.map((je) => {
-                      const isAlreadyAssigned = assignedIds.includes(je.userId);
-                      const isPending = pendingEditorIds.includes(je.userId);
-                      // toggle: pending overrides assigned when present
-                      const isChecked = isPending ? !isAlreadyAssigned : isAlreadyAssigned;
-
-                      const roleLabel =
-                        je.role === 'editor_in_chief' ? 'Editor-in-Chief' :
-                        je.role === 'assistant_editor' ? 'Assistant Editor' :
-                        'Editorial Board Member';
-
-                      return (
-                        <button
-                          key={je.id}
-                          type="button"
-                          onClick={() => {
-                            setPendingEditorIds(prev => {
-                              if (prev.includes(je.userId)) return prev.filter(id => id !== je.userId);
-                              return [...prev, je.userId];
-                            });
-                          }}
-                          className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
-                            isChecked
-                              ? 'border-indigo-500 bg-indigo-50 shadow-sm'
-                              : 'border-gray-100 bg-gray-50 hover:border-gray-300 hover:bg-white'
-                          }`}
-                        >
-                          {/* Custom Checkbox */}
-                          <div className={`shrink-0 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${
-                            isChecked ? 'bg-indigo-600 border-indigo-600' : 'border-gray-300 bg-white'
-                          }`}>
-                            {isChecked && (
-                              <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                              </svg>
-                            )}
-                          </div>
-
-                          {/* Avatar */}
-                          <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                            isChecked ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-600'
-                          }`}>
-                            {(je.user.name || 'E').charAt(0).toUpperCase()}
-                          </div>
-
-                          {/* Info */}
-                          <div className="flex-1 min-w-0">
-                            <p className={`text-sm font-semibold truncate ${isChecked ? 'text-gray-900' : 'text-gray-700'}`}>
-                              {je.user.name}
-                            </p>
-                            <p className="text-xs text-gray-500 truncate">{roleLabel}</p>
-                          </div>
-
-                          {/* Saved badge */}
-                          {isAlreadyAssigned && !isPending && (
-                            <span className="text-xs font-semibold text-indigo-500 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded shrink-0">
-                              Assigned
-                            </span>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {/* Selection summary */}
-                  {pendingEditorIds.length > 0 && (
-                    <div className="flex items-center gap-2 bg-indigo-50 border border-indigo-100 rounded-lg px-3 py-2 mb-3">
-                      <div className="w-5 h-5 bg-indigo-600 rounded-full flex items-center justify-center shrink-0">
-                        <span className="text-white text-xs font-bold">{pendingEditorIds.length}</span>
-                      </div>
-                      <p className="text-sm text-indigo-700 font-medium">
-                        {pendingEditorIds.length} change{pendingEditorIds.length !== 1 ? 's' : ''} pending
-                      </p>
-                    </div>
-                  )}
-
-                  <button
-                    onClick={handleSaveEditors}
-                    disabled={pendingEditorIds.length === 0 || isSavingArticleEditors}
-                    className="w-full bg-indigo-600 text-white py-2.5 px-4 rounded-xl font-semibold hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                  >
-                    {isSavingArticleEditors ? 'Saving…' : 'Assign Editors'}
-                  </button>
-                </div>
+                </>
               );
             })()}
 
@@ -2242,6 +2334,16 @@ export default function AdminArticleDetailPage() {
             </div>
           )
         }
+        <ConfirmModal
+          isOpen={deleteModalOpen}
+          onClose={() => setDeleteModalOpen(false)}
+          onConfirm={handleConfirmDelete}
+          title="Delete Article"
+          message="Are you sure you want to delete this article? This action cannot be undone."
+          confirmLabel="Yes, Delete"
+          cancelLabel="No"
+          isDestructive={true}
+        />
       </div >
     </div >
   );

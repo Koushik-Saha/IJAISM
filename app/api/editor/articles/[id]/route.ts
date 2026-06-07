@@ -156,3 +156,64 @@ export async function PATCH(
     );
   }
 }
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id: articleId } = await params;
+
+    const authHeader = request.headers.get("authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const token = authHeader.split(" ")[1];
+    const decoded = verifyToken(token);
+    if (!decoded) {
+      return NextResponse.json({ error: "Unauthorized - Invalid token" }, { status: 401 });
+    }
+
+    if (decoded.role !== "mother_admin") {
+      return NextResponse.json(
+        { error: "Forbidden - Only Mother Admin can delete articles" },
+        { status: 403 }
+      );
+    }
+
+    const existingArticle = await prisma.article.findUnique({
+      where: { id: articleId, deletedAt: null },
+    });
+
+    if (!existingArticle) {
+      return NextResponse.json({ error: "Article not found or already deleted" }, { status: 404 });
+    }
+
+    // Soft delete article
+    await prisma.article.update({
+      where: { id: articleId },
+      data: {
+        deletedAt: new Date(),
+        activityLogs: {
+          create: {
+            userId: decoded.userId,
+            action: "ARTICLE_DELETED",
+            details: `Article soft-deleted by Mother Admin`,
+          },
+        },
+      },
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: "Article deleted successfully",
+    });
+  } catch (error: any) {
+    console.error("Error deleting article:", error);
+    return NextResponse.json(
+      { error: error.message || "Failed to delete article" },
+      { status: 500 }
+    );
+  }
+}

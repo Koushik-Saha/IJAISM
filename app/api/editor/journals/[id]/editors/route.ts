@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { verifyToken } from "@/lib/auth";
+import { verifyToken, ROLES } from "@/lib/auth";
 
 // GET: Fetch all editors for a journal
 export async function GET(
@@ -36,17 +36,23 @@ export async function GET(
       return NextResponse.json({ error: "Journal not found" }, { status: 404 });
     }
 
-    const editors = await prisma.journalEditor.findMany({
+    // Fetch existing journal editor records
+    const existingJournalEditors = await prisma.journalEditor.findMany({
       where: { journalId },
       include: {
         user: {
-          select: { id: true, name: true, email: true, university: true }
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            university: true,
+            role: true
+          }
         }
-      },
-      orderBy: { createdAt: "desc" }
+      }
     });
 
-    return NextResponse.json({ success: true, editors });
+    return NextResponse.json({ success: true, editors: existingJournalEditors });
   } catch (error: any) {
     console.error("Error fetching journal editors:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

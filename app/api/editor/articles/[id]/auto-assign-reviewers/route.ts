@@ -26,7 +26,7 @@ export async function POST(
             select: { role: true },
         });
 
-        if (!user || !['editor', 'super_admin'].includes(user.role)) {
+        if (!user || !['editor', 'super_admin', 'mother_admin'].includes(user.role)) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 

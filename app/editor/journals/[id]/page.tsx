@@ -205,22 +205,22 @@ export default function EditJournalPage() {
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="bg-white border-b">
-                <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <div className="flex justify-between items-center">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <h1 className="text-3xl font-bold text-primary">Edit Journal</h1>
-                        <div className="flex gap-3">
-                            <Link href={`/editor/journals/${id}/issues`} className="btn-primary bg-indigo-600 hover:bg-indigo-700">
-                                📚 Manage Issues
+                        <div className="flex items-center gap-3">
+                            <Link href="/editor/journals" className="inline-flex items-center px-4 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-all active:scale-95 shadow-sm">
+                                ← Back
                             </Link>
-                            <Link href="/editor/journals" className="btn-secondary">
-                                Cancel
+                            <Link href={`/editor/journals/${id}/issues`} className="btn-primary bg-indigo-600 hover:bg-indigo-700 font-bold px-5 py-2.5 rounded-xl shadow-lg transition-all active:scale-95 text-sm">
+                                📚 Manage Issues
                             </Link>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
@@ -300,21 +300,34 @@ export default function EditJournalPage() {
 
                         <div className="md:col-span-2">
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Cover Image URL
+                                Cover Image
                             </label>
-                            <div className="flex gap-2">
-                                <input
-                                    type="url"
-                                    className="input-field flex-1"
-                                    value={formData.coverImageUrl}
-                                    onChange={(e) => setFormData({ ...formData, coverImageUrl: e.target.value })}
-                                />
-                                <FileUploadButton
-                                    onUploadSuccess={(url) => setFormData({ ...formData, coverImageUrl: url })}
-                                    accept="image/*"
-                                    label="Upload Image"
-                                    fileType="journal"
-                                />
+                            <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                                <div className="w-24 h-32 bg-gray-200 rounded-lg border flex-shrink-0 overflow-hidden flex items-center justify-center shadow-sm">
+                                    {formData.coverImageUrl ? (
+                                        <img src={formData.coverImageUrl} alt="Cover Preview" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <span className="text-[10px] text-gray-400 font-bold uppercase px-1 text-center">No Cover</span>
+                                    )}
+                                </div>
+                                <div className="flex-1 space-y-3">
+                                    <FileUploadButton
+                                        onUploadSuccess={(url) => setFormData({ ...formData, coverImageUrl: url })}
+                                        accept="image/*"
+                                        label={formData.coverImageUrl ? "Change Image" : "Upload Image"}
+                                        fileType="journal"
+                                    />
+                                    {formData.coverImageUrl && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setFormData({ ...formData, coverImageUrl: '' })}
+                                            className="block text-xs font-bold text-red-600 hover:text-red-700 transition-colors"
+                                        >
+                                            Remove Image
+                                        </button>
+                                    )}
+                                    <p className="text-[10px] text-gray-500">Recommended: Portrait aspect ratio (3:4 or A4). Max 10MB.</p>
+                                </div>
                             </div>
                         </div>
 
@@ -360,7 +373,7 @@ export default function EditJournalPage() {
                                     <option value="">-- Choose Editor --</option>
                                     {allEditors.map((u) => (
                                         <option key={u.id} value={u.id}>
-                                            {u.name} ({u.email})
+                                            {u.name} ({u.email}) — {u.role.replace('_', ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())}
                                         </option>
                                     ))}
                                 </select>
@@ -398,7 +411,7 @@ export default function EditJournalPage() {
                             {editors.length === 0 ? (
                                 <p className="text-gray-500 text-sm italic">No editors assigned to this journal board yet.</p>
                             ) : (
-                                <div className="border rounded-lg overflow-hidden">
+                                <div className="border rounded-lg overflow-x-auto">
                                     <table className="min-w-full divide-y divide-gray-200">
                                         <thead className="bg-gray-50">
                                             <tr>

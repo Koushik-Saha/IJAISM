@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import FileUploadButton from "@/components/ui/FileUploadButton";
 
 export default function NewJournalPage() {
     const router = useRouter();
@@ -54,10 +55,10 @@ export default function NewJournalPage() {
         <div className="min-h-screen bg-gray-50">
             <div className="bg-white border-b">
                 <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <div className="flex justify-between items-center">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <h1 className="text-3xl font-bold text-primary">Create New Journal</h1>
-                        <Link href="/editor/journals" className="btn-secondary">
-                            Cancel
+                        <Link href="/editor/journals" className="inline-flex items-center px-4 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-all active:scale-95 shadow-sm">
+                            ← Back
                         </Link>
                     </div>
                 </div>
@@ -145,14 +146,35 @@ export default function NewJournalPage() {
 
                         <div className="md:col-span-2">
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Cover Image URL
+                                Cover Image
                             </label>
-                            <input
-                                type="url"
-                                className="input-field"
-                                value={formData.coverImageUrl}
-                                onChange={(e) => setFormData({ ...formData, coverImageUrl: e.target.value })}
-                            />
+                            <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                                <div className="w-24 h-32 bg-gray-200 rounded-lg border flex-shrink-0 overflow-hidden flex items-center justify-center shadow-sm">
+                                    {formData.coverImageUrl ? (
+                                        <img src={formData.coverImageUrl} alt="Cover Preview" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <span className="text-[10px] text-gray-400 font-bold uppercase px-1 text-center">No Cover</span>
+                                    )}
+                                </div>
+                                <div className="flex-1 space-y-3">
+                                    <FileUploadButton
+                                        onUploadSuccess={(url) => setFormData({ ...formData, coverImageUrl: url })}
+                                        accept="image/*"
+                                        label={formData.coverImageUrl ? "Change Image" : "Upload Image"}
+                                        fileType="journal"
+                                    />
+                                    {formData.coverImageUrl && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setFormData({ ...formData, coverImageUrl: '' })}
+                                            className="block text-xs font-bold text-red-600 hover:text-red-700 transition-colors"
+                                        >
+                                            Remove Image
+                                        </button>
+                                    )}
+                                    <p className="text-[10px] text-gray-500">Recommended: Portrait aspect ratio (3:4 or A4). Max 10MB.</p>
+                                </div>
+                            </div>
                         </div>
 
                         <div className="md:col-span-2">

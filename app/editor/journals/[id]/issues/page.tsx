@@ -193,16 +193,21 @@ export default function ManageIssuesPage() {
             {/* Header */}
             <div className="bg-white border-b sticky top-0 z-10">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                    <div className="flex justify-between items-center">
-                        <div>
-                            <nav className="text-sm text-gray-500 mb-1">
-                                <Link href="/editor/journals" className="hover:text-primary">Journals</Link>
-                                {" / "}
-                                <Link href={`/editor/journals/${journalId}`} className="hover:text-primary">Edit Journal</Link>
-                            </nav>
-                            <h1 className="text-2xl font-bold text-gray-900">Manage Issues</h1>
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div className="flex items-center gap-4">
+                            <Link href={`/editor/journals/${journalId}`} className="inline-flex items-center px-4 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-all active:scale-95 shadow-sm">
+                                ← Back
+                            </Link>
+                            <div>
+                                <nav className="text-sm text-gray-500 mb-1">
+                                    <Link href="/editor/journals" className="hover:text-primary">Journals</Link>
+                                    {" / "}
+                                    <Link href={`/editor/journals/${journalId}`} className="hover:text-primary">Edit Journal</Link>
+                                </nav>
+                                <h1 className="text-2xl font-bold text-gray-900">Manage Issues</h1>
+                            </div>
                         </div>
-                        <button onClick={handleCreate} className="btn-primary">
+                        <button onClick={handleCreate} className="btn-primary font-bold px-5 py-2.5 rounded-xl shadow-lg transition-all active:scale-95 text-sm">
                             + Add New Issue
                         </button>
                     </div>

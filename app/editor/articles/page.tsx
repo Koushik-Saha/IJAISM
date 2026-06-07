@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Search } from "lucide-react";
 import { toast } from "sonner";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 
 interface Article {
   id: string;
@@ -50,6 +51,8 @@ export default function AdminArticlesPage() {
   const limit = 10;
 
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [articleToDelete, setArticleToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     fetchArticles();
@@ -127,6 +130,38 @@ export default function AdminArticlesPage() {
     router.push(`/editor/articles/${article.id}/edit`);
   };
 
+  const handleDeleteClick = (articleId: string) => {
+    setArticleToDelete(articleId);
+    setDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!articleToDelete) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/editor/articles/${articleToDelete}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to delete article");
+      }
+
+      toast.success("Article deleted successfully");
+      fetchArticles(); // Refresh list
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || "Failed to delete article");
+    } finally {
+      setArticleToDelete(null);
+    }
+  };
+
   const formatStatus = (status: string) => {
     return status
       .split('_')
@@ -162,13 +197,13 @@ export default function AdminArticlesPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
               <h1 className="text-3xl font-bold text-primary">Manage Articles</h1>
               <p className="mt-1 text-gray-600">View and manage all article submissions</p>
             </div>
-            <Link href="/editor" className="btn-secondary">
-              ← Back to Dashboard
+            <Link href="/editor" className="inline-flex items-center px-4 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-all active:scale-95 shadow-sm">
+              ← Back
             </Link>
           </div>
         </div>
@@ -329,6 +364,14 @@ export default function AdminArticlesPage() {
                             Edit
                           </button>
                         )}
+                        {currentUser?.role === 'mother_admin' && (
+                          <button
+                            onClick={() => handleDeleteClick(article.id)}
+                            className="text-red-600 hover:text-red-800 font-semibold cursor-pointer"
+                          >
+                            Delete
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -400,6 +443,19 @@ export default function AdminArticlesPage() {
             </div>
           </div>
         )}
+        <ConfirmModal
+          isOpen={deleteModalOpen}
+          onClose={() => {
+            setDeleteModalOpen(false);
+            setArticleToDelete(null);
+          }}
+          onConfirm={handleConfirmDelete}
+          title="Delete Article"
+          message="Are you sure you want to delete this article? This action cannot be undone."
+          confirmLabel="Yes, Delete"
+          cancelLabel="No"
+          isDestructive={true}
+        />
       </div>
     </div>
   );

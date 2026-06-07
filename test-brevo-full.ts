@@ -7,8 +7,8 @@ dotenv.config({ path: '.env.local' });
 import { sendWelcomeEmail, sendEmailVerificationEmail, sendEmailVerificationConfirmationEmail, sendPasswordResetEmail } from './lib/email/send';
 import { EMAIL_CONFIG } from './lib/email/client';
 
-// Use the configured sender email as the test recipient
-const TEST_EMAIL = process.env.SMTP_FROM_EMAIL || 'c5kpublication@gmail.com';
+// Use the user's requested test recipient email
+const TEST_EMAIL = 'eauthentication20@gmail.com';
 const FAKE_TOKEN = 'test-token-abc123xyz';
 
 async function runTests() {

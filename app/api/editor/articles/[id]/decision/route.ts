@@ -49,11 +49,13 @@ export async function POST(
                         id: true,
                         name: true,
                         email: true,
+                        university: true,
                         orcid: true,
                         orcidAccessToken: true
                     }
                 },
-                journal: true
+                journal: true,
+                coAuthors: true
             }
         });
 
@@ -227,6 +229,70 @@ export async function POST(
             where: { id },
             data: updateData
         });
+
+        // Copy published books and dissertations to their directories
+        if (decision === 'publish') {
+            if (article.articleType === 'book') {
+                const existingBook = await prisma.book.findFirst({
+                    where: {
+                        OR: [
+                            { title: article.title },
+                            { isbn: doi || article.id.substring(0, 8) }
+                        ]
+                    }
+                });
+
+                if (!existingBook) {
+                    const coAuthorNames = article.coAuthors?.map(c => c.name) || [];
+                    const authors = coAuthorNames.length > 0 ? coAuthorNames : [article.author.name || 'Unknown Author'];
+
+                    await prisma.book.create({
+                        data: {
+                            title: article.title,
+                            authors: authors,
+                            year: now.getFullYear(),
+                            isbn: doi || article.id.substring(0, 8),
+                            pages: 100, // default placeholder
+                            field: article.journal?.fullName || 'General',
+                            description: article.abstract,
+                            fullDescription: article.abstract,
+                            price: '0.00',
+                            publisher: 'C5K Press',
+                            language: article.language || 'English',
+                            edition: '1st',
+                            format: 'Paperback',
+                            pdfUrl: article.pdfUrl,
+                            coverImageUrl: null,
+                            doi: doi
+                        }
+                    });
+                }
+            } else if (article.articleType === 'dissertation') {
+                const existingDiss = await prisma.dissertation.findFirst({
+                    where: { title: article.title, authorId: article.authorId }
+                });
+
+                if (!existingDiss) {
+                    await prisma.dissertation.create({
+                        data: {
+                            title: article.title,
+                            abstract: article.abstract,
+                            authorId: article.authorId,
+                            university: article.author.university || 'C5K Affiliated University',
+                            degreeType: 'phd',
+                            supervisorName: 'TBD',
+                            defenseDate: now,
+                            submissionDate: now,
+                            keywords: article.keywords,
+                            pdfUrl: article.pdfUrl,
+                            status: 'published',
+                            authorName: article.author.name || 'Unknown Author',
+                            doi: doi
+                        }
+                    });
+                }
+            }
+        }
 
         // Create Notification for Author
         try {

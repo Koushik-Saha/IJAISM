@@ -36,7 +36,56 @@ export async function GET(req: NextRequest) {
         const page = parseInt(searchParams.get("page") || "1");
         const limit = parseInt(searchParams.get("limit") || "10");
         const search = searchParams.get("search") || "";
+        const type = searchParams.get("type") || "published";
         const skip = (page - 1) * limit;
+
+        if (type === "submissions") {
+            const articleWhere: any = {
+                articleType: "dissertation",
+                deletedAt: null,
+            };
+
+            if (search) {
+                articleWhere.OR = [
+                    { title: { contains: search, mode: "insensitive" } },
+                    { author: { name: { contains: search, mode: "insensitive" } } },
+                    { author: { email: { contains: search, mode: "insensitive" } } },
+                ];
+            }
+
+            const [articles, total] = await Promise.all([
+                prisma.article.findMany({
+                    where: articleWhere,
+                    skip,
+                    take: limit,
+                    orderBy: { createdAt: "desc" },
+                    include: {
+                        author: {
+                            select: { name: true, email: true },
+                        },
+                    },
+                }),
+                prisma.article.count({ where: articleWhere }),
+            ]);
+
+            return apiSuccess({
+                dissertations: articles.map(art => ({
+                    id: art.id,
+                    title: art.title,
+                    status: art.status,
+                    createdAt: art.createdAt,
+                    author: art.author,
+                    pdfUrl: art.pdfUrl,
+                    isSubmission: true
+                })),
+                pagination: {
+                    page,
+                    limit,
+                    total,
+                    pages: Math.ceil(total / limit),
+                },
+            });
+        }
 
         const where: any = {
             deletedAt: null,
@@ -46,9 +95,6 @@ export async function GET(req: NextRequest) {
             where.OR = [
                 { title: { contains: search, mode: "insensitive" } },
                 { university: { contains: search, mode: "insensitive" } },
-                // Author relation search might fail if author relation isn't joined properly in filter, 
-                // usually prisma requires specific syntax. Simplifying search to direct fields for stability if author name isn't stored flat.
-                // But Dissertation has 'authorName' field maybe? Schema check: `authorName String?`.
                 { authorName: { contains: search, mode: "insensitive" } }
             ];
         }

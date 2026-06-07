@@ -70,7 +70,7 @@ export default async function DissertationsPage(props: {
               </p>
             </div>
             <Link
-              href="/dashboard/submit-dissertation"
+              href="/submit"
               className="bg-white text-accent hover:bg-gray-100 px-8 py-3 rounded-lg font-bold transition-colors whitespace-nowrap"
             >
               Submit Now

@@ -150,6 +150,7 @@ export default function AdminArticleDetailPage() {
   });
 
   const [journalEditors, setJournalEditors] = useState<any[]>([]);
+  const [journalEditorialBoard, setJournalEditorialBoard] = useState<any[]>([]);
   const [isSavingArticleEditors, setIsSavingArticleEditors] = useState(false);
   const [editorSearch, setEditorSearch] = useState('');
   const [pendingEditorIds, setPendingEditorIds] = useState<string[]>([]);
@@ -304,7 +305,7 @@ export default function AdminArticleDetailPage() {
     if (article?.journalId) {
       fetchJournalEditors();
     }
-  }, [article?.journalId]);
+  }, [article?.journalId, currentUser]);
 
   useEffect(() => {
     if (article && currentUser) {
@@ -531,12 +532,37 @@ export default function AdminArticleDetailPage() {
     if (!article?.journalId) return;
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/editor/journals/${article.journalId}/editors`, {
+      const isSuperOrMother = currentUser && ['super_admin', 'mother_admin'].includes(currentUser.role);
+      
+      // Fetch the journal's actual editorial board to display roles accurately
+      const boardRes = await fetch(`/api/editor/journals/${article.journalId}/editors`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (boardRes.ok) {
+        const boardData = await boardRes.json();
+        setJournalEditorialBoard(boardData.editors || []);
+      }
+
+      const url = isSuperOrMother
+        ? `/api/editor/users?role=editor&limit=100`
+        : `/api/editor/journals/${article.journalId}/editors`;
+
+      const response = await fetch(url, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (response.ok) {
         const data = await response.json();
-        setJournalEditors(data.editors || []);
+        if (isSuperOrMother) {
+          const systemEditors = (data.users || []).map((u: any) => ({
+            id: u.id,
+            userId: u.id,
+            role: 'editor',
+            user: u
+          }));
+          setJournalEditors(systemEditors);
+        } else {
+          setJournalEditors(data.editors || []);
+        }
       }
     } catch (e) {
       console.error("Failed to fetch journal editors", e);
@@ -1142,6 +1168,55 @@ export default function AdminArticleDetailPage() {
               </div>
             </div>
 
+            {/* Assigned Paper Editors List */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                Assigned Editors
+              </h2>
+              {article.editors && article.editors.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {article.editors.map((editorObj: any) => {
+                    // Find editor role on the journal
+                    const boardMatch = journalEditorialBoard.find(boardJe => boardJe.userId === editorObj.userId);
+                    const rawRole = boardMatch?.role || 'editorial_board_member';
+                    const roleLabel =
+                      rawRole === 'editor_in_chief' ? 'Editor-in-Chief' :
+                      rawRole === 'assistant_editor' ? 'Assistant Editor' :
+                      rawRole === 'editorial_board_member' ? 'Editorial Board Member' :
+                      'Editor';
+
+                    return (
+                      <div key={editorObj.id} className="flex items-center gap-4 p-4 border border-gray-100 rounded-xl bg-gray-50/50 hover:bg-indigo-50/20 hover:border-indigo-100 transition-all">
+                        {/* Avatar */}
+                        <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm shrink-0 border border-indigo-200">
+                          {(editorObj.user?.name || 'E').charAt(0).toUpperCase()}
+                        </div>
+                        {/* Info */}
+                        <div className="min-w-0 flex-1">
+                          <p className="font-bold text-gray-800 text-sm truncate">{editorObj.user?.name}</p>
+                          <p className="text-xs text-gray-500 truncate">{editorObj.user?.email}</p>
+                          <div className="mt-1">
+                            <span className={`inline-flex items-center text-xs px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+                              rawRole === 'editor_in_chief' ? 'bg-amber-100 text-amber-800 border border-amber-200' :
+                              rawRole === 'assistant_editor' ? 'bg-teal-100 text-teal-800 border border-teal-200' :
+                              'bg-indigo-100 text-indigo-800 border border-indigo-200'
+                            }`}>
+                              {roleLabel}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-gray-500 text-sm">No editors assigned to this paper yet.</p>
+              )}
+            </div>
+
             {/* Reviewers List */}
             <div className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-xl font-bold mb-4">Reviews</h2>
@@ -1275,10 +1350,14 @@ export default function AdminArticleDetailPage() {
                 setIsSavingArticleEditors(true);
                 try {
                   const token = localStorage.getItem('token');
+                  const finalUserIds = [
+                    ...assignedIds.filter((id: string) => !pendingEditorIds.includes(id)),
+                    ...pendingEditorIds.filter((id: string) => !assignedIds.includes(id))
+                  ];
                   const res = await fetch(`/api/editor/articles/${article.id}/assign-editors`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userIds: pendingEditorIds })
+                    body: JSON.stringify({ userIds: finalUserIds })
                   });
                   if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'Failed'); }
                   toast.success('Editor assignments updated');
@@ -1327,9 +1406,12 @@ export default function AdminArticleDetailPage() {
                         // toggle: pending overrides assigned when present
                         const isChecked = isPending ? !isAlreadyAssigned : isAlreadyAssigned;
 
+                        const boardMatch = journalEditorialBoard.find(boardJe => boardJe.userId === je.userId);
+                        const displayRole = boardMatch ? boardMatch.role : je.role;
+
                         const roleLabel =
-                          je.role === 'editor_in_chief' ? 'Editor-in-Chief' :
-                          je.role === 'assistant_editor' ? 'Assistant Editor' :
+                          displayRole === 'editor_in_chief' ? 'Editor-in-Chief' :
+                          displayRole === 'assistant_editor' ? 'Assistant Editor' :
                           'Editorial Board Member';
 
                         return (

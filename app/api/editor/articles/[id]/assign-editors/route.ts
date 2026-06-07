@@ -87,6 +87,13 @@ export async function POST(
     const invalidUserIds = userIds.filter(id => !validUserIds.includes(id));
 
     if (invalidUserIds.length > 0) {
+      if (!isAdmin) {
+        return NextResponse.json(
+          { error: "Forbidden - As Editorial Chief, you can only assign editors who are members of this journal's editorial board." },
+          { status: 403 }
+        );
+      }
+
       // Validate that these invalidUserIds are valid system users with editor roles
       const systemEditors = await prisma.user.findMany({
         where: {

@@ -212,7 +212,7 @@ export default function IssuesPage() {
                         <p className="text-gray-500">Try adjusting your search or filters</p>
                     </div>
                 ) : (
-                    <div className="bg-white rounded-lg shadowoverflow-hidden border border-gray-200">
+                    <div className="bg-white rounded-lg shadow border border-gray-200 overflow-x-auto">
                         {isLoading && (
                             <div className="p-4 bg-yellow-50 text-yellow-800 text-sm text-center">
                                 Refreshing results...

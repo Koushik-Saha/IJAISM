@@ -11,7 +11,7 @@ test.describe('Submitter Author & Tab Rules', () => {
 
         // Title and abstract
         await page.locator('input[placeholder="Enter manuscript title"]').fill('A Study on Submitter Auto Append Rules');
-        await page.locator('textarea[placeholder="Enter your abstract (150-300 words)"]').fill(
+        await page.locator('textarea[placeholder="Enter your abstract"]').fill(
             'This abstract is between 150 and 300 words. Let\'s make it long enough. The submitter author@c5k.com should be appended automatically to the list if they are not in the list explicitly. We are testing this behaviour in this test case. It should place the author at the very end of the list. If they do not add any other co-author, they will be the sole author. If they add other co-authors, they will be placed at the very end of the co-authors sequence list. This ensures regular submitters are always marked as authors of their papers. Testing regular user submit flow for c5k publishing system. We need to add more words to meet the minimum abstract length validation of 150 words. Therefore, we write more descriptions about the submitter auto assignment rule. The rule states that super admins and mother admins are never automatically assigned as authors when they submit a paper. However, all other users are automatically assigned. This is validated.'
         );
 
@@ -60,7 +60,7 @@ test.describe('Submitter Author & Tab Rules', () => {
 
         // Fill form
         await page.locator('input[placeholder="Enter manuscript title"]').fill('Admin Submission Rule Spec');
-        await page.locator('textarea[placeholder="Enter your abstract (150-300 words)"]').fill(
+        await page.locator('textarea[placeholder="Enter your abstract"]').fill(
             'This abstract is between 150 and 300 words. Let\'s make it long enough. The submitter author@c5k.com should be appended automatically to the list if they are not in the list explicitly. We are testing this behaviour in this test case. It should place the author at the very end of the list. If they do not add any other co-author, they will be the sole author. If they add other co-authors, they will be placed at the very end of the co-authors sequence list. This ensures regular submitters are always marked as authors of their papers. Testing regular user submit flow for c5k publishing system. We need to add more words to meet the minimum abstract length validation of 150 words. Therefore, we write more descriptions about the submitter auto assignment rule. The rule states that super admins and mother admins are never automatically assigned as authors when they submit a paper. However, all other users are automatically assigned. This is validated.'
         );
         await page.locator('select').first().selectOption({ label: 'JITMB' });

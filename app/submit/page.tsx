@@ -232,13 +232,6 @@ function SubmitFormContent() {
 
     if (!formData.abstract.trim()) {
       errors.abstract = 'Abstract is required';
-    } else {
-      const wordCount = formData.abstract.trim().split(/\s+/).filter(Boolean).length;
-      if (wordCount < 150) {
-        errors.abstract = `Abstract is too short (${wordCount} words). Minimum 150 words required.`;
-      } else if (wordCount > 300) {
-        errors.abstract = `Abstract is too long (${wordCount} words). Maximum 300 words allowed.`;
-      }
     }
 
     if (!formData.keywords.trim()) {
@@ -752,14 +745,14 @@ function SubmitFormContent() {
                 rows={8}
                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent ${validationErrors.abstract ? 'border-red-500 bg-red-50' : 'border-gray-300'
                   }`}
-                placeholder="Enter your abstract (150-300 words)"
+                placeholder="Enter your abstract"
                 value={formData.abstract}
                 onChange={(e) => setFormData({ ...formData, abstract: e.target.value })}
               />
               <div className="flex justify-between items-center mt-1">
                 <p className={`text-sm ${validationErrors.abstract ? 'text-red-600 font-semibold' : 'text-gray-600'
                   }`}>
-                  Word count: {formData.abstract.split(/\s+/).filter(Boolean).length} / 150-300 words
+                  Word count: {formData.abstract.split(/\s+/).filter(Boolean).length} words
                 </p>
               </div>
             </div>

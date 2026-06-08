@@ -76,13 +76,18 @@ export async function GET(req: NextRequest) {
             whereClause.year = parseInt(year);
         }
 
-        if (search) {
-            whereClause.OR = [
-                { title: { contains: search, mode: 'insensitive' } },
-                { description: { contains: search, mode: 'insensitive' } },
-                { journal: { fullName: { contains: search, mode: 'insensitive' } } },
-                { journal: { code: { contains: search, mode: 'insensitive' } } }
-            ];
+        const searchNormalized = search ? search.replace(/[\u00a0\u2007\u202F\u2000-\u200A]/g, ' ').trim() : '';
+        const searchTokens = searchNormalized.split(/\s+/).filter(Boolean);
+
+        if (searchTokens.length > 0) {
+            whereClause.AND = searchTokens.map(token => ({
+                OR: [
+                    { title: { contains: token, mode: 'insensitive' } },
+                    { description: { contains: token, mode: 'insensitive' } },
+                    { journal: { fullName: { contains: token, mode: 'insensitive' } } },
+                    { journal: { code: { contains: token, mode: 'insensitive' } } }
+                ]
+            }));
         }
 
         const [total, issues] = await Promise.all([

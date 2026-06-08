@@ -307,7 +307,7 @@ export default function IssueDetailsPage() {
 
                 {/* Assigned Articles */}
                 <div className="lg:col-span-2">
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-x-auto">
                         <div className="px-6 py-4 border-b border-gray-200">
                             <h2 className="text-lg font-bold text-gray-900">
                                 Assigned Articles ({issue.articles?.length || 0})

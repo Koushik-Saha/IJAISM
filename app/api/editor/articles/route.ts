@@ -59,6 +59,9 @@ export async function GET(req: NextRequest) {
       }
     };
 
+    const searchNormalized = search ? search.replace(/[\u00a0\u2007\u202F\u2000-\u200A]/g, ' ').trim() : '';
+    const searchTokens = searchNormalized.split(/\s+/).filter(Boolean);
+
     // Apply RBAC Filter
     if (user.role === 'editor') {
       const accessConditions = {
@@ -68,27 +71,29 @@ export async function GET(req: NextRequest) {
         ]
       };
       
-      if (search) {
+      if (searchTokens.length > 0) {
         where.AND = [
           accessConditions,
-          {
+          ...searchTokens.map(token => ({
             OR: [
-              { title: { contains: search, mode: 'insensitive' } },
-              { doi: { contains: search, mode: 'insensitive' } },
-              { author: { name: { contains: search, mode: 'insensitive' } } },
+              { title: { contains: token, mode: 'insensitive' } },
+              { doi: { contains: token, mode: 'insensitive' } },
+              { author: { name: { contains: token, mode: 'insensitive' } } },
             ]
-          }
+          }))
         ];
       } else {
         where.AND = [accessConditions];
       }
     } else {
-      if (search) {
-        where.OR = [
-          { title: { contains: search, mode: 'insensitive' } },
-          { doi: { contains: search, mode: 'insensitive' } },
-          { author: { name: { contains: search, mode: 'insensitive' } } },
-        ];
+      if (searchTokens.length > 0) {
+        where.AND = searchTokens.map(token => ({
+          OR: [
+            { title: { contains: token, mode: 'insensitive' } },
+            { doi: { contains: token, mode: 'insensitive' } },
+            { author: { name: { contains: token, mode: 'insensitive' } } },
+          ]
+        }));
       }
     }
 

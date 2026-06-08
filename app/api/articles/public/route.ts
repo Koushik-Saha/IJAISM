@@ -28,12 +28,17 @@ export async function GET(req: NextRequest) {
       };
     }
 
-    if (search) {
-      where.OR = [
-        { title: { contains: search, mode: 'insensitive' } },
-        { abstract: { contains: search, mode: 'insensitive' } },
-        { keywords: { has: search } },
-      ];
+    const searchNormalized = search ? search.replace(/[\u00a0\u2007\u202F\u2000-\u200A]/g, ' ').trim() : '';
+    const searchTokens = searchNormalized.split(/\s+/).filter(Boolean);
+
+    if (searchTokens.length > 0) {
+      where.AND = searchTokens.map(token => ({
+        OR: [
+          { title: { contains: token, mode: 'insensitive' } },
+          { abstract: { contains: token, mode: 'insensitive' } },
+          { keywords: { has: token } },
+        ]
+      }));
     }
 
     if (articleType) {

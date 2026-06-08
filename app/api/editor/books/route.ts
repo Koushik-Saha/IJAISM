@@ -52,12 +52,17 @@ export async function GET(req: NextRequest) {
                 deletedAt: null,
             };
 
-            if (search) {
-                articleWhere.OR = [
-                    { title: { contains: search, mode: "insensitive" } },
-                    { author: { name: { contains: search, mode: "insensitive" } } },
-                    { author: { email: { contains: search, mode: "insensitive" } } },
-                ];
+            const searchNormalized = search ? search.replace(/[\u00a0\u2007\u202F\u2000-\u200A]/g, ' ').trim() : '';
+            const searchTokens = searchNormalized.split(/\s+/).filter(Boolean);
+
+            if (searchTokens.length > 0) {
+                articleWhere.AND = searchTokens.map(token => ({
+                    OR: [
+                        { title: { contains: token, mode: "insensitive" } },
+                        { author: { name: { contains: token, mode: "insensitive" } } },
+                        { author: { email: { contains: token, mode: "insensitive" } } },
+                    ]
+                }));
             }
 
             const [articles, total] = await Promise.all([
@@ -96,13 +101,18 @@ export async function GET(req: NextRequest) {
 
         const where: any = {};
 
-        if (search) {
-            where.OR = [
-                { title: { contains: search, mode: "insensitive" } },
-                { isbn: { contains: search, mode: "insensitive" } },
-                { publisher: { contains: search, mode: "insensitive" } },
-                { authors: { has: search } },
-            ];
+        const searchNormalized = search ? search.replace(/[\u00a0\u2007\u202F\u2000-\u200A]/g, ' ').trim() : '';
+        const searchTokens = searchNormalized.split(/\s+/).filter(Boolean);
+
+        if (searchTokens.length > 0) {
+            where.AND = searchTokens.map(token => ({
+                OR: [
+                    { title: { contains: token, mode: "insensitive" } },
+                    { isbn: { contains: token, mode: "insensitive" } },
+                    { publisher: { contains: token, mode: "insensitive" } },
+                    { authors: { has: token } },
+                ]
+            }));
         }
 
         const [books, total] = await Promise.all([

@@ -41,11 +41,39 @@ export default function NotificationBell() {
         }
     };
 
-    // Polling Effect - reduced to 15s for better responsiveness
+    // Polling Effect - visibility-aware with 60s polling interval
     useEffect(() => {
-        fetchNotifications();
-        const interval = setInterval(fetchNotifications, 15000);
-        return () => clearInterval(interval);
+        let interval: any;
+
+        const startPolling = () => {
+            if (interval) clearInterval(interval);
+            interval = setInterval(fetchNotifications, 60000);
+        };
+
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                fetchNotifications();
+                startPolling();
+            } else {
+                if (interval) {
+                    clearInterval(interval);
+                    interval = null;
+                }
+            }
+        };
+
+        // Initial fetch and start polling if page is visible
+        if (document.visibilityState === 'visible') {
+            fetchNotifications();
+            startPolling();
+        }
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        return () => {
+            if (interval) clearInterval(interval);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
     }, []);
 
     // Listen for updates from the notifications page

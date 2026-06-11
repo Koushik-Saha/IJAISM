@@ -26,7 +26,7 @@ const announcements = [
     publishedAt: new Date("2024-01-15"),
     author: "Editorial Team",
     isFeatured: true,
-    thumbnailUrl: "https://images.unsplash.com/photo-1506880018603-83d5b814b5a6?auto=format&fit=crop&q=80&w=800"
+    thumbnailUrl: "/images/announcements/editorial_board.png"
   },
   {
     title: "ICAIML 2024 Conference Registration Now Open",
@@ -49,7 +49,7 @@ const announcements = [
     publishedAt: new Date("2024-01-10"),
     author: "Conference Committee",
     isFeatured: true,
-    thumbnailUrl: "https://images.unsplash.com/photo-1544531586-fde5298cdd40?auto=format&fit=crop&q=80&w=800"
+    thumbnailUrl: "/images/announcements/icaiml_conference.png"
   },
   {
     title: "C5K Publications Research Scholarship Program Announced",
@@ -70,7 +70,7 @@ const announcements = [
     publishedAt: new Date("2024-01-05"),
     author: "C5K Grants Committee",
     isFeatured: false,
-    thumbnailUrl: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&q=80&w=800"
+    thumbnailUrl: "/images/announcements/scholarship.png"
   },
   {
     title: "Updated Author Guidelines for 2024",
@@ -85,7 +85,7 @@ const announcements = [
     publishedAt: new Date("2024-01-03"),
     author: "C5K Admin",
     isFeatured: false,
-    thumbnailUrl: "https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&q=80&w=800"
+    thumbnailUrl: "/images/announcements/guidelines.png"
   },
   {
     title: "New Editorial Board Members Appointed",
@@ -100,7 +100,7 @@ const announcements = [
     publishedAt: new Date("2023-12-28"),
     author: "Editor-in-Chief",
     isFeatured: false,
-    thumbnailUrl: "https://images.unsplash.com/photo-1488190211105-8b0e65b80b4e?auto=format&fit=crop&q=80&w=800"
+    thumbnailUrl: "/images/announcements/editorial_board.png"
   },
   {
     title: "Call for Papers: Business Analytics Special Issue",
@@ -116,7 +116,7 @@ const announcements = [
     publishedAt: new Date("2023-12-20"),
     author: "Editorial Team",
     isFeatured: true,
-    thumbnailUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800"
+    thumbnailUrl: "/images/announcements/business_analytics.png"
   },
   {
     title: "C5K Platform Update: Enhanced Features",
@@ -131,7 +131,7 @@ const announcements = [
     publishedAt: new Date("2023-12-15"),
     author: "Tech Support",
     isFeatured: false,
-    thumbnailUrl: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=800"
+    thumbnailUrl: "/images/announcements/guidelines.png"
   },
   {
     title: "Partnership with Leading Universities",
@@ -145,7 +145,7 @@ const announcements = [
     publishedAt: new Date("2023-12-10"),
     author: "C5K Board",
     isFeatured: true,
-    thumbnailUrl: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&q=80&w=800"
+    thumbnailUrl: "/images/announcements/guidelines.png"
   }
 ];
 

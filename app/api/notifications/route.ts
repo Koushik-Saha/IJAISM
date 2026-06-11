@@ -16,18 +16,19 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const notifications = await prisma.notification.findMany({
-            where: { userId: decoded.userId },
-            orderBy: { createdAt: 'desc' },
-            take: 20
-        });
-
-        const unreadCount = await prisma.notification.count({
-            where: {
-                userId: decoded.userId,
-                isRead: false
-            }
-        });
+        const [notifications, unreadCount] = await prisma.$transaction([
+            prisma.notification.findMany({
+                where: { userId: decoded.userId },
+                orderBy: { createdAt: 'desc' },
+                take: 20
+            }),
+            prisma.notification.count({
+                where: {
+                    userId: decoded.userId,
+                    isRead: false
+                }
+            })
+        ]);
 
         return NextResponse.json({ notifications, unreadCount });
     } catch (error) {

@@ -136,7 +136,7 @@ Despite these exciting developments, several challenges remain:
 
 The future of academic publishing is bright, but it requires collaboration between researchers, publishers, institutions, and technology providers to create a system that serves the global research community effectively.
         `,
-        featuredImageUrl: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=1200',
+        featuredImageUrl: '/images/hero/community.png',
         status: 'published',
         publishedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
       },
@@ -211,7 +211,7 @@ Good writing is rewriting. Don't expect perfection in your first draft. Focus on
 
 Remember: Every published paper started as a blank page. With practice and persistence, you'll develop your unique writing voice and style.
         `,
-        featuredImageUrl: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=1200',
+        featuredImageUrl: '/images/hero/community.png',
         status: 'published',
         publishedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
       },
@@ -329,7 +329,7 @@ Appeals based solely on disagreement with the decision rarely succeed.
 
 Understanding the peer review process helps set realistic expectations and navigate the publication journey more effectively. Remember, peer review improves your work - embrace it as a learning opportunity.
         `,
-        featuredImageUrl: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=1200',
+        featuredImageUrl: '/images/hero/community.png',
         status: 'published',
         publishedAt: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000),
       },
@@ -490,7 +490,7 @@ The right tools can transform your research workflow, saving time and reducing f
 
 Remember: Tools are meant to support your research, not complicate it. Choose tools that genuinely solve problems you face in your workflow.
         `,
-        featuredImageUrl: 'https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=1200',
+        featuredImageUrl: '/images/hero/community.png',
         status: 'published',
         publishedAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
       },
@@ -680,7 +680,7 @@ Remember: Everyone was a first-timer once. Be yourself, be curious, and be open 
 
 **Pro Tip**: Keep a conference journal. After each conference, write down key takeaways, new contacts, and how the experience influenced your research direction. You'll be amazed how much you learn and grow over time.
         `,
-        featuredImageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200',
+        featuredImageUrl: '/images/hero/community.png',
         status: 'published',
         publishedAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000),
       },

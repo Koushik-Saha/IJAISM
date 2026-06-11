@@ -7,7 +7,7 @@ async function run() {
     if (slide.imageUrl && slide.imageUrl.includes('1532094349884')) {
       await prisma.heroSlide.update({
         where: { id: slide.id },
-        data: { imageUrl: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&q=80&w=1920' }
+        data: { imageUrl: '/images/hero/research_publishing.png' }
       });
       console.log('Fixed:', slide.id);
     }

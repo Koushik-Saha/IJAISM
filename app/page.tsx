@@ -162,7 +162,7 @@ export default async function HomePage() {
   const safeHeroSlides = heroSlides.map(slide => ({
     ...slide,
     imageUrl: slide.imageUrl?.includes('1532094349884') 
-        ? 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&q=80&w=1920' 
+        ? '/images/hero/research_publishing.png' 
         : slide.imageUrl
   }));
 

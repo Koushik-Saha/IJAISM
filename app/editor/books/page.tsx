@@ -108,8 +108,12 @@ export default function BooksPage() {
         if (!selectedItem) return;
         try {
             const token = localStorage.getItem('token');
-            await fetch(`/api/editor/books?id=${selectedItem.id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
-            toast.success("Book deleted");
+            const url = selectedItem.isSubmission 
+                ? `/api/editor/articles/${selectedItem.id}`
+                : `/api/editor/books/${selectedItem.id}`;
+            const res = await fetch(url, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+            if (!res.ok) throw new Error("Delete failed");
+            toast.success(selectedItem.isSubmission ? "Submission deleted" : "Book deleted");
             setIsDeleteModalOpen(false);
             fetchData();
         } catch (e) { toast.error("Delete failed"); }
@@ -188,6 +192,8 @@ export default function BooksPage() {
             render: (item: any) => (
                 <div className="flex justify-end gap-2">
                     <Link href={`/editor/articles/${item.id}`} className="text-blue-600 hover:underline text-sm font-bold">Review</Link>
+                    <Link href={`/editor/articles/${item.id}/edit`} className="text-gray-600 hover:underline text-sm font-bold">Edit</Link>
+                    <button onClick={() => { setSelectedItem({ ...item, isSubmission: true }); setIsDeleteModalOpen(true); }} className="text-red-600 hover:underline text-sm font-bold">Delete</button>
                 </div>
             )
         }
@@ -233,7 +239,15 @@ export default function BooksPage() {
                         <Link href="/editor" className="inline-flex items-center px-4 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-all active:scale-95 shadow-sm">
                             ← Back
                         </Link>
-                        <Link href="/submit?type=book" className="btn-primary font-bold px-5 py-2.5 rounded-xl shadow-lg transition-all active:scale-95 text-sm inline-block text-center">+ New Book</Link>
+                        {activeTab === "published" ? (
+                            <button onClick={openCreate} className="btn-primary font-bold px-5 py-2.5 rounded-xl shadow-lg transition-all active:scale-95 text-sm inline-block text-center">
+                                + New Book
+                            </button>
+                        ) : (
+                            <Link href="/editor/books/new-submission" className="btn-primary font-bold px-5 py-2.5 rounded-xl shadow-lg transition-all active:scale-95 text-sm inline-block text-center">
+                                + New Book Submission
+                            </Link>
+                        )}
                     </div>
                 </div>
             </div>

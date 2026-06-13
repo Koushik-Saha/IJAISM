@@ -175,9 +175,9 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized - Invalid token" }, { status: 401 });
     }
 
-    if (decoded.role !== "mother_admin") {
+    if (!["super_admin", "mother_admin"].includes(decoded.role)) {
       return NextResponse.json(
-        { error: "Forbidden - Only Mother Admin can delete articles" },
+        { error: "Forbidden - Only Super Admin or Mother Admin can delete articles" },
         { status: 403 }
       );
     }

@@ -8,7 +8,7 @@ export default function EditorLayout({
     children: React.ReactNode;
 }) {
     return (
-        <RoleGuard allowedRoles={["editor", "super_admin"]}>
+        <RoleGuard allowedRoles={["editor", "super_admin", "admin"]}>
             {children}
         </RoleGuard>
     );

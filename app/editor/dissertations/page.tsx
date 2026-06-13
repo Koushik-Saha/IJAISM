@@ -15,6 +15,7 @@ export default function DissertationsPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [users, setUsers] = useState<any[]>([]);
 
     // Auth Check State
     const [isAuthorized, setIsAuthorized] = useState(false);
@@ -45,7 +46,10 @@ export default function DissertationsPage() {
     }, []);
 
     useEffect(() => {
-        if (isAuthorized) fetchData();
+        if (isAuthorized) {
+            fetchData();
+            fetchUsers();
+        }
     }, [page, isAuthorized, appliedSearch, activeTab]);
 
     useEffect(() => {
@@ -93,11 +97,26 @@ export default function DissertationsPage() {
         }
     };
 
+    const fetchUsers = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('/api/editor/users?limit=100', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (data.success || data.users) {
+                setUsers(data.users || []);
+            }
+        } catch (e) {
+            console.error("Failed to fetch users", e);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
             const token = localStorage.getItem('token');
-            const url = '/api/editor/dissertations';
+            const url = selectedItem ? `/api/editor/dissertations/${selectedItem.id}` : '/api/editor/dissertations';
             const method = selectedItem ? 'PATCH' : 'POST';
             const body = selectedItem ? { ...formData, id: selectedItem.id } : formData;
 
@@ -121,11 +140,15 @@ export default function DissertationsPage() {
         if (!selectedItem) return;
         try {
             const token = localStorage.getItem('token');
-            await fetch(`/api/editor/dissertations?id=${selectedItem.id}`, {
+            const url = selectedItem.isSubmission
+                ? `/api/editor/articles/${selectedItem.id}`
+                : `/api/editor/dissertations/${selectedItem.id}`;
+            const res = await fetch(url, {
                 method: 'DELETE',
                 headers: { Authorization: `Bearer ${token}` }
             });
-            toast.success("Dissertation deleted");
+            if (!res.ok) throw new Error("Delete failed");
+            toast.success(selectedItem.isSubmission ? "Submission deleted" : "Dissertation deleted");
             setIsDeleteModalOpen(false);
             fetchData();
         } catch (e) {
@@ -208,6 +231,8 @@ export default function DissertationsPage() {
             render: (item: any) => (
                 <div className="flex justify-end gap-2">
                     <Link href={`/editor/articles/${item.id}`} className="text-blue-600 hover:underline text-sm font-bold">Review</Link>
+                    <Link href={`/editor/articles/${item.id}/edit`} className="text-gray-600 hover:underline text-sm font-bold">Edit</Link>
+                    <button onClick={() => { setSelectedItem({ ...item, isSubmission: true }); setIsDeleteModalOpen(true); }} className="text-red-600 hover:underline text-sm font-bold">Delete</button>
                 </div>
             )
         }
@@ -241,7 +266,15 @@ export default function DissertationsPage() {
                         <Link href="/editor" className="inline-flex items-center px-4 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-all active:scale-95 shadow-sm">
                             ← Back
                         </Link>
-                        <Link href="/submit?type=dissertation" className="btn-primary font-bold px-5 py-2.5 rounded-xl shadow-lg transition-all active:scale-95 text-sm inline-block text-center">+ New Dissertation</Link>
+                        {activeTab === "published" ? (
+                            <button onClick={openCreate} className="btn-primary font-bold px-5 py-2.5 rounded-xl shadow-lg transition-all active:scale-95 text-sm inline-block text-center">
+                                + New Dissertation
+                            </button>
+                        ) : (
+                            <Link href="/editor/dissertations/new-submission" className="btn-primary font-bold px-5 py-2.5 rounded-xl shadow-lg transition-all active:scale-95 text-sm inline-block text-center">
+                                + New Dissertation Submission
+                            </Link>
+                        )}
                     </div>
                 </div>
             </div>
@@ -344,8 +377,20 @@ export default function DissertationsPage() {
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-sm font-bold mb-1">Author User ID (UUID)</label>
-                                <input required className="w-full border rounded p-2" value={formData.authorId} onChange={e => setFormData({ ...formData, authorId: e.target.value })} placeholder="UUID of the existing user" />
+                                <label className="block text-sm font-bold mb-1">Author <span className="text-red-500">*</span></label>
+                                <select
+                                    required
+                                    className="w-full border rounded p-2 text-sm bg-white"
+                                    value={formData.authorId}
+                                    onChange={e => setFormData({ ...formData, authorId: e.target.value })}
+                                >
+                                    <option value="">-- Select Author User --</option>
+                                    {users.map((u: any) => (
+                                        <option key={u.id} value={u.id}>
+                                            {u.name} ({u.email})
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
                             <div>
                                 <label className="block text-sm font-bold mb-1">Degree Type</label>

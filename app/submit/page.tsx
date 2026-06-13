@@ -222,7 +222,7 @@ function SubmitFormContent() {
   const validateForm = () => {
     const errors: Record<string, string> = {};
 
-    if (!formData.journal) {
+    if (!formData.journal && formData.submissionType !== 'book' && formData.submissionType !== 'dissertation') {
       errors.journal = 'Please select a journal';
     }
 
@@ -401,9 +401,14 @@ function SubmitFormContent() {
       }
 
       // Prepare submission data
+      let finalJournal = formData.journal;
+      if ((formData.submissionType === 'book' || formData.submissionType === 'dissertation') && !finalJournal && journals.length > 0) {
+        finalJournal = journals[0].code;
+      }
+
       const submissionData = {
         submissionType: formData.submissionType,
-        journal: formData.journal,
+        journal: finalJournal,
         title: formData.title,
         abstract: formData.abstract,
         keywords: formData.keywords,
@@ -700,26 +705,28 @@ function SubmitFormContent() {
               </select>
             </div>
 
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">
-                Select Journal <span className="text-red-500">*</span>
-              </label>
-              <select
-                required
-                disabled={loadingJournals}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent ${validationErrors.journal ? 'border-red-500 bg-red-50' : 'border-gray-300'
-                  } ${loadingJournals ? 'opacity-50 cursor-not-allowed' : ''}`}
-                value={formData.journal}
-                onChange={(e) => setFormData({ ...formData, journal: e.target.value })}
-              >
-                <option value="">{loadingJournals ? 'Loading journals...' : '-- Choose a journal --'}</option>
-                {journals.map((journal) => (
-                  <option key={journal.id} value={journal.code}>
-                    {journal.fullName}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {formData.submissionType !== 'book' && formData.submissionType !== 'dissertation' && (
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  Select Journal <span className="text-red-500">*</span>
+                </label>
+                <select
+                  required
+                  disabled={loadingJournals}
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent ${validationErrors.journal ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                    } ${loadingJournals ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  value={formData.journal}
+                  onChange={(e) => setFormData({ ...formData, journal: e.target.value })}
+                >
+                  <option value="">{loadingJournals ? 'Loading journals...' : '-- Choose a journal --'}</option>
+                  {journals.map((journal) => (
+                    <option key={journal.id} value={journal.code}>
+                      {journal.fullName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2">

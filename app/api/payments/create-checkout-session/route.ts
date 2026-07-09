@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { verifyToken } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { getAppUrl } from '@/lib/email/client';
 
 export async function POST(req: NextRequest) {
     try {
@@ -47,8 +48,8 @@ export async function POST(req: NextRequest) {
                 },
             ],
             mode: 'subscription',
-            success_url: `${process.env.NEXT_PUBLIC_APP_URL}/membership/success?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/membership/cancel`,
+            success_url: `${getAppUrl()}/membership/success?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${getAppUrl()}/membership/cancel`,
             customer_email: decoded.email,
             metadata: {
                 userId: decoded.userId,

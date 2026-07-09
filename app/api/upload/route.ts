@@ -111,7 +111,11 @@ export async function POST(req: NextRequest) {
       const publicDir = join(cwd(), 'public');
       
       // SECURITY: Validate fileType against a strict allowlist to prevent Path Traversal
-      const validFileTypes = ['article', 'issue', 'journal', 'book', 'conference', 'dissertation', 'profile', 'announcement', 'blog'];
+      const validFileTypes = [
+        'article', 'issue', 'journal', 'book', 'books', 'conference', 'conferences', 
+        'dissertation', 'thesis', 'profile', 'profile-photos', 'announcement', 'blog', 
+        'manuscript', 'coverLetter', 'supplementaryFile', 'reviewerFile', 'misc', 'issue-covers'
+      ];
       const safeFileType = validFileTypes.includes(fileType) ? fileType : 'misc';
       
       const uploadDir = join(publicDir, 'uploads', safeFileType);

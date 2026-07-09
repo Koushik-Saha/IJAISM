@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
+import { getAppUrl } from '@/lib/email/client';
 import { articleSubmissionSchema } from '@/lib/validations/article';
 import { sendArticleSubmissionEmail, sendCoAuthorNotification } from '@/lib/email/send';
 import { canUserSubmit, getMembershipStatus } from '@/lib/membership';
@@ -432,7 +433,7 @@ async function getOrCreateCoAuthorUserId(
   // Send credentials email
   try {
     const subject = `Welcome to C5K Journals - Account Created as Co-Author`;
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const appUrl = getAppUrl();
     const html = `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; line-height: 1.6; color: #333;">
         <h2 style="color: #4F46E5;">Listed as Co-Author</h2>

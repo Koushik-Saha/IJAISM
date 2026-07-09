@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { verifyToken } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { getAppUrl } from '@/lib/email/client';
 
 export async function POST(req: NextRequest) {
     try {
@@ -52,8 +53,8 @@ export async function POST(req: NextRequest) {
                 },
             ],
             mode: 'payment',
-            success_url: `${process.env.NEXT_PUBLIC_APP_URL}/books/${book.id}?success=true`,
-            cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/books/${book.id}?canceled=true`,
+            success_url: `${getAppUrl()}/books/${book.id}?success=true`,
+            cancel_url: `${getAppUrl()}/books/${book.id}?canceled=true`,
             customer_email: decoded.email,
             metadata: {
                 userId: decoded.userId,

@@ -1,5 +1,6 @@
 
 import { NextRequest, NextResponse } from 'next/server';
+import { getAppUrl } from '@/lib/email/client';
 
 export async function GET(req: NextRequest) {
     const clientId = process.env.ORCID_CLIENT_ID;
@@ -7,7 +8,7 @@ export async function GET(req: NextRequest) {
     const scope = '/authenticate /activities/update';
 
     // Determine Redirect URI dynamically or from env
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://c5k-platform.vercel.app';
+    const baseUrl = getAppUrl();
     const redirectUri = `${baseUrl}/api/auth/orcid/callback`;
 
     const orcidAuthUrl = process.env.ORCID_ENV === 'sandbox'

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 import { exchangeOrcidCode } from '@/lib/orcid/client';
+import { getAppUrl } from '@/lib/email/client';
 
 export async function POST(req: NextRequest) {
     try {
@@ -19,7 +20,7 @@ export async function POST(req: NextRequest) {
         if (!code) return NextResponse.json({ error: 'Code required' }, { status: 400 });
 
         // 2. Exchange Code
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://c5k-platform.vercel.app';
+        const baseUrl = getAppUrl();
         const redirectUri = `${baseUrl}/api/auth/orcid/callback`;
 
         const orcidData = await exchangeOrcidCode(code, redirectUri);

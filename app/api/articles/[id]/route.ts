@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { generateSignedFileToken } from "@/lib/security/url-signer";
 import { verifyToken } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { getAppUrl } from '@/lib/email/client';
 
 export async function GET(
   req: NextRequest,
@@ -93,7 +94,7 @@ export async function GET(
     }
 
     // 5. Secure File Access & Mask Data
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const appUrl = getAppUrl();
     
     (article.reviews as any) = article.reviews.map((review, index) => {
       let safeReview = { ...review } as any;

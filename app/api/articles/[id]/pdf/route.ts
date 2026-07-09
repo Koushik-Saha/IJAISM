@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyToken } from "@/lib/auth";
 import { generateSignedFileToken } from "@/lib/security/url-signer";
+import { getAppUrl } from "@/lib/email/client";
 
 export async function GET(
     request: Request,
@@ -164,7 +165,7 @@ export async function GET(
         const signedToken = generateSignedFileToken(targetUrl, 3600);
 
         // Construct Secure URL
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || url.origin;
+        const appUrl = getAppUrl();
         const secureUrl = `${appUrl}/api/secure-file?token=${signedToken}`;
 
         // Redirect

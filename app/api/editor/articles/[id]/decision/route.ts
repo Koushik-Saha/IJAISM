@@ -4,6 +4,7 @@ import { verifyToken } from '@/lib/auth';
 import { sendArticleStatusUpdateEmail } from '@/lib/email/send';
 import { registerDoi } from '@/lib/doi/crossref';
 import { pushToOrcid } from '@/lib/orcid/client';
+import { getAppUrl } from '@/lib/email/client';
 
 export async function POST(
     req: NextRequest,
@@ -147,7 +148,7 @@ export async function POST(
              * For MVP, we await it or let it run but catch errors so we don't block the UI response.
              */
             try {
-                const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://c5k.com';
+                const appUrl = getAppUrl();
                 await registerDoi({
                     id: article.id,
                     doi: doi || '',
@@ -168,7 +169,7 @@ export async function POST(
             // Trigger ORCID Push
             if (article.author.orcid && article.author.orcidAccessToken) {
                 try {
-                    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://c5k.com';
+                   const appUrl = getAppUrl();
                     await pushToOrcid(
                         article.author.orcid,
                         article.author.orcidAccessToken,

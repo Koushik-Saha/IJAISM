@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 import { exchangeOrcidCode } from '@/lib/orcid/client';
+import { getAppUrl } from '@/lib/email/client';
 
 // Helper to get cookie because verifyToken usually checks header, but here we might need to check cookie if this is a browser redirect
 // Or we assume the user triggers this from settings and we link by matching... wait.
@@ -24,7 +25,7 @@ export async function GET(req: NextRequest) {
 
     try {
         // Exchange Code
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+        const baseUrl = getAppUrl();
         const redirectUri = `${baseUrl}/api/auth/orcid/callback`;
 
         const tokenData = await exchangeOrcidCode(code, redirectUri);
@@ -82,6 +83,6 @@ export async function GET(req: NextRequest) {
 
     } catch (error) {
         console.error("ORCID Callback Error", error);
-        return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/dashboard/profile?error=orcid_failed`);
+        return NextResponse.redirect(`${getAppUrl()}/dashboard/profile?error=orcid_failed`);
     }
 }

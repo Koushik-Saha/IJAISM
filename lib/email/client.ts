@@ -6,8 +6,21 @@ export const EMAIL_CONFIG = {
   get fromName() { return process.env.SMTP_FROM_NAME || 'C5K'; },
   get replyTo() { return process.env.SMTP_FROM_EMAIL || 'c5kpublication@gmail.com'; },
   get appName() { return process.env.NEXT_PUBLIC_APP_NAME || 'C5K Publications'; },
-  get appUrl() { return process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'; },
+  get appUrl() { 
+    return getAppUrl();
+  },
 };
+
+export function getAppUrl(): string {
+  const envUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL;
+  if (process.env.VERCEL_URL) {
+    if (envUrl && !envUrl.includes('localhost')) {
+      return envUrl;
+    }
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  return envUrl || 'http://localhost:3000';
+}
 
 // Initialize Brevo client (new SDK style)
 export function getBrevoClient(): BrevoClient | null {

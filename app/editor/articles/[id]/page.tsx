@@ -2301,6 +2301,8 @@ export default function AdminArticleDetailPage() {
                         <option value="Review">Review</option>
                         <option value="Mini Review">Mini Review</option>
                         <option value="Communication">Communication</option>
+                        <option value="book">Book</option>
+                        <option value="dissertation">Thesis/Dissertation</option>
                       </select>
                     </div>
                   </div>

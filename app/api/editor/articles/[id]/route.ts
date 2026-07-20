@@ -63,6 +63,7 @@ export async function PATCH(
       acceptanceDate,
       publicationDate,
       coAuthors,
+      doi,
     } = body;
 
     if (!title || !title.trim()) {
@@ -105,6 +106,7 @@ export async function PATCH(
         isOpenAccess: isOpenAccess !== undefined ? !!isOpenAccess : true,
         isBestPaper: isBestPaper !== undefined ? !!isBestPaper : false,
         pdfUrl: pdfUrl?.trim() || null,
+        doi: doi?.trim() || null,
         submissionDate: parseDate(submissionDate),
         acceptanceDate: parseDate(acceptanceDate),
         publicationDate: parseDate(publicationDate),

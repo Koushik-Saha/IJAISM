@@ -7,9 +7,9 @@ export const articleSubmissionSchema = z.object({
         .min(10, 'Abstract is required')
         .refine((val) => {
             const wordCount = val.trim().split(/\s+/).filter(Boolean).length;
-            return wordCount >= 150 && wordCount <= 300;
+            return wordCount <= 300;
         }, {
-            message: 'Abstract must be between 150 and 300 words',
+            message: 'Abstract must not exceed 300 words',
         }),
     keywords: z.union([
         z.string().transform((val) => val.split(',').map((k) => k.trim()).filter(Boolean)),

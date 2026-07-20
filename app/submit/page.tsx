@@ -232,6 +232,11 @@ function SubmitFormContent() {
 
     if (!formData.abstract.trim()) {
       errors.abstract = 'Abstract is required';
+    } else {
+      const wordCount = formData.abstract.trim().split(/\s+/).filter(Boolean).length;
+      if (wordCount > 300) {
+        errors.abstract = 'Abstract must not exceed 300 words';
+      }
     }
 
     if (!formData.keywords.trim()) {
@@ -757,10 +762,21 @@ function SubmitFormContent() {
                 onChange={(e) => setFormData({ ...formData, abstract: e.target.value })}
               />
               <div className="flex justify-between items-center mt-1">
-                <p className={`text-sm ${validationErrors.abstract ? 'text-red-600 font-semibold' : 'text-gray-600'
-                  }`}>
-                  Word count: {formData.abstract.split(/\s+/).filter(Boolean).length} words
-                </p>
+                {(() => {
+                  const wordCount = formData.abstract.split(/\s+/).filter(Boolean).length;
+                  if (wordCount > 300) {
+                    return (
+                      <p className="text-sm text-red-600 font-semibold">
+                        Abstract exceeded 300 words
+                      </p>
+                    );
+                  }
+                  return (
+                    <p className={`text-sm ${validationErrors.abstract ? 'text-red-600 font-semibold' : 'text-gray-600'}`}>
+                      Word count: {wordCount} words
+                    </p>
+                  );
+                })()}
               </div>
             </div>
 

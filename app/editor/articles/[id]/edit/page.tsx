@@ -63,15 +63,17 @@ const STATUS_OPTIONS = [
 ];
 
 const ARTICLE_TYPES = [
-  "Research Article",
-  "Review Article",
-  "Case Report",
-  "Review",
-  "Mini Review",
-  "Communication",
-  "Letter",
-  "Editorial",
-  "Short Communication",
+  { value: "Research Article", label: "Research Article" },
+  { value: "Review Article", label: "Review Article" },
+  { value: "Case Report", label: "Case Report" },
+  { value: "Review", label: "Review" },
+  { value: "Mini Review", label: "Mini Review" },
+  { value: "Communication", label: "Communication" },
+  { value: "Letter", label: "Letter" },
+  { value: "Editorial", label: "Editorial" },
+  { value: "Short Communication", label: "Short Communication" },
+  { value: "book", label: "Book" },
+  { value: "dissertation", label: "Thesis/Dissertation" }
 ];
 
 function toDateInputValue(val: string | null | undefined): string {
@@ -361,6 +363,7 @@ export default function EditArticlePage() {
           isOpenAccess,
           isBestPaper,
           pdfUrl: finalPdfUrl || null,
+          doi: doi.trim() || null,
           submissionDate: submissionDate || null,
           acceptanceDate: acceptanceDate || null,
           publicationDate: publicationDate || null,
@@ -674,11 +677,11 @@ export default function EditArticlePage() {
                   <input
                     type="text"
                     value={doi}
-                    readOnly
-                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-500 cursor-default"
+                    onChange={(e) => setDoi(e.target.value)}
+                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none bg-white transition"
                     placeholder="Not assigned"
                   />
-                  <p className="text-xs text-gray-400 mt-1">Use the inline pencil on the detail page to edit.</p>
+                  <p className="text-xs text-gray-400 mt-1">Enter a manual DOI or edit/assign it here.</p>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1.5">Article Type</label>
@@ -688,7 +691,7 @@ export default function EditArticlePage() {
                     className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none bg-white transition"
                   >
                     {ARTICLE_TYPES.map((t) => (
-                      <option key={t} value={t}>{t}</option>
+                      <option key={t.value} value={t.value}>{t.label}</option>
                     ))}
                   </select>
                 </div>

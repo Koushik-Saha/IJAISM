@@ -162,23 +162,33 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+    let userEmail = email?.trim();
+    if (!userEmail) {
+      if (![ROLES.MOTHER_ADMIN, ROLES.SUPER_ADMIN].includes(requester.role as any)) {
+        return NextResponse.json({ error: 'Email is required' }, { status: 400 });
+      }
+      const crypto = await import('crypto');
+      const randomId = crypto.default.randomBytes(8).toString('hex');
+      userEmail = `no-email-${randomId}@c5k.co`;
+    }
+
+    const existingUser = await prisma.user.findUnique({ where: { email: userEmail } });
     if (existingUser) {
       return NextResponse.json({ error: 'User already exists' }, { status: 409 });
     }
 
     const passwordHash = await hashPassword(password);
 
-    // Create user with isEmailVerified: false
+    // Create user with isEmailVerified: false (or true if dummy email)
     const newUser = await prisma.user.create({
       data: {
         name,
-        email,
+        email: userEmail,
         passwordHash,
         role,
         university: university || 'N/A',
         isActive: true,
-        isEmailVerified: false, // Require verification
+        isEmailVerified: userEmail.startsWith('no-email-'), // Auto-verify if dummy email
         managedById: requester.id, // Track who created them
       }
     });
@@ -197,11 +207,13 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Send Verification Email
-    const { sendEmailVerificationEmail } = await import('@/lib/email/send');
-    sendEmailVerificationEmail(newUser.email, newUser.name, verificationToken).catch(error => {
-      console.error('Failed to send verification email:', error);
-    });
+    // Send Verification Email if not a placeholder email
+    if (!userEmail.startsWith('no-email-')) {
+      const { sendEmailVerificationEmail } = await import('@/lib/email/send');
+      sendEmailVerificationEmail(newUser.email, newUser.name, verificationToken).catch(error => {
+        console.error('Failed to send verification email:', error);
+      });
+    }
 
     return NextResponse.json({
       success: true,
@@ -369,11 +381,20 @@ export async function PATCH(req: NextRequest) {
     // Additional fields for admins to edit
     if (name !== undefined) updateData.name = name;
     if (email !== undefined) {
-      // Check if email already exists
-      if (email !== targetUser.email) {
-        const existing = await prisma.user.findUnique({ where: { email } });
+      const emailVal = email?.trim();
+      if (!emailVal) {
+        if (![ROLES.MOTHER_ADMIN, ROLES.SUPER_ADMIN].includes(requester.role as any)) {
+          return NextResponse.json({ error: 'Email is required' }, { status: 400 });
+        }
+        if (!targetUser.email.startsWith('no-email-')) {
+          const crypto = await import('crypto');
+          const randomId = crypto.default.randomBytes(8).toString('hex');
+          updateData.email = `no-email-${randomId}@c5k.co`;
+        }
+      } else if (emailVal !== targetUser.email) {
+        const existing = await prisma.user.findUnique({ where: { email: emailVal } });
         if (existing) return NextResponse.json({ error: 'Email already in use' }, { status: 409 });
-        updateData.email = email;
+        updateData.email = emailVal;
       }
     }
     if (university !== undefined) updateData.university = university;

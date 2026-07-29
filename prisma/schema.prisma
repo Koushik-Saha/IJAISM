@@ -474,6 +474,7 @@ model Book {
   title           String
   authors         String[]
   year            Int
+  publicationDate DateTime?
   isbn            String          @unique
   pages           Int
   field           String

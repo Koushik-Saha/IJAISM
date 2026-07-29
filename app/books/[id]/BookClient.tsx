@@ -18,6 +18,7 @@ interface BookClientProps {
         title: string;
         authors: string[];
         year: number;
+        publicationDate?: string | null;
         isbn: string;
         pages: number;
         field: string;
@@ -375,8 +376,14 @@ export default function BookClient({ book }: BookClientProps) {
                                         <p className="font-semibold text-gray-800">{book.publisher}</p>
                                     </div>
                                     <div>
-                                        <p className="text-sm text-gray-600">Year</p>
-                                        <p className="font-semibold text-gray-800">{book.year}</p>
+                                        <p className="text-sm text-gray-600">Publication Date</p>
+                                        <p className="font-semibold text-gray-800">
+                                            {book.publicationDate ? new Date(book.publicationDate).toLocaleDateString('en-US', {
+                                                year: 'numeric',
+                                                month: 'long',
+                                                day: 'numeric'
+                                            }) : book.year}
+                                        </p>
                                     </div>
                                     <div>
                                         <p className="text-sm text-gray-600">Pages</p>

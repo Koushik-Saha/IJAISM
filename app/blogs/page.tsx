@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import SubmitBlogCTA from "@/components/blog/SubmitBlogCTA";
+import BlogImage from "@/components/blog/BlogImage";
 
 export const revalidate = 300;
 
@@ -62,27 +63,7 @@ export default async function BlogsPage({ searchParams }: { searchParams: Promis
             {blogs.map(blog => (
               <div key={blog.id} className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col h-full border border-gray-100">
                 <div className="h-56 w-full relative overflow-hidden">
-                  {blog.featuredImageUrl ? (
-                    <>
-                      <img 
-                        src={blog.featuredImageUrl} 
-                        alt={blog.title} 
-                        className="absolute inset-0 w-full h-full object-cover" 
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                          const fallback = e.currentTarget.nextElementSibling as HTMLElement;
-                          if (fallback) {
-                            fallback.style.display = 'block';
-                          }
-                        }}
-                      />
-                      <div className="absolute inset-0" style={{ display: 'none' }}>
-                        <BlogFallbackImage title={blog.title} />
-                      </div>
-                    </>
-                  ) : (
-                    <BlogFallbackImage title={blog.title} />
-                  )}
+                  <BlogImage src={blog.featuredImageUrl} title={blog.title} size="normal" />
                 </div>
                 <div className="p-6 flex flex-col flex-grow">
                   <div className="mb-3">
@@ -132,28 +113,6 @@ export default async function BlogsPage({ searchParams }: { searchParams: Promis
             </p>
           </div>
         </div>
-      </div>
-    </div>
-  );
-}
-
-function BlogFallbackImage({ title }: { title: string }) {
-  return (
-    <div className="w-full h-full bg-gradient-to-br from-[#1E3A8A] to-[#3B82F6] flex flex-col justify-between p-6 text-white relative overflow-hidden">
-      {/* Decorative background shape */}
-      <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-white/10 rounded-full blur-xl" />
-      <div className="absolute -left-8 -top-8 w-24 h-24 bg-white/5 rounded-full blur-lg" />
-      
-      <div className="flex items-center justify-between z-10">
-        <span className="text-[10px] font-bold tracking-widest bg-white/20 px-2 py-0.5 rounded uppercase">C5K INSIGHTS</span>
-        <svg className="w-5 h-5 opacity-40" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
-        </svg>
-      </div>
-      <div className="z-10">
-        <h4 className="font-bold text-sm leading-snug line-clamp-3 text-white/90">
-          {title}
-        </h4>
       </div>
     </div>
   );

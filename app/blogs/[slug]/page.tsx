@@ -4,6 +4,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import CommentForm from "@/components/blog/CommentForm";
 import InteractiveSidebar from "@/components/blog/InteractiveSidebar";
+import BlogImage from "@/components/blog/BlogImage";
 
 export const revalidate = 300;
 
@@ -58,27 +59,7 @@ export default async function BlogDetailsPage({ params }: { params: Promise<{ sl
               </h1>
               
               <div className="mb-8 w-full overflow-hidden rounded relative">
-                {blog.featuredImageUrl ? (
-                  <>
-                    <img 
-                      src={blog.featuredImageUrl} 
-                      alt={blog.title} 
-                      className="w-full object-cover max-h-[500px]" 
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                        const fallback = e.currentTarget.nextElementSibling as HTMLElement;
-                        if (fallback) {
-                          fallback.style.display = 'block';
-                        }
-                      }}
-                    />
-                    <div style={{ display: 'none' }}>
-                      <BlogFallbackImageLarge title={blog.title} />
-                    </div>
-                  </>
-                ) : (
-                  <BlogFallbackImageLarge title={blog.title} />
-                )}
+                <BlogImage src={blog.featuredImageUrl} title={blog.title} size="large" />
               </div>
 
               <div 
@@ -114,27 +95,7 @@ export default async function BlogDetailsPage({ params }: { params: Promise<{ sl
                 {relatedPosts.map(post => (
                   <div key={post.id} className="group">
                     <div className="h-32 w-full relative overflow-hidden mb-3 bg-gray-100">
-                      {post.featuredImageUrl ? (
-                        <>
-                          <img 
-                            src={post.featuredImageUrl} 
-                            alt={post.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform" 
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                              const fallback = e.currentTarget.nextElementSibling as HTMLElement;
-                              if (fallback) {
-                                fallback.style.display = 'block';
-                              }
-                            }}
-                          />
-                          <div className="absolute inset-0" style={{ display: 'none' }}>
-                            <BlogFallbackImageMini title={post.title} />
-                          </div>
-                        </>
-                      ) : (
-                        <BlogFallbackImageMini title={post.title} />
-                      )}
+                      <BlogImage src={post.featuredImageUrl} title={post.title} size="mini" />
                     </div>
                     <h4 className="font-bold text-sm text-gray-900 group-hover:text-[#007398]">
                       <Link href={`/blogs/${post.slug}`}>{post.title}</Link>
@@ -175,46 +136,6 @@ export default async function BlogDetailsPage({ params }: { params: Promise<{ sl
             <InteractiveSidebar />
           </div>
         </div>
-      </div>
-    </div>
-  );
-}
-
-function BlogFallbackImageLarge({ title }: { title: string }) {
-  return (
-    <div className="w-full min-h-[250px] bg-gradient-to-br from-[#1E3A8A] to-[#3B82F6] flex flex-col justify-between p-10 text-white relative overflow-hidden rounded">
-      <div className="absolute -right-16 -bottom-16 w-64 h-64 bg-white/10 rounded-full blur-2xl" />
-      <div className="absolute -left-16 -top-16 w-48 h-48 bg-white/5 rounded-full blur-xl" />
-      
-      <div className="flex items-center justify-between z-10">
-        <span className="text-xs font-bold tracking-widest bg-white/20 px-3 py-1 rounded uppercase">C5K INSIGHTS ARTICLE</span>
-        <svg className="w-8 h-8 opacity-40" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
-        </svg>
-      </div>
-      <div className="z-10 mt-8">
-        <h2 className="font-bold text-xl leading-snug text-white/95">
-          {title}
-        </h2>
-      </div>
-    </div>
-  );
-}
-
-function BlogFallbackImageMini({ title }: { title: string }) {
-  return (
-    <div className="w-full h-full bg-gradient-to-br from-[#1E3A8A] to-[#3B82F6] flex flex-col justify-between p-3 text-white relative overflow-hidden">
-      <div className="absolute -right-4 -bottom-4 w-16 h-16 bg-white/10 rounded-full blur-lg" />
-      <div className="flex items-center justify-between z-10">
-        <span className="text-[8px] font-bold tracking-widest bg-white/20 px-1 rounded uppercase">C5K MINI</span>
-        <svg className="w-3 h-3 opacity-30" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
-        </svg>
-      </div>
-      <div className="z-10 mt-1">
-        <h5 className="font-bold text-[10px] leading-tight line-clamp-2 text-white/90">
-          {title}
-        </h5>
       </div>
     </div>
   );

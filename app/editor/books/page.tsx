@@ -39,7 +39,8 @@ export default function BooksPage() {
         price: '0.00',
         authors: '',
         coverImageUrl: '',
-        pdfUrl: ''
+        pdfUrl: '',
+        publicationDate: ''
     });
 
     useEffect(() => { checkAuth(); }, []);
@@ -136,7 +137,8 @@ export default function BooksPage() {
             price: '0.00',
             authors: '',
             coverImageUrl: '',
-            pdfUrl: ''
+            pdfUrl: '',
+            publicationDate: ''
         });
         setIsModalOpen(true);
     };
@@ -333,7 +335,20 @@ export default function BooksPage() {
                                 <div><label className="block text-sm font-bold mb-1">ISBN</label><input required className="w-full border rounded p-2" value={formData.isbn} onChange={e => setFormData({ ...formData, isbn: e.target.value })} /></div>
 
                                 <div><label className="block text-sm font-bold mb-1">Publisher</label><input required className="w-full border rounded p-2" value={formData.publisher} onChange={e => setFormData({ ...formData, publisher: e.target.value })} /></div>
-                                <div><label className="block text-sm font-bold mb-1">Year</label><input type="number" required className="w-full border rounded p-2" value={formData.year} onChange={e => setFormData({ ...formData, year: parseInt(e.target.value) })} /></div>
+                                <div>
+                                    <label className="block text-sm font-bold mb-1">Publication Date</label>
+                                    <input 
+                                        type="date" 
+                                        required 
+                                        className="w-full border rounded p-2" 
+                                        value={formData.publicationDate} 
+                                        onChange={e => setFormData({ 
+                                            ...formData, 
+                                            publicationDate: e.target.value, 
+                                            year: e.target.value ? new Date(e.target.value).getFullYear() : new Date().getFullYear() 
+                                        })} 
+                                    />
+                                </div>
 
                                 <div><label className="block text-sm font-bold mb-1">Field</label><input required className="w-full border rounded p-2" value={formData.field} onChange={e => setFormData({ ...formData, field: e.target.value })} /></div>
                                 <div><label className="block text-sm font-bold mb-1">Price</label><input required className="w-full border rounded p-2" value={formData.price} onChange={e => setFormData({ ...formData, price: e.target.value })} /></div>

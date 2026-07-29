@@ -26,16 +26,19 @@ export default function EditJournalPage() {
 
     const [currentUser, setCurrentUser] = useState<any>(null);
     const [editors, setEditors] = useState<any[]>([]);
-    const [allEditors, setAllEditors] = useState<any[]>([]);
     const [selectedUserId, setSelectedUserId] = useState('');
     const [selectedRole, setSelectedRole] = useState('assistant_editor');
     const [isSubmittingEditor, setIsSubmittingEditor] = useState(false);
+
+    const [editorSearch, setEditorSearch] = useState("");
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const [suggestions, setSuggestions] = useState<any[]>([]);
+    const [isSearchingEditors, setIsSearchingEditors] = useState(false);
 
     useEffect(() => {
         if (id) {
             fetchJournal();
             fetchJournalEditors();
-            fetchAllSystemEditors();
         }
         
         const token = localStorage.getItem('token');
@@ -122,18 +125,43 @@ export default function EditJournalPage() {
         }
     };
 
-    const fetchAllSystemEditors = async () => {
+    const fetchDefaultEditors = async () => {
+        setIsSearchingEditors(true);
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`/api/editor/users?role=editor&limit=100`, {
+            const response = await fetch(`/api/editor/users?role=editor&limit=10`, {
                 headers: { 'Authorization': `Bearer ${token}` },
             });
             if (response.ok) {
                 const data = await response.json();
-                setAllEditors(data.users || []);
+                setSuggestions(data.users || []);
             }
         } catch (err) {
-            console.error("Error loading system editors", err);
+            console.error("Error fetching default editors", err);
+        } finally {
+            setIsSearchingEditors(false);
+        }
+    };
+
+    const handleEditorSearch = async (query: string) => {
+        if (!query.trim()) {
+            fetchDefaultEditors();
+            return;
+        }
+        setIsSearchingEditors(true);
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`/api/editor/users?role=editor&search=${encodeURIComponent(query)}&limit=10`, {
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setSuggestions(data.users || []);
+            }
+        } catch (err) {
+            console.error("Error searching editors", err);
+        } finally {
+            setIsSearchingEditors(false);
         }
     };
 
@@ -166,6 +194,7 @@ export default function EditJournalPage() {
             toast.success("Editor added successfully");
             fetchJournalEditors();
             setSelectedUserId('');
+            setEditorSearch('');
         } catch (err: any) {
             toast.error(err.message);
         } finally {
@@ -364,19 +393,54 @@ export default function EditJournalPage() {
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Select Editor
                                 </label>
-                                <select
-                                    className="input-field"
-                                    value={selectedUserId}
-                                    onChange={(e) => setSelectedUserId(e.target.value)}
-                                    required
-                                >
-                                    <option value="">-- Choose Editor --</option>
-                                    {allEditors.map((u) => (
-                                        <option key={u.id} value={u.id}>
-                                            {u.name} ({u.email}) — {u.role.replace('_', ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())}
-                                        </option>
-                                    ))}
-                                </select>
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        className="input-field w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 outline-none transition bg-white"
+                                        placeholder="Search by name or email..."
+                                        value={editorSearch}
+                                        onChange={(e) => {
+                                            setEditorSearch(e.target.value);
+                                            handleEditorSearch(e.target.value);
+                                        }}
+                                        onFocus={() => {
+                                            setShowSuggestions(true);
+                                            if (!editorSearch) fetchDefaultEditors();
+                                        }}
+                                        required
+                                    />
+                                    {showSuggestions && (
+                                        <>
+                                            <div 
+                                                className="fixed inset-0 z-10" 
+                                                onClick={() => setShowSuggestions(false)}
+                                            />
+                                            <div className="absolute left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto z-20">
+                                                {isSearchingEditors ? (
+                                                    <div className="p-3 text-xs text-gray-500">Searching...</div>
+                                                ) : suggestions.length === 0 ? (
+                                                    <div className="p-3 text-xs text-gray-500">No editors found</div>
+                                                ) : (
+                                                    suggestions.map((u) => (
+                                                        <button
+                                                            key={u.id}
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setSelectedUserId(u.id);
+                                                                setEditorSearch(`${u.name} (${u.email})`);
+                                                                setShowSuggestions(false);
+                                                            }}
+                                                            className="w-full text-left px-4 py-2 hover:bg-gray-50 text-sm text-gray-800 transition-colors border-b last:border-b-0 flex flex-col"
+                                                        >
+                                                            <span className="font-semibold text-gray-900">{u.name}</span>
+                                                            <span className="text-xs text-gray-500">{u.email} — {u.role.replace('_', ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())}</span>
+                                                        </button>
+                                                    ))
+                                                )}
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
                             </div>
                             
                             <div>

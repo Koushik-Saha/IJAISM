@@ -20,6 +20,7 @@ const createBookSchema = z.object({
     format: z.string().default("Paperback"),
     coverImageUrl: z.string().optional().or(z.literal("")),
     pdfUrl: z.string().optional().or(z.literal("")),
+    publicationDate: z.string().optional().nullable().or(z.literal("")),
 });
 
 const updateBookSchema = createBookSchema.partial().extend({
@@ -154,10 +155,18 @@ export async function POST(req: NextRequest) {
 
         const body = await req.json();
         const validated = createBookSchema.parse(body);
+        const { publicationDate, ...rest } = validated;
+
+        const parseDate = (val: any) => {
+            if (val === "" || val === null || val === undefined) return null;
+            const d = new Date(val);
+            return isNaN(d.getTime()) ? null : d;
+        };
 
         const book = await prisma.book.create({
             data: {
-                ...validated,
+                ...rest,
+                publicationDate: parseDate(publicationDate),
                 coverImageUrl: validated.coverImageUrl || null,
                 pdfUrl: validated.pdfUrl || null,
             },
@@ -192,12 +201,19 @@ export async function PATCH(req: NextRequest) {
         const body = await req.json();
         const validated = updateBookSchema.parse(body);
 
-        const { id, ...updateData } = validated;
+        const { id, publicationDate, ...updateData } = validated;
+
+        const parseDate = (val: any) => {
+            if (val === "" || val === null || val === undefined) return null;
+            const d = new Date(val);
+            return isNaN(d.getTime()) ? null : d;
+        };
 
         const book = await prisma.book.update({
             where: { id },
             data: {
                 ...updateData,
+                publicationDate: parseDate(publicationDate),
                 coverImageUrl: updateData.coverImageUrl || null,
                 pdfUrl: updateData.pdfUrl || null,
             },

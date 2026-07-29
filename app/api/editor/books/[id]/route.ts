@@ -21,6 +21,7 @@ const updateBookSchema = z.object({
     format: z.string().optional(),
     coverImageUrl: z.string().optional().or(z.literal("")),
     pdfUrl: z.string().optional().or(z.literal("")),
+    publicationDate: z.string().optional().nullable().or(z.literal("")),
 });
 
 export async function GET(
@@ -75,10 +76,20 @@ export async function PATCH(
         const { id } = await params;
         const body = await req.json();
         const validated = updateBookSchema.parse(body);
+        const { publicationDate, ...updateData } = validated;
+
+        const parseDate = (val: any) => {
+            if (val === "" || val === null || val === undefined) return null;
+            const d = new Date(val);
+            return isNaN(d.getTime()) ? null : d;
+        };
 
         const book = await prisma.book.update({
             where: { id },
-            data: validated,
+            data: {
+                ...updateData,
+                publicationDate: parseDate(publicationDate)
+            },
         });
 
         return apiSuccess({ book }, "Book updated successfully", 200);

@@ -78,10 +78,12 @@ export default function CreateUserModal({ isOpen, onClose, onSuccess, currentUse
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Email Address {['mother_admin', 'super_admin'].includes(currentUserRole) && '(Optional)'}
+                        </label>
                         <input
                             type="email"
-                            required
+                            required={!['mother_admin', 'super_admin'].includes(currentUserRole)}
                             className="w-full border rounded px-3 py-2"
                             value={formData.email}
                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}

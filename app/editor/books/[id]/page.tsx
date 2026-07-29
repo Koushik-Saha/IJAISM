@@ -29,7 +29,8 @@ export default function EditBookPage({ params: routeParams }: { params?: any }) 
         price: '0.00',
         authors: '',
         coverImageUrl: '',
-        pdfUrl: ''
+        pdfUrl: '',
+        publicationDate: ''
     });
 
     useEffect(() => {
@@ -101,7 +102,8 @@ export default function EditBookPage({ params: routeParams }: { params?: any }) 
                 price: book.price || '0.00',
                 authors: book.authors ? book.authors.join(', ') : '',
                 coverImageUrl: book.coverImageUrl || '',
-                pdfUrl: book.pdfUrl || ''
+                pdfUrl: book.pdfUrl || '',
+                publicationDate: book.publicationDate ? new Date(book.publicationDate).toISOString().split('T')[0] : ''
             });
         } catch (e: any) {
             toast.error(`Failed to load book details: ${e.message}`);
@@ -217,14 +219,18 @@ export default function EditBookPage({ params: routeParams }: { params?: any }) 
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Year (Required)
+                                Publication Date (Required)
                             </label>
                             <input
-                                type="number"
+                                type="date"
                                 required
                                 className="input-field"
-                                value={formData.year}
-                                onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) || new Date().getFullYear() })}
+                                value={formData.publicationDate}
+                                onChange={(e) => setFormData({ 
+                                    ...formData, 
+                                    publicationDate: e.target.value, 
+                                    year: e.target.value ? new Date(e.target.value).getFullYear() : formData.year 
+                                })}
                             />
                         </div>
 

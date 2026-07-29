@@ -194,10 +194,12 @@ export default function EditUserModal({ isOpen, onClose, onSuccess, user, curren
                         </div>
 
                         <div>
-                            <label className="block text-sm font-bold text-gray-700 mb-1.5 uppercase tracking-tight">Email Address</label>
+                            <label className="block text-sm font-bold text-gray-700 mb-1.5 uppercase tracking-tight">
+                                Email Address {['mother_admin', 'super_admin'].includes(currentUserRole) && '(Optional)'}
+                            </label>
                             <input
                                 type="email"
-                                required
+                                required={!['mother_admin', 'super_admin'].includes(currentUserRole)}
                                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white shadow-sm transition-all"
                                 value={formData.email}
                                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}

@@ -136,7 +136,7 @@ Despite these exciting developments, several challenges remain:
 
 The future of academic publishing is bright, but it requires collaboration between researchers, publishers, institutions, and technology providers to create a system that serves the global research community effectively.
         `,
-        featuredImageUrl: '/images/hero/community.png',
+        featuredImageUrl: '/images/hero/research_publishing.png',
         status: 'published',
         publishedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
       },
@@ -211,7 +211,7 @@ Good writing is rewriting. Don't expect perfection in your first draft. Focus on
 
 Remember: Every published paper started as a blank page. With practice and persistence, you'll develop your unique writing voice and style.
         `,
-        featuredImageUrl: '/images/hero/community.png',
+        featuredImageUrl: '/images/hero/global_network.png',
         status: 'published',
         publishedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
       },
@@ -329,7 +329,7 @@ Appeals based solely on disagreement with the decision rarely succeed.
 
 Understanding the peer review process helps set realistic expectations and navigate the publication journey more effectively. Remember, peer review improves your work - embrace it as a learning opportunity.
         `,
-        featuredImageUrl: '/images/hero/community.png',
+        featuredImageUrl: '/images/hero/peer_review.png',
         status: 'published',
         publishedAt: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000),
       },
@@ -490,7 +490,7 @@ The right tools can transform your research workflow, saving time and reducing f
 
 Remember: Tools are meant to support your research, not complicate it. Choose tools that genuinely solve problems you face in your workflow.
         `,
-        featuredImageUrl: '/images/hero/community.png',
+        featuredImageUrl: '/images/hero/open_access.png',
         status: 'published',
         publishedAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
       },

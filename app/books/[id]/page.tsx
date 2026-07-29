@@ -27,6 +27,7 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
         ...book,
         createdAt: book.createdAt.toISOString(),
         updatedAt: book.updatedAt.toISOString(),
+        publicationDate: book.publicationDate ? book.publicationDate.toISOString() : null,
         tableOfContents,
         previewPages,
         reviews,

@@ -8,20 +8,47 @@ import { notFound } from "next/navigation";
 import { getArticleAuthors } from "@/lib/articles/authors";
 import { Metadata } from "next";
 
+function getAbsoluteImageUrl(url: string | null, baseUrl: string): string {
+  if (!url) return `${baseUrl}/logo.png`;
+  if (url.startsWith("http")) return url;
+  return `${baseUrl}${url.startsWith("/") ? "" : "/"}${url}`;
+}
+
 export const revalidate = 3600; // Revalidate every hour
 
 export async function generateMetadata({ params }: { params: Promise<{ code: string }> }): Promise<Metadata> {
   const { code } = await params;
   const journal = await prisma.journal.findFirst({
     where: { code: { equals: code, mode: 'insensitive' } },
-    select: { fullName: true, description: true, issn: true, eIssn: true }
+    select: { fullName: true, description: true, issn: true, eIssn: true, coverImageUrl: true }
   });
 
   if (!journal) return {};
 
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.c5k.com';
+  const coverUrl = getAbsoluteImageUrl(journal.coverImageUrl, baseUrl);
+
   return {
     title: `${journal.fullName} | C5K Journals`,
     description: journal.description || `Read articles from ${journal.fullName}`,
+    openGraph: {
+      title: `${journal.fullName} | C5K Journals`,
+      description: journal.description || `Read articles from ${journal.fullName}`,
+      images: [
+        {
+          url: coverUrl,
+          width: 800,
+          height: 600,
+          alt: journal.fullName,
+        }
+      ]
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${journal.fullName} | C5K Journals`,
+      description: journal.description || `Read articles from ${journal.fullName}`,
+      images: [coverUrl],
+    },
     other: {
       'citation_journal_title': journal.fullName,
       'citation_issn': [journal.issn, journal.eIssn].filter(Boolean) as string[],

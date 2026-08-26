@@ -5,6 +5,12 @@ import { Metadata } from "next";
 
 export const revalidate = 300;
 
+function getAbsoluteImageUrl(url: string | null, baseUrl: string): string {
+  if (!url) return `${baseUrl}/logo.png`;
+  if (url.startsWith('http')) return url;
+  return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
   const book = await prisma.book.findUnique({
@@ -21,10 +27,29 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     : book.year?.toString() || '';
 
   const authors = book.authors && book.authors.length > 0 ? book.authors : ['C5K Scholar'];
+  const coverUrl = getAbsoluteImageUrl(book.coverImageUrl, baseUrl);
 
   return {
     title: `${book.title} | C5K Books`,
     description: book.description || `A book on ${book.title}`,
+    openGraph: {
+      title: `${book.title} | C5K Books`,
+      description: book.description || `A book on ${book.title}`,
+      images: [
+        {
+          url: coverUrl,
+          width: 800,
+          height: 600,
+          alt: book.title,
+        }
+      ]
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${book.title} | C5K Books`,
+      description: book.description || `A book on ${book.title}`,
+      images: [coverUrl],
+    },
     other: {
       'citation_title': book.title,
       'citation_author': authors,

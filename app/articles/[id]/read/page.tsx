@@ -17,12 +17,18 @@ function journalCoverUrl(raw: string | null): string | null {
     return `https://c5k.com/public/backend/journal/${raw.replace(/^\//, "")}`;
 }
 
+function getAbsoluteImageUrl(url: string | null, baseUrl: string): string {
+    if (!url) return `${baseUrl}/logo.png`;
+    if (url.startsWith("http")) return url;
+    return `${baseUrl}${url.startsWith("/") ? "" : "/"}${url}`;
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
     const { id } = await params;
     const article = await prisma.article.findUnique({
         where: { id },
         include: {
-            journal: { select: { fullName: true } },
+            journal: { select: { fullName: true, coverImageUrl: true } },
             author: { select: { name: true } },
             coAuthors: { select: { name: true, order: true }, orderBy: { order: "asc" } },
         },
@@ -43,9 +49,29 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
         ? new Date(article.publicationDate).toISOString().split('T')[0].replace(/-/g, '/') 
         : '';
 
+    const coverUrl = getAbsoluteImageUrl(article.journal.coverImageUrl, baseUrl);
+
     return {
         title: `${article.title} - C5K Advanced Info Systems`,
         description: article.abstract?.substring(0, 160),
+        openGraph: {
+            title: `${article.title} - C5K Advanced Info Systems`,
+            description: article.abstract?.substring(0, 160),
+            images: [
+                {
+                    url: coverUrl,
+                    width: 800,
+                    height: 600,
+                    alt: article.title,
+                }
+            ]
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: `${article.title} - C5K Advanced Info Systems`,
+            description: article.abstract?.substring(0, 160),
+            images: [coverUrl],
+        },
         other: {
             'citation_title': article.title,
             'citation_author': allAuthors,

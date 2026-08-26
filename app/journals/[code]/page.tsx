@@ -6,8 +6,28 @@ import JournalSidebar from "@/components/journals/JournalSidebar";
 import AuthorListWithModal from "@/components/articles/AuthorListWithModal";
 import { notFound } from "next/navigation";
 import { getArticleAuthors } from "@/lib/articles/authors";
+import { Metadata } from "next";
 
 export const revalidate = 3600; // Revalidate every hour
+
+export async function generateMetadata({ params }: { params: Promise<{ code: string }> }): Promise<Metadata> {
+  const { code } = await params;
+  const journal = await prisma.journal.findFirst({
+    where: { code: { equals: code, mode: 'insensitive' } },
+    select: { fullName: true, description: true, issn: true, eIssn: true }
+  });
+
+  if (!journal) return {};
+
+  return {
+    title: `${journal.fullName} | C5K Journals`,
+    description: journal.description || `Read articles from ${journal.fullName}`,
+    other: {
+      'citation_journal_title': journal.fullName,
+      'citation_issn': [journal.issn, journal.eIssn].filter(Boolean) as string[],
+    }
+  };
+}
 
 export async function generateStaticParams() {
   try {

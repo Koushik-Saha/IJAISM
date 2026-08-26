@@ -21,11 +21,43 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     const { id } = await params;
     const article = await prisma.article.findUnique({
         where: { id },
-        select: { title: true, abstract: true },
+        include: {
+            journal: { select: { fullName: true } },
+            author: { select: { name: true } },
+            coAuthors: { select: { name: true, order: true }, orderBy: { order: "asc" } },
+        },
     });
+
+    if (!article) return {};
+
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.c5k.com';
+
+    // Format authors list
+    const allAuthors = [
+        article.author.name,
+        ...article.coAuthors.map(ca => ca.name)
+    ];
+
+    // Format publication date in YYYY/MM/DD or YYYY format
+    const pubDate = article.publicationDate 
+        ? new Date(article.publicationDate).toISOString().split('T')[0].replace(/-/g, '/') 
+        : '';
+
     return {
-        title: `${article?.title || "Article"} - C5K Advanced Info Systems`,
-        description: article?.abstract?.substring(0, 160),
+        title: `${article.title} - C5K Advanced Info Systems`,
+        description: article.abstract?.substring(0, 160),
+        other: {
+            'citation_title': article.title,
+            'citation_author': allAuthors,
+            'citation_publication_date': pubDate,
+            'citation_journal_title': article.journal.fullName,
+            'citation_volume': article.volume?.toString() || '',
+            'citation_issue': article.issue?.toString() || '',
+            'citation_firstpage': article.pageStart?.toString() || '',
+            'citation_lastpage': article.pageEnd?.toString() || '',
+            'citation_doi': article.doi || '',
+            'citation_pdf_url': article.pdfUrl ? `${baseUrl}${article.pdfUrl}` : '',
+        }
     };
 }
 

@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 export const revalidate = 3600; // Revalidate every hour
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://c5k-platform.vercel.app';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.c5k.com';
 
     // 1. Static Routes
     const staticRoutes = [
@@ -51,7 +51,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         });
 
         const articleRoutes = articles.map((article) => ({
-            url: `${baseUrl}/articles/${article.id}`,
+            url: `${baseUrl}/articles/${article.id}/read`,
             lastModified: article.updatedAt,
             changeFrequency: 'monthly' as const,
             priority: 0.7,

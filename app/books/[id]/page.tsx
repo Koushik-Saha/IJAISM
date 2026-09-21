@@ -11,11 +11,50 @@ function getAbsoluteImageUrl(url: string | null, baseUrl: string): string {
   return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
 }
 
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+async function findBookBySlugOrId(idOrSlug: string) {
+  // 1. Direct ID lookup
+  let book = await prisma.book.findUnique({
+    where: { id: idOrSlug },
+    include: { chapters: true }
+  });
+  if (book) return book;
+
+  // 2. ISBN lookup
+  book = await prisma.book.findFirst({
+    where: { isbn: idOrSlug },
+    include: { chapters: true }
+  });
+  if (book) return book;
+
+  // 3. DOI lookup
+  book = await prisma.book.findFirst({
+    where: { doi: { contains: idOrSlug, mode: 'insensitive' } },
+    include: { chapters: true }
+  });
+  if (book) return book;
+
+  // 4. Slugified title matching
+  const allBooks = await prisma.book.findMany({ include: { chapters: true } });
+  for (const b of allBooks) {
+    if (slugify(b.title) === idOrSlug.toLowerCase()) {
+      return b;
+    }
+  }
+
+  return null;
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
-  const book = await prisma.book.findUnique({
-    where: { id },
-  });
+  const book = await findBookBySlugOrId(id);
 
   if (!book) return {};
 
@@ -63,11 +102,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function BookDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-
-  const book = await prisma.book.findUnique({
-    where: { id },
-    include: { chapters: true }
-  });
+  const book = await findBookBySlugOrId(id);
 
   if (!book) {
     notFound();

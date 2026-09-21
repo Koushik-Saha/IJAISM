@@ -59,13 +59,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
         // 4. Books (Dynamic)
         const books = await prisma.book.findMany({
-            select: { id: true, updatedAt: true },
+            select: { id: true, title: true, updatedAt: true },
             take: 1000,
             orderBy: { updatedAt: 'desc' },
         });
 
+        const slugify = (text: string) => text.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '');
+
         const bookRoutes = books.map((book) => ({
-            url: `${baseUrl}/books/${book.id}`,
+            url: `${baseUrl}/books/${slugify(book.title)}`,
             lastModified: book.updatedAt,
             changeFrequency: 'monthly' as const,
             priority: 0.6,

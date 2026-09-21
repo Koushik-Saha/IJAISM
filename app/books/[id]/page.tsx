@@ -23,26 +23,26 @@ async function findBookBySlugOrId(idOrSlug: string) {
   // 1. Direct ID lookup
   let book = await prisma.book.findUnique({
     where: { id: idOrSlug },
-    include: { chapters: true }
+    include: { chapters: { orderBy: { createdAt: 'asc' } } }
   });
   if (book) return book;
 
   // 2. ISBN lookup
   book = await prisma.book.findFirst({
     where: { isbn: idOrSlug },
-    include: { chapters: true }
+    include: { chapters: { orderBy: { createdAt: 'asc' } } }
   });
   if (book) return book;
 
   // 3. DOI lookup
   book = await prisma.book.findFirst({
     where: { doi: { contains: idOrSlug, mode: 'insensitive' } },
-    include: { chapters: true }
+    include: { chapters: { orderBy: { createdAt: 'asc' } } }
   });
   if (book) return book;
 
   // 4. Slugified title matching
-  const allBooks = await prisma.book.findMany({ include: { chapters: true } });
+  const allBooks = await prisma.book.findMany({ include: { chapters: { orderBy: { createdAt: 'asc' } } } });
   for (const b of allBooks) {
     if (slugify(b.title) === idOrSlug.toLowerCase()) {
       return b;

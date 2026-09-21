@@ -29,6 +29,14 @@ const nextConfig = {
     ],
   },
   output: 'standalone',
+  outputFileTracingExcludes: {
+    '*': ['./public/uploads/**/*'],
+  },
+  experimental: {
+    outputFileTracingExcludes: {
+      '*': ['./public/uploads/**/*'],
+    },
+  },
   /* config options here */
   async headers() {
     return [

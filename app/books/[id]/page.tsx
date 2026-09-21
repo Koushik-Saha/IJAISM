@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import BookClient from "./BookClient";
 import { Metadata } from "next";
 
-export const revalidate = 300;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 function getAbsoluteImageUrl(url: string | null, baseUrl: string): string {
   if (!url) return `${baseUrl}/logo.png`;

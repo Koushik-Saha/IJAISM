@@ -5,6 +5,14 @@ import CoverImage from "@/components/ui/CoverImage";
 
 export const revalidate = 300;
 
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
 export default async function BooksPage(props: {
   searchParams: Promise<{ page?: string }>;
 }) {
@@ -76,64 +84,66 @@ export default async function BooksPage(props: {
 
           {books.length > 0 ? (
             <div className="grid md:grid-cols-2 gap-6">
-              {books.map((book) => (
-                <div
-                  key={book.id}
-                  className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 border border-gray-200"
-                >
-                  <div className="flex gap-4 mb-4">
-                    {/* Book Cover Placeholder or Image */}
-                    {/* Book Cover Placeholder or Image */}
-                    <div className="flex-shrink-0 w-32 h-auto">
-                      <CoverImage
-                        src={book.coverImageUrl}
-                        alt={book.title}
-                        className="w-full h-auto rounded shadow-sm border border-gray-100 aspect-[2/3]"
-                        fallbackText={book.title}
-                      />
-                    </div>
+              {books.map((book) => {
+                const bookSlug = slugify(book.title);
+                return (
+                  <div
+                    key={book.id}
+                    className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 border border-gray-200"
+                  >
+                    <div className="flex gap-4 mb-4">
+                      {/* Book Cover Placeholder or Image */}
+                      <div className="flex-shrink-0 w-32 h-auto">
+                        <CoverImage
+                          src={book.coverImageUrl}
+                          alt={book.title}
+                          className="w-full h-auto rounded shadow-sm border border-gray-100 aspect-[2/3]"
+                          fallbackText={book.title}
+                        />
+                      </div>
 
-                    {/* Book Details */}
-                    <div className="flex-1">
-                      <span className="inline-block bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium mb-2">
-                        {book.field}
-                      </span>
-                      <Link href={`/books/${book.id}`}>
-                        <h3 className="text-xl font-bold text-primary mb-2 hover:text-accent transition-colors cursor-pointer">
-                          {book.title}
-                        </h3>
-                      </Link>
-                      <p className="text-gray-700 font-medium mb-1">
-                        {book.authors.join(", ")}
-                      </p>
-                      <div className="text-sm text-gray-600 space-y-1">
-                        <p>ISBN: {book.isbn}</p>
-                        <p>{book.pages} pages • {book.year}</p>
-                        <p className="text-lg font-bold text-accent mt-2">{book.price}</p>
+                      {/* Book Details */}
+                      <div className="flex-1">
+                        <span className="inline-block bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium mb-2">
+                          {book.field}
+                        </span>
+                        <Link href={`/books/${bookSlug}`}>
+                          <h3 className="text-xl font-bold text-primary mb-2 hover:text-accent transition-colors cursor-pointer">
+                            {book.title}
+                          </h3>
+                        </Link>
+                        <p className="text-gray-700 font-medium mb-1">
+                          {book.authors.join(", ")}
+                        </p>
+                        <div className="text-sm text-gray-600 space-y-1">
+                          <p>ISBN: {book.isbn}</p>
+                          <p>{book.pages} pages • {book.year}</p>
+                          <p className="text-lg font-bold text-accent mt-2">{book.price}</p>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <p className="text-gray-700 leading-relaxed mb-4 line-clamp-3">
-                    {book.description}
-                  </p>
+                    <p className="text-gray-700 leading-relaxed mb-4 line-clamp-3">
+                      {book.description}
+                    </p>
 
-                  <div className="flex gap-3">
-                    <Link
-                      href={`/books/${book.id}`}
-                      className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded font-medium transition-colors flex-1 text-center"
-                    >
-                      View Details
-                    </Link>
-                    <Link
-                      href={`/books/${book.id}`}
-                      className="border border-primary text-primary hover:bg-primary/10 px-6 py-2 rounded font-medium transition-colors text-center"
-                    >
-                      Preview
-                    </Link>
+                    <div className="flex gap-3">
+                      <Link
+                        href={`/books/${bookSlug}`}
+                        className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded font-medium transition-colors flex-1 text-center"
+                      >
+                        View Details
+                      </Link>
+                      <Link
+                        href={`/books/${bookSlug}`}
+                        className="border border-primary text-primary hover:bg-primary/10 px-6 py-2 rounded font-medium transition-colors text-center"
+                      >
+                        Preview
+                      </Link>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="text-center py-12 bg-white rounded-lg shadow">

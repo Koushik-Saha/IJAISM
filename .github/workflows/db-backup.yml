@@ -17,16 +17,19 @@ jobs:
       AWS_REGION: ${{ secrets.AWS_REGION }}
 
     steps:
-    - name: Install PostgreSQL Client
+    - name: Install PostgreSQL 17 Client
       run: |
+        # The database runs Postgres 17; pg_dump must be the same major version or newer.
         sudo apt-get update
-        sudo apt-get install -y postgresql-client
+        sudo apt-get install -y postgresql-common
+        sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+        sudo apt-get install -y postgresql-client-17
 
     - name: Create Backup
       run: |
         TIMESTAMP=$(date +%Y-%m-%d_%H-%M-%S)
         FILENAME="backup_${TIMESTAMP}.sql"
-        pg_dump $DATABASE_URL > $FILENAME
+        /usr/lib/postgresql/17/bin/pg_dump "$DATABASE_URL" > "$FILENAME"
         echo "BACKUP_FILE=$FILENAME" >> $GITHUB_ENV
 
     - name: Upload to S3

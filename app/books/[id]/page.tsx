@@ -2,9 +2,9 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import BookClient from "./BookClient";
 import { Metadata } from "next";
+import { cache } from "react";
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+export const revalidate = 3600;
 
 function getAbsoluteImageUrl(url: string | null, baseUrl: string): string {
   if (!url) return `${baseUrl}/logo.png`;
@@ -20,7 +20,7 @@ function slugify(text: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
-async function findBookBySlugOrId(idOrSlug: string) {
+const findBookBySlugOrId = cache(async (idOrSlug: string) => {
   // 1. Direct ID lookup
   let book = await prisma.book.findUnique({
     where: { id: idOrSlug },
@@ -51,7 +51,7 @@ async function findBookBySlugOrId(idOrSlug: string) {
   }
 
   return null;
-}
+});
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;

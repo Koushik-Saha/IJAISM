@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300;
 
 export async function GET() {
     try {
@@ -26,7 +26,9 @@ export async function GET() {
             settingsResult[s.key] = s.value;
         });
 
-        return NextResponse.json({ settings: settingsResult });
+        return NextResponse.json({ settings: settingsResult }, {
+            headers: { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600' }
+        });
     } catch (error) {
         console.error('Public settings fetch error:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

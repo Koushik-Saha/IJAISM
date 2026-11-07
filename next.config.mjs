@@ -38,6 +38,19 @@ const nextConfig = {
     },
   },
   /* config options here */
+  async redirects() {
+    return [
+      // Legacy download path from the pre-rewrite site — the project's #1
+      // 404 (~1.2K hits/week) with zero references in the current codebase.
+      // Land those readers on the article index instead of a dead end.
+      { source: '/download-pdf', destination: '/articles', permanent: false },
+      // The blog index lives at /blogs (plural) in the current app.
+      { source: '/blog', destination: '/blogs', permanent: false },
+      // Legacy direct-file links for theses — files are served through the
+      // S3-backed media route under the same relative key.
+      { source: '/public/thesis/:path*', destination: '/api/media/thesis/:path*', permanent: false },
+    ];
+  },
   async headers() {
     return [
       {

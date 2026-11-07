@@ -9,6 +9,8 @@ interface Props {
   params: Promise<{ id: string }>;
 }
 
+export const revalidate = 3600;
+
 export async function generateMetadata({ params }: Props) {
   const { id } = await params;
   const article = await prisma.article.findUnique({
@@ -26,10 +28,22 @@ export default async function FullArticleHtmlPage({ params }: Props) {
   // 1. Fetch metadata from Prisma
   const article = await prisma.article.findUnique({
     where: { id },
-    include: {
-      journal: true,
-      author: true,
-      coAuthors: { orderBy: { order: "asc" } },
+    select: {
+      id: true,
+      title: true,
+      abstract: true,
+      fullText: true,
+      keywords: true,
+      articleType: true,
+      doi: true,
+      volume: true,
+      issue: true,
+      publicationDate: true,
+      submissionDate: true,
+      acceptanceDate: true,
+      journal: { select: { fullName: true, coverImageUrl: true } },
+      author: { select: { id: true, name: true, email: true, university: true, affiliation: true } },
+      coAuthors: { select: { id: true, name: true, email: true, university: true, isMain: true, userId: true, order: true }, orderBy: { order: "asc" } },
     },
   });
 

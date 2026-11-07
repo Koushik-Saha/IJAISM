@@ -31,8 +31,13 @@ export default async function ArticleFullTextPage({ params }: { params: Promise<
 
     const article = await prisma.article.findUnique({
         where: { id },
-        include: {
-            journal: true,
+        select: {
+            id: true,
+            title: true,
+            abstract: true,
+            fullText: true,
+            publicationDate: true,
+            journal: { select: { code: true, fullName: true } },
             author: {
                 select: {
                     id: true,
@@ -42,7 +47,7 @@ export default async function ArticleFullTextPage({ params }: { params: Promise<
                     affiliation: true,
                 },
             },
-            coAuthors: true,
+            coAuthors: { select: { id: true, userId: true, name: true, email: true, university: true, isMain: true, order: true } },
         },
     });
 

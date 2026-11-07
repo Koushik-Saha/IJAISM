@@ -9,7 +9,7 @@ import AuthorListWithModal from "@/components/articles/AuthorListWithModal";
 import SafeJournalCover from "@/components/journals/SafeJournalCover";
 import { getArticleAuthors } from "@/lib/articles/authors";
  
-export const revalidate = 300;
+export const revalidate = 3600;
 
 function journalCoverUrl(raw: string | null): string | null {
     if (!raw) return null;
@@ -27,7 +27,16 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     const { id } = await params;
     const article = await prisma.article.findUnique({
         where: { id },
-        include: {
+        select: {
+            title: true,
+            abstract: true,
+            publicationDate: true,
+            volume: true,
+            issue: true,
+            pageStart: true,
+            pageEnd: true,
+            doi: true,
+            pdfUrl: true,
             journal: { select: { fullName: true, coverImageUrl: true } },
             author: { select: { name: true } },
             coAuthors: { select: { name: true, order: true }, orderBy: { order: "asc" } },

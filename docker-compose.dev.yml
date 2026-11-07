@@ -1,0 +1,52 @@
+# Local development compose file.
+# Builds the app image locally (no GHCR pull) and runs only the data plane —
+# you continue to `npm run dev` against this Postgres for hot reload.
+#
+# Usage:  docker compose -f docker-compose.dev.yml up -d
+# Then:   DATABASE_URL=postgresql://ijaism:ijaism@localhost:5432/ijaism npm run dev
+
+name: ijaism-dev
+
+services:
+  postgres:
+    build:
+      context: ./docker/postgres
+    image: ijaism-postgres:16
+    restart: unless-stopped
+    ports:
+      - "5432:5432"   # exposed to host for Prisma Studio / local dev
+    environment:
+      POSTGRES_USER: ijaism
+      POSTGRES_PASSWORD: ijaism
+      POSTGRES_DB: ijaism
+    volumes:
+      - pg_data_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ijaism -d ijaism"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # Optional: build the production image locally to sanity-check the Dockerfile.
+  # Skipped by default — enable with `--profile build-test`.
+  app:
+    profiles: ["build-test"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ijaism-app:dev
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: "postgresql://ijaism:ijaism@postgres:5432/ijaism?schema=public"
+      NODE_ENV: production
+      JWT_SECRET: "dev-jwt-secret-not-for-production"
+      NEXTAUTH_SECRET: "dev-nextauth-secret-not-for-production"
+      NEXTAUTH_URL: "http://localhost:3000"
+      NEXT_PUBLIC_APP_URL: "http://localhost:3000"
+
+volumes:
+  pg_data_dev:

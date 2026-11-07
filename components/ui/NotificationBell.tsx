@@ -41,13 +41,13 @@ export default function NotificationBell() {
         }
     };
 
-    // Polling Effect - visibility-aware with 60s polling interval
+    // Polling Effect - visibility-aware with 5-minute polling interval
     useEffect(() => {
         let interval: any;
 
         const startPolling = () => {
             if (interval) clearInterval(interval);
-            interval = setInterval(fetchNotifications, 60000);
+            interval = setInterval(fetchNotifications, 300000);
         };
 
         const handleVisibilityChange = () => {

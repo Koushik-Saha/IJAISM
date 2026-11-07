@@ -6,6 +6,9 @@ import { logger } from '@/lib/logger';
 import path from 'path';
 import fs from 'fs';
 import { getMembershipStatus } from '@/lib/membership';
+import { GetObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { s3Client, BUCKET_NAME } from '@/lib/s3';
 
 // Helper to stream file from local filesystem
 function streamFile(filePath: string): ReadableStream {
@@ -139,6 +142,38 @@ export async function GET(
         }
 
         // 4. Serve File
+        // Prefer S3: if the object exists there, redirect to a short-lived
+        // pre-signed URL so S3 serves the bytes directly — no streaming
+        // through this function. Auth, download limits, and logging above
+        // are unchanged; this only changes where the bytes come from.
+        const fileName = fileSegments[fileSegments.length - 1];
+        const candidateKeys = [fileSegments.join('/')];
+        if (fileSegments[0] === 'uploads' && fileSegments.length > 1) {
+            candidateKeys.push(fileSegments.slice(1).join('/'));
+        }
+
+        for (const key of candidateKeys) {
+            try {
+                await s3Client.send(new HeadObjectCommand({ Bucket: BUCKET_NAME, Key: key }));
+                const presignedUrl = await getSignedUrl(s3Client, new GetObjectCommand({
+                    Bucket: BUCKET_NAME,
+                    Key: key,
+                    ResponseContentDisposition: `inline; filename="${fileName}"`,
+                    ResponseContentType: 'application/pdf',
+                }), { expiresIn: 900 });
+                return NextResponse.redirect(presignedUrl, {
+                    status: 302,
+                    headers: { 'Cache-Control': 'private, no-store' },
+                });
+            } catch (s3Error: any) {
+                const notThere = s3Error?.name === 'NotFound' || s3Error?.$metadata?.httpStatusCode === 404;
+                if (!notThere) {
+                    logger.warn('S3 check failed for download, trying next source', { key, error: s3Error?.message });
+                }
+            }
+        }
+
+        // Local fallback: files that have not been migrated to S3 yet
         // Check local storage first
         const safePath = path.join(process.cwd(), 'public', 'uploads', ...fileSegments);
 
@@ -150,7 +185,6 @@ export async function GET(
         if (fs.existsSync(safePath)) {
             const fileStream = streamFile(safePath);
             const stats = fs.statSync(safePath);
-            const fileName = fileSegments[fileSegments.length - 1]; // last segment
 
             return new NextResponse(fileStream, {
                 headers: {

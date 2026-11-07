@@ -49,6 +49,11 @@ const nextConfig = {
       // Legacy direct-file links for theses — files are served through the
       // S3-backed media route under the same relative key.
       { source: '/public/thesis/:path*', destination: '/api/media/thesis/:path*', permanent: false },
+      // Direct-file links (citation_pdf_url, book/chapter pdfUrl values,
+      // legacy shares) point at /uploads/<key>. The files live in S3 and
+      // are served through the media route under the same relative key,
+      // so route those URLs there instead of the local public folder.
+      { source: '/uploads/:path*', destination: '/api/media/:path*', permanent: false },
     ];
   },
   async headers() {

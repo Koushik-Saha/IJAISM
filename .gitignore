@@ -47,3 +47,11 @@ CLAUDE.md
 
 # Large static data
 /data/article-content/*.html
+
+# Uploaded files live in S3 (c5k-uploads) and are served via /api/media.
+# Never commit them again — this folder stays empty in the repo.
+/public/uploads/*
+
+# Playwright test output
+/playwright-report/
+/test-results/

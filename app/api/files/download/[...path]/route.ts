@@ -49,9 +49,13 @@ export async function GET(
         }
 
         if (!token) {
-            // Build URL for login redirect if accessing directly
+            // Build URL for login redirect if accessing directly.
+            // req.url is the internal origin behind the proxy
+            // (localhost:3000), so build the redirect from the public
+            // app URL instead - same pattern as app/sitemap.ts.
             const url = new URL(req.url);
-            return NextResponse.redirect(new URL(`/login?callbackUrl=${encodeURIComponent(url.pathname + url.search)}`, req.url));
+            const publicOrigin = process.env.NEXT_PUBLIC_APP_URL || 'https://www.c5k.com';
+            return NextResponse.redirect(new URL(`/login?callbackUrl=${encodeURIComponent(url.pathname + url.search)}`, publicOrigin));
         }
 
         const decoded = verifyToken(token);

@@ -3,7 +3,7 @@
 import { toast } from "sonner";
 import Card from "@/components/ui/Card";
 import ArticleAccessButtons from "@/components/articles/ArticleAccessButtons";
-import { track } from "@/lib/analytics";
+import { track } from "@vercel/analytics";
 
 interface ArticleActionsProps {
     articleId: string;

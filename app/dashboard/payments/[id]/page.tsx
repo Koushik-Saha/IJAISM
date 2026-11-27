@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { loadStripe } from '@stripe/stripe-js';
 import { toast } from "sonner";
-import { track } from "@/lib/analytics";
+import { track } from "@vercel/analytics";
 import Card from '@/components/ui/Card';
 
 // Initialize Stripe

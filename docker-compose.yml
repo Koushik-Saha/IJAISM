@@ -1,0 +1,124 @@
+# Production compose file — runs on the Oracle Cloud VM.
+# Image is pulled from GHCR (built by GitHub Actions on push to main).
+# Env values come from /opt/ijaism/.env on the host (not committed).
+
+name: ijaism
+
+services:
+  postgres:
+    build:
+      context: ./docker/postgres
+    image: ijaism-postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  app:
+    image: ${APP_IMAGE:-ghcr.io/koushik-saha/ijaism:latest}
+    pull_policy: always
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public"
+      NODE_ENV: production
+      PORT: "3000"
+      HOSTNAME: "0.0.0.0"
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+      NEXT_PUBLIC_APP_NAME: ${NEXT_PUBLIC_APP_NAME:-IJAISM}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1h}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      NEXTAUTH_URL: ${NEXTAUTH_URL}
+      # Stripe
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
+      STRIPE_PRICE_BASIC: ${STRIPE_PRICE_BASIC}
+      STRIPE_PRICE_PREMIUM: ${STRIPE_PRICE_PREMIUM}
+      STRIPE_PRICE_INSTITUTIONAL: ${STRIPE_PRICE_INSTITUTIONAL}
+      # PayPal (server-side)
+      PAYPAL_CLIENT_ID: ${PAYPAL_CLIENT_ID}
+      PAYPAL_CLIENT_SECRET: ${PAYPAL_CLIENT_SECRET}
+      PAYPAL_WEBHOOK_ID: ${PAYPAL_WEBHOOK_ID}
+      # PayPal (client-side; also read during SSR so kept here too)
+      NEXT_PUBLIC_PAYPAL_CLIENT_ID: ${NEXT_PUBLIC_PAYPAL_CLIENT_ID}
+      NEXT_PUBLIC_PAYPAL_PLAN_BASIC: ${NEXT_PUBLIC_PAYPAL_PLAN_BASIC}
+      NEXT_PUBLIC_PAYPAL_PLAN_PREMIUM: ${NEXT_PUBLIC_PAYPAL_PLAN_PREMIUM}
+      NEXT_PUBLIC_PAYPAL_PLAN_INSTITUTIONAL: ${NEXT_PUBLIC_PAYPAL_PLAN_INSTITUTIONAL}
+      # Email (Resend, with SMTP fallback fields)
+      RESEND_API_KEY: ${RESEND_API_KEY}
+      EMAIL_FROM: ${EMAIL_FROM}
+      EMAIL_REPLY_TO: ${EMAIL_REPLY_TO}
+      SMTP_FROM_NAME: ${SMTP_FROM_NAME:-IJAISM Platform}
+      SMTP_FROM_EMAIL: ${SMTP_FROM_EMAIL:-noreply@ijaism.org}
+      # ORCID login (OAuth)
+      ORCID_CLIENT_ID: ${ORCID_CLIENT_ID}
+      ORCID_CLIENT_SECRET: ${ORCID_CLIENT_SECRET}
+      ORCID_ENV: ${ORCID_ENV:-production}
+      # CrossRef DOI registration
+      CROSSREF_USERNAME: ${CROSSREF_USERNAME}
+      CROSSREF_PASSWORD: ${CROSSREF_PASSWORD}
+      # Cloudflare R2 (S3-compatible — same env names the AWS SDK uses)
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: ${AWS_REGION:-auto}
+      AWS_S3_BUCKET_NAME: ${AWS_S3_BUCKET_NAME}
+      AWS_S3_ENDPOINT: ${AWS_S3_ENDPOINT}
+      # Sentry (client DSN is also read during SSR)
+      NEXT_PUBLIC_SENTRY_DSN: ${NEXT_PUBLIC_SENTRY_DSN}
+      # Feature flags
+      NEXT_PUBLIC_MOCK_PAYMENT: ${NEXT_PUBLIC_MOCK_PAYMENT:-false}
+      ENABLE_MOCK_UPLOAD_IN_PROD: ${ENABLE_MOCK_UPLOAD_IN_PROD:-false}
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+
+  caddy:
+    build:
+      context: ./docker/caddy
+    image: ijaism-caddy:2.8
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"  # HTTP/3
+    environment:
+      DOMAIN: ${DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL}
+      CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN}
+    volumes:
+      - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  pg_data:
+  caddy_data:
+  caddy_config:

@@ -1,5 +1,0 @@
-# Exclude large static data folders from serverless functions
-data/article-content
-node_modules
-.next
-.git

@@ -1,0 +1,86 @@
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# Node
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp
+.pnp.js
+
+# Next.js build output
+.next
+out
+build
+*.tsbuildinfo
+next-env.d.ts
+
+# Local env (secrets must not enter the image)
+.env
+.env.*
+!.env.example
+
+# Editor / OS
+.vscode
+.idea
+.DS_Store
+
+# Test artefacts
+__tests__
+e2e
+playwright-report
+test-results
+coverage
+jest.config.ts
+jest.setup.ts
+playwright.config.ts
+
+# Vercel / legacy host
+.vercel
+.vercelignore
+vercel.json
+
+# Claude / scratchpads
+.claude
+CLAUDE.md
+scratch
+migration-data
+data/article-content
+
+# Docs (not needed at runtime)
+*.md
+docs
+
+# Loose maintenance scripts at repo root (kept in repo for ops, but not shipped in image)
+check_*.ts
+check_*.js
+count_*.ts
+count_*.js
+cleanup_*.ts
+debug_*.ts
+delete_*.ts
+disable_*.ts
+find_*.ts
+fix_*.ts
+inspect_*.ts
+list_*.ts
+prune_*.ts
+purge_*.ts
+query_*.ts
+verify_*.ts
+test-*.ts
+extract-test.txt
+sample.html
+temp_books_page.html
+test_output.txt
+articles_mapping.json
+*.postman_collection.json
+
+# Container build context itself
+Dockerfile
+docker-compose*.yml
+docker
+infra

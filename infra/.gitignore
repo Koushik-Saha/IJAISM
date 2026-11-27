@@ -1,8 +1,0 @@
-.terraform/
-.terraform.lock.hcl
-*.tfvars
-*.tfvars.json
-*.tfstate
-*.tfstate.backup
-crash.log
-crash.*.log
